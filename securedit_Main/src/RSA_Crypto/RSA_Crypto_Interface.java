@@ -15,4 +15,6 @@ interface RSA_Crypto_Interface {
     public boolean genNewKeys();
     public PrivateKey getPrivateKey();
     public PublicKey getPublicKey();
+    public byte[] PublicKeyEncrypt(PublicKey pk, byte[] raw_data);
+    public byte[] PrivateKeyDecrypt(PrivateKey pk, byte[] encrypted_data);
 }
