@@ -5,13 +5,14 @@
 package File_Handler;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.RandomAccessFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import sun.misc.IOUtils;
 
 /**
  *
@@ -50,15 +51,58 @@ public class File_Handler implements File_Handler_Interface{
         }
         return true;
     }
+    public static byte[] readFile (File file) throws IOException {
+        // Open file
+        RandomAccessFile f = new RandomAccessFile(file, "r");
+
+        try {
+            // Get and check length
+            long longlength = f.length();
+            int length = (int) longlength;
+            if (length != longlength) throw new IOException("File size >= 2 GB");
+
+            // Read file and return data
+            byte[] data = new byte[length];
+            f.readFully(data);
+            return data;
+        }
+        finally {
+            f.close();
+        }
+    }
 
     @Override
     public byte[] readByteFile(String filename) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        FileInputStream fis = null;
+        try {
+            RandomAccessFile f = new RandomAccessFile(new File(filename), "r");
+            long longlength = f.length();
+            int length = (int) longlength;
+            if (length != longlength){
+                throw new IOException("File size is too big");
+            }
+
+            // Read file and return data
+            byte[] data = new byte[length];
+            f.readFully(data);
+            return data;
+        } catch (IOException ex) {
+            Logger.getLogger(File_Handler.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                fis.close();
+            } catch (IOException ex) {
+                Logger.getLogger(File_Handler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return null;
     }
 
     @Override
     public String readStringFile(String filename) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        byte[] file = readByteFile(filename);
+        String file_string = new String(file);
+        return file_string;
     }
     
 }
