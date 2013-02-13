@@ -1,0 +1,18 @@
+So.. pull requests summarized.
+
+When you are coding, always work on a separate branch.
+
+# assuming you are starting on the master branch
+git checkout -b branch_name
+# will take you to a new branch
+
+# Then you write lots of sweet code.
+# Then commit as normal.
+git add -A
+git commit -m "super sweet feature"
+
+# Push your new branch up to GitHub
+# NEVER push to the master branch directly; this will circumvent our code review process
+git push origin branch_name
+
+Once your branch is on GitHub
