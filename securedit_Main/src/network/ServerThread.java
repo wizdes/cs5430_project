@@ -20,7 +20,9 @@ public class ServerThread extends Thread {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(socket.getInputStream()));
-            this.server.depositMessage(in.readLine());
+            String recd = in.readLine();
+            System.out.println("recieved " + recd);
+            this.server.depositMessage(recd);
             out.println("ok");
             out.close();
             in.close();

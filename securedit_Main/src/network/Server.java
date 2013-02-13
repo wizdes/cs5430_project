@@ -28,6 +28,10 @@ public class Server {
         this.node = node;
     }
     
+    public Server(String id, String host, int port) {
+        this(new Node(id, host, port));
+    }
+    
     public Node getNode() {
       return this.node;
     }

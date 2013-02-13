@@ -3,12 +3,9 @@
  * and open the template in the editor.
  */
 package messages;
-
-import java.io.IOException;
-import java.io.Serializable;
 import network.Node;
-import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
