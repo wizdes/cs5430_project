@@ -5,3 +5,4 @@
 *.war
 *.ear
 /securedit_Main/nbproject/private/
+/securedit_Main/build/
