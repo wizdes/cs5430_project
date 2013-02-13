@@ -4,3 +4,4 @@
 *.jar
 *.war
 *.ear
+/securedit_Main/nbproject/private/
