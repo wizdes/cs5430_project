@@ -18,8 +18,6 @@ public class Message implements Serializable {
     private String messageId = null;
     private Node from = null;
     private Node to = null;
-    static private BASE64Encoder encode = new BASE64Encoder();
-    static private BASE64Decoder decode = new BASE64Decoder();
 
     public Message(Node t, Node f, String mid) {
         this.from = f;
