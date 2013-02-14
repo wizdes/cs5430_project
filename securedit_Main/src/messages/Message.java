@@ -12,14 +12,17 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Objects;
 import network.Node;
-
+import sun.misc.BASE64Encoder;
+import sun.misc.BASE64Decoder;
 
 public class Message implements Serializable {
     
     private String messageId = null;
     private Node from = null;
     private Node to = null;
-    
+    static private BASE64Encoder encode = new BASE64Encoder();
+    static private BASE64Decoder decode = new BASE64Decoder();
+
     public Message(Node t, Node f, String mid) {
         this.from = f;
         this.to = t;
@@ -57,7 +60,7 @@ public class Message implements Serializable {
     public static Message fromString(String s) {
         Object obj = null;
         try {
-            byte [] data = Base64Coder.decode(s);
+            byte [] data = decode.decodeBuffer(s);
             ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
             obj  = ois.readObject();
             ois.close();
@@ -80,7 +83,8 @@ public class Message implements Serializable {
         } catch (IOException ex) {
             System.out.println("FAILED TO SERIALIZE " + this);
         }
-        return new String(Base64Coder.encode(baos.toByteArray()));
+         
+        return encode.encode(baos.toByteArray());
     }
     
     @Override
