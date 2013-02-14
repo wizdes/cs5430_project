@@ -12,8 +12,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Objects;
 import network.Node;
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 
 public class Message implements Serializable {
     
@@ -60,7 +58,7 @@ public class Message implements Serializable {
     public static Message fromString(String s) {
         Object obj = null;
         try {
-            byte [] data = decode.decodeBuffer(s);
+            byte [] data = javax.xml.bind.DatatypeConverter.parseBase64Binary(s);
             ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
             obj  = ois.readObject();
             ois.close();
@@ -84,7 +82,7 @@ public class Message implements Serializable {
             System.out.println("FAILED TO SERIALIZE " + this);
         }
          
-        return encode.encode(baos.toByteArray());
+        return javax.xml.bind.DatatypeConverter.printBase64Binary(baos.toByteArray());
     }
     
     @Override
