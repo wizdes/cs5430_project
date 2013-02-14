@@ -6,7 +6,7 @@ import messages.Message;
 
 class Client {
         
-    public String send(Message m) {
+    public boolean send(Message m) {
         Socket kkSocket = null;
         PrintWriter out = null;
         BufferedReader in = null;
@@ -22,9 +22,7 @@ class Client {
         }
         
         String response = "";
-        if (in == null) {
-            return response;
-        }
+        if (in == null) return false;
         
         try {
             out.println(m.serialize());
@@ -37,6 +35,6 @@ class Client {
             ex.printStackTrace();
         }
         
-        return response;
+        return response.equals(ServerThread.MESSAGE_RECIEVED_ACK);
     }
 }

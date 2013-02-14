@@ -10,8 +10,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Objects;
 import network.Node;
 
 
@@ -94,8 +93,13 @@ public class Message implements Serializable {
         return other instanceof Message 
                 && ((Message)other).getMessageId().equals(this.getMessageId());
     }
-    
-    public static void main(String[] args) {
-        System.out.println("hell world");
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 29 * hash + Objects.hashCode(this.messageId);
+        hash = 29 * hash + Objects.hashCode(this.from);
+        hash = 29 * hash + Objects.hashCode(this.to);
+        return hash;
     }
 }
