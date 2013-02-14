@@ -5,7 +5,9 @@ import java.net.*;
 import messages.Message;
 
 class Client {
-        
+    
+    public static final String NEW_LINE_TRANSLATION = "%%%%%";
+    
     public boolean send(Message m) {
         Socket kkSocket = null;
         PrintWriter out = null;
@@ -25,7 +27,8 @@ class Client {
         if (in == null) return false;
         
         try {
-            out.println(m.serialize());
+            String toSend = m.serialize().replaceAll("\\n", NEW_LINE_TRANSLATION);
+            out.println(toSend);
             response = in.readLine();
             out.close();
             in.close();

@@ -12,8 +12,8 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Objects;
 import network.Node;
-import sun.misc.BASE64Encoder;
 import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
 
 public class Message implements Serializable {
     

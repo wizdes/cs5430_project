@@ -26,6 +26,7 @@ public class MessageTest {
         assertEquals(obj, m);
         assertEquals(obj.getTo(), m.getTo());
         assertEquals(obj.getFrom(), m.getFrom());
+        assertEquals(obj.getMessageId(), m.getMessageId());
     }
 
 }
