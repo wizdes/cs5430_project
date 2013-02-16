@@ -43,7 +43,6 @@ public class ServerTest {
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
                 String mid = recieved_ids.get(i * 10 + j);
-                System.out.println(mid);
                 assertEquals(i + "-" + j, mid);
             }
         }
@@ -74,6 +73,7 @@ public class ServerTest {
                 }
             }
             
+            client.closeSocketWith(recipient);            
         }
     }
 }
