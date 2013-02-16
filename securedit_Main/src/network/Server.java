@@ -14,7 +14,7 @@ public class Server {
 
     private Node node;
     private ClientListenerThread clientListener;
-    private Lock queueLock = new ReentrantLock();
+    private Lock queueLock = new ReentrantLock(true);
     private Condition newMessageArrived = queueLock.newCondition();
     private BlockingQueue<Message> messageQueue = new LinkedBlockingDeque<>();
     
@@ -32,28 +32,36 @@ public class Server {
     
     public void depositMessage(String msg) {
         Message m = Message.fromString(msg);
-        if (m == null) return;
+        if (m == null) {
+            return;
+        }
         
         this.queueLock.lock();
-        this.messageQueue.add(m);
-        this.newMessageArrived.signal();
-        this.queueLock.unlock();
+        try {
+            this.messageQueue.add(m);
+            this.newMessageArrived.signal();
+        } finally {
+            this.queueLock.unlock();
+        }
     }
     
     public Collection<Message> waitForMessages() {
-      Collection<Message> messages = new LinkedList<Message>();
+      Collection<Message> messages = new LinkedList<>();
       
       queueLock.lock();
-      while (this.messageQueue.isEmpty()) {
-        try {
-          this.newMessageArrived.await();
-        } catch (InterruptedException ex) {
-          System.out.println("queueItemAdded.await() interrupted");
+      try {
+        while (this.messageQueue.isEmpty()) {
+          try {
+            this.newMessageArrived.await();
+          } catch (InterruptedException ex) {
+            System.out.println("queueItemAdded.await() interrupted");
+          }
         }
+        this.messageQueue.drainTo(messages);
+      } finally {
+          queueLock.unlock();
       }
       
-      this.messageQueue.drainTo(messages);
-      queueLock.unlock();
       return messages;
     }
     
