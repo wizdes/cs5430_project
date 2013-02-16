@@ -14,7 +14,7 @@ public class Server {
 
     private Node node;
     private ClientListenerThread clientListener;
-    private Lock queueLock = new ReentrantLock(true);
+    private final Lock queueLock = new ReentrantLock(true);
     private Condition newMessageArrived = queueLock.newCondition();
     private BlockingQueue<Message> messageQueue = new LinkedBlockingDeque<>();
     

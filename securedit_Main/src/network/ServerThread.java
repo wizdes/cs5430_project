@@ -24,6 +24,7 @@ public class ServerThread extends Thread {
                     new InputStreamReader(socket.getInputStream()));
             String recd = in.readLine().replaceAll(Client.NEW_LINE_TRANSLATION, "\n");
             this.server.depositMessage(recd);
+            System.out.println("server responded " + MESSAGE_RECIEVED_ACK); 
             out.println(MESSAGE_RECIEVED_ACK);
             out.close();
             in.close();
