@@ -5,20 +5,19 @@
 package securedit_main;
 
 import RSA_Crypto.RSA_Crypto;
+import java.io.UnsupportedEncodingException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Yi
  */
 public class Securedit_Main {
-
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
-        RSA_Crypto test = new RSA_Crypto();
-        System.out.println(test.getPrivateKey());
-        System.out.println(test.getPublicKey());
+
     }
 }
