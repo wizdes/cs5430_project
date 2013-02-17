@@ -25,7 +25,7 @@ import javax.crypto.spec.SecretKeySpec;
  */
 public class AES {
     private static final String ENCODING = "UTF-8";
-    private static final int lengthOfIV = 16;
+    public static final int lengthOfIV = 16;
     //private static final byte[] presharedSalt = "IAmASalt".getBytes();
     
     private SecretKey secret;
@@ -33,7 +33,7 @@ public class AES {
     public AES(String password, String presharedSalt){
         secret = generateKey(password.toCharArray(), presharedSalt.getBytes());
     }
-    private byte[] encrypt(String plaintext){
+    public byte[] encrypt(String plaintext){
         byte[] encryptedData = null;
         try {
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
@@ -128,22 +128,7 @@ public class AES {
         System.out.println("Cipher2 :" + ciphertext2);
         System.out.println("Plain1  :" + plaintext1);
         System.out.println("Plain2  :" + plaintext2);
-        
-        
-        //Encrypts and decrypts successfully
-        if(plaintext1.equals(original)){
-            System.out.println("PASSED: plaintext1.equals(original)");
-        } else{
-            System.out.println("FAILED: plaintext1.equals(original)");
-        }
-        
-        //IV produces different ciphertext after each encryption
-        if(!ciphertext1.equals(ciphertext2)){
-            System.out.println("PASSED: !ciphertext1.equals(ciphertext2)");
-        } else{
-            System.out.println("FAILED: !ciphertext1.equals(ciphertext2)");
-        }
-        
+                
         
         /*
          * THOUGHTS:
