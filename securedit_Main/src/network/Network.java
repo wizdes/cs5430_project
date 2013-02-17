@@ -31,4 +31,12 @@ public class Network implements NetworkInterface {
     public Collection<Message> waitForMessages() {
         return server.waitForMessages();
     }
+    
+    public static void log(String msg) {
+        System.out.println(msg);
+    }
+    
+    public static void logError(String msg) {
+        System.err.println(msg);
+    }
 }

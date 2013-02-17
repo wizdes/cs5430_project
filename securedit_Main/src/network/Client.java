@@ -2,42 +2,88 @@ package network;
 
 import java.io.*;
 import java.net.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import messages.Message;
 
 class Client {
     
-    public static final String NEW_LINE_TRANSLATION = "%%%%%";
+    public static final String NEW_LINE_TRANSLATION = "%%%%%";    
+    private ConcurrentMap<String, Channel> channelMap = new ConcurrentHashMap<>();
+    
+    public void closeSocketWith(Node n) {
+        String key = n.toString();
+        if(channelMap.containsKey(key)){
+            channelMap.get(key).close();
+        }
+    }
     
     public boolean send(Message m) {
-        Socket kkSocket = null;
-        PrintWriter out = null;
-        BufferedReader in = null;
-
-        try {
-            kkSocket = new Socket(m.getTo().getHost(), m.getTo().getPort());
-            out = new PrintWriter(kkSocket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(kkSocket.getInputStream()));
-        } catch (UnknownHostException e) {
-            System.err.println("Don't know about host: " + m.getTo());
-        } catch (IOException e) {
-            System.err.println("Couldn't get I/O for the connection to: " + m.getTo());
+        Node destNode = m.getTo();
+        String key = destNode.toString();
+        
+        if (!channelMap.containsKey(key)){
+            channelMap.putIfAbsent(key, new Channel(destNode));
         }
         
-        String response = "";
-        if (in == null) return false;
+        String toSend = m.serialize().replaceAll("\\n", NEW_LINE_TRANSLATION);
+        return channelMap.get(key).send(toSend);
+    }
+    
+    private class Channel {
+        private Socket socket;
+        private PrintWriter out;
+        private BufferedReader in;
+        private Node node;
         
-        try {
-            String toSend = m.serialize().replaceAll("\\n", NEW_LINE_TRANSLATION);
-            out.println(toSend);
-            response = in.readLine();
-            out.close();
-            in.close();
-            kkSocket.close();
-        } catch (IOException ex) {
-            System.err.println("IOException reading from server");
-            ex.printStackTrace();
+        public Channel(Node n){
+            node = n;
+            initialize();
         }
         
-        return response.equals(ServerThread.MESSAGE_RECIEVED_ACK);
+        private void initialize() {
+            try{
+                socket = new Socket(node.getHost(), node.getPort());
+                out = new PrintWriter(socket.getOutputStream(), true);
+                in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            } catch(UnknownHostException ex){
+                Network.logError("Unknown host: " + node);
+                close();
+            } catch(IOException ex){
+                Network.logError("Couldn't get I/O for the connection : " + node);
+                close();
+            }
+        }
+        
+        public boolean send(String message) {
+            String response = "";
+            
+            if (out != null && in != null) { 
+                out.println(message);
+                Network.log("client sent " + message); 
+                try {
+                    response = in.readLine();
+                } catch (IOException ex) {
+                    Network.logError("Client error reading from : " + node);
+                }
+            }
+            
+            return response.equals(ServerThread.MESSAGE_RECIEVED_ACK);
+        }
+        
+        public void close() {
+            Network.log("Client closing socket with " + node);
+            try {
+                if(out != null) {
+                    out.println(ServerThread.CONNECTION_FINISHED);
+                    out.close();
+                }
+                if(socket != null) {
+                    socket.close();
+                }
+            } catch (IOException ex) {
+                Network.logError("Couldn't close socket to : " + node);
+            }
+        }   
     }
 }
