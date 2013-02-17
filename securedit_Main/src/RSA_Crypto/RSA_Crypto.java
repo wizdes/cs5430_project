@@ -44,9 +44,6 @@ public class RSA_Crypto implements RSA_Crypto_Interface{
         } catch (NoSuchAlgorithmException ex) {
             Logger.getLogger(RSA_Crypto.class.getName()).log(Level.SEVERE, null, ex);
             return false;
-        } catch (NoSuchProviderException ex) {
-            Logger.getLogger(RSA_Crypto.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
         }
         return true;
     }
