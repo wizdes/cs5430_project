@@ -36,7 +36,7 @@ public class RSA_Crypto implements RSA_Crypto_Interface{
     public boolean genNewKeys() {
         try {
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-            SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
+            SecureRandom random = SecureRandom.getInstance("SHA256");
             keyGen.initialize(1024, random);
             KeyPair pair = keyGen.generateKeyPair();
             pri_k = pair.getPrivate();
@@ -64,7 +64,7 @@ public class RSA_Crypto implements RSA_Crypto_Interface{
     @Override
     public byte[] PublicKeyEncrypt(PublicKey pk, byte[] raw_data) {
         try {
-            Cipher cipher = Cipher.getInstance("RSA");
+            Cipher cipher = Cipher.getInstance("RSA/None/OAEPWithSHA1AndMGF1Padding", "BC");
             cipher.init(Cipher.ENCRYPT_MODE, pk);
             byte[] encrypted = cipher.doFinal(raw_data);
             return encrypted;
@@ -77,7 +77,7 @@ public class RSA_Crypto implements RSA_Crypto_Interface{
     @Override
     public byte[] PrivateKeyDecrypt(PrivateKey pk, byte[] encrypted_data) {
         try {
-            Cipher cipher = Cipher.getInstance("RSA");
+            Cipher cipher = Cipher.getInstance("RSA/None/OAEPWithSHA1AndMGF1Padding", "BC");
             cipher.init(Cipher.DECRYPT_MODE, pk);
             byte[] raw = cipher.doFinal(encrypted_data);
             return raw;
