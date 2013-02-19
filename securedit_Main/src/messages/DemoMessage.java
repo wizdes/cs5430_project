@@ -19,7 +19,7 @@ public class DemoMessage extends Message {
     }
     
     public String getContent() {
-        return "hello";
+        return message;
     }
 
 }
