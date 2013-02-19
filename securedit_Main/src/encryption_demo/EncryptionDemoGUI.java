@@ -8,6 +8,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import javax.swing.JFileChooser;
+import network.Node;
 
 /**
  *
@@ -20,7 +21,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
     /**
      * Creates new form EncryptionDemoGUI
      */
-    public EncryptionDemoGUI() {
+    public EncryptionDemoGUI(Node appNode) {
         fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File("."));
 
@@ -34,7 +35,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                 }
             }
         });
-        functionality = new EncryptionDemoFunctionality(this);
+        functionality = new EncryptionDemoFunctionality(this, appNode);
     }
     
     public void displayMessages(String plaintext, String ciphertext){
@@ -351,11 +352,18 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(EncryptionDemoGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-
+        
+        
+        final String appNodeId = args[0];
+        final String appHost = args[1];
+        final int appPort = Integer.parseInt(args[2]);
+        
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
-                new EncryptionDemoGUI().setVisible(true);
+                Node appNode = new Node(appNodeId, appHost, appPort);
+                new EncryptionDemoGUI(appNode).setVisible(true);
             }
         });
     }

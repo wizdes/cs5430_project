@@ -53,12 +53,63 @@ public class ServerTest {
         server.shutdown();
     }
     
+    @Test
+    public void testSendAndReceiveEncrypted() {
+        Node serverNode = new Node("1", "localhost", 4445);
+        Server server = new Server(serverNode);
+        
+        Collection<Message> messages;
+        ArrayList<String> recieved_ids = new ArrayList<>();
+        int tries = 0;
+
+        server.listen();
+        ClientThread clientThread = new ClientThread(serverNode);
+        
+        server.setPassword("password");
+        server.setSalt("salt");
+        clientThread.encrypt("password", "salt");
+        
+        clientThread.start();
+        
+        while (recieved_ids.size() != 100 && tries++ < 1000) {
+            messages = server.waitForMessages();
+            for (Message m : messages) {
+                recieved_ids.add(m.getMessageId());
+            }
+        }
+        
+        // make sure we recieved all the messages
+        assertEquals(100, recieved_ids.size());
+        
+        // iterate and assert we saw all the messages we sent
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 10; j++) {
+                String mid = recieved_ids.get(i * 10 + j);
+                assertEquals(i + "-" + j, mid);
+            }
+        }
+        
+        // Assert all the client.send calls returned true
+        assertEquals(true, clientThread.success);
+        
+        server.shutdown();
+    }
+    
     private static class ClientThread extends Thread {
         private Node recipient;
         public boolean success = true;
+        public boolean encrypt = false;
+        public String salt;
+        public String password;
         
         public ClientThread(Node r) {
             recipient = r;
+        }
+        
+        public void encrypt(String pass, String salt) {
+            encrypt = true;
+            this.salt = salt;
+            this.password = pass;
         }
         
         @Override
@@ -69,7 +120,14 @@ public class ServerTest {
             for (int i = 0; i < 10; i++) {
                 for (int j = 0; j < 10; j++) {
                     m.setmessageId(i + "-" + j);
-                    success = success && client.send(m);
+                    if (encrypt) {
+                       byte[] bytes = m.serializeEncrypted(password, salt);
+                       byte encType = Server.ENC_TYPE_AES;
+                       success = success && client.send(m.getTo(), bytes, encType);
+                    } else {
+                       success = success && client.send(m);
+                    }
+                    
                 }
             }
             

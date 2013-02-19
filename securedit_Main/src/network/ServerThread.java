@@ -3,6 +3,7 @@ package network;
 
 import java.io.*;
 import java.net.*;
+import java.nio.ByteBuffer;
 
 public class ServerThread extends Thread {
     
@@ -17,20 +18,38 @@ public class ServerThread extends Thread {
         this.server = server;
     }
 
+    public static int fromByteArray(byte[] bytes) {
+     return ByteBuffer.wrap(bytes).getInt();
+    }
+    
     @Override
     public void run() {
         try {
             
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(socket.getInputStream()));
+            DataInputStream in = new DataInputStream(socket.getInputStream());
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            int offset = 0;
             
-            String recd = in.readLine().replaceAll(Client.NEW_LINE_TRANSLATION, "\n");
-            while (!recd.equals(CONNECTION_FINISHED)) {
-                Network.log("server recd " + recd); 
-                this.server.depositMessage(recd);
+            byte buffer[] = new byte[1024];
+            byte[] messageLength = new byte[4];
+            byte[] encryptionType = new byte[1];
+            
+            int l = in.read(messageLength, 0, 4);
+            int length = fromByteArray(messageLength);
+            
+            while (length > -1) {
+                                
+                in.read(encryptionType, 0, 1);
+                
+                byte[] result = new byte[length];
+                in.read(result, 0, length);
+                System.out.println("Recieving with encType = " + encryptionType[0]);
+                this.server.depositMessage(encryptionType[0], result);
                 out.println(MESSAGE_RECIEVED_ACK);
-                recd = in.readLine().replaceAll(Client.NEW_LINE_TRANSLATION, "\n");
+                
+                l = in.read(messageLength, 0, 4);
+                length = fromByteArray(messageLength);
             }
             
             Network.log("Server closed socket");

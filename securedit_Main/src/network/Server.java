@@ -12,12 +12,19 @@ import messages.Message;
 
 public class Server {
 
+    public static byte ENC_TYPE_NONE = 0;
+    public static byte ENC_TYPE_AES = 1;
+    public static byte ENC_TYPE_RSA = 2;
+    
     private Node node;
     private ClientListenerThread clientListener;
     private final Lock queueLock = new ReentrantLock(true);
     private Condition newMessageArrived = queueLock.newCondition();
     private BlockingQueue<Message> messageQueue = new LinkedBlockingDeque<>();
     
+    private String password;
+    private String salt;
+        
     public Server(Node node) {
         this.node = node;
     }
@@ -30,8 +37,18 @@ public class Server {
       return this.node;
     }
     
-    public void depositMessage(String msg) {
-        Message m = Message.fromString(msg);
+    public void depositMessage(byte encType, byte[] bytes) {
+        Message m = null;
+        
+        if (encType == ENC_TYPE_NONE) {
+            m = Message.fromBytes(bytes);
+        } else if (encType == ENC_TYPE_AES) {
+            System.out.println("salt = " + salt + ", password = " + password);
+            m = Message.fromEncryptedBytes(bytes, password, salt);
+        } else {
+            System.err.print("NO ENCRYPTION TYPE FOUND FOR " + encType);
+        }
+        
         if (m == null) {
             return;
         }
@@ -79,5 +96,21 @@ public class Server {
         Node n = new Node("server", "localhost", 4444);
         Server s = new Server(n);
         s.listen();
+    }
+    
+        public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getSalt() {
+        return salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
     }
 }

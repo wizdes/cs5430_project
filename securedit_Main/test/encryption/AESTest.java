@@ -13,20 +13,32 @@ import org.junit.Test;
  * @author Patrick C. Berens
  */
 public class AESTest {
+    
+    private AES aes;
+    
+    public AESTest (){
+        String stupidPresharedPass = "IAmAPassword";
+        String stupidPresharedSalt = "IAmASalt";
+        aes = new AES(stupidPresharedPass, stupidPresharedSalt);
+    }
+    
     /**
      * Ensures decrypted plaintext matches original plaintext.
      */
     @Test
     public void testBasicEncryption(){
-        String stupidPresharedPass = "IAmAPassword";
-        String stupidPresharedSalt = "IAmASalt";
-        AES aes = new AES(stupidPresharedPass, stupidPresharedSalt);
-        
         String original = "test 1321314123k;389nnvp ion kljdsa";
-        byte[] ciphertext1 = aes.encrypt(original);
-        String plaintext1 = aes.decrypt(ciphertext1);
+        byte[] input = new byte[original.length()];
+        for (int i = 0; i < original.length(); i++) {
+            input[i] = (byte)original.charAt(i);
+        }
         
-        assertEquals(plaintext1, original);
+        byte[] ciphertext1 = aes.encrypt(input);
+        byte[] plaintext1 = aes.decrypt(ciphertext1);
+        
+        for (int i = 0; i < original.length(); i++) {
+            assertEquals(input[i], plaintext1[i]);
+        }
     }    
     
     /**
@@ -35,75 +47,23 @@ public class AESTest {
      */
     @Test
     public void testDifferentCiphertext(){
-        String stupidPresharedPass = "IAmAPassword";
-        String stupidPresharedSalt = "IAmASalt";
-        AES aes = new AES(stupidPresharedPass, stupidPresharedSalt);
-        
         String original = "test 1321314123k;389nnvp ion kljdsa";
-        byte[] ciphertext1 = aes.encrypt(original);
-        byte[] ciphertext2 = aes.encrypt(original);
-        String plaintext1 = aes.decrypt(ciphertext1);
-        String plaintext2 = aes.decrypt(ciphertext2);
+        byte[] input = new byte[original.length()];
+        for (int i = 0; i < original.length(); i++) {
+            input[i] = (byte)original.charAt(i);
+        }
         
-        assertFalse(ciphertext1.equals(ciphertext2));
-    }
-    
-    /***************************************************************
-     *  EDGE CASES
-     **************************************************************/ 
-    
-    @Test
-    public void testEmptyString(){
-        String stupidPresharedPass = "IAmAPassword";
-        String stupidPresharedSalt = "IAmASalt";
-        AES aes = new AES(stupidPresharedPass, stupidPresharedSalt);
+        byte[] ciphertext1 = aes.encrypt(input);
+        byte[] ciphertext2 = aes.encrypt(input);
         
-        String original = "";
-        byte[] ciphertext1 = aes.encrypt(original);
-        String plaintext1 = aes.decrypt(ciphertext1);
-        
-        assertEquals(original, plaintext1);
-    }
-    
-    @Test(expected=NullPointerException.class)
-    public void testNullPtr(){
-        String stupidPresharedPass = "IAmAPassword";
-        String stupidPresharedSalt = "IAmASalt";
-        AES aes = new AES(stupidPresharedPass, stupidPresharedSalt);
-        
-        String original = null;
-        byte[] ciphertext1 = aes.encrypt(original);
-        String plaintext1 = aes.decrypt(ciphertext1);
-        
-        assertEquals(original, plaintext1);
-    }
-    
-    @Test
-    public void testEscapeChars(){
-        String stupidPresharedPass = "IAmAPassword";
-        String stupidPresharedSalt = "IAmASalt";
-        AES aes = new AES(stupidPresharedPass, stupidPresharedSalt);
-        
-        String original = "\t\b\n\r\f\'\"\\";
-        byte[] ciphertext1 = aes.encrypt(original);
-        String plaintext1 = aes.decrypt(ciphertext1);
-        
-        assertEquals(original, plaintext1);
-    }
-    
-    @Test
-    public void testNonAsciiChars(){
-        String stupidPresharedPass = "IAmAPassword";
-        String stupidPresharedSalt = "IAmASalt";
-        AES aes = new AES(stupidPresharedPass, stupidPresharedSalt);
-        
-        String nonAscii = "A função, Ãugent";
-        byte[] ciphertext1 = aes.encrypt(nonAscii);
-        String plaintext1 = aes.decrypt(ciphertext1);
-        
-        assertEquals(nonAscii, plaintext1);
-        
-        
-        
+        // make sure they aren't all the same
+        if (ciphertext1.length == ciphertext2.length) {
+            boolean theSame = true;
+            for (int i = 0; i < ciphertext2.length; i++) {
+                theSame = theSame && ciphertext1[i] == ciphertext2[i];
+            }
+            assertFalse(theSame);
+        }
+        // if they aren't the same length, they aren't equal, so we're done
     }
 }
