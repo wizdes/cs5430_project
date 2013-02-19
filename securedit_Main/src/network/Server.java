@@ -43,7 +43,6 @@ public class Server {
         if (encType == ENC_TYPE_NONE) {
             m = Message.fromBytes(bytes);
         } else if (encType == ENC_TYPE_AES) {
-            System.out.println("salt = " + salt + ", password = " + password);
             m = Message.fromEncryptedBytes(bytes, password, salt);
         } else {
             System.err.print("NO ENCRYPTION TYPE FOUND FOR " + encType);
