@@ -6,6 +6,7 @@ package network;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.List;
 import messages.Message;
 
 /**
@@ -18,9 +19,15 @@ public interface NetworkInterface {
     
     public void sendMessage(Message m);
     
+    public void sendEncryptedMessage(Message m, String password, String salt);
+    
     public void addNeighbor(Node n);
     
-    public Collection<Node> readNeighbors(File f);
+    public List<Node> readNeighbors(File f);
     
-    public Collection<Node> getNeighbors();
+    public List<Node> getNeighbors();
+    
+    public Node getNeighbor(String nid);
+    
+    public void setSaltAndPassword(String pass, String salt);
 }

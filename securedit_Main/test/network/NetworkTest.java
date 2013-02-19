@@ -21,18 +21,19 @@ public class NetworkTest {
     
     @Test
     public void testReadNeighbors() {
-        Node me = new Node("me", "localhost", 4000);
+        Node me = new Node("1", "localhost", 4001);
         Network network = new Network(me);
         
         File f = new File("test/network/test_hosts.txt");
         Collection<Node> neighbors = network.readNeighbors(f);
         
-        assertEquals(5, neighbors.size());
-        assertTrue(neighbors.contains(new Node("1", "localhost", 4001)));
+        assertEquals(4, neighbors.size());
         assertTrue(neighbors.contains(new Node("2", "localhost", 4002)));
         assertTrue(neighbors.contains(new Node("3", "localhost", 4003)));
         assertTrue(neighbors.contains(new Node("4", "localhost", 4004)));
         assertTrue(neighbors.contains(new Node("5", "localhost", 4005)));
+        
+        assertFalse(neighbors.contains(new Node("1", "localhost", 4001)));
     }
 
 }

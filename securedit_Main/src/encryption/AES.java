@@ -33,14 +33,15 @@ public class AES {
     public AES(String password, String presharedSalt){
         secret = generateKey(password.toCharArray(), presharedSalt.getBytes());
     }
-    public byte[] encrypt(String plaintext){
+    
+    public byte[] encrypt(byte[] rawData){
         byte[] encryptedData = null;
         try {
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, secret);
             AlgorithmParameters params = cipher.getParameters();
             byte[] iv = params.getParameterSpec(IvParameterSpec.class).getIV(); //16 bytes
-            byte[] ciphertext = cipher.doFinal(plaintext.getBytes(ENCODING));
+            byte[] ciphertext = cipher.doFinal(rawData);
             
             //Concat iv to front of ciphertext
             //  Too slow???
@@ -48,8 +49,6 @@ public class AES {
             System.arraycopy(iv, 0, encryptedData, 0, iv.length);
             System.arraycopy(ciphertext, 0, encryptedData, iv.length, ciphertext.length);
         } catch (InvalidKeyException ex) {
-            Logger.getLogger(AES.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (UnsupportedEncodingException ex) {
             Logger.getLogger(AES.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IllegalBlockSizeException ex) {
             Logger.getLogger(AES.class.getName()).log(Level.SEVERE, null, ex);
@@ -65,8 +64,8 @@ public class AES {
         return encryptedData;
     }
     
-    public String decrypt(byte[] data){
-        String plaintext = null;
+    public byte[] decrypt(byte[] data){
+        byte[] result = null;
         //Unpack iv and ciphertext
         byte[] iv = new byte[lengthOfIV];
         byte[] ciphertext = new byte[data.length - lengthOfIV];
@@ -76,9 +75,7 @@ public class AES {
         try {    
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             cipher.init(Cipher.DECRYPT_MODE, secret, new IvParameterSpec(iv));
-            plaintext = new String(cipher.doFinal(ciphertext), ENCODING);
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(AES.class.getName()).log(Level.SEVERE, null, ex);
+            result = cipher.doFinal(ciphertext);
         } catch (IllegalBlockSizeException ex) {
             Logger.getLogger(AES.class.getName()).log(Level.SEVERE, null, ex);
         } catch (BadPaddingException ex) {
@@ -92,7 +89,8 @@ public class AES {
         } catch (NoSuchPaddingException ex) {
             Logger.getLogger(AES.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return plaintext;
+        
+        return result;
     }
     
     private SecretKey generateKey(char[] password, byte[] salt) {
@@ -108,41 +106,5 @@ public class AES {
             Logger.getLogger(AES.class.getName()).log(Level.SEVERE, null, ex);
         }
         return key;
-    }
-    
-    //Stupid tests to show usage
-    public static void main(String[] args) {
-        //Usage Examples:
-        String stupidPresharedPass = "IAmAPassword";
-        String stupidPresharedSalt = "IAmASalt";
-        AES aes = new AES(stupidPresharedPass, stupidPresharedSalt);
-        
-        String original = "test 1321314123k;389nnvp ion kljdsa";
-        byte[] ciphertext1 = aes.encrypt(original);
-        byte[] ciphertext2 = aes.encrypt(original);
-        String plaintext1 = aes.decrypt(ciphertext1);
-        String plaintext2 = aes.decrypt(ciphertext2);
-        
-        System.out.println("Original:" + original);
-        System.out.println("Cipher1 :" + ciphertext1);
-        System.out.println("Cipher2 :" + ciphertext2);
-        System.out.println("Plain1  :" + plaintext1);
-        System.out.println("Plain2  :" + plaintext2);
-                
-        
-        /*
-         * THOUGHTS:
-         * Can always see IV at front of text...need to investigate if this
-         *   is ok(I believe it is)
-         * SecretKeyFactory - Find a better one possibly(SHA2)
-         * 
-         * OTHER TESTS TO RUN:
-         * 1. Empty plaintext
-         * 2. 
-         * 
-         * 
-         * 
-         */
-       
     }
 }

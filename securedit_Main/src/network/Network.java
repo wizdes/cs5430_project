@@ -11,7 +11,9 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import messages.Message;
@@ -23,12 +25,14 @@ public class Network implements NetworkInterface {
     
     private Server server;
     private Client client;
-    private Collection<Node> neighbors = new LinkedList<>();
+    private HashMap<String, Node> neighbors = new HashMap<>();
+    private Node host;
     
     public Network(Node host) {
         client = new Client();
         server = new Server(host);
         server.listen();
+        this.host = host;
     }
     
     @Override
@@ -37,17 +41,26 @@ public class Network implements NetworkInterface {
     }
     
     @Override
+    public void sendEncryptedMessage(Message m, String password, String salt) {
+        byte[] bytes = m.serializeEncrypted(password, salt);
+        byte encType = Server.ENC_TYPE_AES;
+        client.send(m.getTo(), bytes, encType);
+    }    
+    
+    @Override
     public Collection<Message> waitForMessages() {
         return server.waitForMessages();
     }
     
     @Override
     public void addNeighbor(Node n) {
-        neighbors.add(n);
+        if (!n.equals(host)) {
+            neighbors.put(n.getID(), n);
+        }
     }
     
     @Override
-    public Collection<Node> readNeighbors(File file) {
+    public List<Node> readNeighbors(File file) {
         BufferedReader br = null;
         try {
             br = new BufferedReader(new FileReader(file));
@@ -75,8 +88,18 @@ public class Network implements NetworkInterface {
     }
     
     @Override
-    public Collection<Node> getNeighbors() {
-        return neighbors;
+    public List<Node> getNeighbors() {
+        return new LinkedList(neighbors.values());
+    }
+    
+    @Override
+    public Node getNeighbor(String nid) {
+        return neighbors.get(nid);
+    }
+    
+    public void setSaltAndPassword(String pass, String salt) {
+        this.server.setPassword(pass);
+        this.server.setSalt(salt);
     }
     
     public static void log(String msg) {
