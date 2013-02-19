@@ -44,7 +44,6 @@ public class ServerThread extends Thread {
                 
                 byte[] result = new byte[length];
                 in.read(result, 0, length);
-                System.out.println("Recieving with encType = " + encryptionType[0]);
                 this.server.depositMessage(encryptionType[0], result);
                 out.println(MESSAGE_RECIEVED_ACK);
                 
