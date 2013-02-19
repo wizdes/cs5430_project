@@ -4,6 +4,7 @@
  */
 
 package messages;
+import encryption.AES;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -19,14 +20,18 @@ public class Message implements Serializable {
     private Node from = null;
     private Node to = null;
 
-    public Message(Node t, Node f, String mid) {
-        this.from = f;
+    public Message(Node t) {
         this.to = t;
+    }
+    
+    public Message(Node t, Node f, String mid) {
+        this.to = t;
+        this.from = f;
         this.messageId = mid;
     }
     
     public boolean isValid() {
-        return from != null && to != null;
+        return from != null && to != null && this.messageId != null;
     }
     
     public void setmessageId(String i) {
@@ -52,24 +57,30 @@ public class Message implements Serializable {
     public void setTo(Node t) {
         this.to = t;
     }
-             
-    public static Message fromString(String s) {
+    
+    public static Message fromBytes(byte[] data) {
         Object obj = null;
+        ByteArrayInputStream bis = new ByteArrayInputStream(data);
         try {
-            byte [] data = javax.xml.bind.DatatypeConverter.parseBase64Binary(s);
-            ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
-            obj  = ois.readObject();
+            ObjectInputStream ois = new ObjectInputStream(bis);
+            obj = ois.readObject();
             ois.close();
         } catch (IOException ex) {
-            System.out.println("IOException parsing " + s);
+            System.out.println("IOException parsing " + data);
         } catch (ClassNotFoundException ex) {
-            System.out.println("ClassNotFoundException parsing " + s);
+            System.out.println("ClassNotFoundException parsing " + data);
         }
 
         return obj == null ? null : (Message)obj;
     }
-
-    public String serialize() {
+    
+    public static Message fromEncryptedBytes(byte[] s, String password, String salt) {
+       AES aes = new AES(password, salt);
+       byte[] serialized = aes.decrypt(s);
+       return fromBytes(serialized);
+    }
+    
+    public byte[] serialize() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oos;
         try {
@@ -80,7 +91,13 @@ public class Message implements Serializable {
             System.out.println("FAILED TO SERIALIZE " + this);
         }
          
-        return javax.xml.bind.DatatypeConverter.printBase64Binary(baos.toByteArray());
+        return baos.toByteArray();
+    }
+    
+    public byte[] serializeEncrypted(String password, String salt) {
+        AES aes = new AES(password, salt);
+        byte[] cryptedBytes = aes.encrypt(serialize());
+        return cryptedBytes;
     }
     
     @Override

@@ -21,12 +21,24 @@ public class MessageTest {
         Node from = new Node("1", "localhost", 4444);
         Node to = new Node("2", "localhost", 4445);
         Message m = new Message(to, from, "messageID");
-        String serialized = m.serialize();
-        Message obj = Message.fromString(serialized);
+        byte[] serialized = m.serialize();
+        Message obj = Message.fromBytes(serialized);
         assertEquals(obj, m);
         assertEquals(obj.getTo(), m.getTo());
         assertEquals(obj.getFrom(), m.getFrom());
         assertEquals(obj.getMessageId(), m.getMessageId());
     }
-
+    
+    //@Test
+    public void testEncrypredSerialize() {
+        Node from = new Node("1", "localhost", 4444);
+        Node to = new Node("2", "localhost", 4445);
+        Message m = new Message(to, from, "messageID");
+        byte[] serialized = m.serializeEncrypted("salt", "password");
+        Message obj = Message.fromEncryptedBytes(serialized, "salt", "password");
+        assertEquals(obj, m);
+        assertEquals(obj.getTo(), m.getTo());
+        assertEquals(obj.getFrom(), m.getFrom());
+        assertEquals(obj.getMessageId(), m.getMessageId());
+    }
 }
