@@ -76,8 +76,7 @@ public class EncryptionDemoFunctionality {
      */
     public String sendEncryptedMessage(String plaintextMsg) {
         DemoMessage dm = new DemoMessage(this.collaboratorNode, plaintextMsg);
-        System.out.println("salt = " + salt + ", password = " + password);
-        network.sendEncryptedMessage(dm, salt, password);
+        network.sendEncryptedMessage(dm);
         return new String(dm.serializeEncrypted(password, salt));
     }
 

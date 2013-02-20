@@ -5,6 +5,7 @@
 package network;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import messages.Message;
 import static org.junit.Assert.*;
@@ -34,6 +35,97 @@ public class NetworkTest {
         assertTrue(neighbors.contains(new Node("5", "localhost", 4005)));
         
         assertFalse(neighbors.contains(new Node("1", "localhost", 4001)));
+        
+        network.shutdown();
+    }
+    
+    @Test
+    public void testSendAndAwaitReply() {
+        int iterations = 1000;
+        Node serverNode = new Node("1", "localhost", 4001);
+        Node echoNode = new Node("2", "localhost", 4002);
+        
+        Network myNetwork = new Network(serverNode);
+        Network echoNetwork = new Network(echoNode);
+        
+        Collection<Message> messages;
+        ArrayList<String> recieved_ids = new ArrayList<>();
+                
+        ReplyServerThread echoThread = new ReplyServerThread(echoNetwork, iterations);
+        echoThread.start();
+        
+        for (int i = 0; i < iterations; i++) {
+            Message toSend = new Message(echoNode, i + "");
+            Message response = myNetwork.sendMessageAndAwaitReply(toSend);
+            assertNotNull(response);
+            assertEquals(toSend.getMessageId(), response.getReplyTo());
+        }
+        
+        myNetwork.shutdown();
+        echoNetwork.shutdown();
+    }
+    
+    @Test
+    public void testSendAndAwaitReplyEncrypted() {
+        int iterations = 10;
+        Node serverNode = new Node("1", "localhost", 4001);
+        Node echoNode = new Node("2", "localhost", 4002);
+        String password = "password";
+        String salt = "salt";
+        
+        Network myNetwork = new Network(serverNode);
+        myNetwork.setSaltAndPassword(password, salt);
+        Network echoNetwork = new Network(echoNode);
+        echoNetwork.setSaltAndPassword(password, salt);
+        
+        Collection<Message> messages;
+        ArrayList<String> recieved_ids = new ArrayList<>();
+                
+        ReplyServerThread echoThread = new ReplyServerThread(echoNetwork, iterations);
+        echoThread.encrypt();
+        echoThread.start();
+        
+        for (int i = 0; i < iterations; i++) {
+            Message toSend = new Message(echoNode, i + "");
+            Message response = myNetwork.sendEncryptedMessageAndAwaitReply(toSend);
+            assertNotNull(response);
+            assertEquals(toSend.getMessageId(), response.getReplyTo());
+        }
+        
+        myNetwork.shutdown();
+        echoNetwork.shutdown();
+    }
+    
+    private static class ReplyServerThread extends Thread {
+        private Network echoNetwork;
+        int iterations;
+        private boolean encrypt = false;
+
+        public ReplyServerThread(Network n, int i) {
+            echoNetwork = n;
+            iterations = i;
+        }
+        
+        public void encrypt() {
+            encrypt = true;
+        }
+        
+        @Override
+        public void run() {
+            int recieved = 0;
+            while (recieved < iterations) {
+                for (Message m : echoNetwork.waitForMessages()) {
+                    Message reply = new Message(m.getFrom(), "client-" + recieved++);
+                    reply.setReplyTo(m.getMessageId());
+                    if (encrypt) {
+                        echoNetwork.sendEncryptedMessage(reply);
+                    } else {
+                        echoNetwork.sendMessage(reply);
+                    }
+                    
+                }
+            }
+        }
     }
 
 }

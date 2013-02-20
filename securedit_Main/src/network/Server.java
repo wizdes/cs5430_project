@@ -1,7 +1,9 @@
 package network;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.locks.Condition;
@@ -19,8 +21,10 @@ public class Server {
     private Node node;
     private ClientListenerThread clientListener;
     private final Lock queueLock = new ReentrantLock(true);
+    private final Lock replyLock = new ReentrantLock(true);
     private Condition newMessageArrived = queueLock.newCondition();
     private BlockingQueue<Message> messageQueue = new LinkedBlockingDeque<>();
+    private Map<String, Pair<Condition, Message>> awaitingReplyQueue = new HashMap<>();
     
     private String password;
     private String salt;
@@ -52,6 +56,25 @@ public class Server {
             return;
         }
         
+        String reply = m.getReplyTo();        
+        if (reply != null) {
+            this.replyLock.lock();
+            try {
+                if (this.awaitingReplyQueue.containsKey(reply)) {
+                    Pair<Condition, Message> waiting = this.awaitingReplyQueue.get(reply);
+                    Pair<Condition, Message> withReply = new Pair(waiting.x, m);
+                    this.awaitingReplyQueue.put(reply, withReply);
+                    waiting.x.signal();
+                } else {
+                    this.awaitingReplyQueue.put(reply, new Pair(null, m));
+                }
+                return;
+            } finally {
+                this.replyLock.unlock();
+            }
+        }
+
+        
         this.queueLock.lock();
         try {
             this.messageQueue.add(m);
@@ -59,6 +82,28 @@ public class Server {
         } finally {
             this.queueLock.unlock();
         }
+    }
+    
+    public Message waitForReplyTo(Message m) {
+        Condition replyArrived = this.replyLock.newCondition();
+        Message response = null;
+        String key = m.getMessageId();
+        
+        this.replyLock.lock();
+        try {
+            if (!this.awaitingReplyQueue.containsKey(key)) {
+                this.awaitingReplyQueue.put(key, new Pair(replyArrived, null));
+                replyArrived.await();
+            }
+            response = this.awaitingReplyQueue.get(key).y;
+            this.awaitingReplyQueue.remove(key);
+        } catch (InterruptedException ex) {
+            System.err.println("Thread interrupted waiting for message reply");
+        } finally {
+            this.replyLock.unlock();
+        }
+        
+        return response;
     }
     
     public Collection<Message> waitForMessages() {
@@ -90,14 +135,8 @@ public class Server {
     public void shutdown() {
         this.clientListener.stopListening();
     }
-    
-    public static void main(String[] args) {
-        Node n = new Node("server", "localhost", 4444);
-        Server s = new Server(n);
-        s.listen();
-    }
-    
-        public String getPassword() {
+        
+    public String getPassword() {
         return password;
     }
 

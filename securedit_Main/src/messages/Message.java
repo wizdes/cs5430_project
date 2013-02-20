@@ -17,11 +17,17 @@ import network.Node;
 public class Message implements Serializable {
     
     private String messageId = null;
+    private String replyTo = null;
     private Node from = null;
     private Node to = null;
 
     public Message(Node t) {
         this.to = t;
+    }
+
+    public Message(Node t, String mid) {
+        this.to = t;
+        this.messageId = mid;
     }
     
     public Message(Node t, Node f, String mid) {
@@ -56,6 +62,14 @@ public class Message implements Serializable {
     
     public void setTo(Node t) {
         this.to = t;
+    }
+    
+    public String getReplyTo() {
+        return replyTo;
+    }
+
+    public void setReplyTo(String replyTo) {
+        this.replyTo = replyTo;
     }
     
     public static Message fromBytes(byte[] data) {

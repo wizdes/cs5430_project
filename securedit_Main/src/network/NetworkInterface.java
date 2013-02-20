@@ -18,8 +18,10 @@ public interface NetworkInterface {
     public Collection<Message> waitForMessages();
     
     public void sendMessage(Message m);
+    public Message sendMessageAndAwaitReply(Message m);
     
-    public void sendEncryptedMessage(Message m, String password, String salt);
+    public void sendEncryptedMessage(Message m);
+    public Message sendEncryptedMessageAndAwaitReply(Message m);
     
     public void addNeighbor(Node n);
     
@@ -30,4 +32,6 @@ public interface NetworkInterface {
     public Node getNeighbor(String nid);
     
     public void setSaltAndPassword(String pass, String salt);
+    
+    public void shutdown();
 }

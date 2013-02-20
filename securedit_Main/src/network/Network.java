@@ -37,15 +37,29 @@ public class Network implements NetworkInterface {
     
     @Override
     public void sendMessage(Message m) {
+        m.setFrom(host);
         client.send(m);
     }
     
     @Override
-    public void sendEncryptedMessage(Message m, String password, String salt) {
-        byte[] bytes = m.serializeEncrypted(password, salt);
+    public Message sendMessageAndAwaitReply(Message m) {
+        sendMessage(m);
+        return server.waitForReplyTo(m);
+    }
+    
+    @Override
+    public void sendEncryptedMessage(Message m) {
+        m.setFrom(host);
+        byte[] bytes = m.serializeEncrypted(this.server.getPassword(), this.server.getSalt());
         byte encType = Server.ENC_TYPE_AES;
         client.send(m.getTo(), bytes, encType);
-    }    
+    }
+    
+    @Override
+    public Message sendEncryptedMessageAndAwaitReply(Message m) {
+        sendEncryptedMessage(m);
+        return server.waitForReplyTo(m);
+    }
     
     @Override
     public Collection<Message> waitForMessages() {
@@ -97,9 +111,15 @@ public class Network implements NetworkInterface {
         return neighbors.get(nid);
     }
     
+    @Override
     public void setSaltAndPassword(String pass, String salt) {
         this.server.setPassword(pass);
         this.server.setSalt(salt);
+    }
+    
+    @Override
+    public void shutdown() {
+        this.server.shutdown();
     }
     
     public static void log(String msg) {
