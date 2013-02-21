@@ -54,9 +54,9 @@ public class File_Handler implements File_Handler_Interface{
 
     @Override
     public byte[] readByteFile(String filename) {
-        FileInputStream fis = null;
+        RandomAccessFile f = null;
         try {
-            RandomAccessFile f = new RandomAccessFile(new File(filename), "r");
+            f = new RandomAccessFile(new File(filename), "r");
             long longlength = f.length();
             int length = (int) longlength;
             if (length != longlength){
@@ -71,7 +71,7 @@ public class File_Handler implements File_Handler_Interface{
             Logger.getLogger(File_Handler.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             try {
-                fis.close();
+                f.close();
             } catch (IOException ex) {
                 Logger.getLogger(File_Handler.class.getName()).log(Level.SEVERE, null, ex);
             }
