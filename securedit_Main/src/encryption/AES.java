@@ -18,6 +18,8 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.security.SecureRandom;
+import java.math.BigInteger;
 
 /**
  *
@@ -32,6 +34,11 @@ public class AES {
     
     public AES(String password, String presharedSalt){
         secret = generateKey(password.toCharArray(), presharedSalt.getBytes());
+    }
+    
+    public SecretKey getKey()
+    {
+        return secret;
     }
     
     public byte[] encrypt(byte[] rawData){
