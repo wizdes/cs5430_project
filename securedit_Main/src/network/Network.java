@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -46,21 +47,7 @@ public class Network implements NetworkInterface {
         sendMessage(m);
         return server.waitForReplyTo(m);
     }
-    
-    @Override
-    public void sendEncryptedMessage(Message m) {
-        m.setFrom(host);
-        byte[] bytes = m.serializeEncrypted(this.server.getPassword(), this.server.getSalt());
-        byte encType = Server.ENC_TYPE_AES;
-        client.send(m.getTo(), bytes, encType);
-    }
-    
-    @Override
-    public Message sendEncryptedMessageAndAwaitReply(Message m) {
-        sendEncryptedMessage(m);
-        return server.waitForReplyTo(m);
-    }
-    
+        
     @Override
     public Collection<Message> waitForMessages() {
         return server.waitForMessages();
@@ -129,6 +116,14 @@ public class Network implements NetworkInterface {
     public static void logError(String msg) {
         System.err.println(msg);
     }
-
+    
+    public static void debugBytes(byte[] bytes, String label) {
+        try {
+            System.out.println(label + "[" + bytes.length + "]");
+            System.out.println(new String(bytes, "UTF-8"));
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(Message.class.getName()).log(Level.SEVERE, null, ex);
+        }   
+    }
 
 }

@@ -19,10 +19,7 @@ public interface NetworkInterface {
     
     public void sendMessage(Message m);
     public Message sendMessageAndAwaitReply(Message m);
-    
-    public void sendEncryptedMessage(Message m);
-    public Message sendEncryptedMessageAndAwaitReply(Message m);
-    
+        
     public void addNeighbor(Node n);
     
     public List<Node> readNeighbors(File f);

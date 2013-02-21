@@ -12,9 +12,14 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Objects;
+import network.Network;
 import network.Node;
 
 public class Message implements Serializable {
+    
+    public static byte ENC_TYPE_NONE = 0;
+    public static byte ENC_TYPE_AES = 1;
+    public static byte ENC_TYPE_RSA = 2;
     
     private String messageId = null;
     private String replyTo = null;
@@ -73,8 +78,12 @@ public class Message implements Serializable {
     }
     
     public static Message fromBytes(byte[] data) {
+        byte[] messageData = new byte[data.length - 1];
+        System.arraycopy(data, 1, messageData, 0, data.length - 1);
+        
         Object obj = null;
-        ByteArrayInputStream bis = new ByteArrayInputStream(data);
+        
+        ByteArrayInputStream bis = new ByteArrayInputStream(messageData);
         try {
             ObjectInputStream ois = new ObjectInputStream(bis);
             obj = ois.readObject();
@@ -104,8 +113,21 @@ public class Message implements Serializable {
         } catch (IOException ex) {
             System.out.println("FAILED TO SERIALIZE " + this);
         }
-         
-        return baos.toByteArray();
+        
+        byte[] message = baos.toByteArray();   
+        return withEncryptionType(message, ENC_TYPE_NONE);
+    }
+    
+    protected byte[] withEncryptionType(byte[] message, byte encType) {
+        
+        byte[] encryptionType = new byte[1];
+        encryptionType[0] = encType;
+        byte[] fullMessage = new byte[message.length + 1];
+
+        System.arraycopy(encryptionType, 0, fullMessage, 0, 1);
+        System.arraycopy(message, 0, fullMessage, 1, message.length);
+
+        return fullMessage;
     }
     
     public byte[] serializeEncrypted(String password, String salt) {

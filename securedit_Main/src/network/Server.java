@@ -13,10 +13,6 @@ import messages.Message;
 
 
 public class Server {
-
-    public static byte ENC_TYPE_NONE = 0;
-    public static byte ENC_TYPE_AES = 1;
-    public static byte ENC_TYPE_RSA = 2;
     
     private Node node;
     private ClientListenerThread clientListener;
@@ -41,17 +37,8 @@ public class Server {
       return this.node;
     }
     
-    public void depositMessage(byte encType, byte[] bytes) {
-        Message m = null;
-        
-        if (encType == ENC_TYPE_NONE) {
-            m = Message.fromBytes(bytes);
-        } else if (encType == ENC_TYPE_AES) {
-            m = Message.fromEncryptedBytes(bytes, password, salt);
-        } else {
-            System.err.print("NO ENCRYPTION TYPE FOUND FOR " + encType);
-        }
-        
+    public void depositMessage(byte[] bytes) {
+        Message m = Message.fromBytes(bytes);
         if (m == null) {
             return;
         }

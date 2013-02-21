@@ -24,9 +24,9 @@ public class MessageTest {
         byte[] serialized = m.serialize();
         Message obj = Message.fromBytes(serialized);
         assertEquals(obj, m);
-        assertEquals(obj.getTo(), m.getTo());
-        assertEquals(obj.getFrom(), m.getFrom());
-        assertEquals(obj.getMessageId(), m.getMessageId());
+        assertEquals(m.getTo(), obj.getTo());
+        assertEquals(m.getFrom(), obj.getFrom());
+        assertEquals(m.getMessageId(), obj.getMessageId());
     }
     
     //@Test

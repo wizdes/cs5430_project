@@ -12,12 +12,6 @@ import messages.Message;
 import network.Network;
 import network.Node;
 import File_Handler.File_Handler;
-import encryption.AES;
-import java.io.UnsupportedEncodingException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.xml.bind.DatatypeConverter;
-
 /**
  *
  * @author Patrick C. Berens
@@ -61,10 +55,7 @@ public class EncryptionDemoFunctionality {
     public String encryptFile(String plaintext){
         //Encrypts the currently opened file and writes it back to the filesystem.
         System.out.println("encryptFile not yet implemented");
-        AES aes = new AES(password, salt);
-        return aes.encrypt(plaintext);
-//        byte[] ciphertext = aes.encrypt(plaintext.getBytes());
-//        return DatatypeConverter.printBase64Binary(ciphertext);
+        return "encryptFile not yet implemented";
     }
     
     /**
@@ -75,15 +66,7 @@ public class EncryptionDemoFunctionality {
     public String decryptFile(String ciphertext){
         System.out.println("decryptFile not yet implemented");
         //Decrypts the currently opened file.
-        AES aes = new AES(password, salt);
-        return aes.decrypt(ciphertext);
-//        byte[] plaintext = aes.decrypt(DatatypeConverter.parseBase64Binary(ciphertext));
-//        try {
-//            return new String(plaintext, "UTF-8");
-//        } catch (UnsupportedEncodingException ex) {
-//            Logger.getLogger(EncryptionDemoFunctionality.class.getName()).log(Level.SEVERE, null, ex);
-//            return "encoding not supported";
-//        }
+        return "decryptFile not yet implemented";
     }
     
     /**
@@ -93,8 +76,7 @@ public class EncryptionDemoFunctionality {
      */
     public String sendEncryptedMessage(String plaintextMsg) {
         DemoMessage dm = new DemoMessage(this.collaboratorNode, plaintextMsg);
-        System.out.println("salt = " + salt + ", password = " + password);
-        network.sendEncryptedMessage(dm, salt, password);
+        network.sendMessage(dm);
         return new String(dm.serializeEncrypted(password, salt));
     }
 

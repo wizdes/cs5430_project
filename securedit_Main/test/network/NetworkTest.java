@@ -20,7 +20,7 @@ public class NetworkTest {
     public NetworkTest() {
     }
     
-    @Test
+    //@Test
     public void testReadNeighbors() {
         Node me = new Node("1", "localhost", 4001);
         Network network = new Network(me);
@@ -65,49 +65,14 @@ public class NetworkTest {
         echoNetwork.shutdown();
     }
     
-    @Test
-    public void testSendAndAwaitReplyEncrypted() {
-        int iterations = 10;
-        Node serverNode = new Node("1", "localhost", 4001);
-        Node echoNode = new Node("2", "localhost", 4002);
-        String password = "password";
-        String salt = "salt";
-        
-        Network myNetwork = new Network(serverNode);
-        myNetwork.setSaltAndPassword(password, salt);
-        Network echoNetwork = new Network(echoNode);
-        echoNetwork.setSaltAndPassword(password, salt);
-        
-        Collection<Message> messages;
-        ArrayList<String> recieved_ids = new ArrayList<>();
-                
-        ReplyServerThread echoThread = new ReplyServerThread(echoNetwork, iterations);
-        echoThread.encrypt();
-        echoThread.start();
-        
-        for (int i = 0; i < iterations; i++) {
-            Message toSend = new Message(echoNode, i + "");
-            Message response = myNetwork.sendEncryptedMessageAndAwaitReply(toSend);
-            assertNotNull(response);
-            assertEquals(toSend.getMessageId(), response.getReplyTo());
-        }
-        
-        myNetwork.shutdown();
-        echoNetwork.shutdown();
-    }
     
     private static class ReplyServerThread extends Thread {
         private Network echoNetwork;
         int iterations;
-        private boolean encrypt = false;
 
         public ReplyServerThread(Network n, int i) {
             echoNetwork = n;
             iterations = i;
-        }
-        
-        public void encrypt() {
-            encrypt = true;
         }
         
         @Override
@@ -117,12 +82,7 @@ public class NetworkTest {
                 for (Message m : echoNetwork.waitForMessages()) {
                     Message reply = new Message(m.getFrom(), "client-" + recieved++);
                     reply.setReplyTo(m.getMessageId());
-                    if (encrypt) {
-                        echoNetwork.sendEncryptedMessage(reply);
-                    } else {
-                        echoNetwork.sendMessage(reply);
-                    }
-                    
+                    echoNetwork.sendMessage(reply);
                 }
             }
         }
