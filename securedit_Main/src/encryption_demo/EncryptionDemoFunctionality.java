@@ -57,7 +57,6 @@ public class EncryptionDemoFunctionality {
      */
     public String encryptFile(String plaintext){
         //Encrypts the currently opened file and writes it back to the filesystem.
-        System.out.println("encryptFile not yet implemented");
         AES aes = new AES(password, salt);
         String ciphertext = aes.encrypt(plaintext);
         fHandler.writeToFile(openedFilename, ciphertext);
@@ -70,7 +69,6 @@ public class EncryptionDemoFunctionality {
      * @return Plaintext of file after being decrypted.
      */
     public String decryptFile(String ciphertext){
-        System.out.println("decryptFile not yet implemented");
         //Decrypts the currently opened file.
         AES aes = new AES(password, salt);
         String plaintext = aes.decrypt(ciphertext);
