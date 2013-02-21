@@ -1,5 +1,6 @@
 package encryption;
 
+import encryption_demo.EncryptionDemoFunctionality;
 import java.io.UnsupportedEncodingException;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
@@ -20,6 +21,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.SecureRandom;
 import java.math.BigInteger;
+import javax.xml.bind.DatatypeConverter;
 
 /**
  *
@@ -41,6 +43,12 @@ public class AES {
         return secret;
     }
     
+
+    public String encrypt(String plaintext){
+        byte[] ciphertext = encrypt(plaintext.getBytes());
+        return DatatypeConverter.printBase64Binary(ciphertext);
+    }
+
     public byte[] encrypt(byte[] rawData){
         byte[] encryptedData = null;
         try {
@@ -71,6 +79,15 @@ public class AES {
         return encryptedData;
     }
     
+    public String decrypt(String ciphertext){
+        byte[] plaintext = decrypt(DatatypeConverter.parseBase64Binary(ciphertext));
+        try {
+            return new String(plaintext, ENCODING);
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(EncryptionDemoFunctionality.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
+    }
     public byte[] decrypt(byte[] data){
         byte[] result = null;
         //Unpack iv and ciphertext
@@ -100,6 +117,8 @@ public class AES {
         return result;
     }
     
+    
+    
     private SecretKey generateKey(char[] password, byte[] salt) {
         SecretKey key = null;
         try {
@@ -113,5 +132,50 @@ public class AES {
             Logger.getLogger(AES.class.getName()).log(Level.SEVERE, null, ex);
         }
         return key;
+    }
+    
+    //Stupid tests to show usage
+    public static void main(String[] args) {
+        //Usage Examples:
+        String stupidPresharedPass = "IAmAPassword";
+        String stupidPresharedSalt = "IAmASalt";
+        AES aes = new AES(stupidPresharedPass, stupidPresharedSalt);
+        
+//        String original = "test 1321314123k;389nnvp ion kljdsa";
+//        byte[] ciphertext1 = aes.encrypt(original);
+//        byte[] ciphertext2 = aes.encrypt(original);
+//        String plaintext1 = aes.decrypt(ciphertext1);
+//        String plaintext2 = aes.decrypt(ciphertext2);
+//        
+//        System.out.println("Original:" + original);
+//        System.out.println("Cipher1 :" + ciphertext1);
+//        System.out.println("Cipher2 :" + ciphertext2);
+//        System.out.println("Plain1  :" + plaintext1);
+//        System.out.println("Plain2  :" + plaintext2);
+        
+        String original = "Hello";
+        byte[] cipherBytes = aes.encrypt(original);
+        String sentString = new String(cipherBytes);
+        
+        byte[] recvBytes = sentString.getBytes();
+        String newString = new String(recvBytes);
+        
+        System.out.println("Original :" + original);
+        System.out.println("newString:" + newString);
+        
+        /*
+         * THOUGHTS:
+         * Can always see IV at front of text...need to investigate if this
+         *   is ok(I believe it is)
+         * SecretKeyFactory - Find a better one possibly(SHA2)
+         * 
+         * OTHER TESTS TO RUN:
+         * 1. Empty plaintext
+         * 2. 
+         * 
+         * 
+         * 
+         */
+       
     }
 }
