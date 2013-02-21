@@ -121,6 +121,7 @@ public class Network implements NetworkInterface {
         try {
             System.out.println(label + "[" + bytes.length + "]");
             System.out.println(new String(bytes, "UTF-8"));
+            System.out.println("");
         } catch (UnsupportedEncodingException ex) {
             Logger.getLogger(Message.class.getName()).log(Level.SEVERE, null, ex);
         }   

@@ -12,7 +12,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Objects;
-import network.Network;
+import javax.crypto.SecretKey;
 import network.Node;
 
 public class Message implements Serializable {
@@ -78,11 +78,18 @@ public class Message implements Serializable {
     }
     
     public static Message fromBytes(byte[] data) {
+        return fromBytes(data, null);
+    }
+    
+    public static Message fromBytes(byte[] data, SecretKey secret) {
         byte[] messageData = new byte[data.length - 1];
         System.arraycopy(data, 1, messageData, 0, data.length - 1);
         
-        Object obj = null;
+        if (data[0] == ENC_TYPE_AES) {
+            messageData = new AES(secret).decrypt(messageData);
+        }
         
+        Object obj = null;  
         ByteArrayInputStream bis = new ByteArrayInputStream(messageData);
         try {
             ObjectInputStream ois = new ObjectInputStream(bis);
@@ -97,13 +104,11 @@ public class Message implements Serializable {
         return obj == null ? null : (Message)obj;
     }
     
-    public static Message fromEncryptedBytes(byte[] s, String password, String salt) {
-       AES aes = new AES(password, salt);
-       byte[] serialized = aes.decrypt(s);
-       return fromBytes(serialized);
+    public byte[] serialize() {
+        return withEncryptionType(serializeRaw(), ENC_TYPE_NONE);
     }
     
-    public byte[] serialize() {
+    protected byte[] serializeRaw() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oos;
         try {
@@ -114,8 +119,8 @@ public class Message implements Serializable {
             System.out.println("FAILED TO SERIALIZE " + this);
         }
         
-        byte[] message = baos.toByteArray();   
-        return withEncryptionType(message, ENC_TYPE_NONE);
+        byte[] message = baos.toByteArray();  
+        return message;
     }
     
     protected byte[] withEncryptionType(byte[] message, byte encType) {
@@ -128,12 +133,6 @@ public class Message implements Serializable {
         System.arraycopy(message, 0, fullMessage, 1, message.length);
 
         return fullMessage;
-    }
-    
-    public byte[] serializeEncrypted(String password, String salt) {
-        AES aes = new AES(password, salt);
-        byte[] cryptedBytes = aes.encrypt(serialize());
-        return cryptedBytes;
     }
     
     @Override

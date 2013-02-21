@@ -113,9 +113,11 @@ public class AES {
         return result;
     }
     
+    public static SecretKey generateKey(String password, String salt) {
+        return generateKey(password.toCharArray(), salt.getBytes());
+    }
     
-    
-    private SecretKey generateKey(char[] password, byte[] salt) {
+    public static SecretKey generateKey(char[] password, byte[] salt) {
         SecretKey key = null;
         try {
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");  //SHA2???
