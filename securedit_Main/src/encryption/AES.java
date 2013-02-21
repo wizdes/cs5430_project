@@ -154,7 +154,7 @@ public class AES {
 //        System.out.println("Plain2  :" + plaintext2);
         
         String original = "Hello";
-        byte[] cipherBytes = aes.encrypt(original);
+        byte[] cipherBytes = aes.encrypt(original).getBytes();
         String sentString = new String(cipherBytes);
         
         byte[] recvBytes = sentString.getBytes();
