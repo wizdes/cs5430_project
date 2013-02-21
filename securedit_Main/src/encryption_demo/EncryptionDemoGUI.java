@@ -8,6 +8,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import network.Node;
 
 /**
@@ -15,6 +16,12 @@ import network.Node;
  * @author Patrick C. Berens
  */
 public class EncryptionDemoGUI extends javax.swing.JFrame {
+    private static String appNodeId;
+    private static String appHost;
+    private static int appPort;
+    private static String username;
+    private static String password;
+    
     private String filename;
     private JFileChooser fileChooser;
     private EncryptionDemoFunctionality functionality;
@@ -24,8 +31,11 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
     public EncryptionDemoGUI(Node appNode) {
         fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File("."));
-
         initComponents();
+        
+        NodeIDTextField.setText(appNodeId);
+        HostTextField.setText(appHost);
+        PortTextField.setText(appPort + "");
 
         SendTextField.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e) {
@@ -53,6 +63,19 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
     private void initComponents() {
 
         CryptographyTabbedPane = new javax.swing.JTabbedPane();
+        AuthorizationLabel = new javax.swing.JPanel();
+        AuthorizeMachineButton = new javax.swing.JButton();
+        NodeIDTextField = new javax.swing.JTextField();
+        NodeIDLabel = new javax.swing.JLabel();
+        HostLabel = new javax.swing.JLabel();
+        HostTextField = new javax.swing.JTextField();
+        PortLabel = new javax.swing.JLabel();
+        PortTextField = new javax.swing.JTextField();
+        UpdatePropertiesButton = new javax.swing.JButton();
+        UsernameLabel = new javax.swing.JLabel();
+        UsernameTextField = new javax.swing.JTextField();
+        PasswordLabel = new javax.swing.JLabel();
+        PasswordTextField = new javax.swing.JTextField();
         FilePanel = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         FileTextArea = new javax.swing.JTextArea();
@@ -79,6 +102,98 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
         CryptographyLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        AuthorizeMachineButton.setText("Authorize Machine");
+        AuthorizeMachineButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                AuthorizeMachineButtonActionPerformed(evt);
+            }
+        });
+
+        NodeIDLabel.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        NodeIDLabel.setText("Node ID");
+
+        HostLabel.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        HostLabel.setText("Host");
+
+        PortLabel.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        PortLabel.setText("Port");
+
+        UpdatePropertiesButton.setText("Update Properties");
+        UpdatePropertiesButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                UpdatePropertiesButtonActionPerformed(evt);
+            }
+        });
+
+        UsernameLabel.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        UsernameLabel.setText("Username");
+
+        PasswordLabel.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        PasswordLabel.setText("Password");
+
+        javax.swing.GroupLayout AuthorizationLabelLayout = new javax.swing.GroupLayout(AuthorizationLabel);
+        AuthorizationLabel.setLayout(AuthorizationLabelLayout);
+        AuthorizationLabelLayout.setHorizontalGroup(
+            AuthorizationLabelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(AuthorizationLabelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(AuthorizationLabelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(HostLabel)
+                    .addComponent(PortLabel)
+                    .addComponent(UsernameLabel)
+                    .addGroup(AuthorizationLabelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(UpdatePropertiesButton)
+                        .addGroup(AuthorizationLabelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AuthorizationLabelLayout.createSequentialGroup()
+                                .addComponent(PasswordLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(PasswordTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(AuthorizationLabelLayout.createSequentialGroup()
+                                .addComponent(NodeIDLabel)
+                                .addGap(43, 43, 43)
+                                .addGroup(AuthorizationLabelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(HostTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(NodeIDTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(PortTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(UsernameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                .addGap(42, 482, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AuthorizationLabelLayout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(AuthorizeMachineButton)
+                .addGap(27, 27, 27))
+        );
+        AuthorizationLabelLayout.setVerticalGroup(
+            AuthorizationLabelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AuthorizationLabelLayout.createSequentialGroup()
+                .addGap(19, 19, 19)
+                .addGroup(AuthorizationLabelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(NodeIDTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(NodeIDLabel))
+                .addGap(9, 9, 9)
+                .addGroup(AuthorizationLabelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(HostLabel)
+                    .addComponent(HostTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(AuthorizationLabelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(PortLabel)
+                    .addComponent(PortTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(8, 8, 8)
+                .addGroup(AuthorizationLabelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(UsernameLabel)
+                    .addComponent(UsernameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(AuthorizationLabelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(PasswordTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(PasswordLabel))
+                .addGap(18, 18, 18)
+                .addComponent(UpdatePropertiesButton)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 33, Short.MAX_VALUE)
+                .addComponent(AuthorizeMachineButton, javax.swing.GroupLayout.PREFERRED_SIZE, 66, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(26, 26, 26))
+        );
+
+        CryptographyTabbedPane.addTab("Authorization", AuthorizationLabel);
 
         FileTextArea.setEditable(false);
         FileTextArea.setColumns(20);
@@ -143,7 +258,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                         .addContainerGap())
                     .addGroup(FilePanelLayout.createSequentialGroup()
                         .addComponent(OpenFileButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 128, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 140, Short.MAX_VALUE)
                         .addComponent(EncryptButton)
                         .addGap(18, 18, 18)
                         .addComponent(DecryptButton)
@@ -216,7 +331,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                             .addComponent(SendButton)
                             .addComponent(SendTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(23, Short.MAX_VALUE))
         );
 
         CryptographyTabbedPane.addTab("Sent Messages", SentMessagesPanel);
@@ -266,7 +381,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                 .addGroup(SentMessagesPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(48, Short.MAX_VALUE))
+                .addContainerGap(60, Short.MAX_VALUE))
         );
 
         CryptographyTabbedPane.addTab("Received Messages", SentMessagesPanel1);
@@ -293,7 +408,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                 .addComponent(CryptographyLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(CryptographyTabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(13, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -326,6 +441,24 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
         SendTextField.setText("");
     }//GEN-LAST:event_SendButtonActionPerformed
 
+    private void UpdatePropertiesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UpdatePropertiesButtonActionPerformed
+        appNodeId = NodeIDTextField.getText();
+        appHost = HostTextField.getText();
+        username = UsernameTextField.getText();
+        password = PasswordTextField.getText();
+        try{
+            appPort = Integer.parseInt(PortTextField.getText());
+        } catch(NumberFormatException ex){
+            handleException(ex);
+        }
+    }//GEN-LAST:event_UpdatePropertiesButtonActionPerformed
+
+    private void AuthorizeMachineButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AuthorizeMachineButtonActionPerformed
+        //Yi, this is where you call your method: functionality.author..
+    }//GEN-LAST:event_AuthorizeMachineButtonActionPerformed
+    private void handleException(Exception ex) {
+        JOptionPane.showMessageDialog(this, ex.getMessage());
+    }
     /**
      * @param args the command line arguments
      */
@@ -354,9 +487,9 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
         //</editor-fold>
         
         
-        final String appNodeId = args[0];
-        final String appHost = args[1];
-        final int appPort = Integer.parseInt(args[2]);
+        appNodeId = args[0];
+        appHost = args[1];
+        appPort = Integer.parseInt(args[2]);
         
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -368,6 +501,8 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel AuthorizationLabel;
+    private javax.swing.JButton AuthorizeMachineButton;
     private javax.swing.JLabel CryptographyLabel;
     private javax.swing.JTabbedPane CryptographyTabbedPane;
     private javax.swing.JButton DecryptButton;
@@ -379,7 +514,15 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
     private javax.swing.JLabel FileLabel;
     private javax.swing.JPanel FilePanel;
     private javax.swing.JTextArea FileTextArea;
+    private javax.swing.JLabel HostLabel;
+    private javax.swing.JTextField HostTextField;
+    private javax.swing.JLabel NodeIDLabel;
+    private javax.swing.JTextField NodeIDTextField;
     private javax.swing.JButton OpenFileButton;
+    private javax.swing.JLabel PasswordLabel;
+    private javax.swing.JTextField PasswordTextField;
+    private javax.swing.JLabel PortLabel;
+    private javax.swing.JTextField PortTextField;
     private javax.swing.JLabel ReceivedCiphertextLabel;
     private javax.swing.JTextArea ReceivedCiphertextTextArea;
     private javax.swing.JButton SendButton;
@@ -388,6 +531,9 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
     private javax.swing.JLabel SentMessagesLabel;
     private javax.swing.JPanel SentMessagesPanel;
     private javax.swing.JPanel SentMessagesPanel1;
+    private javax.swing.JButton UpdatePropertiesButton;
+    private javax.swing.JLabel UsernameLabel;
+    private javax.swing.JTextField UsernameTextField;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
