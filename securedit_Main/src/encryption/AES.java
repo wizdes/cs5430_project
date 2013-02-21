@@ -19,8 +19,6 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.SecureRandom;
-import java.math.BigInteger;
 import javax.xml.bind.DatatypeConverter;
 
 /**
@@ -38,12 +36,14 @@ public class AES {
         secret = generateKey(password.toCharArray(), presharedSalt.getBytes());
     }
     
-    public SecretKey getKey()
-    {
+    public AES(SecretKey secret) {
+        this.secret = secret;
+    }
+    
+    public SecretKey getKey() {
         return secret;
     }
     
-
     public String encrypt(String plaintext){
         byte[] ciphertext = encrypt(plaintext.getBytes());
         return DatatypeConverter.printBase64Binary(ciphertext);
@@ -117,9 +117,11 @@ public class AES {
         return result;
     }
     
+    public static SecretKey generateKey(String password, String salt) {
+        return generateKey(password.toCharArray(), salt.getBytes());
+    }
     
-    
-    private SecretKey generateKey(char[] password, byte[] salt) {
+    public static SecretKey generateKey(char[] password, byte[] salt) {
         SecretKey key = null;
         try {
             SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");  //SHA2???

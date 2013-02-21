@@ -12,7 +12,7 @@ import java.util.Map;
  *
  * @author yjli_000
  */
-public class Keys_Func implements Serializable{
+public class Keys_Func implements Serializable {
     public Map<String, PublicKey> id_pub_key;
     public Map<String, String> id_session_key;
     public Map<String, String> salt;

@@ -22,18 +22,17 @@ class Client {
     public boolean send(Message m) {        
         byte[] toSend = m.serialize();
         Node destNode = m.getTo();
-        byte encType = Server.ENC_TYPE_NONE;
-        return send(destNode, toSend, encType);
+        return send(destNode, toSend);
     }
     
-    public boolean send(Node destNode, byte[] bytes, byte encType) {
+    public boolean send(Node destNode, byte[] bytes) {
         String key = destNode.toString();
         
         if (!channelMap.containsKey(key)){
             channelMap.putIfAbsent(key, new Channel(destNode));
         }
         
-        return channelMap.get(key).send(bytes, encType);
+        return channelMap.get(key).send(bytes);
     }
     
     private class Channel {
@@ -65,26 +64,15 @@ class Client {
             return  ByteBuffer.allocate(4).putInt(value).array();
         }
 
-        public boolean send(byte[] message, byte encType) {
+        public boolean send(byte[] message) {
             String response = "";
             
             byte[] messageLength = toByteArray(message.length);  // 4 bytes
-            byte[] encryptionType = new byte[1];
-            encryptionType[0] = encType;
-            byte[] fullMessage = new byte[message.length + 4 + 1];
-            
-            System.arraycopy(messageLength, 0, fullMessage, 0, 4 - 1);
-            System.arraycopy(encryptionType, 0, fullMessage, 4, 1);
-            System.arraycopy(message, 0, fullMessage, 4 + 1, message.length - 1);
-            
+                        
             if (out != null && in != null) { 
                 try {
                     // send length of message
                     out.write(messageLength);
-                    out.flush();
-                    
-                    // send encryption type
-                    out.write(encryptionType);
                     out.flush();
                     
                     // send message

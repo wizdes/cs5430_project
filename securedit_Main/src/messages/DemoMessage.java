@@ -5,19 +5,25 @@
 
 package messages;
 
+import javax.crypto.SecretKey;
 import network.Node;
 
 /**
  *
  */
-public class DemoMessage extends Message {
+public class DemoMessage extends AESEncryptedMessage {
     private String message;
     
-    public DemoMessage(Node t, String message) {
-        super(t);
+    public DemoMessage(Node t, String message, SecretKey secret) {
+        super(t, secret);
         this.message = message;
     }
     
+    public DemoMessage(Node t, Node f, String mid, String m, SecretKey secret) {
+        super(t, f, mid, secret);
+        this.message = m;
+    }
+        
     public String getContent() {
         return message;
     }
