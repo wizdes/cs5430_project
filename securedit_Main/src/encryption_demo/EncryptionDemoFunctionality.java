@@ -11,7 +11,7 @@ import messages.DemoMessage;
 import messages.Message;
 import network.Network;
 import network.Node;
-
+import File_Handler.File_Handler;
 /**
  *
  * @author Patrick C. Berens
@@ -43,8 +43,8 @@ public class EncryptionDemoFunctionality {
      * @return String representation of the file.
      */
     public String openFile(String filename){
-        System.out.println("openFile not yet implemented");
-        return "openFile not yet implemented";
+        File_Handler f = new File_Handler();
+        return f.readStringFile(filename);
     }
     
     /**
