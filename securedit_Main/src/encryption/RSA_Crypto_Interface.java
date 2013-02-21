@@ -11,7 +11,7 @@ import java.security.PublicKey;
  *
  * @author Yi
  */
-interface RSA_Crypto_Interface {
+public interface RSA_Crypto_Interface {
     public boolean genNewKeys();
     public PrivateKey getPrivateKey();
     public PublicKey getPublicKey();

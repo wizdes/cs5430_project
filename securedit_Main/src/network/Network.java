@@ -99,6 +99,10 @@ public class Network implements NetworkInterface {
     }
     
     @Override
+    public Node getHostNode() {
+        return host;
+    }
+    
     public void setSaltAndPassword(String pass, String salt) {
         this.server.setPassword(pass);
         this.server.setSalt(salt);

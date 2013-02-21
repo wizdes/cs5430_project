@@ -31,4 +31,7 @@ public interface NetworkInterface {
     public void setSaltAndPassword(String pass, String salt);
     
     public void shutdown();
+
+    public Node getHostNode();
 }
+

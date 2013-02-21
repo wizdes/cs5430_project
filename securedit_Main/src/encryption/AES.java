@@ -19,6 +19,8 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.security.SecureRandom;
+import java.math.BigInteger;
 import javax.xml.bind.DatatypeConverter;
 
 /**
@@ -38,6 +40,10 @@ public class AES {
     
     public AES(SecretKey secret) {
         this.secret = secret;
+    }
+    
+    public SecretKey getKey() {
+        return secret;
     }
     
     public String encrypt(String plaintext){

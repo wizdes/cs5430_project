@@ -12,6 +12,8 @@ import messages.Message;
 import network.Network;
 import network.Node;
 import File_Handler.File_Handler;
+import encryption.AES;
+
 /**
  *
  * @author Patrick C. Berens
@@ -22,7 +24,8 @@ public class EncryptionDemoFunctionality {
     private Node collaboratorNode;
     private String password = "I am a password";
     private String salt = "I am a salt";
-    
+    private File_Handler fHandler = new File_Handler();
+    private String openedFilename;
     public EncryptionDemoFunctionality(EncryptionDemoGUI gui, Node appNode){
         this.gui = gui;
         this.network = new Network(appNode);
@@ -43,8 +46,8 @@ public class EncryptionDemoFunctionality {
      * @return String representation of the file.
      */
     public String openFile(String filename){
-        File_Handler f = new File_Handler();
-        return f.readStringFile(filename);
+        openedFilename = filename;
+        return fHandler.readStringFile(filename);
     }
     
     /**
@@ -54,8 +57,10 @@ public class EncryptionDemoFunctionality {
      */
     public String encryptFile(String plaintext){
         //Encrypts the currently opened file and writes it back to the filesystem.
-        System.out.println("encryptFile not yet implemented");
-        return "encryptFile not yet implemented";
+        AES aes = new AES(password, salt);
+        String ciphertext = aes.encrypt(plaintext);
+        fHandler.writeToFile(openedFilename, ciphertext);
+        return ciphertext;
     }
     
     /**
@@ -64,9 +69,11 @@ public class EncryptionDemoFunctionality {
      * @return Plaintext of file after being decrypted.
      */
     public String decryptFile(String ciphertext){
-        System.out.println("decryptFile not yet implemented");
         //Decrypts the currently opened file.
-        return "decryptFile not yet implemented";
+        AES aes = new AES(password, salt);
+        String plaintext = aes.decrypt(ciphertext);
+        fHandler.writeToFile(openedFilename, plaintext);
+        return plaintext;
     }
     
     /**
@@ -76,7 +83,8 @@ public class EncryptionDemoFunctionality {
      */
     public String sendEncryptedMessage(String plaintextMsg) {
         DemoMessage dm = new DemoMessage(this.collaboratorNode, plaintextMsg);
-        network.sendMessage(dm);
+        System.out.println("salt = " + salt + ", password = " + password);
+        network.sendEncryptedMessage(dm, salt, password);
         return new String(dm.serializeEncrypted(password, salt));
     }
 
