@@ -9,6 +9,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.crypto.SecretKey;
 import messages.Message;
 
 
@@ -22,8 +23,7 @@ public class Server {
     private BlockingQueue<Message> messageQueue = new LinkedBlockingDeque<>();
     private Map<String, Pair<Condition, Message>> awaitingReplyQueue = new HashMap<>();
     
-    private String password;
-    private String salt;
+    private SecretKey secret;
         
     public Server(Node node) {
         this.node = node;
@@ -38,7 +38,7 @@ public class Server {
     }
     
     public void depositMessage(byte[] bytes) {
-        Message m = Message.fromBytes(bytes);
+        Message m = Message.fromBytes(bytes, secret);
         if (m == null) {
             return;
         }
@@ -122,20 +122,12 @@ public class Server {
     public void shutdown() {
         this.clientListener.stopListening();
     }
-        
-    public String getPassword() {
-        return password;
+    
+    public SecretKey getSecret() {
+        return secret;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getSalt() {
-        return salt;
-    }
-
-    public void setSalt(String salt) {
-        this.salt = salt;
-    }
+    public void setSecret(SecretKey secret) {
+        this.secret = secret;
+    }    
 }

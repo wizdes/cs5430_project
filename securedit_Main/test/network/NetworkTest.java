@@ -20,7 +20,7 @@ public class NetworkTest {
     public NetworkTest() {
     }
     
-    //@Test
+    @Test
     public void testReadNeighbors() {
         Node me = new Node("1", "localhost", 4001);
         Network network = new Network(me);

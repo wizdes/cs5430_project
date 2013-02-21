@@ -7,6 +7,7 @@ package network;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+import javax.crypto.SecretKey;
 import messages.Message;
 
 /**
@@ -28,7 +29,7 @@ public interface NetworkInterface {
     
     public Node getNeighbor(String nid);
     
-    public void setSaltAndPassword(String pass, String salt);
+    public void setSecret(SecretKey secret);
     
     public void shutdown();
 

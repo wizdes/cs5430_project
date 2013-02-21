@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.crypto.SecretKey;
 import network.Network;
+import network.Node;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -15,27 +16,30 @@ import org.junit.Test;
  *
  * @author goggin
  */
-public class AESEncryptedMessageTest extends MessageTest {
+public class DemoMessageTest extends MessageTest {
     
     @Test
     @Override
     public void testSerialize() {
+        Node from = new Node("1", "localhost", 4444);
+        Node to = new Node("2", "localhost", 4445);
         SecretKey secret = AES.generateKey("password", "secret");
         
-        Message m = new AESEncryptedMessage(to, from, "messageID", secret);
+        DemoMessage m = new DemoMessage(to, from, "messageID", "hello world", secret);
         byte[] serialized = m.serialize();
-        Message obj = Message.fromBytes(serialized, secret);
+        DemoMessage obj = (DemoMessage)Message.fromBytes(serialized, secret);
         assertEquals(m, obj);
         assertEquals(m.getTo(), obj.getTo());
         assertEquals(m.getFrom(), obj.getFrom());
         assertEquals(m.getMessageId(), obj.getMessageId());
+        assertEquals("hello world", obj.getContent());
     }
-    
+
     @Test
     @Override
     public void testSending() {
         SecretKey secret = AES.generateKey("password", "secret");
-        Message m = new AESEncryptedMessage(to, from, "messageID", secret);
+        DemoMessage m = new DemoMessage(to, from, "messageID", "hello world", secret);
         Network myNetwork = new Network(to);
         myNetwork.setSecret(secret);
         Network sendNetwork = new Network(from);
@@ -48,13 +52,15 @@ public class AESEncryptedMessageTest extends MessageTest {
         
         assertEquals(messages.size(), 1);
         
-        Message obj = messages.get(0);
+        DemoMessage obj = (DemoMessage)messages.get(0);
         assertEquals(obj, m);
         assertEquals(m.getTo(), obj.getTo());
         assertEquals(m.getFrom(), obj.getFrom());
         assertEquals(m.getMessageId(), obj.getMessageId());
+        assertEquals("hello world", obj.getContent());
         
         myNetwork.shutdown();
         sendNetwork.shutdown();
-    }   
+    }       
+    
 }

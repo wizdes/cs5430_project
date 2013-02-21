@@ -9,6 +9,7 @@ import File_Handler.File_Handler;
 import encryption.AES;
 import java.io.File;
 import java.util.Collection;
+import javax.crypto.SecretKey;
 import messages.DemoMessage;
 import messages.Message;
 import network.Network;
@@ -24,14 +25,16 @@ public class EncryptionDemoFunctionality {
     private Node collaboratorNode;
     private String password = "I am a password";
     private String salt = "I am a salt";
+    private SecretKey secret = AES.generateKey(password, salt);
     private File_Handler fHandler = new File_Handler();
     private String openedFilename;
+    
     public EncryptionDemoFunctionality(EncryptionDemoGUI gui, Node appNode){
         this.gui = gui;
         this.network = new Network(appNode);
         File neighbors = new File("securedit_Main/src/network/hosts.txt");
         this.network.readNeighbors(neighbors);
-        this.network.setSaltAndPassword(password, salt);
+        this.network.setSecret(secret);
         this.collaboratorNode = this.network.getNeighbors().get(0);
         listenForMessages();
     }
@@ -82,9 +85,9 @@ public class EncryptionDemoFunctionality {
      * @return Encrypted version of message.
      */
     public String sendEncryptedMessage(String plaintextMsg) {
-        DemoMessage dm = new DemoMessage(this.collaboratorNode, plaintextMsg);
-        System.out.println("salt = " + salt + ", password = " + password);
-        network.sendMessage(dm);
+//        DemoMessage dm = new DemoMessage(this.collaboratorNode, plaintextMsg);
+//        System.out.println("salt = " + salt + ", password = " + password);
+//        network.sendMessage(dm);
         return "hello";
     }
 

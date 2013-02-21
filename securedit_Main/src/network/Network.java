@@ -5,6 +5,7 @@
 
 package network;
 
+import encryption.AES;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -17,6 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.crypto.SecretKey;
 import messages.Message;
 
 /**
@@ -103,9 +105,8 @@ public class Network implements NetworkInterface {
         return host;
     }
     
-    public void setSaltAndPassword(String pass, String salt) {
-        this.server.setPassword(pass);
-        this.server.setSalt(salt);
+    public void setSecret(SecretKey secret) {
+        this.server.setSecret(secret);
     }
     
     @Override
