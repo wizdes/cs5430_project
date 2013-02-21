@@ -6,13 +6,7 @@
 package messages;
 
 import encryption.AES;
-import java.beans.Transient;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.security.PrivateKey;
 import javax.crypto.SecretKey;
-import network.Network;
 import network.Node;
 
 /**

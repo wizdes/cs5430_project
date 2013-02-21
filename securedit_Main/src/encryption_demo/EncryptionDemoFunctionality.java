@@ -5,14 +5,14 @@
  */
 package encryption_demo;
 
+import File_Handler.File_Handler;
+import encryption.AES;
 import java.io.File;
 import java.util.Collection;
 import messages.DemoMessage;
 import messages.Message;
 import network.Network;
 import network.Node;
-import File_Handler.File_Handler;
-import encryption.AES;
 
 /**
  *
