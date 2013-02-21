@@ -85,10 +85,9 @@ public class EncryptionDemoFunctionality {
      * @return Encrypted version of message.
      */
     public String sendEncryptedMessage(String plaintextMsg) {
-//        DemoMessage dm = new DemoMessage(this.collaboratorNode, plaintextMsg);
-//        System.out.println("salt = " + salt + ", password = " + password);
-//        network.sendMessage(dm);
-        return "hello";
+        DemoMessage dm = new DemoMessage(this.collaboratorNode, plaintextMsg, secret);
+        network.sendMessage(dm);
+        return "the cipher text";
     }
 
 /**********************************************************************
@@ -119,8 +118,7 @@ public class EncryptionDemoFunctionality {
                     if (m instanceof DemoMessage) {
                         DemoMessage dm = (DemoMessage)m;
                         String msg = dm.getContent();
-                        String crypted_text = "hello";
-                        gui.displayMessages(msg, crypted_text);
+                        gui.displayMessages(msg, "the cipher text");
                     }
 
                 }
