@@ -27,6 +27,10 @@ public class AESEncryptedMessage extends Message {
         this.secret = secret;
     }
     
+    public void setSecret(SecretKey secret) {
+        this.secret = secret;
+    }
+    
     @Override
     public byte[] serialize() {
         byte[] messageBytes = super.serializeRaw();

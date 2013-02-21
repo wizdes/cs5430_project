@@ -8,7 +8,10 @@ package encryption_demo;
 import File_Handler.File_Handler;
 import encryption.AES;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.crypto.SecretKey;
 import messages.DemoMessage;
 import messages.Message;
@@ -87,7 +90,13 @@ public class EncryptionDemoFunctionality {
     public String sendEncryptedMessage(String plaintextMsg) {
         DemoMessage dm = new DemoMessage(this.collaboratorNode, plaintextMsg, secret);
         network.sendMessage(dm);
-        return "the cipher text";
+        String crypted = "";
+        try {
+            crypted = new String(dm.serialize(), "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(EncryptionDemoFunctionality.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return crypted;
     }
 
 /**********************************************************************
@@ -118,7 +127,14 @@ public class EncryptionDemoFunctionality {
                     if (m instanceof DemoMessage) {
                         DemoMessage dm = (DemoMessage)m;
                         String msg = dm.getContent();
-                        gui.displayMessages(msg, "the cipher text");
+                        String crypted = "";
+                        try {
+                            dm.setSecret(secret);
+                            crypted = new String(dm.serialize(), "UTF-8");
+                        } catch (UnsupportedEncodingException ex) {
+                            Logger.getLogger(EncryptionDemoFunctionality.class.getName()).log(Level.SEVERE, null, ex);
+                        }                     
+                        gui.displayMessages(msg, crypted);
                     }
 
                 }
