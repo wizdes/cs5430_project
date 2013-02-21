@@ -1,5 +1,6 @@
 package encryption;
 
+import encryption_demo.EncryptionDemoFunctionality;
 import java.io.UnsupportedEncodingException;
 import java.security.AlgorithmParameters;
 import java.security.InvalidAlgorithmParameterException;
@@ -18,6 +19,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.xml.bind.DatatypeConverter;
 
 /**
  *
@@ -38,6 +40,11 @@ public class AES {
         this.secret = secret;
     }
     
+    public String encrypt(String plaintext){
+        byte[] ciphertext = encrypt(plaintext.getBytes());
+        return DatatypeConverter.printBase64Binary(ciphertext);
+    }
+
     public byte[] encrypt(byte[] rawData){
         byte[] encryptedData = null;
         try {
@@ -68,6 +75,15 @@ public class AES {
         return encryptedData;
     }
     
+    public String decrypt(String ciphertext){
+        byte[] plaintext = decrypt(DatatypeConverter.parseBase64Binary(ciphertext));
+        try {
+            return new String(plaintext, ENCODING);
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(EncryptionDemoFunctionality.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
+    }
     public byte[] decrypt(byte[] data){
         byte[] result = null;
         //Unpack iv and ciphertext
@@ -96,6 +112,8 @@ public class AES {
         
         return result;
     }
+    
+    
     
     private SecretKey generateKey(char[] password, byte[] salt) {
         SecretKey key = null;
