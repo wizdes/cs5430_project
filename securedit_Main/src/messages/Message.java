@@ -12,16 +12,27 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Objects;
+import javax.crypto.SecretKey;
 import network.Node;
 
 public class Message implements Serializable {
     
+    public static byte ENC_TYPE_NONE = 0;
+    public static byte ENC_TYPE_AES = 1;
+    public static byte ENC_TYPE_RSA = 2;
+    
     private String messageId = null;
+    private String replyTo = null;
     private Node from = null;
     private Node to = null;
 
     public Message(Node t) {
         this.to = t;
+    }
+
+    public Message(Node t, String mid) {
+        this.to = t;
+        this.messageId = mid;
     }
     
     public Message(Node t, Node f, String mid) {
@@ -58,9 +69,28 @@ public class Message implements Serializable {
         this.to = t;
     }
     
+    public String getReplyTo() {
+        return replyTo;
+    }
+
+    public void setReplyTo(String replyTo) {
+        this.replyTo = replyTo;
+    }
+    
     public static Message fromBytes(byte[] data) {
-        Object obj = null;
-        ByteArrayInputStream bis = new ByteArrayInputStream(data);
+        return fromBytes(data, null);
+    }
+    
+    public static Message fromBytes(byte[] data, SecretKey secret) {
+        byte[] messageData = new byte[data.length - 1];
+        System.arraycopy(data, 1, messageData, 0, data.length - 1);
+        
+        if (data[0] == ENC_TYPE_AES) {
+            messageData = new AES(secret).decrypt(messageData);
+        }
+        
+        Object obj = null;  
+        ByteArrayInputStream bis = new ByteArrayInputStream(messageData);
         try {
             ObjectInputStream ois = new ObjectInputStream(bis);
             obj = ois.readObject();
@@ -74,13 +104,11 @@ public class Message implements Serializable {
         return obj == null ? null : (Message)obj;
     }
     
-    public static Message fromEncryptedBytes(byte[] s, String password, String salt) {
-       AES aes = new AES(password, salt);
-       byte[] serialized = aes.decrypt(s);
-       return fromBytes(serialized);
+    public byte[] serialize() {
+        return withEncryptionType(serializeRaw(), ENC_TYPE_NONE);
     }
     
-    public byte[] serialize() {
+    protected byte[] serializeRaw() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ObjectOutputStream oos;
         try {
@@ -90,14 +118,21 @@ public class Message implements Serializable {
         } catch (IOException ex) {
             System.out.println("FAILED TO SERIALIZE " + this);
         }
-         
-        return baos.toByteArray();
+        
+        byte[] message = baos.toByteArray();  
+        return message;
     }
     
-    public byte[] serializeEncrypted(String password, String salt) {
-        AES aes = new AES(password, salt);
-        byte[] cryptedBytes = aes.encrypt(serialize());
-        return cryptedBytes;
+    protected byte[] withEncryptionType(byte[] message, byte encType) {
+        
+        byte[] encryptionType = new byte[1];
+        encryptionType[0] = encType;
+        byte[] fullMessage = new byte[message.length + 1];
+
+        System.arraycopy(encryptionType, 0, fullMessage, 0, 1);
+        System.arraycopy(message, 0, fullMessage, 1, message.length);
+
+        return fullMessage;
     }
     
     @Override
