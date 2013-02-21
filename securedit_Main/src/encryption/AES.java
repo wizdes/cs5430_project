@@ -117,18 +117,27 @@ public class AES {
         String stupidPresharedSalt = "IAmASalt";
         AES aes = new AES(stupidPresharedPass, stupidPresharedSalt);
         
-        String original = "test 1321314123k;389nnvp ion kljdsa";
-        byte[] ciphertext1 = aes.encrypt(original);
-        byte[] ciphertext2 = aes.encrypt(original);
-        String plaintext1 = aes.decrypt(ciphertext1);
-        String plaintext2 = aes.decrypt(ciphertext2);
+//        String original = "test 1321314123k;389nnvp ion kljdsa";
+//        byte[] ciphertext1 = aes.encrypt(original);
+//        byte[] ciphertext2 = aes.encrypt(original);
+//        String plaintext1 = aes.decrypt(ciphertext1);
+//        String plaintext2 = aes.decrypt(ciphertext2);
+//        
+//        System.out.println("Original:" + original);
+//        System.out.println("Cipher1 :" + ciphertext1);
+//        System.out.println("Cipher2 :" + ciphertext2);
+//        System.out.println("Plain1  :" + plaintext1);
+//        System.out.println("Plain2  :" + plaintext2);
         
-        System.out.println("Original:" + original);
-        System.out.println("Cipher1 :" + ciphertext1);
-        System.out.println("Cipher2 :" + ciphertext2);
-        System.out.println("Plain1  :" + plaintext1);
-        System.out.println("Plain2  :" + plaintext2);
-                
+        String original = "Hello";
+        byte[] cipherBytes = aes.encrypt(original);
+        String sentString = new String(cipherBytes);
+        
+        byte[] recvBytes = sentString.getBytes();
+        String newString = new String(recvBytes);
+        
+        System.out.println("Original :" + original);
+        System.out.println("newString:" + newString);
         
         /*
          * THOUGHTS:
