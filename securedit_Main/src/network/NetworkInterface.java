@@ -30,4 +30,6 @@ public interface NetworkInterface {
     public Node getNeighbor(String nid);
     
     public void setSaltAndPassword(String pass, String salt);
+    
+    public Node getHostNode();
 }
