@@ -25,6 +25,17 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+
+/*
+ * 
+ * A wishes to authenticate with B
+ * A -> B : {A, r} K_B
+ * B generates K_AB
+ * B -> A : {K_AB, B, r + 1, r'} K_A
+ * A -> B : {r' + 1} K_B
+ * 
+ */
+
 /**
  *
  * @author yjli_000
