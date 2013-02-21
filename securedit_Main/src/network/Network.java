@@ -97,6 +97,12 @@ public class Network implements NetworkInterface {
         return neighbors.get(nid);
     }
     
+    @Override
+    public Node getHostNode()
+    {
+        return host;
+    }
+    
     public void setSaltAndPassword(String pass, String salt) {
         this.server.setPassword(pass);
         this.server.setSalt(salt);
