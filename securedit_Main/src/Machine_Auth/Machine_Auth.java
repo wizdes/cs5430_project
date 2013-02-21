@@ -4,26 +4,25 @@
  */
 package Machine_Auth;
 import Keys.Keys_Func;
-import messages.Message;
-import messages.TextMessage;
-import messages.NetworkMessage;
-import network.NetworkInterface;
-import network.Node;
-import encryption.RSA_Crypto_Interface;
-import java.security.PublicKey;
-import java.util.Collection;
 import encryption.AES;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.math.BigInteger;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.crypto.SecretKey;
+import messages.AuthRequest;
+import messages.AuthResponse;
+import messages.ChallengeResponse;
+import messages.Message;
+import network.NetworkInterface;
+import network.Node;
 
 /**
  *
@@ -31,17 +30,14 @@ import java.util.logging.Logger;
  */
 public class Machine_Auth implements Machine_Auth_Interface{
 
-    String IP;
-    Keys_Func _key;
-    NetworkInterface network;
-    RSA_Crypto_Interface RSA;
-    String Machine_Auth_State;
-    Map<String, AES> session_keys;
-    String client_key;
-    int port_num;
+    private String IP;
+    private Keys_Func _key;
+    private NetworkInterface network;
+    private String Machine_Auth_State;
+    private Map<String, AES> session_keys;
+    private SecretKey client_key;
     
-    Machine_Auth()
-    {
+    Machine_Auth() {
         _key = new Keys_Func();
     }
     
@@ -59,42 +55,39 @@ public class Machine_Auth implements Machine_Auth_Interface{
     }
     
     @Override
-    public void setup(String username, String password, String filename, NetworkInterface _network, RSA_Crypto_Interface _RSA) {
+    public void setup(String username, String password, String filename, NetworkInterface _network) {
         //!!!! WARNING! THIS ONLY READS THE FILE; DOESN'T DECRYPT
         read_file(username, password, filename);
         
         Machine_Auth_State = "";
         network = _network;
-        client_key = "";
-        port_num = 8000;
     }
 
     @Override
-    public boolean authenticate_as_client(String IP) {
+    public boolean authenticate_as_client(Node server) {
         // calls network send
         // sends over a session key encrypted and hashed
         Machine_Auth_State = "client";
-        Node n = new Node("server", IP, port_num);
-        //encrypted 'client' with the public key
-        String auth_request = "client_auth_req";
-        PublicKey pub_k = _key.id_pub_key.get("server");
-        auth_request = new String(RSA.PublicKeyEncrypt(pub_k, auth_request.getBytes()));
-        TextMessage m = new TextMessage(n, auth_request);
-        m.setmessageId("client_auth_req");
-        network.sendMessage(m);
-        Collection<Message> response = network.waitForMessages();
-        for(Message elt:response)
-        {
-           if(elt.getMessageId().equals("server_auth_resp")){
-               String encrypted_session_key = ((NetworkMessage)elt).getContent();
-               client_key = new String(RSA.PrivateKeyDecrypt(_key.my_priv_key, encrypted_session_key.getBytes()));
-               m = new TextMessage(n ,new String(RSA.PublicKeyEncrypt(pub_k, 
-                    ((NetworkMessage)elt).getNonce().toString().getBytes())));
-               m.setmessageId("confirm_nonce");
-               network.sendMessage(m);
-           }
-        }        
         
+        //encrypted 'client' with the public key
+        PublicKey pub_k = _key.id_pub_key.get("server");
+        
+        AuthRequest m = new AuthRequest(server, "1");
+        Message response = network.sendMessageAndAwaitReply(m);
+        AuthResponse authResponse = null;
+        if (response instanceof AuthResponse) {
+            authResponse = (AuthResponse)response;
+        } else {
+            System.out.println("Did not recieve an auth response");
+            return false;
+        }
+
+        client_key = authResponse.getSecret();
+        Integer nonceResponse = authResponse.getNonce() + 1;
+        
+        ChallengeResponse challengeResponse = new ChallengeResponse(server, "2", nonceResponse, client_key);
+        network.sendMessage(challengeResponse);
+          
         return true;
     }
     
@@ -105,44 +98,39 @@ public class Machine_Auth implements Machine_Auth_Interface{
         String salt = new BigInteger(130, random).toString(32);
         return new AES(pw, salt);
     }
-    
-    private boolean server_confirm_nonce(Integer nonce){
-        Collection<Message> response = network.waitForMessages();
-        Machine_Auth_State = "server";
-        for(Message elt:response){
-            if(elt.getMessageId().equals("confirm_nonce"))
-            {
-                Integer client_nonce = Integer.parseInt(((TextMessage)elt).getContent());
-                if(nonce.equals(client_nonce)) return true;
-            }
-        }
-        return false;
-    }
-
+        
     @Override
-    public boolean authenticate_as_server() {
-        Collection<Message> response = network.waitForMessages();
-        Machine_Auth_State = "server";
-        for(Message elt:response)
-        {
-           if(elt.getMessageId().equals("client_auth_req")){
-               Node n = new Node("server", IP, port_num);
-               session_keys.put("client", genRandAES());
-               String auth_resp = session_keys.get("client").getKey().toString();
-               PublicKey pub_k = _key.id_pub_key.get("client");
-               auth_resp = new String(RSA.PublicKeyEncrypt(pub_k, auth_resp.getBytes()));
-               SecureRandom random = new SecureRandom();
-               int nonce = random.nextInt();
-               NetworkMessage m = new NetworkMessage(n, auth_resp, nonce);
-               m.setmessageId("server_auth_resp");
-               network.sendMessage(m);
-               if(!server_confirm_nonce(nonce))
-               {
-                   session_keys.remove("client");
-               }
+    public void listenForMessages() {
+        for (Message m : network.waitForMessages()) {
+           if (m instanceof AuthRequest) {
+            authenticate_as_server((AuthRequest)m);
            }
         } 
-        return true;
+    }
+    
+    
+    public boolean authenticate_as_server(AuthRequest m ) {
+        String clientId = m.getFrom().toString();
+        
+        session_keys.put(clientId, genRandAES());
+        SecretKey secret = session_keys.get(clientId).getKey();
+        int nonce = new SecureRandom().nextInt();
+        PublicKey pub_k = _key.id_pub_key.get(clientId);
+        
+        AuthResponse authResponse = new AuthResponse(m.getFrom(), "server-1", secret, nonce, pub_k);
+        Message response = network.sendMessageAndAwaitReply(m);
+        
+        boolean confirmed = false;
+        if (response instanceof ChallengeResponse) {
+            ChallengeResponse challengeResponse = (ChallengeResponse)response;
+            confirmed = nonce == challengeResponse.getNonce();
+        }
+        
+        if (!confirmed) {
+            session_keys.remove("client");
+        }
+
+        return confirmed;
     }
     
 }

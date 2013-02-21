@@ -21,6 +21,11 @@ public class AESEncryptedMessage extends Message {
         super(t);
         this.secret = secret;
     }
+
+    public AESEncryptedMessage(Node t, String mid, SecretKey secret) {
+        super(t, mid);
+        this.secret = secret;
+    }    
     
     public AESEncryptedMessage(Node t, Node f, String mid, SecretKey secret) {
         super(t, f, mid);
