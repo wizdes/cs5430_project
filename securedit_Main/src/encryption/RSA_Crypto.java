@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package RSA_Crypto;
+package encryption;
 
 import java.security.InvalidKeyException;
 import java.security.KeyPair;

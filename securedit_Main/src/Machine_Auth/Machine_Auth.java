@@ -4,6 +4,7 @@
  */
 package Machine_Auth;
 import Keys.Keys_Func;
+import network.NetworkInterface;
 
 /**
  *
@@ -13,6 +14,7 @@ public class Machine_Auth implements Machine_Auth_Interface{
 
     String IP;
     Keys_Func _key;
+    NetworkInterface network;
     
     Machine_Auth()
     {
@@ -27,7 +29,7 @@ public class Machine_Auth implements Machine_Auth_Interface{
     }
     
     @Override
-    public void setup(String username, String password, String filename) {
+    public void setup(String username, String password, String filename, NetworkInterface _network) {
         read_file(username, password, filename);
     }
 

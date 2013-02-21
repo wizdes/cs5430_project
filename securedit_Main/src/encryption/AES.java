@@ -34,6 +34,10 @@ public class AES {
         secret = generateKey(password.toCharArray(), presharedSalt.getBytes());
     }
     
+    public AES(SecretKey secret) {
+        this.secret = secret;
+    }
+    
     public byte[] encrypt(byte[] rawData){
         byte[] encryptedData = null;
         try {
