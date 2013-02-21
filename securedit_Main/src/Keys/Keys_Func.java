@@ -17,4 +17,12 @@ public class Keys_Func implements Serializable{
     public Map<String, String> id_session_key;
     public Map<String, String> salt;
     public PrivateKey my_priv_key;
+    
+    @Override
+    public String toString(){
+        return id_pub_key.toString() + "\n"
+                + id_session_key.toString() + "\n"
+                + salt.toString() + "\n"
+                + my_priv_key.toString();
+    }
 }
