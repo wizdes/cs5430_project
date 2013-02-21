@@ -4,6 +4,7 @@
  */
 package RSA_Crypto;
 
+import encryption.RSA_Crypto;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;

@@ -4,7 +4,7 @@
  */
 package securedit_main;
 
-import RSA_Crypto.RSA_Crypto;
+import encryption.RSA_Crypto;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
