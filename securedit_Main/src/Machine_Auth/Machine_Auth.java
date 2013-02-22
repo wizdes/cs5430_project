@@ -129,7 +129,7 @@ public class Machine_Auth implements Machine_Auth_Interface{
         PublicKey pub_k = _key.id_pub_key.get(clientId);
         
         AuthResponse authResponse = new AuthResponse(m.getFrom(), "server-1", secret, nonce, pub_k);
-        Message response = network.sendMessageAndAwaitReply(m);
+        Message response = network.sendMessageAndAwaitReply(authResponse);
         
         boolean confirmed = false;
         if (response instanceof ChallengeResponse) {
