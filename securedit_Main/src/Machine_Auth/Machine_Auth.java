@@ -218,11 +218,17 @@ public class Machine_Auth implements Machine_Auth_Interface{
     }
     
     public void setSecretKeyAsClient(SecretKey sk){
+        Machine_Auth_State = "client";
         this.client_key = sk;
     }
     
     public void setSecretKeyAsServer(SecretKey sk, String id){
+        Machine_Auth_State = "server";
         AES encryption = new AES(sk);
         this.session_keys.put(id, encryption);
+    }
+    
+    public void setNetwork(NetworkInterface _network) {
+        this.network = _network;
     }
 }

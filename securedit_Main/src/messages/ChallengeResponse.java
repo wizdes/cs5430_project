@@ -5,6 +5,7 @@
 
 package messages;
 
+import encryption.AES;
 import javax.crypto.SecretKey;
 import network.Node;
 
@@ -23,5 +24,4 @@ public class ChallengeResponse extends AESEncryptedMessage {
     public Integer getNonce() {
         return this.nonce;
     }
-    
 }
