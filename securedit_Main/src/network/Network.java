@@ -5,17 +5,20 @@
 
 package network;
 
+import encryption.AES;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.crypto.SecretKey;
 import messages.Message;
 
 /**
@@ -37,16 +40,16 @@ public class Network implements NetworkInterface {
     
     @Override
     public void sendMessage(Message m) {
+        m.setFrom(host);
         client.send(m);
     }
     
     @Override
-    public void sendEncryptedMessage(Message m, String password, String salt) {
-        byte[] bytes = m.serializeEncrypted(password, salt);
-        byte encType = Server.ENC_TYPE_AES;
-        client.send(m.getTo(), bytes, encType);
-    }    
-    
+    public Message sendMessageAndAwaitReply(Message m) {
+        sendMessage(m);
+        return server.waitForReplyTo(m);
+    }
+        
     @Override
     public Collection<Message> waitForMessages() {
         return server.waitForMessages();
@@ -98,14 +101,17 @@ public class Network implements NetworkInterface {
     }
     
     @Override
-    public Node getHostNode()
-    {
+    public Node getHostNode() {
         return host;
     }
     
-    public void setSaltAndPassword(String pass, String salt) {
-        this.server.setPassword(pass);
-        this.server.setSalt(salt);
+    public void setSecret(SecretKey secret) {
+        this.server.setSecret(secret);
+    }
+    
+    @Override
+    public void shutdown() {
+        this.server.shutdown();
     }
     
     public static void log(String msg) {
@@ -115,6 +121,15 @@ public class Network implements NetworkInterface {
     public static void logError(String msg) {
         System.err.println(msg);
     }
-
+    
+    public static void debugBytes(byte[] bytes, String label) {
+        try {
+            System.out.println(label + "[" + bytes.length + "]");
+            System.out.println(new String(bytes, "UTF-8"));
+            System.out.println("");
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(Message.class.getName()).log(Level.SEVERE, null, ex);
+        }   
+    }
 
 }

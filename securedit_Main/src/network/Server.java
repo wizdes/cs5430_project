@@ -1,29 +1,29 @@
 package network;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.crypto.SecretKey;
 import messages.Message;
 
 
 public class Server {
-
-    public static byte ENC_TYPE_NONE = 0;
-    public static byte ENC_TYPE_AES = 1;
-    public static byte ENC_TYPE_RSA = 2;
     
     private Node node;
     private ClientListenerThread clientListener;
     private final Lock queueLock = new ReentrantLock(true);
+    private final Lock replyLock = new ReentrantLock(true);
     private Condition newMessageArrived = queueLock.newCondition();
     private BlockingQueue<Message> messageQueue = new LinkedBlockingDeque<>();
+    private Map<String, Pair<Condition, Message>> awaitingReplyQueue = new HashMap<>();
     
-    private String password;
-    private String salt;
+    private SecretKey secret;
         
     public Server(Node node) {
         this.node = node;
@@ -37,20 +37,30 @@ public class Server {
       return this.node;
     }
     
-    public void depositMessage(byte encType, byte[] bytes) {
-        Message m = null;
-        
-        if (encType == ENC_TYPE_NONE) {
-            m = Message.fromBytes(bytes);
-        } else if (encType == ENC_TYPE_AES) {
-            m = Message.fromEncryptedBytes(bytes, password, salt);
-        } else {
-            System.err.print("NO ENCRYPTION TYPE FOUND FOR " + encType);
-        }
-        
+    public void depositMessage(byte[] bytes) {
+        Message m = Message.fromBytes(bytes, secret);
         if (m == null) {
             return;
         }
+        
+        String reply = m.getReplyTo();        
+        if (reply != null) {
+            this.replyLock.lock();
+            try {
+                if (this.awaitingReplyQueue.containsKey(reply)) {
+                    Pair<Condition, Message> waiting = this.awaitingReplyQueue.get(reply);
+                    Pair<Condition, Message> withReply = new Pair(waiting.x, m);
+                    this.awaitingReplyQueue.put(reply, withReply);
+                    waiting.x.signal();
+                } else {
+                    this.awaitingReplyQueue.put(reply, new Pair(null, m));
+                }
+                return;
+            } finally {
+                this.replyLock.unlock();
+            }
+        }
+
         
         this.queueLock.lock();
         try {
@@ -59,6 +69,28 @@ public class Server {
         } finally {
             this.queueLock.unlock();
         }
+    }
+    
+    public Message waitForReplyTo(Message m) {
+        Condition replyArrived = this.replyLock.newCondition();
+        Message response = null;
+        String key = m.getMessageId();
+        
+        this.replyLock.lock();
+        try {
+            if (!this.awaitingReplyQueue.containsKey(key)) {
+                this.awaitingReplyQueue.put(key, new Pair(replyArrived, null));
+                replyArrived.await();
+            }
+            response = this.awaitingReplyQueue.get(key).y;
+            this.awaitingReplyQueue.remove(key);
+        } catch (InterruptedException ex) {
+            System.err.println("Thread interrupted waiting for message reply");
+        } finally {
+            this.replyLock.unlock();
+        }
+        
+        return response;
     }
     
     public Collection<Message> waitForMessages() {
@@ -91,25 +123,11 @@ public class Server {
         this.clientListener.stopListening();
     }
     
-    public static void main(String[] args) {
-        Node n = new Node("server", "localhost", 4444);
-        Server s = new Server(n);
-        s.listen();
-    }
-    
-        public String getPassword() {
-        return password;
+    public SecretKey getSecret() {
+        return secret;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getSalt() {
-        return salt;
-    }
-
-    public void setSalt(String salt) {
-        this.salt = salt;
-    }
+    public void setSecret(SecretKey secret) {
+        this.secret = secret;
+    }    
 }

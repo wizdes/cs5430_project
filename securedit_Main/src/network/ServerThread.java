@@ -29,22 +29,18 @@ public class ServerThread extends Thread {
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             DataInputStream in = new DataInputStream(socket.getInputStream());
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            int offset = 0;
             
-            byte buffer[] = new byte[1024];
             byte[] messageLength = new byte[4];
-            byte[] encryptionType = new byte[1];
             
             int l = in.read(messageLength, 0, 4);
             int length = fromByteArray(messageLength);
             
             while (length > -1) {
                                 
-                in.read(encryptionType, 0, 1);
-                
                 byte[] result = new byte[length];
                 in.read(result, 0, length);
-                this.server.depositMessage(encryptionType[0], result);
+                
+                this.server.depositMessage(result);
                 out.println(MESSAGE_RECIEVED_ACK);
                 
                 l = in.read(messageLength, 0, 4);

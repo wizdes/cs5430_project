@@ -5,14 +5,18 @@
  */
 package encryption_demo;
 
+import File_Handler.File_Handler;
+import encryption.AES;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.crypto.SecretKey;
 import messages.DemoMessage;
 import messages.Message;
 import network.Network;
 import network.Node;
-import File_Handler.File_Handler;
-import encryption.AES;
 
 /**
  *
@@ -24,14 +28,16 @@ public class EncryptionDemoFunctionality {
     private Node collaboratorNode;
     private String password = "I am a password";
     private String salt = "I am a salt";
+    private SecretKey secret = AES.generateKey(password, salt);
     private File_Handler fHandler = new File_Handler();
     private String openedFilename;
+    
     public EncryptionDemoFunctionality(EncryptionDemoGUI gui, Node appNode){
         this.gui = gui;
         this.network = new Network(appNode);
         File neighbors = new File("securedit_Main/src/network/hosts.txt");
         this.network.readNeighbors(neighbors);
-        this.network.setSaltAndPassword(password, salt);
+        this.network.setSecret(secret);
         this.collaboratorNode = this.network.getNeighbors().get(0);
         listenForMessages();
     }
@@ -82,10 +88,15 @@ public class EncryptionDemoFunctionality {
      * @return Encrypted version of message.
      */
     public String sendEncryptedMessage(String plaintextMsg) {
-        DemoMessage dm = new DemoMessage(this.collaboratorNode, plaintextMsg);
-        System.out.println("salt = " + salt + ", password = " + password);
-        network.sendEncryptedMessage(dm, salt, password);
-        return new String(dm.serializeEncrypted(password, salt));
+        DemoMessage dm = new DemoMessage(this.collaboratorNode, plaintextMsg, secret);
+        network.sendMessage(dm);
+        String crypted = "";
+        try {
+            crypted = new String(dm.serialize(), "UTF-8");
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(EncryptionDemoFunctionality.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return crypted;
     }
 
 /**********************************************************************
@@ -116,13 +127,18 @@ public class EncryptionDemoFunctionality {
                     if (m instanceof DemoMessage) {
                         DemoMessage dm = (DemoMessage)m;
                         String msg = dm.getContent();
-                        String crypted_text = dm.serializeEncrypted(password, salt).toString();
-                        gui.displayMessages(msg, crypted_text);
+                        String crypted = "";
+                        try {
+                            dm.setSecret(secret);
+                            crypted = new String(dm.serialize(), "UTF-8");
+                        } catch (UnsupportedEncodingException ex) {
+                            Logger.getLogger(EncryptionDemoFunctionality.class.getName()).log(Level.SEVERE, null, ex);
+                        }                     
+                        gui.displayMessages(msg, crypted);
                     }
 
                 }
             }
         }
     }
-    
 }
