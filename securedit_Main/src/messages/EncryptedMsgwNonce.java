@@ -2,7 +2,6 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package messages;
 
 import encryption.AES;
@@ -11,17 +10,23 @@ import network.Node;
 
 /**
  *
+ * @author Yi
  */
-public class ChallengeResponse extends AESEncryptedMessage {
-    
+public class EncryptedMsgwNonce extends AESEncryptedMessage {
     private Integer nonce;
+    private String msg;
     
-    public ChallengeResponse(Node t, String mid, Integer nonce, SecretKey secret) {
-        super(t, mid, secret);
+    public EncryptedMsgwNonce(Node t, String mid, String msg,Integer nonce, SecretKey secret) {
+        super(t, msg, secret);
         this.nonce = nonce;
+        this.msg = msg;
     }
     
     public Integer getNonce() {
         return this.nonce;
+    }
+    
+    public String getMsg() {
+        return this.msg;
     }
 }
