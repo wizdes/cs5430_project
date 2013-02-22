@@ -215,5 +215,14 @@ public class Machine_Auth implements Machine_Auth_Interface{
         }
         
         return encrypted_msg.getMsg();
-    } 
+    }
+    
+    public void setSecretKeyAsClient(SecretKey sk){
+        this.client_key = sk;
+    }
+    
+    public void setSecretKeyAsServer(SecretKey sk, String id){
+        AES encryption = new AES(sk);
+        this.session_keys.put(id, encryption);
+    }
 }
