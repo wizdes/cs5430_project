@@ -59,7 +59,6 @@ public class AES {
             byte[] ciphertext = cipher.doFinal(rawData);
             
             //Concat iv to front of ciphertext
-            //  Too slow???
             encryptedData = new byte[iv.length + ciphertext.length];
             System.arraycopy(iv, 0, encryptedData, 0, iv.length);
             System.arraycopy(ciphertext, 0, encryptedData, iv.length, ciphertext.length);
@@ -122,7 +121,7 @@ public class AES {
     private SecretKey generateKey(char[] password, byte[] salt) {
         SecretKey key = null;
         try {
-            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");  //SHA2???
+            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
             PBEKeySpec spec = new PBEKeySpec(password, salt, 65513, 128);
             SecretKey temp = factory.generateSecret(spec);
             key = new SecretKeySpec(temp.getEncoded(), "AES");
