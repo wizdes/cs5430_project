@@ -17,13 +17,16 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.SecretKey;
+import messages.AESEncryptedMessage;
 import messages.AuthRequest;
 import messages.AuthResponse;
 import messages.ChallengeResponse;
+import messages.EncryptedMsgwNonce;
 import messages.Message;
+import messages.MessageInitRequest;
+import messages.MessageInitResponse;
 import network.NetworkInterface;
 import network.Node;
-
 
 /*
  * 
@@ -121,6 +124,9 @@ public class Machine_Auth implements Machine_Auth_Interface{
     
     
     public boolean authenticate_as_server(AuthRequest m ) {
+        
+        Machine_Auth_State = "server";
+        
         String clientId = m.getFrom().toString();
         
         session_keys.put(clientId, genRandAES());
@@ -144,4 +150,85 @@ public class Machine_Auth implements Machine_Auth_Interface{
         return confirmed;
     }
     
+    public boolean send(String message, Node to) {
+        // calls network send
+        // sends over a session key encrypted and hashed
+        SecretKey shared_key = null;
+        if(Machine_Auth_State.equals("server")){
+            shared_key = (SecretKey) (session_keys.get("client"));
+        }
+        else{
+            shared_key = client_key;
+        }
+        
+        int nonce = new SecureRandom().nextInt();
+        
+        MessageInitRequest m = new MessageInitRequest(to, "1", nonce, shared_key);
+        Message response = network.sendMessageAndAwaitReply(m);
+        MessageInitResponse messageInitResponse = null;
+        if (response instanceof MessageInitResponse) {
+            messageInitResponse = (MessageInitResponse)response;
+        } else {
+            System.out.println("Did not recieve an msg init resp");
+            return false;
+        }
+
+        if(nonce + 1 != messageInitResponse.getNonce().intValue()){
+            System.out.println("Bad nonce value");
+            return false;
+        }
+        
+        EncryptedMsgwNonce send_Msg = new EncryptedMsgwNonce(
+                to, "3", message, messageInitResponse.getNoncePrime() + 1, shared_key);
+        
+        network.sendMessage(send_Msg);          
+        return true;
+    }
+    
+    public String rcvInitRequest(MessageInitRequest m)
+    {
+        //this is necessary since it could be the client receiving a message
+        SecretKey shared_key = null;
+        if(Machine_Auth_State.equals("server")){
+            shared_key = (SecretKey) (session_keys.get("client"));
+        }
+        else{
+            shared_key = client_key;
+        }
+        int nonce_prime = new SecureRandom().nextInt();
+        MessageInitResponse messageInitResponse = new MessageInitResponse(
+                m.getFrom(),"2", m.getNonce()+1, nonce_prime, shared_key);
+        Message response = network.sendMessageAndAwaitReply(messageInitResponse);
+        EncryptedMsgwNonce encrypted_msg = null;
+        if(response instanceof EncryptedMsgwNonce){
+            encrypted_msg = (EncryptedMsgwNonce) response;
+        }
+        else {
+            System.out.println("Wrong Msg Type.");
+            return null;
+        }
+        
+        if(nonce_prime + 1 != encrypted_msg.getNonce())
+        {
+            System.out.println("Bad nonce value");
+            return null;
+        }
+        
+        return encrypted_msg.getMsg();
+    }
+    
+    public void setSecretKeyAsClient(SecretKey sk){
+        Machine_Auth_State = "client";
+        this.client_key = sk;
+    }
+    
+    public void setSecretKeyAsServer(SecretKey sk, String id){
+        Machine_Auth_State = "server";
+        AES encryption = new AES(sk);
+        this.session_keys.put(id, encryption);
+    }
+    
+    public void setNetwork(NetworkInterface _network) {
+        this.network = _network;
+    }
 }

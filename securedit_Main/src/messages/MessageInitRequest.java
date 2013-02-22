@@ -2,21 +2,19 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package messages;
 
-import encryption.AES;
 import javax.crypto.SecretKey;
 import network.Node;
 
 /**
  *
+ * @author Yi
  */
-public class ChallengeResponse extends AESEncryptedMessage {
-    
+public class MessageInitRequest extends AESEncryptedMessage {
     private Integer nonce;
     
-    public ChallengeResponse(Node t, String mid, Integer nonce, SecretKey secret) {
+    public MessageInitRequest(Node t, String mid, Integer nonce, SecretKey secret) {
         super(t, mid, secret);
         this.nonce = nonce;
     }
