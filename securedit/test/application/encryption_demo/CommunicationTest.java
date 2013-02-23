@@ -32,7 +32,6 @@ public class CommunicationTest {
         SecureTransportInterface s1 = myCommunicator.getSecureTransport();
         theirCommunicator = new Communication(password, theirNode);
         theirCommunicator.getSecureTransport().setKeys(s1.getKeys());
-        
     }
 
     @After
@@ -40,7 +39,6 @@ public class CommunicationTest {
         myCommunicator.shutdown();
         theirCommunicator.shutdown();
     }
-
         
     @Test
     public void testSendMessage() {
