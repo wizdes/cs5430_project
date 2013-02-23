@@ -10,7 +10,7 @@ package transport_layer.files;
  */
 public interface FileTransportInterface {
     //Patrick
-    
+    public String openUnserializedFile(String filename);
     public java.io.Serializable readFile(String filename);
-    public java.io.Serializable writeFile(String filename, java.io.Serializable content);
+    public boolean writeFile(String filename, java.io.Serializable content);
 }

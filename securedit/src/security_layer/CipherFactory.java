@@ -24,7 +24,7 @@ public class CipherFactory {
     /**************************************
      * patrick's
      * ****************************************/
-    public Cipher constructAESEncryptionCipher(Key key, byte[] iv) {
+    public static Cipher constructAESEncryptionCipher(Key key, byte[] iv) {
         try {
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
@@ -34,7 +34,7 @@ public class CipherFactory {
             return null;
         }
     }
-    public Cipher constructAESDecryptionCipher(Key key, byte[] iv){
+    public static Cipher constructAESDecryptionCipher(Key key, byte[] iv){
         assert iv.length == 16 : iv;
         try {
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
@@ -45,7 +45,7 @@ public class CipherFactory {
             return null;
         }
     }
-    public Cipher constructRSAEncryptionCipher(Key key){
+    public static Cipher constructRSAEncryptionCipher(Key key){
         try {
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.ENCRYPT_MODE, key);
@@ -55,7 +55,7 @@ public class CipherFactory {
             return null;
         }
     }
-    public Cipher constructRSADecryptionCipher(Key key){
+    public static Cipher constructRSADecryptionCipher(Key key){
         try {
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.DECRYPT_MODE, key);
@@ -67,7 +67,7 @@ public class CipherFactory {
         
     }
     
-    public byte[] generateRandomIV(){
+    public static byte[] generateRandomIV(){
         try {
             //SecureRandom random = new SecureRandom();
            SecureRandom sr = SecureRandom.getInstance("SHA1PRNG", "SUN");

@@ -22,7 +22,7 @@ public class KeyFactory {
     /**********************************************
      * patrick's
      * ********************************************/
-    public static KeyPair generateAsymmetricKey(){
+    public static KeyPair generateAsymmetricKeys(){
         try {
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
             //SecureRandom random = SecureRandom.getInstance("SHA256");

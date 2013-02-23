@@ -5,6 +5,7 @@
  */
 package application.encryption_demo;
 
+import security_layer.SecureTransport;
 import security_layer.SecureTransportInterface;
 
 /**
@@ -15,8 +16,14 @@ public class EncryptionDemoFunctionality {
     private EncryptionDemoGUI gui;
     private String openedFilename;
     private SecureTransportInterface secureTransport;
+        
     public EncryptionDemoFunctionality(EncryptionDemoGUI gui){
         this.gui = gui;
+        
+        //Temporary Field
+        String password = "d2cb415e067c7b13";   //should be 16 bytes
+        
+        secureTransport = new SecureTransport(password);
     }
     
     /**
@@ -26,7 +33,8 @@ public class EncryptionDemoFunctionality {
      */
     public String openFile(String filename){
         openedFilename = filename;
-        throw new UnsupportedOperationException("Not supported yet.");
+        String contents = (String)secureTransport.readUnencryptedFile(filename);
+        return contents;
     }
     
     /**
@@ -55,7 +63,7 @@ public class EncryptionDemoFunctionality {
      * @return Encrypted version of message.
      */
     public String sendEncryptedMessage(String plaintextMsg) {
-        String ciphertext = (String)secureTransport.sendEncryptedMessage(plaintextMsg);
+        String ciphertext = (String)secureTransport.sendAESEncryptedMessage(plaintextMsg);
         return ciphertext;
     }
 
