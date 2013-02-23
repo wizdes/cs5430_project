@@ -2,14 +2,13 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package encryption_demo;
+package application.encryption_demo;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import network.Node;
 
 /**
  *
@@ -28,7 +27,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
     /**
      * Creates new form EncryptionDemoGUI
      */
-    public EncryptionDemoGUI(Node appNode) {
+    public EncryptionDemoGUI() {
         fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File("."));
         initComponents();
@@ -45,7 +44,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                 }
             }
         });
-        functionality = new EncryptionDemoFunctionality(this, appNode);
+        functionality = new EncryptionDemoFunctionality(this);
     }
     
     public void displayMessages(String plaintext, String ciphertext){
@@ -495,8 +494,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                Node appNode = new Node(appNodeId, appHost, appPort);
-                new EncryptionDemoGUI(appNode).setVisible(true);
+                new EncryptionDemoGUI().setVisible(true);
             }
         });
     }
