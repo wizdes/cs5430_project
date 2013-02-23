@@ -5,8 +5,10 @@
  */
 package application.encryption_demo;
 
-import security_layer.SecureTransport;
-import security_layer.SecureTransportInterface;
+import application.messages.EncryptedMessage;
+import application.messages.Message;
+import java.util.Collection;
+import transport_layer.network.Node;
 
 /**
  *
@@ -15,7 +17,8 @@ import security_layer.SecureTransportInterface;
 public class EncryptionDemoFunctionality {
     private EncryptionDemoGUI gui;
     private String openedFilename;
-    private SecureTransportInterface secureTransport;
+    private CommunicationInterface communication;
+    private Node collaborator;
         
     public EncryptionDemoFunctionality(EncryptionDemoGUI gui){
         this.gui = gui;
@@ -23,7 +26,13 @@ public class EncryptionDemoFunctionality {
         //Temporary Field
         String password = "d2cb415e067c7b13";   //should be 16 bytes
         
-        secureTransport = new SecureTransport(password);
+        Node host = new Node("client-1", "localhost", 4001);
+        collaborator = new Node("client-2", "localhost", 4002);
+        communication = new Communication(password, host);
+    }
+    
+    private void listenForMessages() {
+        new GUIListenerThread().start();
     }
     
     /**
@@ -33,7 +42,7 @@ public class EncryptionDemoFunctionality {
      */
     public String openFile(String filename){
         openedFilename = filename;
-        String contents = (String)secureTransport.readUnencryptedFile(filename);
+        String contents = (String)communication.readUnencryptedFile(filename);
         return contents;
     }
     
@@ -43,7 +52,7 @@ public class EncryptionDemoFunctionality {
      * @return Encrypted version of the file.
      */
     public String encryptFile(String plaintext){
-        String ciphertext = (String)secureTransport.writeEncryptedFile(openedFilename, plaintext);
+        String ciphertext = (String)communication.writeEncryptedFile(openedFilename, plaintext);
         return ciphertext;
     }
     
@@ -53,7 +62,7 @@ public class EncryptionDemoFunctionality {
      * @return Plaintext of file after being decrypted.
      */
     public String decryptFile(String ciphertext){
-        String plaintext = (String)secureTransport.readEncryptedFile(openedFilename);
+        String plaintext = (String)communication.readEncryptedFile(openedFilename);
         return plaintext;
     }
     
@@ -63,7 +72,8 @@ public class EncryptionDemoFunctionality {
      * @return Encrypted version of message.
      */
     public String sendEncryptedMessage(String plaintextMsg) {
-        String ciphertext = (String)secureTransport.sendAESEncryptedMessage(plaintextMsg);
+        EncryptedMessage em = new EncryptedMessage(collaborator, "1");
+        String ciphertext = (String)communication.sendAESEncryptedMessage(em, plaintextMsg);
         return ciphertext;
     }
 
@@ -79,5 +89,28 @@ public class EncryptionDemoFunctionality {
     public void displayIncomingMessage(String plaintext, String ciphertext){
         //This should be called by thread that handles reading the message queue.
         gui.displayMessages(plaintext, ciphertext);
+    }
+    
+    private class GUIListenerThread extends Thread {
+        
+        public GUIListenerThread() {
+            super("GUIListenerThread");
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                Collection<Message> messages = communication.waitForMessages();
+                for (Message m : messages) {
+                    if (m instanceof EncryptedMessage) {
+                        EncryptedMessage dm = (EncryptedMessage)m;
+                        String msg = (String)dm.getDecryptedObject();
+                        String crypted = "Hmmmm.....";                   
+                        gui.displayMessages(msg, crypted);
+                    }
+
+                }
+            }
+        }
     }
 }

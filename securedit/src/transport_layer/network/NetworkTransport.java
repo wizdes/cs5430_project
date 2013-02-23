@@ -4,22 +4,55 @@
  */
 package transport_layer.network;
 
-import java.io.Serializable;
+import application.encryption_demo.CommunicationInterface;
+import application.messages.Message;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Patrick C. Berens
  */
 public class NetworkTransport implements NetworkTransportInterface{
-
-    @Override
-    public void send(Serializable msg) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    
+    private Server server;
+    private Client client;
+    private HashMap<String, Node> neighbors = new HashMap<>();
+    private Node host;
+    
+    public NetworkTransport(Node host, CommunicationInterface network) {
+        client = new Client();
+        server = new Server(host, network);
+        server.listen();
+        this.host = host;
     }
-
+        
     @Override
-    public Serializable read() {
+    public Message read() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
     
+    @Override
+    public void send(Message m) {
+        m.setFrom(host);
+        client.send(m);
+    }
+        
+    @Override
+    public void shutdown() {
+        this.server.shutdown();
+        this.client.closeConnections();
+    }
+    
+    public static void debugBytes(byte[] bytes, String label) {
+        try {
+            System.out.println(label + "[" + bytes.length + "]");
+            System.out.println(new String(bytes, "UTF-8"));
+            System.out.println("");
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(Message.class.getName()).log(Level.SEVERE, null, ex);
+        }   
+    }
 }

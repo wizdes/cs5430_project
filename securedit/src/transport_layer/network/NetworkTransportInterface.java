@@ -4,6 +4,8 @@
  */
 package transport_layer.network;
 
+import application.messages.Message;
+
 /**
  *
  * @author Patrick C. Berens
@@ -12,6 +14,7 @@ public interface NetworkTransportInterface {
     /***************************************
      * Matt's package
      * **************************************/
-    public void send(java.io.Serializable msg);
-    public java.io.Serializable read();
+    public void send(Message msg);
+    public Message read();
+    public void shutdown();
 }
