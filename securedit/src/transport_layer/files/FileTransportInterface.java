@@ -10,5 +10,7 @@ package transport_layer.files;
  */
 public interface FileTransportInterface {
     //Patrick
-    //  Will do serialization, etc here too
+    
+    public java.io.Serializable readFile(String filename);
+    public java.io.Serializable writeFile(String filename, java.io.Serializable content);
 }

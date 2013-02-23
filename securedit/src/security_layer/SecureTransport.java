@@ -17,7 +17,7 @@ public class SecureTransport implements SecureTransportInterface{
      * patrick's 
      * *******************************************/
     @Override
-    public void sendEncryptedMessage(java.io.Serializable msg){
+    public java.io.Serializable sendEncryptedMessage(java.io.Serializable msg){
         throw new UnsupportedOperationException("Not supported yet.");
     }
     @Override
@@ -26,7 +26,7 @@ public class SecureTransport implements SecureTransportInterface{
     }
 
     @Override
-    public void writeEncryptedFile(String filename, Serializable contents) {
+    public java.io.Serializable writeEncryptedFile(String filename, Serializable contents) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

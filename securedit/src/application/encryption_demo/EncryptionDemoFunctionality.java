@@ -5,12 +5,7 @@
  */
 package application.encryption_demo;
 
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.crypto.SecretKey;
+import security_layer.SecureTransportInterface;
 
 /**
  *
@@ -18,7 +13,8 @@ import javax.crypto.SecretKey;
  */
 public class EncryptionDemoFunctionality {
     private EncryptionDemoGUI gui;
-
+    private String openedFilename;
+    private SecureTransportInterface secureTransport;
     public EncryptionDemoFunctionality(EncryptionDemoGUI gui){
         this.gui = gui;
     }
@@ -29,6 +25,7 @@ public class EncryptionDemoFunctionality {
      * @return String representation of the file.
      */
     public String openFile(String filename){
+        openedFilename = filename;
         throw new UnsupportedOperationException("Not supported yet.");
     }
     
@@ -38,7 +35,8 @@ public class EncryptionDemoFunctionality {
      * @return Encrypted version of the file.
      */
     public String encryptFile(String plaintext){
-        throw new UnsupportedOperationException("Not supported yet.");
+        String ciphertext = (String)secureTransport.writeEncryptedFile(openedFilename, plaintext);
+        return ciphertext;
     }
     
     /**
@@ -47,7 +45,8 @@ public class EncryptionDemoFunctionality {
      * @return Plaintext of file after being decrypted.
      */
     public String decryptFile(String ciphertext){
-        throw new UnsupportedOperationException("Not supported yet.");
+        String plaintext = (String)secureTransport.readEncryptedFile(openedFilename);
+        return plaintext;
     }
     
     /**
@@ -56,7 +55,8 @@ public class EncryptionDemoFunctionality {
      * @return Encrypted version of message.
      */
     public String sendEncryptedMessage(String plaintextMsg) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        String ciphertext = (String)secureTransport.sendEncryptedMessage(plaintextMsg);
+        return ciphertext;
     }
 
 /**********************************************************************
