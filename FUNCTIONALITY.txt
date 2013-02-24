@@ -5,17 +5,25 @@ Table of Contents
 	a) Confidentality
 	b) Integrity
 	c) Availability
-2) Functionality
+2) Assumptions
+3) Functionality
 	a) File_Handler
 	b) Keys
 	c) Machine_Authentication
+		i) session key exchange protocol
+		ii) message protocol
 	d) Encryption
+		i) RSA
+		ii) AES
+		iii) HMACs
 	e) Messages
 	f) Network
 
 1) Overview
 
-2) Functionality
+2) Assumptions
+
+3) Functionality
 
 a) File_Handler
 b) Keys	

@@ -14,6 +14,25 @@ Table of Contents
 
 1) Overview 
 
+We used a combination of standard Java implementations of security measures as well as unit tests on every package of our system to increase assurance in the correctness of our system.
+
 2) Unit Test Cases
 
+We introduced unit tests for each package of our cryptographic substrate. 
+
 3) Other Assurance Mechanics
+
+There are several other assurance measures that were taken to increase the assurance in the correctness of the system.
+
+a) SealedObject
+We used the Java class 'SealedObject' to encapsulates a Java object and encrypts it.
+
+b) RSA Encryption/Decryption
+	We are using the standard Java class KeyPairGenerator with the 'RSA' algorithm. It encrypts/decrypts with the 'RSA/ECB/PKCS1Padding' algorithm.
+	i) size of Keys
+	We are using a 2048 bit RSA keys.
+c) AES Encryption/Decryption
+d) Nonces
+	We are using nonces to ensure the system is not susceptible to replay attacks. The specific protocols in using nonces during machine authentication is detailed in FUNCTIONALITY.txt.
+e) HMACs
+	We are using HMACs to ensure the integrity of the data we are sending. The HMAC is generated using the standard Java implementation of HMACs.

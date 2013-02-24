@@ -12,11 +12,11 @@ Table of Contents:
 	f) Network
 	g) GUI Scaffolding
 3) Testing 
-	- Machine Authentication
-	- RSA Crypto
-	- Encryption
-	- Messages
-	- Network
+	a) Machine Authentication
+	b) RSA Crypto
+	c) Encryption
+	d) Messages
+	e) Network
 
 
 1) Introduction:
