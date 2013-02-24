@@ -26,9 +26,12 @@ public class EncryptionDemoFunctionality {
         //Temporary Field
         String password = "d2cb415e067c7b13";   //should be 16 bytes
         
-        if (host.getID().equals("client-1")) {
+        
+        if (host.getID().equals("1")) {
+            System.out.println("I'm talking to 2");
             collaborator = new Node("client-2", "localhost", 4002);
         } else {
+            System.out.println("I'm talking to 1");
             collaborator = new Node("client-1", "localhost", 4001);
         }
         
@@ -111,8 +114,10 @@ public class EncryptionDemoFunctionality {
                     System.out.println(m);
                     if (m instanceof DemoMessage) {
                         DemoMessage dm = (DemoMessage)m;
-                        String crypted = "Hmmmm.....";                   
-                        gui.displayMessages(dm.getContents(), crypted);
+                        String crypted = "Hmmmm.....";   
+                        System.out.println("here");
+                        System.out.println(dm.getContents());
+                        displayIncomingMessage(dm.getContents(), crypted);
                     }
                 }
             }

@@ -39,4 +39,9 @@ public class Message implements Serializable {
     public void setTo(Node to) {
         this.to = to.toString();
     }
+    
+    @Override
+    public String toString() {
+        return this.from + " => " + this.to;
+    }
 }
