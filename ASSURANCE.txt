@@ -5,12 +5,13 @@ Table of Contents
 2) Unit Test Cases
 3) Other Assurance Mechanics
 	a) Sealed Object
-	b) RSA Encryption/Decryption
+	b) SecureRandom
+	c) RSA Encryption/Decryption
 		i) size of Keys
-	c) AES Encryption/Decryption
+	d) AES Encryption/Decryption
 		i) size of Keys
-	d) Nonces
-	e) HMACs
+	e) Nonces
+	f) HMACs
 
 1) Overview 
 
@@ -26,13 +27,14 @@ There are several other assurance measures that were taken to increase the assur
 
 a) SealedObject
 We used the Java class 'SealedObject' to encapsulates a Java object and encrypts it.
-
-b) RSA Encryption/Decryption
-	We are using the standard Java class KeyPairGenerator with the 'RSA' algorithm. It encrypts/decrypts with the 'RSA/ECB/PKCS1Padding' algorithm.
+b) SecureRandom
+We used the Java class 'SecureRandom' to general random numbers securely.
+c) RSA Encryption/Decryption
+	We are using the standard Java class KeyPairGenerator with the 'RSA' algorithm. This is initialized with the highest level of SecureRandom (from the Javadocs). It encrypts/decrypts with the 'RSA/ECB/PKCS1Padding' algorithm.
 	i) size of Keys
 	We are using a 2048 bit RSA keys.
-c) AES Encryption/Decryption
-d) Nonces
+d) AES Encryption/Decryption
+e) Nonces
 	We are using nonces to ensure the system is not susceptible to replay attacks. The specific protocols in using nonces during machine authentication is detailed in FUNCTIONALITY.txt.
-e) HMACs
+f) HMACs
 	We are using HMACs to ensure the integrity of the data we are sending. The HMAC is generated using the standard Java implementation of HMACs.
