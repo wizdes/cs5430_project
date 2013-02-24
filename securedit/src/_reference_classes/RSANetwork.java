@@ -30,7 +30,6 @@ import javax.crypto.spec.IvParameterSpec;
 public class RSANetwork {
     public void sendEncryptedMessage(ObjectOutputStream out, Serializable msg, Key key){
         try {
-            
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.ENCRYPT_MODE, key);
             

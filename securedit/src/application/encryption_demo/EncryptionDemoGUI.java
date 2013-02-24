@@ -15,8 +15,8 @@ import javax.swing.JOptionPane;
  * @author Patrick C. Berens
  */
 public class EncryptionDemoGUI extends javax.swing.JFrame {
-    private static String appNodeId;
-    private static String appHost;
+    private static String appNodeId = "";
+    private static String appHost = "";
     private static int appPort;
     private static String username;
     private static String password;
@@ -44,7 +44,6 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                 }
             }
         });
-        functionality = new EncryptionDemoFunctionality(this);
     }
     
     public void displayMessages(String plaintext, String ciphertext){
@@ -450,6 +449,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
         } catch(NumberFormatException ex){
             handleException(ex);
         }
+        functionality = new EncryptionDemoFunctionality(this);
     }//GEN-LAST:event_UpdatePropertiesButtonActionPerformed
 
     private void AuthorizeMachineButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AuthorizeMachineButtonActionPerformed
@@ -485,10 +485,11 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
         }
         //</editor-fold>
         
-        
-        appNodeId = args[0];
-        appHost = args[1];
-        appPort = Integer.parseInt(args[2]);
+        if(args.length == 3){
+            appNodeId = args[0];
+            appHost = args[1];
+            appPort = Integer.parseInt(args[2]);
+        }
         
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {

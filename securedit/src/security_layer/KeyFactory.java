@@ -37,7 +37,6 @@ public class KeyFactory {
         byte[] passBytes = password.getBytes();
         assert passBytes.length == 16 : passBytes.length;
         
-        /*****THIS SHOULD USE SALT, ITERATIONS, ETC***/
         return new SecretKeySpec(passBytes, "AES");
     }
     public static Key generateSymmetricKey(){
