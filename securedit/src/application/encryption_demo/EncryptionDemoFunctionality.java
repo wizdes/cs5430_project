@@ -20,15 +20,20 @@ public class EncryptionDemoFunctionality {
     private CommunicationInterface communication;
     private Node collaborator;
         
-    public EncryptionDemoFunctionality(EncryptionDemoGUI gui){
+    public EncryptionDemoFunctionality(EncryptionDemoGUI gui, Node host){
         this.gui = gui;
         
         //Temporary Field
         String password = "d2cb415e067c7b13";   //should be 16 bytes
         
-        Node host = new Node("client-1", "localhost", 4001);
-        collaborator = new Node("client-2", "localhost", 4002);
+        if (host.getID().equals("client-1")) {
+            collaborator = new Node("client-2", "localhost", 4002);
+        } else {
+            collaborator = new Node("client-1", "localhost", 4001);
+        }
+        
         communication = new Communication(password, host);
+        listenForMessages();
     }
     
     private void listenForMessages() {
@@ -102,6 +107,7 @@ public class EncryptionDemoFunctionality {
             while (true) {
                 Collection<Message> messages = communication.waitForMessages();
                 for (Message m : messages) {
+                    System.out.println(m);
                     if (m instanceof EncryptedMessage) {
                         EncryptedMessage dm = (EncryptedMessage)m;
                         String msg = (String)dm.getDecryptedObject();

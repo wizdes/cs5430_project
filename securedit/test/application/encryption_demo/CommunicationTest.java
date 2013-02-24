@@ -73,7 +73,30 @@ public class CommunicationTest {
         
         assertEquals(recieved, 100);
     }    
-          
+    
+    @Test
+    public void testSendRSAMessage() {
+        int iterations = 100;
+        int recieved = 0;
+        new SendingThread(theirCommunicator, new RSAMessageSender(), myNode, iterations).start();
+        
+        while (recieved < iterations) {
+            Collection<Message> messages = myCommunicator.waitForMessages();
+            for (Message m : messages) {
+                EncryptedMessage em = (EncryptedMessage)m;
+                assertEquals("message-" + recieved, em.getMessageId());
+                assertEquals("hello, world-" + recieved++, (String)em.getDecryptedObject());
+            }
+        }
+        
+        assertEquals(recieved, 100);
+    }     
+    
+    @Test
+    public void testWaitForReply() {
+        
+    }
+    
     private static class SendingThread extends Thread {
         private CommunicationInterface communicator;
         int iterations;
@@ -119,4 +142,13 @@ public class CommunicationTest {
 
     }
     
+    private static class RSAMessageSender implements MessageSender {
+        
+        @Override
+        public void sendMessage(CommunicationInterface c, Node target, int i) {
+            EncryptedMessage m = new EncryptedMessage(target, "message-" + i);
+            c.sendRSAEncryptedMessage(m, "hello, world-" + i);
+        }
+
+    }    
 }
