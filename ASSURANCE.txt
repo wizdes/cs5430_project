@@ -1,0 +1,18 @@
+ASSURANCE.txt, which describes how and what you tested in the software being submitted. Also describe here any other means you used to increase assurance in the correctness of the system and in the absence of vulnerabilities.
+
+Table of Contents
+1) Overview 
+2) Unit Test Cases
+3) Other Assurance Mechanics
+	a) Sealed Object
+	b) RSA Encryption/Decryption
+		i) size of Keys
+	c) AES Encryption/Decryption
+		i) size of Keys
+	d) Nonces
+
+1) Overview 
+
+2) Unit Test Cases
+
+3) Other Assurance Mechanics

@@ -1,0 +1,25 @@
+FUNCTIONALITY.txt, which should discuss the interface that your system implements. What operations does it export? What is the effect of each operation? Diagram or give high-level psuedocode for the cryptographic protocol being used within each operation or within collection of operations.
+
+Table of Contents
+1) Overview
+	a) Confidentality
+	b) Integrity
+	c) Availability
+2) Functionality
+	a) File_Handler
+	b) Keys
+	c) Machine_Authentication
+	d) Encryption
+	e) Messages
+	f) Network
+
+1) Overview
+
+2) Functionality
+
+a) File_Handler
+b) Keys
+c) Machine_Authentication
+d) Encryption
+e) Messages
+f) Network
