@@ -94,19 +94,24 @@ public class SecureTransport implements SecureTransportInterface{
     public Serializable sendAESEncryptedMessage(Message m) {
         byte[] iv = CipherFactory.generateRandomIV();
         Cipher cipher = CipherFactory.constructAESEncryptionCipher(keys.secretKey, iv);
-        return sendEncryptedMessage(m, cipher, iv);
+        
+        return sendEncryptedMessage(m, cipher, iv, CipherFactory.HMAC(keys.secretKey, m));
     }
 
     @Override
     public Serializable sendRSAEncryptedMessage(Message m) {
         byte[] iv = new byte[16];
         Cipher cipher = CipherFactory.constructRSAEncryptionCipher(keys.publicKey);
-        return sendEncryptedMessage(m, cipher, iv);
+        return sendEncryptedMessage(m, cipher, iv, null);
     }
 
-    private Serializable sendEncryptedMessage(Message m, Cipher cipher, byte[] iv) {
+    private Serializable sendEncryptedMessage(Message m, Cipher cipher, byte[] iv, byte[] hmac) {
         try {
-            SealedObject encryptedObject = new SealedObject(m, cipher);
+            Serializable send_obj = m;
+            if(hmac != null){
+                send_obj = new HMACMessage(m, hmac);
+            }
+            SealedObject encryptedObject = new SealedObject(send_obj, cipher);
             EncryptedObject encryptedMessage = new EncryptedObject(encryptedObject, iv);
             networkTransport.send(m.getTo(), encryptedMessage);
             return encryptedObject.toString();          //Doesn't return encrypted text
