@@ -19,7 +19,6 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SealedObject;
 import transport_layer.files.FileHandler;
 import transport_layer.files.FileTransportInterface;
-import transport_layer.network.NetworkTransport;
 import transport_layer.network.NetworkTransportInterface;
 
 
@@ -85,7 +84,7 @@ public class SecureTransport implements SecureTransportInterface{
             Cipher cipher = null;
             switch(encryptedObject.encryptedObject.getAlgorithm()){
                 case "AES/CBC/PKCS5Padding":
-                    cipher = CipherFactory.constructAESDecryptionCipher(keys.personalKey, encryptedObject.iv);
+                    cipher = CipherFactory.constructAESDecryptionCipher(keys.secretKey, encryptedObject.iv);
                     break;
                 case "RSA/ECB/PKCS1Padding":
                     cipher = CipherFactory.constructRSADecryptionCipher(keys.privateKey);
