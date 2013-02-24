@@ -24,13 +24,12 @@ class Client {
         }
     }
     
-    public boolean send(Message m) {  
-        Node destNode = m.getTo();
+    public boolean send(Node destNode, Serializable m) {  
         String key = destNode.toString();
         
-        if (!channelMap.containsKey(key)){
+//        if (!channelMap.containsKey(key)){
             channelMap.putIfAbsent(key, new Client.Channel(destNode));
-        }
+//       }
         
         return channelMap.get(key).send(m);
     }
@@ -61,10 +60,8 @@ class Client {
             }
         }
         
-        public boolean send(Message message) {
+        public boolean send(Serializable message) {
             String response = "";
-            
-                        
             if (out != null && in != null) { 
                 try {                    
                     // send message
@@ -72,7 +69,8 @@ class Client {
                     out.flush();
                     response = in.readLine();
                 } catch (IOException ex) {
-                    System.err.println("Client error reading from : " + node);
+                    ex.printStackTrace();
+                    System.err.println("Client error reading from : " + node + " after send");
                 }
             }
             
@@ -80,9 +78,8 @@ class Client {
         }
         
         public void close() {
+            System.out.println("client closing socket");
             try {
-                //Node dummy = new Node("close-connection", "not-used", 0);
-                //send(new CloseConnection(dummy, node, "close-connection"));
                 if (in != null) {
                     in.close();
                 }

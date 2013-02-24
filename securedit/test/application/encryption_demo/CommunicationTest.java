@@ -4,15 +4,17 @@
  */
 package application.encryption_demo;
 
-import application.messages.EncryptedMessage;
+import application.messages.DemoMessage;
 import application.messages.Message;
-import java.util.ArrayList;
 import java.util.Collection;
+import javax.crypto.SecretKey;
 import org.junit.After;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+import security_layer.KeyFactory;
 import security_layer.SecureTransportInterface;
+import security_layer.machine_authentication.Msg02_KeyResponse;
 import transport_layer.network.Node;
 
 /**
@@ -23,9 +25,11 @@ public class CommunicationTest {
     
     Node myNode = new Node("1", "localhost", 4001);
     Node theirNode = new Node("2", "localhost", 4002);
-    String password = "1234567890123456";
     CommunicationInterface myCommunicator;
     CommunicationInterface theirCommunicator;
+    
+    static String password = "1234567890123456";
+    static SecretKey secretKey =  (SecretKey)KeyFactory.generateSymmetricKey();
         
     @Before
     public void setUp() throws Exception {
@@ -40,23 +44,7 @@ public class CommunicationTest {
         myCommunicator.shutdown();
         theirCommunicator.shutdown();
     }
-        
-    @Test
-    public void testSendMessage() {
-        int iterations = 100;
-        int recieved = 0;
-        new SendingThread(theirCommunicator, new PlainMessageSender(), myNode, iterations).start();
-        
-        while (recieved < iterations) {
-            Collection<Message> messages = myCommunicator.waitForMessages();
-            for (Message m : messages) {
-                assertEquals("message-" + recieved++, m.getMessageId());
-            }
-        }
-        
-        assertEquals(recieved, 100);
-    }
-                
+                        
     @Test
     public void testSendAESMessage() {
         int iterations = 100;
@@ -66,13 +54,12 @@ public class CommunicationTest {
         while (recieved < iterations) {
             Collection<Message> messages = myCommunicator.waitForMessages();
             for (Message m : messages) {
-                EncryptedMessage em = (EncryptedMessage)m;
-                assertEquals("message-" + recieved, em.getMessageId());
-                assertEquals("hello, world-" + recieved++, (String)em.getDecryptedObject());
+                DemoMessage dm = (DemoMessage)m;
+                assertEquals("hello world " + recieved++, dm.getContents());
             }
         }
         
-        assertEquals(recieved, 100);
+        assertEquals(recieved, iterations);
     }    
     
     @Test
@@ -84,33 +71,16 @@ public class CommunicationTest {
         while (recieved < iterations) {
             Collection<Message> messages = myCommunicator.waitForMessages();
             for (Message m : messages) {
-                EncryptedMessage em = (EncryptedMessage)m;
-                assertEquals("message-" + recieved, em.getMessageId());
-                assertEquals("hello, world-" + recieved++, (String)em.getDecryptedObject());
+                Msg02_KeyResponse dm = (Msg02_KeyResponse)m;
+                assertEquals(recieved, dm.getNonce2());
+                assertEquals(recieved, dm.getNonce1Response());
+                recieved++;
             }
         }
         
-        assertEquals(recieved, 100);
+        assertEquals(recieved, iterations);
     }     
-    
-    @Test
-    public void testWaitForReply() {
-        ArrayList<String> recieved_ids = new ArrayList<>();
-        int iterations = 100;
         
-        new ReplyServerThread(theirCommunicator, iterations).start();
-        
-        for (int i = 0; i < iterations; i++) {
-            Message toSend = new Message(theirNode, i + "");
-            Message response = myCommunicator.sendMessageAndAwaitReply(toSend);
-            assertNotNull(response);
-            assertEquals(toSend.getMessageId(), response.getReplyTo());
-            recieved_ids.add(response.getMessageId());
-        }
-        
-        assertEquals(iterations, recieved_ids.size());
-    }
-    
     private static class SendingThread extends Thread {
         private CommunicationInterface communicator;
         int iterations;
@@ -135,23 +105,13 @@ public class CommunicationTest {
     private static interface MessageSender {
         public void sendMessage(CommunicationInterface c, Node target, int i);
     }    
-    
-    private static class PlainMessageSender implements MessageSender {
         
-        @Override
-        public void sendMessage(CommunicationInterface c, Node target, int i) {
-            Message m = new Message(target, "message-" + i);
-            c.sendMessage(m);
-        }
-
-    }
-    
     private static class AESMessageSender implements MessageSender {
         
         @Override
         public void sendMessage(CommunicationInterface c, Node target, int i) {
-            EncryptedMessage m = new EncryptedMessage(target, "message-" + i);
-            c.sendAESEncryptedMessage(m, "hello, world-" + i);
+            DemoMessage dm = new DemoMessage(target, "message-" + i, "hello world " + i);
+            c.sendAESEncryptedMessage(dm);
         }
 
     }
@@ -160,31 +120,9 @@ public class CommunicationTest {
         
         @Override
         public void sendMessage(CommunicationInterface c, Node target, int i) {
-            EncryptedMessage m = new EncryptedMessage(target, "message-" + i);
-            c.sendRSAEncryptedMessage(m, "hello, world-" + i);
+            Msg02_KeyResponse m = new Msg02_KeyResponse(target, secretKey, i, i);
+            c.sendRSAEncryptedMessage(m);
         }
 
-    }   
-    
-    private static class ReplyServerThread extends Thread {
-        private CommunicationInterface communicator;
-        int iterations;
-
-        public ReplyServerThread(CommunicationInterface c, int i) {
-            communicator = c;
-            iterations = i;
-        }
-        
-        @Override
-        public void run() {
-            int recieved = 0;
-            while (recieved < iterations) {
-                for (Message m : communicator.waitForMessages()) {
-                    Message reply = new Message(m.getFrom(), "client-" + recieved++);
-                    reply.setReplyTo(m.getMessageId());
-                    communicator.sendMessage(reply);
-                }
-            }
-        }
-    }    
+    }       
 }

@@ -52,9 +52,11 @@ public class ClientListenerThread extends Thread {
             }
             serverSocket.close();
         } catch (SocketException ex) {
-            System.out.println("socket closed");
+            System.out.println("socket closed from socket exception");
+            //ex.printStackTrace();
         } catch (IOException ex) {
-            ex.printStackTrace();
+            System.out.println("IOException in client listener socket closed");
+           // ex.printStackTrace();
         } 
     }
 }

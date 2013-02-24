@@ -7,18 +7,20 @@ package transport_layer.network;
 
 import application.encryption_demo.CommunicationInterface;
 import application.messages.Message;
+import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
+import security_layer.SecureTransportInterface;
 
 
 public class Server {
     
     private ClientListenerThread clientListener;
     private Node host;
-    private CommunicationInterface network;
+    private SecureTransportInterface secureTransport;
     
-    public Server(Node host, CommunicationInterface network) {
+    public Server(Node host, SecureTransportInterface secureTransport) {
         this.host = host;
-        this.network = network;
+        this.secureTransport = secureTransport;
     }
     
     public void listen() {
@@ -27,8 +29,8 @@ public class Server {
         this.clientListener.start();
     }
 
-    public void depositMessage(Message m) throws NoSuchAlgorithmException {
-        this.network.depositMessage(m);
+    public void depositMessage(Serializable m) throws NoSuchAlgorithmException {
+        this.secureTransport.processEncryptedMessage(m);
     }    
     
     public void shutdown() {

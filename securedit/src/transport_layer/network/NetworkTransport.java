@@ -6,10 +6,12 @@ package transport_layer.network;
 
 import application.encryption_demo.CommunicationInterface;
 import application.messages.Message;
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import security_layer.SecureTransportInterface;
 
 /**
  *
@@ -22,22 +24,16 @@ public class NetworkTransport implements NetworkTransportInterface{
     private HashMap<String, Node> neighbors = new HashMap<>();
     private Node host;
     
-    public NetworkTransport(Node host, CommunicationInterface network) {
+    public NetworkTransport(Node host, SecureTransportInterface secureTransport) {
         client = new Client();
-        server = new Server(host, network);
+        server = new Server(host, secureTransport);
         server.listen();
         this.host = host;
     }
-        
-    @Override
-    public Message read() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
     
     @Override
-    public void send(Message m) {
-        m.setFrom(host);
-        client.send(m);
+    public void send(Node to, Serializable m) {
+        client.send(to, m);
     }
         
     @Override

@@ -5,7 +5,7 @@
  */
 package application.encryption_demo;
 
-import application.messages.EncryptedMessage;
+import application.messages.DemoMessage;
 import application.messages.Message;
 import java.util.Collection;
 import transport_layer.network.Node;
@@ -77,8 +77,9 @@ public class EncryptionDemoFunctionality {
      * @return Encrypted version of message.
      */
     public String sendEncryptedMessage(String plaintextMsg) {
-        EncryptedMessage em = new EncryptedMessage(collaborator, "1");
-        String ciphertext = (String)communication.sendAESEncryptedMessage(em, plaintextMsg);
+        DemoMessage dm = new DemoMessage(collaborator, "1", plaintextMsg);
+        
+        String ciphertext = (String)communication.sendAESEncryptedMessage(dm);
         return ciphertext;
     }
 
@@ -108,13 +109,11 @@ public class EncryptionDemoFunctionality {
                 Collection<Message> messages = communication.waitForMessages();
                 for (Message m : messages) {
                     System.out.println(m);
-                    if (m instanceof EncryptedMessage) {
-                        EncryptedMessage dm = (EncryptedMessage)m;
-                        String msg = (String)dm.getDecryptedObject();
+                    if (m instanceof DemoMessage) {
+                        DemoMessage dm = (DemoMessage)m;
                         String crypted = "Hmmmm.....";                   
-                        gui.displayMessages(msg, crypted);
+                        gui.displayMessages(dm.getContents(), crypted);
                     }
-
                 }
             }
         }

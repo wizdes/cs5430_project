@@ -12,51 +12,31 @@ import transport_layer.network.Node;
  *
  */
 public class Message implements Serializable {
-    private String messageId = null;
-    private String replyTo = null;
-    private Node from = null;
-    private Node to = null;
+    private String from = null;
+    private String to = null;
     
     public Message(Node to, String messageId) {
-        this.to = to;
-        this.messageId = messageId;
+        this.to = to.toString();
     }
     
     public Message(Node to, Node from, String messageId) {
-        this.to = to;
-        this.from = from;
-        this.messageId = messageId;
+        this.to = to.toString();
+        this.from = from.toString();
     }    
-    
-    public String getMessageId() {
-        return messageId;
-    }
-
-    public void setMessageId(String messageId) {
-        this.messageId = messageId;
-    }
-
-    public String getReplyTo() {
-        return replyTo;
-    }
-
-    public void setReplyTo(String replyTo) {
-        this.replyTo = replyTo;
-    }
 
     public Node getFrom() {
-        return from;
+        return Node.fromString(from);
     }
 
     public void setFrom(Node from) {
-        this.from = from;
+        this.from = from.toString();
     }
 
     public Node getTo() {
-        return to;
+        return Node.fromString(to);
     }
 
     public void setTo(Node to) {
-        this.to = to;
+        this.to = to.toString();
     }
 }

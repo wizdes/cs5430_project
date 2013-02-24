@@ -25,8 +25,8 @@ public class KeyFactory {
     public static KeyPair generateAsymmetricKeys(){
         try {
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-            //SecureRandom random = SecureRandom.getInstance("SHA256");
-            keyGen.initialize(2048);
+            keyGen.initialize(3584);
+//            keyGen.initialize(2048);            
             return keyGen.generateKeyPair();
         } catch (NoSuchAlgorithmException ex) {
             Logger.getLogger(KeyFactory.class.getName()).log(Level.SEVERE, null, ex);

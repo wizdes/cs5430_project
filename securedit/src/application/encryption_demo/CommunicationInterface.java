@@ -5,7 +5,6 @@
 
 package application.encryption_demo;
 
-import application.messages.EncryptedMessage;
 import application.messages.Message;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
@@ -16,14 +15,8 @@ import security_layer.SecureTransportInterface;
  */
 public interface CommunicationInterface {
     
-    public java.io.Serializable sendAESEncryptedMessage(EncryptedMessage m, java.io.Serializable contents);
-    public Message sendAESEncryptedMessageAndAwaitReply(EncryptedMessage m, java.io.Serializable contents);
-    
-    public java.io.Serializable sendRSAEncryptedMessage(EncryptedMessage m, java.io.Serializable contents);
-    public Message sendRSAEncryptedMessageAndAwaitReply(EncryptedMessage m, java.io.Serializable contents);
-    
-    public void sendMessage(Message m);
-    public Message sendMessageAndAwaitReply(Message m);
+    public java.io.Serializable sendAESEncryptedMessage(Message m);
+    public java.io.Serializable sendRSAEncryptedMessage(Message m);
     
     public Collection<Message> waitForMessages();
     

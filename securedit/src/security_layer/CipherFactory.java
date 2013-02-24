@@ -38,8 +38,6 @@ public class CipherFactory {
         assert iv.length == 16 : iv;
         try {
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            System.out.println(Cipher.DECRYPT_MODE);
-            System.out.println(key.toString());
             cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
             return cipher;
         } catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchPaddingException ex) {
