@@ -6,7 +6,6 @@
 package transport_layer.network;
 
 import application.messages.CloseConnection;
-import application.messages.Message;
 import java.io.*;
 import java.net.*;
 import java.security.NoSuchAlgorithmException;

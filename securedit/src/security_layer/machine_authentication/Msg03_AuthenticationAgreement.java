@@ -15,9 +15,13 @@ public class Msg03_AuthenticationAgreement extends Message {
     String fromIdent;       //A
     int nonce2Response;     //r2 + 1
 
-    Msg03_AuthenticationAgreement(Node to, int nonce2Response) {
+    public Msg03_AuthenticationAgreement(Node to, int nonce2Response) {
         super(to, null);
         this.fromIdent = to.toString();
         this.nonce2Response = nonce2Response;
+    }
+    
+    public int getNonce2Response() {
+        return nonce2Response;
     }
 }

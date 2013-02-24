@@ -14,9 +14,13 @@ import transport_layer.network.Node;
 public class Msg01_AuthenticationRequest extends Message {
     String fromIdentifier;  //A
     int nonce1;             //r1
-    Msg01_AuthenticationRequest(Node to, int nonce1) {
+    public Msg01_AuthenticationRequest(Node to, int nonce1) {
         super(to, null);
         this.fromIdentifier = to.toString();
         this.nonce1 = nonce1;
+    }
+    
+    public int getNonce() {
+        return nonce1;
     }
 }

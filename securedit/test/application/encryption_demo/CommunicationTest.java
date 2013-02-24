@@ -14,7 +14,9 @@ import org.junit.Before;
 import org.junit.Test;
 import security_layer.KeyFactory;
 import security_layer.SecureTransportInterface;
+import security_layer.machine_authentication.Msg01_AuthenticationRequest;
 import security_layer.machine_authentication.Msg02_KeyResponse;
+import security_layer.machine_authentication.Msg03_AuthenticationAgreement;
 import transport_layer.network.Node;
 
 /**
@@ -63,10 +65,28 @@ public class CommunicationTest {
     }    
     
     @Test
-    public void testSendRSAMessage() {
+    public void testSendRSAMessage_Msg01() {
         int iterations = 100;
         int recieved = 0;
-        new SendingThread(theirCommunicator, new RSAMessageSender(), myNode, iterations).start();
+        new SendingThread(theirCommunicator, new RSAMessageSender_msg01(), myNode, iterations).start();
+        
+        while (recieved < iterations) {
+            Collection<Message> messages = myCommunicator.waitForMessages();
+            for (Message m : messages) {
+                Msg01_AuthenticationRequest dm = (Msg01_AuthenticationRequest)m;
+                assertEquals(recieved, dm.getNonce());
+                recieved++;
+            }
+        }
+        
+        assertEquals(recieved, iterations);
+    }     
+
+    @Test
+    public void testSendRSAMessage_Msg02() {
+        int iterations = 100;
+        int recieved = 0;
+        new SendingThread(theirCommunicator, new RSAMessageSender_msg02(), myNode, iterations).start();
         
         while (recieved < iterations) {
             Collection<Message> messages = myCommunicator.waitForMessages();
@@ -79,8 +99,26 @@ public class CommunicationTest {
         }
         
         assertEquals(recieved, iterations);
-    }     
+    }  
+    
+    @Test
+    public void testSendRSAMessage_Msg03() {
+        int iterations = 100;
+        int recieved = 0;
+        new SendingThread(theirCommunicator, new RSAMessageSender_msg03(), myNode, iterations).start();
         
+        while (recieved < iterations) {
+            Collection<Message> messages = myCommunicator.waitForMessages();
+            for (Message m : messages) {
+                Msg03_AuthenticationAgreement dm = (Msg03_AuthenticationAgreement)m;
+                assertEquals(recieved, dm.getNonce2Response());
+                recieved++;
+            }
+        }
+        
+        assertEquals(recieved, iterations);
+    }     
+    
     private static class SendingThread extends Thread {
         private CommunicationInterface communicator;
         int iterations;
@@ -116,13 +154,27 @@ public class CommunicationTest {
 
     }
     
-    private static class RSAMessageSender implements MessageSender {
-        
+    private static class RSAMessageSender_msg01 implements MessageSender {
         @Override
         public void sendMessage(CommunicationInterface c, Node target, int i) {
-            Msg02_KeyResponse m = new Msg02_KeyResponse(target, secretKey, i, i);
+            Message m = new Msg01_AuthenticationRequest(target, i);
             c.sendRSAEncryptedMessage(m);
         }
-
     }       
+
+    private static class RSAMessageSender_msg02 implements MessageSender {
+        @Override
+        public void sendMessage(CommunicationInterface c, Node target, int i) {
+            Message m = new Msg02_KeyResponse(target, secretKey, i, i);
+            c.sendRSAEncryptedMessage(m);
+        }
+    }
+    
+    private static class RSAMessageSender_msg03 implements MessageSender {
+        @Override
+        public void sendMessage(CommunicationInterface c, Node target, int i) {
+            Message m = new Msg03_AuthenticationAgreement(target, i);
+            c.sendRSAEncryptedMessage(m);
+        }
+    }     
 }
