@@ -34,9 +34,15 @@ public class Node implements Serializable {
         return this.id;
     }
     
+    public static Node fromString(String str) {
+        String[] arr = str.split(":");
+        return new Node(arr[0], arr[1], Integer.parseInt(arr[2]));
+    }
+    
+    
     @Override
     public String toString() {
-        return this.id + " @ " + this.host + ":" + this.port;
+        return this.id + ":" + this.host + ":" + this.port;
     }
     
     @Override

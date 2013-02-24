@@ -6,7 +6,6 @@
 package transport_layer.network;
 
 import application.messages.CloseConnection;
-import application.messages.Message;
 import java.io.*;
 import java.net.*;
 import java.security.NoSuchAlgorithmException;
@@ -38,7 +37,7 @@ public class ServerThread extends Thread {
             in = new ObjectInputStream(socket.getInputStream());
             baos = new ByteArrayOutputStream();
             
-            Message m = (Message)in.readObject();          
+            Serializable m = (Serializable)in.readObject();          
             while (! (m instanceof CloseConnection)) {
                 
                 try {
@@ -48,16 +47,15 @@ public class ServerThread extends Thread {
                 }
                 
                 out.println(MESSAGE_RECIEVED_ACK);
-                m = (Message)in.readObject();
+                m = (Serializable)in.readObject();
             }
             
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
         } catch (java.io.EOFException ex) {
             // this is expected when server closes socket
-            System.out.println("server thread interrupted");
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("server thread IOException");
         } finally {
             close();
         }

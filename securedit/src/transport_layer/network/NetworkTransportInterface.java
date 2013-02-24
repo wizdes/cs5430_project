@@ -5,6 +5,7 @@
 package transport_layer.network;
 
 import application.messages.Message;
+import java.io.Serializable;
 
 /**
  *
@@ -14,7 +15,6 @@ public interface NetworkTransportInterface {
     /***************************************
      * Matt's package
      * **************************************/
-    public void send(Message msg);
-    public Message read();
+    public void send(Node to, Serializable msg);
     public void shutdown();
 }

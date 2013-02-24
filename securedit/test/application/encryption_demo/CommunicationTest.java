@@ -4,14 +4,19 @@
  */
 package application.encryption_demo;
 
-import application.messages.EncryptedMessage;
+import application.messages.DemoMessage;
 import application.messages.Message;
 import java.util.Collection;
+import javax.crypto.SecretKey;
 import org.junit.After;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+import security_layer.KeyFactory;
 import security_layer.SecureTransportInterface;
+import security_layer.machine_authentication.Msg01_AuthenticationRequest;
+import security_layer.machine_authentication.Msg02_KeyResponse;
+import security_layer.machine_authentication.Msg03_AuthenticationAgreement;
 import transport_layer.network.Node;
 
 /**
@@ -22,9 +27,11 @@ public class CommunicationTest {
     
     Node myNode = new Node("1", "localhost", 4001);
     Node theirNode = new Node("2", "localhost", 4002);
-    String password = "1234567890123456";
     CommunicationInterface myCommunicator;
     CommunicationInterface theirCommunicator;
+    
+    static String password = "1234567890123456";
+    static SecretKey secretKey =  (SecretKey)KeyFactory.generateSymmetricKey();
         
     @Before
     public void setUp() throws Exception {
@@ -39,23 +46,7 @@ public class CommunicationTest {
         myCommunicator.shutdown();
         theirCommunicator.shutdown();
     }
-        
-    @Test
-    public void testSendMessage() {
-        int iterations = 100;
-        int recieved = 0;
-        new SendingThread(theirCommunicator, new PlainMessageSender(), myNode, iterations).start();
-        
-        while (recieved < iterations) {
-            Collection<Message> messages = myCommunicator.waitForMessages();
-            for (Message m : messages) {
-                assertEquals("message-" + recieved++, m.getMessageId());
-            }
-        }
-        
-        assertEquals(recieved, 100);
-    }
-                
+                        
     @Test
     public void testSendAESMessage() {
         int iterations = 100;
@@ -65,15 +56,69 @@ public class CommunicationTest {
         while (recieved < iterations) {
             Collection<Message> messages = myCommunicator.waitForMessages();
             for (Message m : messages) {
-                EncryptedMessage em = (EncryptedMessage)m;
-                assertEquals("message-" + recieved, em.getMessageId());
-                assertEquals("hello, world-" + recieved++, (String)em.getDecryptedObject());
+                DemoMessage dm = (DemoMessage)m;
+                assertEquals("hello world " + recieved++, dm.getContents());
             }
         }
         
-        assertEquals(recieved, 100);
+        assertEquals(recieved, iterations);
     }    
-          
+    
+    @Test
+    public void testSendRSAMessage_Msg01() {
+        int iterations = 100;
+        int recieved = 0;
+        new SendingThread(theirCommunicator, new RSAMessageSender_msg01(), myNode, iterations).start();
+        
+        while (recieved < iterations) {
+            Collection<Message> messages = myCommunicator.waitForMessages();
+            for (Message m : messages) {
+                Msg01_AuthenticationRequest dm = (Msg01_AuthenticationRequest)m;
+                assertEquals(recieved, dm.getNonce());
+                recieved++;
+            }
+        }
+        
+        assertEquals(recieved, iterations);
+    }     
+
+    @Test
+    public void testSendRSAMessage_Msg02() {
+        int iterations = 100;
+        int recieved = 0;
+        new SendingThread(theirCommunicator, new RSAMessageSender_msg02(), myNode, iterations).start();
+        
+        while (recieved < iterations) {
+            Collection<Message> messages = myCommunicator.waitForMessages();
+            for (Message m : messages) {
+                Msg02_KeyResponse dm = (Msg02_KeyResponse)m;
+                assertEquals(recieved, dm.getNonce2());
+                assertEquals(recieved, dm.getNonce1Response());
+                recieved++;
+            }
+        }
+        
+        assertEquals(recieved, iterations);
+    }  
+    
+    @Test
+    public void testSendRSAMessage_Msg03() {
+        int iterations = 100;
+        int recieved = 0;
+        new SendingThread(theirCommunicator, new RSAMessageSender_msg03(), myNode, iterations).start();
+        
+        while (recieved < iterations) {
+            Collection<Message> messages = myCommunicator.waitForMessages();
+            for (Message m : messages) {
+                Msg03_AuthenticationAgreement dm = (Msg03_AuthenticationAgreement)m;
+                assertEquals(recieved, dm.getNonce2Response());
+                recieved++;
+            }
+        }
+        
+        assertEquals(recieved, iterations);
+    }     
+    
     private static class SendingThread extends Thread {
         private CommunicationInterface communicator;
         int iterations;
@@ -83,8 +128,8 @@ public class CommunicationTest {
         public SendingThread(CommunicationInterface c, MessageSender sender, Node target, int i) {
             communicator = c;
             this.target = target;
-            this.sender = sender;
             iterations = i;
+            this.sender = sender;
         }
         
         @Override
@@ -98,25 +143,38 @@ public class CommunicationTest {
     private static interface MessageSender {
         public void sendMessage(CommunicationInterface c, Node target, int i);
     }    
-    
-    private static class PlainMessageSender implements MessageSender {
         
-        @Override
-        public void sendMessage(CommunicationInterface c, Node target, int i) {
-            Message m = new Message(target, "message-" + i);
-            c.sendMessage(m);
-        }
-
-    }
-    
     private static class AESMessageSender implements MessageSender {
         
         @Override
         public void sendMessage(CommunicationInterface c, Node target, int i) {
-            EncryptedMessage m = new EncryptedMessage(target, "message-" + i);
-            c.sendAESEncryptedMessage(m, "hello, world-" + i);
+            DemoMessage dm = new DemoMessage(target, "message-" + i, "hello world " + i);
+            c.sendAESEncryptedMessage(dm);
         }
 
     }
     
+    private static class RSAMessageSender_msg01 implements MessageSender {
+        @Override
+        public void sendMessage(CommunicationInterface c, Node target, int i) {
+            Message m = new Msg01_AuthenticationRequest(target, i);
+            c.sendRSAEncryptedMessage(m);
+        }
+    }       
+
+    private static class RSAMessageSender_msg02 implements MessageSender {
+        @Override
+        public void sendMessage(CommunicationInterface c, Node target, int i) {
+            Message m = new Msg02_KeyResponse(target, secretKey, i, i);
+            c.sendRSAEncryptedMessage(m);
+        }
+    }
+    
+    private static class RSAMessageSender_msg03 implements MessageSender {
+        @Override
+        public void sendMessage(CommunicationInterface c, Node target, int i) {
+            Message m = new Msg03_AuthenticationAgreement(target, i);
+            c.sendRSAEncryptedMessage(m);
+        }
+    }     
 }

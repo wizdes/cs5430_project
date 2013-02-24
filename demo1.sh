@@ -1,1 +1,1 @@
-java -jar "securedit_Main/dist/securedit_Main.jar" "1" "localhost" 4001
+java -jar "securedit/dist/securedit.jar" "1" "localhost" 4001

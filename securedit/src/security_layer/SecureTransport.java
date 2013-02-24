@@ -5,7 +5,8 @@
 package security_layer;
 
 
-import application.messages.EncryptedMessage;
+import application.encryption_demo.CommunicationInterface;
+import application.messages.Message;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.Key;
@@ -19,7 +20,9 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SealedObject;
 import transport_layer.files.FileHandler;
 import transport_layer.files.FileTransportInterface;
+import transport_layer.network.NetworkTransport;
 import transport_layer.network.NetworkTransportInterface;
+import transport_layer.network.Node;
 
 
 
@@ -31,14 +34,16 @@ public class SecureTransport implements SecureTransportInterface{
     private EncryptionKeys keys;
     private FileTransportInterface fileTransport = new FileHandler();
     private NetworkTransportInterface networkTransport;
+    private CommunicationInterface communication;
     
     /********************************************
      * patrick's 
      * *******************************************/
-    public SecureTransport(String password, NetworkTransportInterface networkTransport) {
+    public SecureTransport(String password, Node host, CommunicationInterface communication) {
         assert password.length() == 16: password.length();
         
-        this.networkTransport = networkTransport;
+        this.networkTransport = new NetworkTransport(host, this);
+        this.communication = communication;
         
         Key personalKey = KeyFactory.generateSymmetricKey(password);
         Key secretKey = KeyFactory.generateSymmetricKey();
@@ -48,27 +53,24 @@ public class SecureTransport implements SecureTransportInterface{
     }
     
     @Override
-    public Serializable sendAESEncryptedMessage(EncryptedMessage m, java.io.Serializable contents) {
+    public Serializable sendAESEncryptedMessage(Message m) {
         byte[] iv = CipherFactory.generateRandomIV();
         Cipher cipher = CipherFactory.constructAESEncryptionCipher(keys.secretKey, iv);
-
-        return sendEncryptedMessage(m, contents, cipher, iv);
+        return sendEncryptedMessage(m, cipher, iv);
     }
 
     @Override
-    public Serializable sendRSAEncryptedMessage(EncryptedMessage m, java.io.Serializable contents) {
+    public Serializable sendRSAEncryptedMessage(Message m) {
         byte[] iv = new byte[16];
         Cipher cipher = CipherFactory.constructRSAEncryptionCipher(keys.publicKey);
-        
-        return sendEncryptedMessage(m, contents, cipher, iv);
+        return sendEncryptedMessage(m, cipher, iv);
     }
 
-    private Serializable sendEncryptedMessage(EncryptedMessage m, Serializable contents, Cipher cipher, byte[] iv) {
+    private Serializable sendEncryptedMessage(Message m, Cipher cipher, byte[] iv) {
         try {
-            SealedObject encryptedObject = new SealedObject(contents, cipher);
+            SealedObject encryptedObject = new SealedObject(m, cipher);
             EncryptedObject encryptedMessage = new EncryptedObject(encryptedObject, iv);
-            m.setEncryptedObject(encryptedMessage);            
-            networkTransport.send(m);
+            networkTransport.send(m.getTo(), encryptedMessage);
             return encryptedObject.toString();          //Doesn't return encrypted text
         } catch (IOException | IllegalBlockSizeException ex) {
             Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
@@ -77,10 +79,10 @@ public class SecureTransport implements SecureTransportInterface{
     }
 
     @Override
-    public EncryptedMessage processEncryptedMessage(EncryptedMessage encryptedNetMsg) throws NoSuchAlgorithmException {
+    public Message processEncryptedMessage(Serializable encryptedNetMsg) throws NoSuchAlgorithmException {
+        EncryptedObject encryptedObject = (EncryptedObject)encryptedNetMsg;
+        Message decryptedMsg = null;
         try {
-            
-            EncryptedObject encryptedObject = encryptedNetMsg.getEncryptedObject();
             Cipher cipher = null;
             switch(encryptedObject.encryptedObject.getAlgorithm()){
                 case "AES/CBC/PKCS5Padding":
@@ -93,14 +95,13 @@ public class SecureTransport implements SecureTransportInterface{
                     throw new NoSuchAlgorithmException("Attempted to process a message encrypted with an unsupported algorithm.");
             }
             
-            Serializable decryptedObj = (Serializable)encryptedObject.encryptedObject.getObject(cipher);
-            encryptedNetMsg.setDecryptedObject(decryptedObj);
-            
+            decryptedMsg = (Message)encryptedObject.encryptedObject.getObject(cipher);
+            communication.depositMessage(decryptedMsg);
         } catch (IOException | ClassNotFoundException | IllegalBlockSizeException | BadPaddingException ex) {
             Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        return encryptedNetMsg;
+        return decryptedMsg;
     }
 
     @Override
@@ -148,5 +149,10 @@ public class SecureTransport implements SecureTransportInterface{
     @Override
     public void setKeys(EncryptionKeys keys) {
         this.keys = keys;
+    }
+    
+    @Override
+    public void shutdown() {
+        this.networkTransport.shutdown();
     }
 }

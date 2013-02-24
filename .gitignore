@@ -8,3 +8,7 @@
 /securedit_Main/build/
 /securedit_Main/dist/
 /securedit/build/
+
+/securedit/nbproject/private/
+/securedit/build/
+/securedit/dist/

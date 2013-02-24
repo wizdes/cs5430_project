@@ -5,8 +5,8 @@
 
 package application.encryption_demo;
 
-import application.messages.EncryptedMessage;
 import application.messages.Message;
+import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -34,34 +34,20 @@ public class Communication implements CommunicationInterface {
     private Condition newMessageArrived = queueLock.newCondition();
     private BlockingQueue<Message> messageQueue = new LinkedBlockingDeque<>();
     private Map<String, Pair<Condition, Message>> awaitingReplyQueue = new HashMap<>();
-    private NetworkTransportInterface networkTransport;
     private SecureTransportInterface secureTransport;
     
     public Communication(String password, Node host) {
-        this.networkTransport = new NetworkTransport(host, this);
-        this.secureTransport = new SecureTransport(password, this.networkTransport);
+        this.secureTransport = new SecureTransport(password, host, this);
     }
     
     @Override
-    public java.io.Serializable sendAESEncryptedMessage(EncryptedMessage m, java.io.Serializable contents) {
-        return this.secureTransport.sendAESEncryptedMessage(m, contents);
+    public java.io.Serializable sendAESEncryptedMessage(Message m) {
+        return this.secureTransport.sendAESEncryptedMessage(m);
     }
-    
+        
     @Override
-    public Message sendAESEncryptedMessageAndAwaitReply(EncryptedMessage m, java.io.Serializable contents) {
-        sendAESEncryptedMessage(m, contents);
-        return waitForReplyTo(m);
-    }
-    
-    @Override
-    public java.io.Serializable sendRSAEncryptedMessage(EncryptedMessage m, java.io.Serializable contents) {
-        return this.secureTransport.sendRSAEncryptedMessage(m, contents);
-    }
-    
-    @Override
-    public Message sendRSAEncryptedMessageAndAwaitReply(EncryptedMessage m, java.io.Serializable contents) {
-        sendRSAEncryptedMessage(m, contents);
-        return sendMessageAndAwaitReply(m);
+    public java.io.Serializable sendRSAEncryptedMessage(Message m) {
+        return this.secureTransport.sendRSAEncryptedMessage(m);
     }
     
     @Override
@@ -81,19 +67,8 @@ public class Communication implements CommunicationInterface {
     
     @Override
     public void shutdown() {
-        this.networkTransport.shutdown();
+        this.secureTransport.shutdown();
     }
-    
-    @Override
-    public void sendMessage(Message m) {
-        this.networkTransport.send(m);
-    }
-    
-    @Override
-    public Message sendMessageAndAwaitReply(Message m) {
-        this.networkTransport.send(m);
-        return waitForReplyTo(m);
-    }    
     
     @Override
     public Collection<Message> waitForMessages() {
@@ -117,18 +92,7 @@ public class Communication implements CommunicationInterface {
     }
     
     @Override
-    public void depositMessage(Message m) throws NoSuchAlgorithmException{
-        if (m instanceof EncryptedMessage) {
-            m = this.secureTransport.processEncryptedMessage((EncryptedMessage)m);
-        }
-        
-        // process replies separately
-        if (m.getReplyTo() != null) {
-            depositReply(m);
-            return;
-        }
-        
-        // if its not a reply it goes in the general queue
+    public void depositMessage(Message m) throws NoSuchAlgorithmException{        
         this.queueLock.lock();
         try {
             this.messageQueue.add(m);
@@ -137,46 +101,8 @@ public class Communication implements CommunicationInterface {
             this.queueLock.unlock();
         }
     }
+       
     
-    private void depositReply(Message m) {
-        String reply = m.getReplyTo();
-        this.replyLock.lock();
-        try {
-            if (this.awaitingReplyQueue.containsKey(reply)) {
-                Pair<Condition, Message> waiting = this.awaitingReplyQueue.get(reply);
-                Pair<Condition, Message> withReply = new Pair(waiting.x, m);
-                this.awaitingReplyQueue.put(reply, withReply);
-                waiting.x.signal();
-            } else {
-                this.awaitingReplyQueue.put(reply, new Pair(null, m));
-            }
-        } finally {
-            this.replyLock.unlock();
-        }        
-    }
-    
-    
-    private Message waitForReplyTo(Message m) {
-        Condition replyArrived = this.replyLock.newCondition();
-        Message response = null;
-        String key = m.getMessageId();
-        
-        this.replyLock.lock();
-        try {
-            if (!this.awaitingReplyQueue.containsKey(key)) {
-                this.awaitingReplyQueue.put(key, new Pair(replyArrived, null));
-                replyArrived.await();
-            }
-            response = this.awaitingReplyQueue.get(key).y;
-            this.awaitingReplyQueue.remove(key);
-        } catch (InterruptedException ex) {
-            System.err.println("Thread interrupted waiting for message reply");
-        } finally {
-            this.replyLock.unlock();
-        }
-        
-        return response;
-    }
     
     @Override
     public SecureTransportInterface getSecureTransport() {

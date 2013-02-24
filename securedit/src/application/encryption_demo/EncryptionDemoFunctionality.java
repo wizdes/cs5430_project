@@ -5,7 +5,7 @@
  */
 package application.encryption_demo;
 
-import application.messages.EncryptedMessage;
+import application.messages.DemoMessage;
 import application.messages.Message;
 import java.util.Collection;
 import transport_layer.network.Node;
@@ -20,15 +20,23 @@ public class EncryptionDemoFunctionality {
     private CommunicationInterface communication;
     private Node collaborator;
         
-    public EncryptionDemoFunctionality(EncryptionDemoGUI gui){
+    public EncryptionDemoFunctionality(EncryptionDemoGUI gui, Node host){
         this.gui = gui;
         
         //Temporary Field
         String password = "d2cb415e067c7b13";   //should be 16 bytes
         
-        Node host = new Node("client-1", "localhost", 4001);
-        collaborator = new Node("client-2", "localhost", 4002);
+        
+        if (host.getID().equals("1")) {
+            System.out.println("I'm talking to 2");
+            collaborator = new Node("client-2", "localhost", 4002);
+        } else {
+            System.out.println("I'm talking to 1");
+            collaborator = new Node("client-1", "localhost", 4001);
+        }
+        
         communication = new Communication(password, host);
+        listenForMessages();
     }
     
     private void listenForMessages() {
@@ -72,8 +80,9 @@ public class EncryptionDemoFunctionality {
      * @return Encrypted version of message.
      */
     public String sendEncryptedMessage(String plaintextMsg) {
-        EncryptedMessage em = new EncryptedMessage(collaborator, "1");
-        String ciphertext = (String)communication.sendAESEncryptedMessage(em, plaintextMsg);
+        DemoMessage dm = new DemoMessage(collaborator, "1", plaintextMsg);
+        
+        String ciphertext = (String)communication.sendAESEncryptedMessage(dm);
         return ciphertext;
     }
 
@@ -102,13 +111,14 @@ public class EncryptionDemoFunctionality {
             while (true) {
                 Collection<Message> messages = communication.waitForMessages();
                 for (Message m : messages) {
-                    if (m instanceof EncryptedMessage) {
-                        EncryptedMessage dm = (EncryptedMessage)m;
-                        String msg = (String)dm.getDecryptedObject();
-                        String crypted = "Hmmmm.....";                   
-                        gui.displayMessages(msg, crypted);
+                    System.out.println(m);
+                    if (m instanceof DemoMessage) {
+                        DemoMessage dm = (DemoMessage)m;
+                        String crypted = "Hmmmm.....";   
+                        System.out.println("here");
+                        System.out.println(dm.getContents());
+                        displayIncomingMessage(dm.getContents(), crypted);
                     }
-
                 }
             }
         }
