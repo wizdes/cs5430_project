@@ -10,6 +10,7 @@ Table of Contents
 	c) AES Encryption/Decryption
 		i) size of Keys
 	d) Nonces
+	e) HMACs
 
 1) Overview 
 

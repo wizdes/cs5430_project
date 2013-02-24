@@ -18,7 +18,7 @@ Table of Contents
 2) Functionality
 
 a) File_Handler
-b) Keys
+b) Keys	
 c) Machine_Authentication
 d) Encryption
 e) Messages
