@@ -13,7 +13,7 @@ import java.security.Key;
 public class EncryptionKeys {
     //Have access to keys directly only inside security_layer package.
     Key personalKey;    //Generated from password for AES files
-    Key secretKey;      //Generated randomly for AES communication
+    public Key secretKey;      //Generated randomly for AES communication
     Key publicKey;      //RSA
     Key privateKey;     //RSA
     
