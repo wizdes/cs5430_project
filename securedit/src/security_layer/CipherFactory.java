@@ -4,6 +4,10 @@
  */
 package security_layer;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -13,7 +17,9 @@ import java.security.SecureRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.Cipher;
+import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
 /**
@@ -78,6 +84,30 @@ public class CipherFactory {
             Logger.getLogger(CipherFactory.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
+    }
+    
+    public static byte[] HMAC(Key sk, byte[] DataToHash){
+        try {
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(sk);
+            return mac.doFinal(DataToHash);
+        } catch (InvalidKeyException | NoSuchAlgorithmException ex) {
+            Logger.getLogger(CipherFactory.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+    
+    public static byte[] HMAC(Key sk, Object DataToHash){
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ObjectOutput out = new ObjectOutputStream(bos); 
+            out.writeObject(DataToHash);
+            return HMAC(sk, bos.toByteArray());
+        }
+        catch (IOException ex) {
+            Logger.getLogger(CipherFactory.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
 
 }
