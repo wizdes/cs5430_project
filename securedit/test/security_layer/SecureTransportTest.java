@@ -14,8 +14,8 @@ import java.util.logging.Logger;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SealedObject;
-import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Test;
 import transport_layer.network.Node;
 
 /**

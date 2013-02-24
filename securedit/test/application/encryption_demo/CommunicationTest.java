@@ -6,6 +6,7 @@ package application.encryption_demo;
 
 import application.messages.EncryptedMessage;
 import application.messages.Message;
+import java.util.ArrayList;
 import java.util.Collection;
 import org.junit.After;
 import static org.junit.Assert.*;
@@ -94,7 +95,20 @@ public class CommunicationTest {
     
     @Test
     public void testWaitForReply() {
+        ArrayList<String> recieved_ids = new ArrayList<>();
+        int iterations = 100;
         
+        new ReplyServerThread(theirCommunicator, iterations).start();
+        
+        for (int i = 0; i < iterations; i++) {
+            Message toSend = new Message(theirNode, i + "");
+            Message response = myCommunicator.sendMessageAndAwaitReply(toSend);
+            assertNotNull(response);
+            assertEquals(toSend.getMessageId(), response.getReplyTo());
+            recieved_ids.add(response.getMessageId());
+        }
+        
+        assertEquals(iterations, recieved_ids.size());
     }
     
     private static class SendingThread extends Thread {
@@ -106,8 +120,8 @@ public class CommunicationTest {
         public SendingThread(CommunicationInterface c, MessageSender sender, Node target, int i) {
             communicator = c;
             this.target = target;
-            this.sender = sender;
             iterations = i;
+            this.sender = sender;
         }
         
         @Override
@@ -150,5 +164,27 @@ public class CommunicationTest {
             c.sendRSAEncryptedMessage(m, "hello, world-" + i);
         }
 
+    }   
+    
+    private static class ReplyServerThread extends Thread {
+        private CommunicationInterface communicator;
+        int iterations;
+
+        public ReplyServerThread(CommunicationInterface c, int i) {
+            communicator = c;
+            iterations = i;
+        }
+        
+        @Override
+        public void run() {
+            int recieved = 0;
+            while (recieved < iterations) {
+                for (Message m : communicator.waitForMessages()) {
+                    Message reply = new Message(m.getFrom(), "client-" + recieved++);
+                    reply.setReplyTo(m.getMessageId());
+                    communicator.sendMessage(reply);
+                }
+            }
+        }
     }    
 }
