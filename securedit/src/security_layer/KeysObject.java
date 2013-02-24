@@ -23,6 +23,9 @@ public class KeysObject implements java.io.Serializable {
     public void addPublicKey(String ident, PublicKey key){
         publicKeys.put(ident, key);
     }
+    public Key getPublicKey(String ident){
+        return publicKeys.get(ident);
+    }
     public void setPrivateKey(String ident, PrivateKey key){
         this.ident = ident;
         this.privateKey = key;

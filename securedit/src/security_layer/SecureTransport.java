@@ -46,10 +46,14 @@ public class SecureTransport implements SecureTransportInterface{
         this.communication = communication;
         
         Key personalKey = KeyFactory.generateSymmetricKey(password);
-        Key secretKey = KeyFactory.generateSymmetricKey();
-        KeyPair asymmetricKeys = KeyFactory.generateAsymmetricKeys();
+        KeysObject keyObj = (KeysObject)readEncryptedFile("keys_" + host.getID());
+        Key privateKey = keyObj.getPrivateKey();
+        Key publicKey = keyObj.getPublicKey(host.getID());
         
-        keys = new EncryptionKeys(personalKey, secretKey, asymmetricKeys.getPublic(), asymmetricKeys.getPrivate());
+        Key secretKey = KeyFactory.generateSymmetricKey();  //Replace with authentication
+        //KeyPair asymmetricKeys = KeyFactory.generateAsymmetricKeys();
+        
+        keys = new EncryptionKeys(personalKey, secretKey, publicKey, privateKey);
     }
     
     @Override

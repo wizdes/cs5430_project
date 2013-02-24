@@ -29,10 +29,10 @@ public class EncryptionDemoFunctionality {
         
         if (host.getID().equals("1")) {
             System.out.println("I'm talking to 2");
-            collaborator = new Node("client-2", "localhost", 4002);
+            collaborator = new Node("2", "localhost", 4002);
         } else {
             System.out.println("I'm talking to 1");
-            collaborator = new Node("client-1", "localhost", 4001);
+            collaborator = new Node("1", "localhost", 4001);
         }
         
         communication = new Communication(password, host);

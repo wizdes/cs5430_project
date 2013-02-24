@@ -30,7 +30,7 @@ public class GenerateAndWriteKeys {
         System.out.print("Password for " + myIdent + ": ");
         String password = scan.next().trim();
 
-        transport = new SecureTransport(password, null);
+        transport = new SecureTransport(password, null, null);
         
         KeyPair keys1 = KeyFactory.generateAsymmetricKeys();
         KeyPair keys2 = KeyFactory.generateAsymmetricKeys();

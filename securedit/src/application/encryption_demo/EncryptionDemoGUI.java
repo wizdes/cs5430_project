@@ -9,6 +9,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import transport_layer.network.Node;
 
 /**
  *
@@ -440,16 +441,17 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_SendButtonActionPerformed
 
     private void UpdatePropertiesButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UpdatePropertiesButtonActionPerformed
-        appNodeId = NodeIDTextField.getText();
-        appHost = HostTextField.getText();
-        username = UsernameTextField.getText();
-        password = PasswordTextField.getText();
+        appNodeId = NodeIDTextField.getText().trim();
+        appHost = HostTextField.getText().trim();
+        username = UsernameTextField.getText().trim();
+        password = PasswordTextField.getText().trim();
         try{
             appPort = Integer.parseInt(PortTextField.getText());
         } catch(NumberFormatException ex){
             handleException(ex);
         }
-        functionality = new EncryptionDemoFunctionality(this);
+        
+        functionality = new EncryptionDemoFunctionality(this, new Node(appNodeId, appHost, appPort));
     }//GEN-LAST:event_UpdatePropertiesButtonActionPerformed
 
     private void AuthorizeMachineButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AuthorizeMachineButtonActionPerformed
