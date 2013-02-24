@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
@@ -74,7 +75,7 @@ public class SecureTransport implements SecureTransportInterface{
     private Serializable sendEncryptedMessage(Message m, Cipher cipher, byte[] iv, byte[] hmac) {
         try {
             Serializable send_obj = m;
-            if(hmac != null){
+            if (hmac != null){
                 send_obj = new HMACMessage(m, hmac);
             }
             SealedObject encryptedObject = new SealedObject(send_obj, cipher);
@@ -104,7 +105,8 @@ public class SecureTransport implements SecureTransportInterface{
                     throw new NoSuchAlgorithmException("Attempted to process a message encrypted with an unsupported algorithm.");
             }
             
-            decryptedMsg = (Message)encryptedObject.encryptedObject.getObject(cipher);
+            Object obj = encryptedObject.encryptedObject.getObject(cipher);
+            decryptedMsg = messageFromEncryptedObject(obj);
             communication.depositMessage(decryptedMsg);
         } catch (IOException | ClassNotFoundException | IllegalBlockSizeException | BadPaddingException ex) {
             Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
@@ -113,6 +115,23 @@ public class SecureTransport implements SecureTransportInterface{
         return decryptedMsg;
     }
 
+    private Message messageFromEncryptedObject(Object obj) {
+        Message decryptedMsg = null;
+        if (obj instanceof HMACMessage) {
+            HMACMessage hmacMessage = (HMACMessage)obj;
+            byte[] hmac = CipherFactory.HMAC(keys.secretKey, hmacMessage.getMessage());
+            if (Arrays.equals(hmac, hmacMessage.getHMAC())) {
+                decryptedMsg = hmacMessage.getMessage();
+            } else {
+                System.out.println("Invalid HMAC");
+            }
+        } else {
+            decryptedMsg = (Message)obj;
+        }
+        
+        return decryptedMsg;
+    }
+    
     @Override
     public Serializable writeEncryptedFile(String filename, Serializable contents) {
         try {

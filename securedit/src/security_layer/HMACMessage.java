@@ -19,4 +19,13 @@ public class HMACMessage implements Serializable{
         this.HMAC = hmac;
         this.m = m;
     }
+    
+    public byte[] getHMAC() {
+        return HMAC;
+    }
+
+    public Message getMessage() {
+        return m;
+    } 
+    
 }
