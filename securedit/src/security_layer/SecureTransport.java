@@ -12,12 +12,18 @@ import java.io.Serializable;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SealedObject;
+import security_layer.machine_authentication.Authentications;
+import security_layer.machine_authentication.Msg01_AuthenticationRequest;
 import transport_layer.files.FileHandler;
 import transport_layer.files.FileTransportInterface;
 import transport_layer.network.NetworkTransport;
@@ -35,10 +41,15 @@ public class SecureTransport implements SecureTransportInterface{
     private FileTransportInterface fileTransport = new FileHandler();
     private NetworkTransportInterface networkTransport;
     private CommunicationInterface communication;
+    private Authentications authInstance = new Authentications();
     
     /********************************************
      * patrick's 
      * *******************************************/
+    public SecureTransport(String password){
+        Key personalKey = KeyFactory.generateSymmetricKey(password);
+        keys = new EncryptionKeys(personalKey);
+    }
     public SecureTransport(String password, Node host, CommunicationInterface communication) {
         assert password.length() == 16: password.length();
         
@@ -53,9 +64,32 @@ public class SecureTransport implements SecureTransportInterface{
         Key secretKey = KeyFactory.generateSymmetricKey();  //Replace with authentication
         //KeyPair asymmetricKeys = KeyFactory.generateAsymmetricKeys();
         
-        keys = new EncryptionKeys(personalKey, secretKey, publicKey, privateKey);
+        keys = new EncryptionKeys(host.getID(), personalKey, secretKey, publicKey, privateKey);
     }
     
+    @Override
+    public boolean authenticate(Node dest) {
+        final Lock authenticateLock = new ReentrantLock(true);
+        int nonce1 = generateNonce();
+        Msg01_AuthenticationRequest msg = new Msg01_AuthenticationRequest(dest, nonce1);
+        Condition authenticationComplete = authenticateLock.newCondition();
+        
+        try {
+            authenticateLock.lock();
+            authInstance.addAuthentication(dest.getID(), msg, authenticationComplete, authenticateLock);
+            sendRSAEncryptedMessage(msg);
+            authenticationComplete.await();
+            authInstance.removeAuthentication(dest.getID());
+        } catch (InterruptedException ex) {
+            Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+        finally{
+            authenticateLock.unlock();
+            return true;
+        }
+    }
+        
     @Override
     public Serializable sendAESEncryptedMessage(Message m) {
         byte[] iv = CipherFactory.generateRandomIV();
@@ -146,17 +180,12 @@ public class SecureTransport implements SecureTransportInterface{
     }
     
     @Override
-    public EncryptionKeys getKeys() {
-        return keys;
-    }
-
-    @Override
-    public void setKeys(EncryptionKeys keys) {
-        this.keys = keys;
-    }
-    
-    @Override
     public void shutdown() {
         this.networkTransport.shutdown();
+    }
+
+    private int generateNonce() {
+        SecureRandom rand = new SecureRandom();
+        return rand.nextInt();
     }
 }

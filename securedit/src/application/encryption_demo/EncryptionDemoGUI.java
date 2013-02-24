@@ -455,7 +455,8 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_UpdatePropertiesButtonActionPerformed
 
     private void AuthorizeMachineButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AuthorizeMachineButtonActionPerformed
-        //Yi, this is where you call your method: functionality.author..
+        String authResult = functionality.authenticateMachine();
+        JOptionPane.showMessageDialog(this, authResult);
     }//GEN-LAST:event_AuthorizeMachineButtonActionPerformed
     private void handleException(Exception ex) {
         JOptionPane.showMessageDialog(this, ex.getMessage());

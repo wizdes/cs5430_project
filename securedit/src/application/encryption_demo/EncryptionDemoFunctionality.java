@@ -85,6 +85,15 @@ public class EncryptionDemoFunctionality {
         String ciphertext = (String)communication.sendAESEncryptedMessage(dm);
         return ciphertext;
     }
+    
+    public String authenticateMachine(){
+        boolean wasSuccessful = communication.authenticateMachine(collaborator);
+        if(wasSuccessful){
+            return "Successfully authenticated machine\n";
+        } else{
+            return "Machine authentication was not successful\n";
+        }
+    }
 
 /**********************************************************************
  *  Methods used to control the GUI. 

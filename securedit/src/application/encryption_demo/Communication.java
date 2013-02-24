@@ -49,6 +49,10 @@ public class Communication implements CommunicationInterface {
     public java.io.Serializable sendRSAEncryptedMessage(Message m) {
         return this.secureTransport.sendRSAEncryptedMessage(m);
     }
+    @Override
+    public boolean authenticateMachine(Node dest){
+        return secureTransport.authenticate(dest);
+    }
     
     @Override
     public java.io.Serializable writeEncryptedFile(String filename, java.io.Serializable contents) {

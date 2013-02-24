@@ -9,6 +9,7 @@ import application.messages.Message;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import security_layer.SecureTransportInterface;
+import transport_layer.network.Node;
 
 /**
  *
@@ -17,6 +18,7 @@ public interface CommunicationInterface {
     
     public java.io.Serializable sendAESEncryptedMessage(Message m);
     public java.io.Serializable sendRSAEncryptedMessage(Message m);
+    public boolean authenticateMachine(Node dest);
     
     public Collection<Message> waitForMessages();
     

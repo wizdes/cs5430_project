@@ -38,7 +38,7 @@ public class CommunicationTest {
         myCommunicator = new Communication(password, myNode);
         SecureTransportInterface s1 = myCommunicator.getSecureTransport();
         theirCommunicator = new Communication(password, theirNode);
-        theirCommunicator.getSecureTransport().setKeys(s1.getKeys());
+//theirCommunicator.getSecureTransport().setKeys(s1.getKeys());
     }
 
     @After
