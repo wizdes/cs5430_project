@@ -88,8 +88,7 @@ i) messages (package)
 There are several Message classes in this package. All derive from the base Message class and implement a different type of Message that is to be sent. 
 
 Files:
-Message.java - the base class of Message; it stores the message and allows for an easy interface to encrypt, decrypt and serialize into a network message
-!!!^_^_^_^_^!!! Add the other files here (not sure if what others I haven't included)
+Message.java - the base class of Message; it stores the message and allows for an easy interface to encrypt, decrypt and serialize into a network message. These are also inherited by the messages in Machine Authentication
 
 
 ii) demo (package)
