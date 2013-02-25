@@ -34,7 +34,7 @@ We used the Java class 'SecureRandom' to general random numbers securely.
 c) RSA Encryption/Decryption
 	We are using the standard Java class KeyPairGenerator with the 'RSA' algorithm. This is initialized with the highest level of SecureRandom (from the Javadocs). It encrypts/decrypts with the 'RSA/ECB/PKCS1Padding' algorithm.
 	i) size of Keys
-	We are using a 2048 bit RSA keys.
+	We are using a 3584 bit RSA keys which support our large authentication messages.
 d) AES Encryption/Decryption
 e) Nonces
 	We are using nonces to ensure the system is not susceptible to replay attacks. The specific protocols in using nonces during machine authentication is detailed in FUNCTIONALITY.txt.
@@ -44,3 +44,4 @@ g) Code Reviews
 	We used Github's 'Pull Request' feature to code review all commits going into the master branch. This allows us to confirm all changes with the entire team and reduce the number of errors pushed into code.
 
 h) Class Design 
+	To reduce programmer error and prevent any leakage of insecure data, we abstracted our system into three layers. The bottom layer is the networking transport layer which provides basic networking functionality of a multi-client socket architecture. it is within this layer that serialization of messages occurs. The second layer is the security layer which packages messages into 

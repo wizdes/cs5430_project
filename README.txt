@@ -120,3 +120,24 @@ CipherFactoryHMACTest.java - a class that tests our implementation of HMACing me
 CipherFactoryRSATest.java - a class that tests our implementation of RSA public/private key encryption 
 
 3) Running our Scaffolding Code
+In order to run our code follow these steps (tested on Ubuntu):
+- Change directory into the root of our code submission
+- run "./keygen"
+- run "./demo1.sh"
+- (in a new terminal) run "./demo2.sh"
+
+You should now have 2 GUI's open that you can interact with.
+- Press "Update Properties" on each GUI
+- On one of the GUI's press "Authorize Machine"
+- On either GUI, select the "sent messages" tab, and type and send a message
+  - it will appear in the other GUI's received messages tab.
+- On either GUI, select the files tab, and open the text file in the root of our submission
+  - (it only works on files in the root of our directory)
+  - If you encrypt the file, you can go back to the OS and see the encrypted file.
+  - Pressing decrypt will load it back into the editor
+  - If you wish, you can encrypt the file, close down the application, and then 
+    reopen it to decrypt it again (but remember you have to "Update Properties")
+    every time you open the app.
+
+    
+
