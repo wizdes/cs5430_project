@@ -92,4 +92,7 @@ iii) HMACs
 We used the standard Java MAC class to generate an HMAC of our messages using the 'HmacSHA256' algorithm.
 
 d) Network
+  The Network layer provides the functionality to send and receive encrypted messages; the actual application interfaces only with a "send" function, to which it passes objects of type application.Message.  These will be subclassed in subsequent phases to send application specific data. The network layer utilizes the SecureTransport package to encrypt messages using either RSA (for initial exchange of the shared session key), or AES (for exchanging messages with the session key).
+  
 
+  
