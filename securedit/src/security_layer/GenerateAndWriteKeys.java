@@ -16,6 +16,7 @@ import javax.crypto.Cipher;
 import transport_layer.network.Node;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import javax.crypto.SecretKey;
 
 /**
  *
@@ -35,6 +36,7 @@ public class GenerateAndWriteKeys {
         //Generate keys
         PrivateKey privateKeys[] = new PrivateKey[3];
         ConcurrentMap<String, PublicKey> publicKeys = new ConcurrentHashMap<>();
+        SecretKey secretKey = (SecretKey)KeyFactory.generateSymmetricKey();
         for(int i = 0; i < 3; i++){
             String pw = "pass" + i + i + i + i + "pass" + i + i + i + i;
             transport = new SecureTransport(pw);
@@ -50,13 +52,14 @@ public class GenerateAndWriteKeys {
         //Write keys files
         KeysObject keysObject = new KeysObject();
         keysObject.setPublicKeys(publicKeys);
+        keysObject.setSecretKey(secretKey);
         for(int i = 0; i < 3; i++){
             transport = new SecureTransport("pass" + i + i + i + i + "pass" + i + i + i + i);
             keysObject.setPrivateKey(i + "", privateKeys[i]);
-            transport.writeEncryptedFile("keys_" + i, dm);
-            System.out.println("pre-encryption dm: " + dm.getContents());
-            DemoMessage msg = (DemoMessage)transport.readEncryptedFile("keys_" + i);
-            System.out.println("decrypted dm: " + dm.getContents());
+            transport.writeEncryptedFile("keys_" + i, keysObject);
+            //System.out.println("pre-encryption dm: " + dm.getContents());
+            //DemoMessage msg = (DemoMessage)transport.readEncryptedFile("keys_" + i);
+            //System.out.println("decrypted dm: " + dm.getContents());
         }
         
         //Test file decryption

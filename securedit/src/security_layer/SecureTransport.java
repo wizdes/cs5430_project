@@ -73,6 +73,9 @@ public class SecureTransport implements SecureTransportInterface{
         PrivateKey privateKey = keyObj.getPrivateKey();
         keys.privateKey = privateKey;
         keys.publicKeys = keyObj.getPublicKeys();
+        keys.secretKeys.put("0", keyObj.getSecretKey());
+        keys.secretKeys.put("1", keyObj.getSecretKey());
+        keys.secretKeys.put("2", keyObj.getSecretKey());
         
         Key secretKey = KeyFactory.generateSymmetricKey();  //Replace with authentication
         //KeyPair asymmetricKeys = KeyFactory.generateAsymmetricKeys();
@@ -108,6 +111,7 @@ public class SecureTransport implements SecureTransportInterface{
     public Serializable sendAESEncryptedMessage(Message m) {
         byte[] iv = CipherFactory.generateRandomIV();
         SecretKey secretKey = keys.getSymmetricKey(m.getTo().getID());
+        System.out.println("secret key = " + secretKey);
         Cipher cipher = CipherFactory.constructAESEncryptionCipher(secretKey, iv);
         
         return sendEncryptedMessage(m, cipher, iv, CipherFactory.HMAC(secretKey, m));

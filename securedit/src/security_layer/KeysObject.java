@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import javax.crypto.SecretKey;
 
 /**
  *
@@ -20,6 +21,7 @@ public class KeysObject implements java.io.Serializable {
     private ConcurrentMap<String, PublicKey> publicKeys = new ConcurrentHashMap<>();  //<Ident, publicKey>
     private PrivateKey privateKey;
     private String ident;
+    private SecretKey secretKey;
     
 
     public void addPublicKey(String ident, PublicKey key){
@@ -31,6 +33,12 @@ public class KeysObject implements java.io.Serializable {
     public void setPrivateKey(String ident, PrivateKey key){
         this.ident = ident;
         this.privateKey = key;
+    }
+    public void setSecretKey(SecretKey sk) {
+        secretKey = sk;
+    }
+    public SecretKey getSecretKey() {
+        return secretKey;
     }
     
     /**
