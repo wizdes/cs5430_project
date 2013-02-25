@@ -12,6 +12,7 @@ Table of Contents
 		i) size of Keys
 	e) Nonces
 	f) HMACs
+	g) Code Reviews
 
 1) Overview 
 
@@ -38,3 +39,5 @@ e) Nonces
 	We are using nonces to ensure the system is not susceptible to replay attacks. The specific protocols in using nonces during machine authentication is detailed in FUNCTIONALITY.txt.
 f) HMACs
 	We are using HMACs to ensure the integrity of the data we are sending. The HMAC is generated using the standard Java implementation of HMACs.
+g) Code Reviews
+	We used Github's 'Pull Request' feature to code review all commits going into the master branch. This allows us to confirm all changes with the entire team and reduce the number of errors pushed into code.
