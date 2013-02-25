@@ -28,7 +28,7 @@ We introduced unit tests for each package of our cryptographic substrate.
 There are several other assurance measures that were taken to increase the assurance in the correctness of the system.
 
 a) SealedObject
-We used the Java class 'SealedObject' to encapsulates a Java object and encrypts it.
+We used the Java class 'SealedObject' to encapsulate a Java object and encrypt it.
 b) SecureRandom
 We used the Java class 'SecureRandom' to general random numbers securely.
 c) RSA Encryption/Decryption
@@ -39,9 +39,10 @@ d) AES Encryption/Decryption
 e) Nonces
 	We are using nonces to ensure the system is not susceptible to replay attacks. The specific protocols in using nonces during machine authentication is detailed in FUNCTIONALITY.txt.
 f) HMACs
-	We are using HMACs to ensure the integrity of the data we are sending. The HMAC is generated using the standard Java implementation of HMACs.
+	We are using HMACs to ensure the integrity of the data we are sending. The HMAC is generated using the standard Java implementation of HMACs and encrypted with the message.
 g) Code Reviews
 	We used Github's 'Pull Request' feature to code review all commits going into the master branch. This allows us to confirm all changes with the entire team and reduce the number of errors pushed into code.
 
 h) Class Design 
-	To reduce programmer error and prevent any leakage of insecure data, we abstracted our system into three layers. The bottom layer is the networking transport layer which provides basic networking functionality of a multi-client socket architecture. it is within this layer that serialization of messages occurs. The second layer is the security layer which packages messages into 
+	To reduce programmer error and prevent any leakage of insecure data, we abstracted our system into three layers. The bottom layer is the transport layer which provides basic networking functionality of a multi-client socket architecture, as well as, file operations. It is within this layer that serialization of messages and files occurs. The top layer is the application layer, which runs client applications. It is within this top layer that message and file content construction occurs. 
+	The application layer and the transportation layer are separated by the security layer. This layer has functions which accept messages and file contents from the application layer, and packages them into encrypted objects using AES(from password or shared random key) or RSA. This layer also processes messages coming up from the transport layer by unpackaging/decrypting the encrypted messages and sending the plaintext data up to the application. All keys are encapsulated within this layer and aren’t visible outside it. No data can be sent between layers without passing through this secure layer. This provides assurance that all messages and files sent/written are encrypted and no keys leave this layer without first being protected.
