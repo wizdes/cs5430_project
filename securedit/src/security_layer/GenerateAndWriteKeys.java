@@ -4,12 +4,15 @@
  */
 package security_layer;
 
+import application.messages.DemoMessage;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import javax.crypto.Cipher;
+import transport_layer.network.Node;
 
 /**
  *
@@ -36,13 +39,23 @@ public class GenerateAndWriteKeys {
             privateKeys[i] = keys.getPrivate();
         }
         
+        //Test personal key
+        DemoMessage dm = new DemoMessage(new Node(null, null, 0), "", "Hello Matt, I hope this works.");
+        //Cipher cipher = CipherFactory.constructAESEncryptionCipher(personal, iv) 
+        
         //Write keys files
         KeysObject keysObject = new KeysObject();
         keysObject.setPublicKeys(publicKeys);
         for(int i = 0; i < 3; i++){
+            transport = new SecureTransport("pass" + i + i + i + i + "pass" + i + i + i + i);
             keysObject.setPrivateKey(i + "", privateKeys[i]);
-            transport.writeEncryptedFile("keys_" + i, keysObject);
+            transport.writeEncryptedFile("keys_" + i, dm);
+            System.out.println("pre-encryption dm: " + dm.getContents());
+            DemoMessage msg = (DemoMessage)transport.readEncryptedFile("keys_" + i);
+            System.out.println("decrypted dm: " + dm.getContents());
         }
+        
+        //Test file decryption
         
         
 //        KeysObject readObj = (KeysObject)transport.readEncryptedFile(filename);
