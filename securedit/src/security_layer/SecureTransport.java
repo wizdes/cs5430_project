@@ -73,13 +73,12 @@ public class SecureTransport implements SecureTransportInterface{
         PrivateKey privateKey = keyObj.getPrivateKey();
         keys.privateKey = privateKey;
         keys.publicKeys = keyObj.getPublicKeys();
-        keys.secretKeys.put("0", keyObj.getSecretKey());
-        keys.secretKeys.put("1", keyObj.getSecretKey());
-        keys.secretKeys.put("2", keyObj.getSecretKey());
-        
-        Key secretKey = KeyFactory.generateSymmetricKey();  //Replace with authentication
+//        keys.secretKeys.put("0", keyObj.getSecretKey());
+//        keys.secretKeys.put("1", keyObj.getSecretKey());
+//        keys.secretKeys.put("2", keyObj.getSecretKey());
+                
+//        Key secretKey = KeyFactory.generateSymmetricKey();  //Replace with authentication
         //KeyPair asymmetricKeys = KeyFactory.generateAsymmetricKeys();
-        
         
         authInstance = new Authentications(keys);
     }
@@ -111,9 +110,14 @@ public class SecureTransport implements SecureTransportInterface{
     public Serializable sendAESEncryptedMessage(Message m) {
         byte[] iv = CipherFactory.generateRandomIV();
         SecretKey secretKey = keys.getSymmetricKey(m.getTo().getID());
-        System.out.println("secret key = " + secretKey);
-        Cipher cipher = CipherFactory.constructAESEncryptionCipher(secretKey, iv);
         
+        if (secretKey == null) {
+            System.out.println("No symemetric key found for " + m.getTo().getID());
+            return null;
+        }
+        
+        Cipher cipher = CipherFactory.constructAESEncryptionCipher(secretKey, iv);
+        m.setFrom(this.networkTransport.getHost());
         return sendEncryptedMessage(m, cipher, iv, CipherFactory.HMAC(secretKey, m));
     }
 
@@ -122,12 +126,12 @@ public class SecureTransport implements SecureTransportInterface{
         byte[] iv = new byte[16];
         PublicKey publicKey = keys.getPublicKey(m.getTo().getID());
         Cipher cipher = CipherFactory.constructRSAEncryptionCipher(publicKey);
+        m.setFrom(this.networkTransport.getHost());
         return sendEncryptedMessage(m, cipher, iv, null);
     }
 
     private Serializable sendEncryptedMessage(Message m, Cipher cipher, byte[] iv, byte[] hmac) {
         Node from = this.networkTransport.getHost();
-        m.setFrom(from);
         
         try {
             Serializable send_obj = m;
@@ -136,6 +140,7 @@ public class SecureTransport implements SecureTransportInterface{
             }
             SealedObject encryptedObject = new SealedObject(send_obj, cipher);
             EncryptedObject encryptedMessage = new EncryptedObject(encryptedObject, iv, from);
+            
             networkTransport.send(m.getTo(), encryptedMessage);
             return encryptedObject.toString();          //Doesn't return encrypted text
         } catch (IOException | IllegalBlockSizeException ex) {
@@ -167,8 +172,10 @@ public class SecureTransport implements SecureTransportInterface{
             Object obj = encryptedObject.encryptedObject.getObject(cipher);
             decryptedMsg = messageFromEncryptedObject(obj, secretKey);
             if (decryptedMsg instanceof AuthenticationMessage) {
+                System.out.println("[DEBUG] processing AuthenticationMessage");
                 Message m = authInstance.processAuthenticationRequest((AuthenticationMessage)decryptedMsg);
                 if (m != null) {
+                    System.out.println("[DEBUG] sendRSAEncryptedMessage");
                     sendRSAEncryptedMessage(m);
                 }
             } else {

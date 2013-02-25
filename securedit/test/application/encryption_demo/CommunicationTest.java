@@ -7,6 +7,8 @@ package application.encryption_demo;
 import application.messages.DemoMessage;
 import application.messages.Message;
 import java.util.Collection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.crypto.SecretKey;
 import org.junit.After;
 import static org.junit.Assert.*;
@@ -37,10 +39,7 @@ public class CommunicationTest {
     @Before
     public void setUp() throws Exception {
         myCommunicator = new Communication(password_0, myNode);
-        System.out.println("will we see this?");
-        SecureTransportInterface s1 = myCommunicator.getSecureTransport();
         theirCommunicator = new Communication(password_1, theirNode);
-//theirCommunicator.getSecureTransport().setKeys(s1.getKeys());
     }
 
     @After
@@ -48,11 +47,14 @@ public class CommunicationTest {
         myCommunicator.shutdown();
         theirCommunicator.shutdown();
     }
-                        
+
+    // they authenticate and send
     @Test
-    public void testSendAESMessage() {
+    public void testSendAESMessage_1() {
         int iterations = 100;
         int recieved = 0;
+        assertTrue(theirCommunicator.authenticateMachine(myNode));
+       
         new SendingThread(theirCommunicator, new AESMessageSender(), myNode, iterations).start();
         
         while (recieved < iterations) {
@@ -66,8 +68,35 @@ public class CommunicationTest {
         assertEquals(recieved, iterations);
     }    
     
+    // I authenticate they send
+    @Test
+    public void testSendAESMessage_2() {
+        int iterations = 100;
+        int recieved = 0;
+        assertTrue(myCommunicator.authenticateMachine(theirNode));
+        
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(CommunicationTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+                
+        
+        new SendingThread(theirCommunicator, new AESMessageSender(), myNode, iterations).start();
+        
+        while (recieved < iterations) {
+            Collection<Message> messages = myCommunicator.waitForMessages();
+            for (Message m : messages) {
+                DemoMessage dm = (DemoMessage)m;
+                assertEquals("hello world " + recieved++, dm.getContents());
+            }
+        }
+        
+        assertEquals(recieved, iterations);
+    }
+    
     //@Test
-    public void testSendRSAMessage_Msg01() {
+ /*   public void testSendRSAMessage_Msg01() {
         int iterations = 100;
         int recieved = 0;
         new SendingThread(theirCommunicator, new RSAMessageSender_msg01(), myNode, iterations).start();
@@ -119,7 +148,7 @@ public class CommunicationTest {
         }
         
         assertEquals(recieved, iterations);
-    }     
+    }     */
     
     private static class SendingThread extends Thread {
         private CommunicationInterface communicator;

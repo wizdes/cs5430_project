@@ -41,7 +41,7 @@ public class GenerateAndWriteKeys {
             String pw = "pass" + i + i + i + i + "pass" + i + i + i + i;
             transport = new SecureTransport(pw);
             KeyPair keys = KeyFactory.generateAsymmetricKeys();
-            publicKeys.put("1", keys.getPublic());
+            publicKeys.put(i + "", keys.getPublic());
             privateKeys[i] = keys.getPrivate();
         }
         

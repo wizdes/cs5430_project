@@ -27,9 +27,11 @@ class Client {
     public boolean send(Node destNode, Serializable m) {  
         String key = destNode.toString();
         
-//        if (!channelMap.containsKey(key)){
-            channelMap.putIfAbsent(key, new Client.Channel(destNode));
-//       }
+        System.out.println("[debug] sned 1 ");
+        if (!channelMap.containsKey(key)) {
+            Channel c = new Client.Channel(destNode);
+            channelMap.putIfAbsent(key, c);
+        }
         
         return channelMap.get(key).send(m);
     }
@@ -65,9 +67,12 @@ class Client {
             if (out != null && in != null) { 
                 try {                    
                     // send message
+                    System.out.println("[debug] write object");
                     out.writeObject(message);
                     out.flush();
+                    System.out.println("[debug] read");
                     response = in.readLine();
+                    System.out.println("[debug] read it");
                 } catch (IOException ex) {
                     ex.printStackTrace();
                     System.err.println("Client error reading from : " + node + " after send");

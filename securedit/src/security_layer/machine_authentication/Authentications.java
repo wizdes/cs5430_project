@@ -34,7 +34,7 @@ public class Authentications {
     public void removeAuthentication(String ident){
         authentications.remove(ident);
     }
-    
+        
     private class Authentication{
         Message message;
         Condition cond;
@@ -59,6 +59,7 @@ public class Authentications {
         Node to = ((Message)message).getFrom();
         
         if (message instanceof Msg01_AuthenticationRequest) {
+            System.out.println("[DEBUG] processing Msg01_AuthenticationRequest");
             
             Msg01_AuthenticationRequest msg = (Msg01_AuthenticationRequest)message;
             
@@ -72,11 +73,14 @@ public class Authentications {
             return m;
             
         } else if (message instanceof Msg02_KeyResponse) {
+            System.out.println("[DEBUG] processing Msg02_KeyResponse");
+            
             Msg02_KeyResponse msg = (Msg02_KeyResponse)message;
             Authentication auth = authentications.get(to.getID());
             
             int nonce2Response = msg.getNonce2() + 1;
             if (msg.getNonce1Response() - 1 != ((Msg01_AuthenticationRequest)auth.message).getNonce()) {
+                System.out.println("[DEBUG] Bad Nonce msg02!");
                 authentications.remove(to.getID());
                 return null;
             }
@@ -85,6 +89,7 @@ public class Authentications {
             
             keys.addSymmetricKey(to.getID(), msg.getSymmetricKey());
             
+            System.out.println("[DEBUG] grabbinglock");
             auth.lock.lock();
             try {
                 auth.cond.signal();
@@ -92,14 +97,18 @@ public class Authentications {
                 auth.lock.unlock();
             }
             
+            System.out.println("[DEBUG] releasing lock");
             return m;
             
         } else if (message instanceof Msg03_AuthenticationAgreement) {
+            System.out.println("[DEBUG] processing Msg03_AuthenticationAgreement");
+            
             Msg03_AuthenticationAgreement msg = (Msg03_AuthenticationAgreement)message;
             Authentication auth = authentications.get(to.getID());
             Msg02_KeyResponse msg2 = (Msg02_KeyResponse)auth.message;
             
             if (msg.getNonce2Response() - 1 != msg2.getNonce2()) {
+                System.out.println("[DEBUG] Bad Nonce msg03!");
                 authentications.remove(to.getID());
                 return null;
             }

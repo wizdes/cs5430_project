@@ -39,7 +39,8 @@ public class ServerThread extends Thread {
             in = new ObjectInputStream(socket.getInputStream());
             baos = new ByteArrayOutputStream();
             
-            Serializable m = (Serializable)in.readObject();          
+            Serializable m = (Serializable)in.readObject();
+            out.println(MESSAGE_RECIEVED_ACK);
             while (! (m instanceof CloseConnection)) {
                 
                 try {
@@ -48,8 +49,8 @@ public class ServerThread extends Thread {
                     Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 
-                out.println(MESSAGE_RECIEVED_ACK);
                 m = (Serializable)in.readObject();
+                out.println(MESSAGE_RECIEVED_ACK);
             }
             
         } catch (ClassNotFoundException ex) {
