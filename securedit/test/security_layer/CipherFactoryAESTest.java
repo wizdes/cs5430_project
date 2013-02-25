@@ -45,10 +45,11 @@ public class CipherFactoryAESTest {
             Cipher encrypt = CipherFactory.constructAESEncryptionCipher(sk, iv);
             Cipher decrypt = CipherFactory.constructAESDecryptionCipher(sk, iv);
             String test = "A NEW HOPE";
-            String encrypted = new String(encrypt.doFinal(test.getBytes()));
-            assert(!encrypted.equals(test));
-            String decrypted = new String(decrypt.doFinal(encrypted.getBytes()));
-            assert(decrypted.equals(test));
+            byte[] raw_bytes = test.getBytes();
+            byte[] encrypted = encrypt.doFinal(raw_bytes);
+            assert(!Arrays.equals(encrypted, raw_bytes));
+            byte[] decrypted = decrypt.doFinal(encrypted);
+            assert(Arrays.equals(raw_bytes, decrypted));
         } catch (IllegalBlockSizeException ex) {
             Logger.getLogger(CipherFactoryAESTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (BadPaddingException ex) {

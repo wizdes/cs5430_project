@@ -13,6 +13,7 @@ Table of Contents
 	e) Nonces
 	f) HMACs
 	g) Code Reviews
+	h) Class Design
 
 1) Overview 
 

@@ -21,13 +21,27 @@ Table of Contents
 
 1) Overview
 
-2) Assumptions
+In this phase, we are demonstrating our cryptographic substrate and how these operations are used to maintain confidentality, integrity and availability. After reviewing a high level description of our system's interface is used to maintain confidentality, integrity and availability, we go over the assumptions our system makes. Finally, we go in depth in the interfaces our system implements.
 
+a) Confidentality
+
+All communication between machines are subject to Dolov-Yao attacks. Because of this, we encrypt our messages either with AES session keys and exchange this key using public/private key encryption. Furthermore, our program stores public keys safely on the file, encrypting the public keys with AES cipher that is generated using a key generator on a user generated password. This allows the public keys to stored safely on disk (via encryption) without having to store the key on disk.
+
+b) Integrity
+
+We guarantee the integrity of both the data sent between machines as well as data stored on disk by calculating an HMAC of the unencrypted data before encrypting the the concatenation of the HMAC and the unencrypted data. As mentioned in the online lecture notes "[2/10] Applied Cryptography Notes" under the section (Part 2: Integrity), 
+
+c) Availability
+2) Assumptions 
 3) Functionality
-
 a) File handling
 b) Key Generation
 c) Machine_Authentication
+i) session key exchange protocol
+ii) message protocol
 d) Encryption
+i) RSA
+ii) AES
+iii) HMACs
 e) Messages
 f) Network
