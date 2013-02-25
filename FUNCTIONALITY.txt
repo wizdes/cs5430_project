@@ -8,16 +8,14 @@ Table of Contents
 2) Assumptions 
 3) Functionality
 	a) File handling
-	b) Key Generation
-	c) Machine_Authentication
+	b) Machine_Authentication
 		i) session key exchange protocol
 		ii) message protocol
-	d) Encryption
+	c) Encryption
 		i) RSA
 		ii) AES
 		iii) HMACs
-	e) Messages
-	f) Network
+	d) Network
 
 1) Overview
 
@@ -40,14 +38,58 @@ We use TCP to address issues of availability that involves dropped or out of ord
 We assume attackers do not have physical access to the hardware of a user while the user is using the application. Attackers also do not have access to the computer’s software nor exploit software vulnerabilities unrelated to the system. Furthermore, we assume users have access to read and modify files on their system while using the application.
 
 3) Functionality
+
+Here are some details of our regarding the functionality of our code.
+
 a) File handling
-b) Key Generation
-c) Machine_Authentication
-i) session key exchange protocol
-ii) message protocol
-d) Encryption
+
+The 'FileHandler' class has a several functions that encapsulate file handling:
+public Serializable readFile(String filename);
+public boolean writeFile(String filename, Serializable content);
+public String openUnserializedFile(String filename);
+
+These three functions are write and read from files.
+
+
+b) Machine_Authentication
+
+We use a protocol for machine authentication. 
+
+To exchange session keys, we use the following protocol. 
+A and B are machines.
+A is trying to authenticate to B.
+K_B is the public key of B, and K_A is the public key of A.
+
+1) A -> B : {A, r} K_B, where r is a nonce
+2) B generates K_AB
+3) B -> A : {K_AB, B, r + 1, r'} K_A, where r' is another nonce
+4) A verifies r + 1
+5) A -> B : {r' + 1} K_B
+
+In this protocol, B is able to communicate with A the session key K_AB. The first nonce r is used to confirm the message received at 3 to A is indeed from B. The second nonce r' is used to confirm the message at 5 received by B is indeed from A.
+
+From this, both machines receive a shared key which is then used to encrypt and send messages between each other.  We plan on using this to implement the following message sending protocol:
+A and B are machines.
+A is trying to send a message m to B.
+K_AB is the shared key of A and B.
+
+1) A -> B : {A, B} K_AB
+2) B -> A : {B, A, r} K_AB where r is a nonce
+3) A -> B : {m, A, B, r + 1} K_AB
+
+c) Encryption and MACs
+
+We used several encryption and MAC schemes. 
+
 i) RSA
+We used the standard Java Key Generator and Cipher using the 'RSA/ECB/PKCS1Padding' algorithm to generate public/private RSA key pairs. The size of the key is 3584 bits.
+
 ii) AES
+
+We used the standard Java SecureRandom random number generator to create an initialization vector using the 'SHA1PRNG' algorithm and using the 'AES/CBC/PKCS5Padding' algorithm to generate a symmetric AES key with 128 bytes.
+
 iii) HMACs
-e) Messages
-f) Network
+We used the standard Java MAC class to generate an HMAC of our messages using the 'HmacSHA256' algorithm.
+
+d) Network
+
