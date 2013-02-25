@@ -1,3 +1,7 @@
+Patrick Berens(pcb73)
+Matt Goggin(mg343)
+Yi Li(yl2326)
+
 FUNCTIONALITY.txt, which should discuss the interface that your system implements. What operations does it export? What is the effect of each operation? Diagram or give high-level psuedocode for the cryptographic protocol being used within each operation or within collection of operations.
 
 Table of Contents

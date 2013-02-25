@@ -1,3 +1,7 @@
+Patrick Berens(pcb73)
+Matt Goggin(mg343)
+Yi Li(yl2326)
+
 ASSURANCE.txt, which describes how and what you tested in the software being submitted. Also describe here any other means you used to increase assurance in the correctness of the system and in the absence of vulnerabilities.
 
 Table of Contents
