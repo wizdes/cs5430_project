@@ -4,72 +4,74 @@ Source files that contain the source needed to compile and run your software. Th
 Table of Contents:
 1) Introduction
 2) Sections
-	a) File_Handler
-	b) Keys
-	c) Machine_Authentication
-	d) Encryption
-	e) Messages
-	f) Network
-	g) GUI Scaffolding
-3) Testing 
-	a) Machine Authentication
-	b) RSA Crypto
-	c) Encryption
-	d) Messages
-	e) Network
-
+	a) Security Layer
+		i) encryption
+		ii) machine authentication
+	b) Transport Layer
+		i) files
+		ii) network
+	c) Application Layer
+		i) messages
+		ii) demo
+	d) Testing 
+		i) Machine Authentication
+		ii) RSA Crypto
+		iii) Encryption
+		iv) Messages
+		v) Network 
 
 1) Introduction:
 
-In this phase, we implemented the cryptographic substrate to our colloborative text editor. We split the different parts of the substrate into seperate packages to encapsulate different parts of the implementation and abstracting away different parts of the code behind interfaces. 
+In this phase, we implemented the cryptographic substrate to our colloborative text editor. We split the different parts of the substrate into seperate layers to encapsulate different parts of the implementation and abstracting away different parts of the code behind interfaces. 
 
 2) Sections
-There are 7 main packages to implemented different parts of the cryptographic substrate.
+There are 4 main layers and 7 main packages to implemented different parts of the cryptographic substrate. 
 
-a) File_Handler
+The Security Layer implements the security elements, including the encryption/decryption mechanisms, HMACs, machine authentication, secur transport, etc. 
 
+The Transport Layer implements the underlying network elements and saving to files. 
+
+The Application Layer has the message classes that the main application uses, as well the GUI code for our scaffolding.
+
+The Testing Layer has all our unit test elements.  
+
+a) Security Layer
+
+i) security_layer (package)
+This package deals mostly with the encryption, decryption and the secure transport of objects. It also generates and writes keys.
+
+Files:
+CipherFactory.java
+EncryptedObject.java
+EncryptionKeys.java
+GenerateAndWriteKeys.java
+HMACMessage.java
+KeyFactory.java
+KeysObject.java	
+SecureTransport.java
+SecureTransportInterface.java
+
+
+ii) machine authentication (package)
+This package deals with authenticating machines by exchanging session keys using established public/private keys, as well as sending secure messages after the session key exchange.
+
+Files:
+MachineAuth.java
+MachineAuthInterface.java
+Msg01_AuthenticationRequest.java
+Msg02_KeyResponse.java
+Msg03_AuthenticationAgreement.java
+
+b) Transport Layer
+
+i) files (package)
 This package handles writing to and reading from a file. The interface allows for the user to read and write either via text string or a byte array.
 
 Files:
 File_Handler.java - implements writing to and reading from a file. Uses java.io.* to access the file and input/output. 
 File_Handler_Interface.java - provides an interface to read and write from a file.
 
-
-b) Keys
-
-This package holds the class that contains all the information a particular will need to connect to others, namely the public key of the user's peers and the user's own private key.
-
-Files:
-Keys_Func.java - class that contains the data structure necessary for a user to connect to others
-
-
-c) Machine_Authentication
-
-This package provides an interface that allows two machines to authenticate with each other using hybrid authentication. This package also allows the machines to communicate with each other after the authentication using the shared public key.
-
-Machine_Auth.java - implements all the authentication of one machine to another. This class exchanges a session key for a session use and creates an interface that allows a user to send messages to another.
-Machine_Auth_Interface.java - This interface provides the functions that are called to authenticate a machine to another as well as sending secure messages.
-
-
-d) Encryption
-
-This package includes all the encryption/decryption algorithms for encryption/decryption of all communication from the program to other programs or to file.
-
-Files:
-AES.java - implements the functions that allow for the creation of AES keys given a password, as well as the encryption and decryption of messages under this encryption scheme
-RSA_Crypto.java - implements the functions used to create a public/private RSA key pair, as well as encrypt via public key and decrypt via private key
-
-
-e) Messages
-
-There are several Message classes in this package. All derive from the base Message class and implement a different type of Message that is to be sent. 
-
-Files:
-Message.java - the base class of Message; it stores the message and allows for an easy interface to encrypt, decrypt and serialize into a network message
-!!!^_^_^_^_^!!! Add the other files here (not sure if what others I haven't included)
-
-f) Network
-
+ii) network (package)
 This package provides the network layer and implements send, receive and other network elements. !!!^_^_^_^_^_^!!!! MORE STUFF HERE
 
 Files:
@@ -82,59 +84,30 @@ Pair.java -
 Server.java - 
 ServerThread.java - 
 
+c) Application Layer
 
-g) GUI Scaffolding
-
-This package is used to provide the GUI scaffolding to demonstrate how our cryptographic layer works.
-
-Files:
-EncryptionDemoFunctionality.java - The functionality class that implements the actions specified by the GUI. 
-EncryptionDemoGUI.form - Part of the GUI class.
-EncryptionDemoGUI.java - The GUI class that draws the elements of the GUI.
-
-3) Testing
-
-a) Machine Authentication
-
-This unit test package tests the machine authentication functionality.
-
-Files: 
-Machine_AuthMsgSend.java - Tests that messages after the initial hybrid encryption handshake is completed can be sent securely with the session key.
-Machine_AuthTest.java - Tests the initial exchange of the session key works.
-
-
-b) RSA Crypto
-
-The unit test package tests the RSA public/private key encryption/decryption functionality. 
+i) messages (package)
+There are several Message classes in this package. All derive from the base Message class and implement a different type of Message that is to be sent. 
 
 Files:
-RSA_CryptoTest.java - This class encrypts a string with a public key, decrypts it and confirms that the string is correct.
+Message.java - the base class of Message; it stores the message and allows for an easy interface to encrypt, decrypt and serialize into a network message
+!!!^_^_^_^_^!!! Add the other files here (not sure if what others I haven't included)
 
 
-c) Encryption
+ii) demo (package)
 
-The unit test package tests the AES symmetric encryption/decryption functionality.
-
-Files:
-AESTest.java - THis class encrypts a string with an AES key and decrypts it, confirming the correctness of the string.
-
-
-d) Messages
-
-This unit test package tests the message classes and confirms their functionality.
+This package deals with the actual scaffolding of the program; it provides the GUI that allows a tester to observe the functionality of the cryptographic substrate.
 
 Files:
-MessageTest.java - Tests the Message class functionality.
-DemoMessageTest.java - Tests the DemoMessage class functionality.
-EncryptedMsgwNonceTest.java - Tests the EncryptedMsgwNonceTest class functionality.
-AESEncryptedMessageTest.java - Tests the AESEncryptedMessageTest class functionality. 
+Communication.java - 
+CommunicationInterface.java - 
+EncryptionDemoFunctionality.java - 
+EncryptionDemoGUI.form - 
+EncryptionDemoGUI.java - 
 
-
-e) Network
-
-This unit test package tests the functionality of the Network class.
-
-Files:
-NetworkTest.java - A general test of the functionality of the network layer.
-ServerTest.java - Tests the server class of the network layer.
-
+d) Testing 
+i) Machine Authentication
+ii) RSA Crypto
+iii) Encryption
+iv) Messages
+v) Network 
