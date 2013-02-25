@@ -9,21 +9,23 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  *
  * @author Patrick C. Berens
  */
 public class KeysObject implements java.io.Serializable {
-    private Map<String, Key> publicKeys = new HashMap<>();  //<Ident, publicKey>
-    private Key privateKey;
+    private ConcurrentMap<String, PublicKey> publicKeys = new ConcurrentHashMap<>();  //<Ident, publicKey>
+    private PrivateKey privateKey;
     private String ident;
     
 
     public void addPublicKey(String ident, PublicKey key){
         publicKeys.put(ident, key);
     }
-    public Key getPublicKey(String ident){
+    public PublicKey getPublicKey(String ident){
         return publicKeys.get(ident);
     }
     public void setPrivateKey(String ident, PrivateKey key){
@@ -34,21 +36,21 @@ public class KeysObject implements java.io.Serializable {
     /**
      * @return the publicKeys
      */
-    public Map<String, Key> getPublicKeys() {
+    public ConcurrentMap<String, PublicKey> getPublicKeys() {
         return publicKeys;
     }
 
     /**
      * @param publicKeys the publicKeys to set
      */
-    public void setPublicKeys(Map<String, Key> publicKeys) {
+    public void setPublicKeys(ConcurrentMap<String, PublicKey> publicKeys) {
         this.publicKeys = publicKeys;
     }
 
     /**
      * @return the privateKey
      */
-    public Key getPrivateKey() {
+    public PrivateKey getPrivateKey() {
         return privateKey;
     }
 }

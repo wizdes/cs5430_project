@@ -25,6 +25,7 @@ public class NetworkTransport implements NetworkTransportInterface{
     private Node host;
     
     public NetworkTransport(Node host, SecureTransportInterface secureTransport) {
+        System.out.println("instantiate NT " + host);
         client = new Client();
         server = new Server(host, secureTransport);
         server.listen();
@@ -40,6 +41,10 @@ public class NetworkTransport implements NetworkTransportInterface{
     public void shutdown() {
         this.server.shutdown();
         this.client.closeConnections();
+    }
+    
+    public Node getHost() {
+        return host;
     }
     
     public static void debugBytes(byte[] bytes, String label) {

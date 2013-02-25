@@ -21,11 +21,13 @@ public class ServerThread extends Thread {
     private PrintWriter out = null;
     private ObjectInputStream in = null;
     private ByteArrayOutputStream baos = null;
+    private Node client;
         
     public ServerThread(Socket socket, Server server) {
         super("ServerThread");
         this.socket = socket;
         this.server = server;
+        this.client = client;
     }
     
     @Override

@@ -7,9 +7,12 @@ package security_layer;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  *
@@ -28,9 +31,10 @@ public class GenerateAndWriteKeys {
 
         //Generate keys
         PrivateKey privateKeys[] = new PrivateKey[3];
-        Map<String, Key> publicKeys = new HashMap<>();
+        ConcurrentMap<String, PublicKey> publicKeys = new ConcurrentHashMap<>();
         for(int i = 0; i < 3; i++){
-            transport = new SecureTransport("pass" + i + i + i + i + "pass" + i + i + i + i);
+            String pw = "pass" + i + i + i + i + "pass" + i + i + i + i;
+            transport = new SecureTransport(pw);
             KeyPair keys = KeyFactory.generateAsymmetricKeys();
             publicKeys.put("1", keys.getPublic());
             privateKeys[i] = keys.getPrivate();

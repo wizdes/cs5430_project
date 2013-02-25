@@ -5,6 +5,7 @@
 package security_layer;
 
 import javax.crypto.SealedObject;
+import transport_layer.network.Node;
 
 /**
  *
@@ -13,10 +14,16 @@ import javax.crypto.SealedObject;
 public class EncryptedObject implements java.io.Serializable {
     byte[] iv;
     SealedObject encryptedObject;
-
-    public EncryptedObject(SealedObject encryptedObject, byte[] iv){
+    private Node from; 
+    
+    public EncryptedObject(SealedObject encryptedObject, byte[] iv, Node from){
         assert iv.length == 16: iv;
         this.iv = iv;
         this.encryptedObject = encryptedObject;
+        this.from = from;
+    }
+    
+    public Node getFrom() {
+        return this.from;
     }
 }

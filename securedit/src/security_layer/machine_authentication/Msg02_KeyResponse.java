@@ -12,7 +12,7 @@ import transport_layer.network.Node;
  * B -> A: {K_AB, B, r1 + 1, r2}K_A
  * @author Patrick C. Berens
  */
-public class Msg02_KeyResponse extends Message {
+public class Msg02_KeyResponse extends Message implements AuthenticationMessage {
     SecretKey symmetricKey;     //K_AB
     String fromIdent;           //B
     int nonce1Response;         //r1 + 1

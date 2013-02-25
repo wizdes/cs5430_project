@@ -11,7 +11,7 @@ import transport_layer.network.Node;
  * A -> B: {A, r1}K_B
  * @author Patrick C. Berens
  */
-public class Msg01_AuthenticationRequest extends Message {
+public class Msg01_AuthenticationRequest extends Message implements AuthenticationMessage {
     String fromIdentifier;  //A
     int nonce1;             //r1
     public Msg01_AuthenticationRequest(Node to, int nonce1) {

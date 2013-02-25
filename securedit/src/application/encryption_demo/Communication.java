@@ -37,6 +37,7 @@ public class Communication implements CommunicationInterface {
     private SecureTransportInterface secureTransport;
     
     public Communication(String password, Node host) {
+        System.out.println("c " + host);
         this.secureTransport = new SecureTransport(password, host, this);
     }
     
