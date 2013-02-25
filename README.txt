@@ -38,26 +38,26 @@ i) security_layer (package)
 This package deals mostly with the encryption, decryption and the secure transport of objects. It also generates and writes keys.
 
 Files:
-CipherFactory.java
-EncryptedObject.java
-EncryptionKeys.java
-GenerateAndWriteKeys.java
-HMACMessage.java
-KeyFactory.java
-KeysObject.java	
-SecureTransport.java
-SecureTransportInterface.java
+CipherFactory.java - a factory class that generates ciphers given a key
+EncryptedObject.java - encapsulates objects and serializes them for network transfer
+EncryptionKeys.java - a machine's set of keys used for communication
+GenerateAndWriteKeys.java - a class that generates and write keys
+HMACMessage.java - a class that contains the HMAC and a message
+KeyFactory.java - a factory class that generates keys (optionally given a password)
+KeysObject.java	- a class used to serializing and de-serializing keys to a file
+SecureTransport.java - the main layer that implements the interface used by the application and the network layer
+SecureTransportInterface.java - the interface used to securely transport messages between machines
 
 
 ii) machine authentication (package)
 This package deals with authenticating machines by exchanging session keys using established public/private keys, as well as sending secure messages after the session key exchange.
 
 Files:
-MachineAuth.java
-MachineAuthInterface.java
-Msg01_AuthenticationRequest.java
-Msg02_KeyResponse.java
-Msg03_AuthenticationAgreement.java
+MachineAuth.java - the implementation of the machine authentication interface
+MachineAuthInterface.java - the interface used to authenticate between machines used by the secure transport layer
+Msg01_AuthenticationRequest.java - a class extending from class 'Message' that requests authentication of a machine
+Msg02_KeyResponse.java - a class extending from class 'Message' that responses to the authentication request with a key
+Msg03_AuthenticationAgreement.java - a class extending from class 'Message' that signals an agreement of authentication 
 
 b) Transport Layer
 
@@ -69,17 +69,17 @@ File_Handler.java - implements writing to and reading from a file. Uses java.io.
 File_Handler_Interface.java - provides an interface to read and write from a file.
 
 ii) network (package)
-This package provides the network layer and implements send, receive and other network elements. !!!^_^_^_^_^_^!!!! MORE STUFF HERE
+This package provides the network layer and implements send, receive and other network elements. 
 
 Files:
-Client.java - 
-ClientListenerThread.java - 
-Network.java - 
-NetworkInterface.java - 
-Node.java -
-Pair.java - 
-Server.java - 
-ServerThread.java - 
+Client.java - the class responsible for interacting in the system as a client
+ClientListenerThread.java - a class that runs concurrently with the program to handle client requests from the network
+NetworkTransport.java - the class that implements the network transport interface
+NetworkTransportInterface.java - the main network transport layer that is used by 'SecureTransport' to communicate with other machines
+Node.java - a class that represents a machine in a abstract topology
+Pair.java - a class that represents a pair of values
+Server.java - the class responsible for interacting in the system as a server
+ServerThread.java - a class that runs concurrently with the program to handle server requests from the network
 
 c) Application Layer
 
@@ -96,12 +96,25 @@ ii) demo (package)
 This package deals with the actual scaffolding of the program; it provides the GUI that allows a tester to observe the functionality of the cryptographic substrate.
 
 Files:
-Communication.java - 
-CommunicationInterface.java - 
-EncryptionDemoFunctionality.java - 
-EncryptionDemoGUI.form - 
-EncryptionDemoGUI.java - 
+Communication.java - the class that implements the communication interface
+CommunicationInterface.java - the interface that connects the GUI with the 'SecureTransport' interface
+EncryptionDemoFunctionality.java - the class that implements the user interface in the GUI
+EncryptionDemoGUI.form - part of the EncryptionDemoGUI
+EncryptionDemoGUI.java - the GUI scaffolding code that demonstrates on encryption demo
 
 d) Testing 
-	i) Machine Authentication (network, messages, file encryption, machine authentication protocols)
-	ii) Encryption (encryption)
+i) Machine Authentication (network, messages, file encryption, machine authentication protocols)
+This package is used to test the entire stack of the program, including the network, messages, file encryption/decryption, and the machine authentication protocols
+
+Files:
+CommunicationInterfaceTest.java - the class that applies an integration test of all our systems in a JUnit format
+CommunicationTest.java - the class that tests specific elements of communication, such as sending AES messages, sending RSA messages
+
+ii) Encryption (encryption)
+This package is used to test our various encryption and MAC schemes.
+
+Files:
+CipherFactoryAESTest.java - a class that test our implementation of AES Encryption
+CipherFactoryHMACTest.java - a class that tests our implementation of HMACing messages
+CipherFactoryRSATest.java - a class that tests our implementation of RSA public/private key encryption 
+
