@@ -21,6 +21,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
     private static int appPort;
     private static String username;
     private static String password;
+    private static boolean nonDefaultSet = false;
     
     private String filename;
     private JFileChooser fileChooser;
@@ -36,7 +37,10 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
         NodeIDTextField.setText(appNodeId);
         HostTextField.setText(appHost);
         PortTextField.setText(appPort + "");
-
+        
+        if(nonDefaultSet){
+            functionality = new EncryptionDemoFunctionality(this, new Node(appNodeId, appHost, appPort));
+        }
         SendTextField.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e) {
                 int key = e.getKeyCode();
@@ -450,7 +454,6 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
         } catch(NumberFormatException ex){
             handleException(ex);
         }
-        
         functionality = new EncryptionDemoFunctionality(this, new Node(appNodeId, appHost, appPort));
     }//GEN-LAST:event_UpdatePropertiesButtonActionPerformed
 
@@ -492,6 +495,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
             appNodeId = args[0];
             appHost = args[1];
             appPort = Integer.parseInt(args[2]);
+            nonDefaultSet = true;
         } else{
             appNodeId = "0";
             appHost = "localhost";
