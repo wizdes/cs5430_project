@@ -20,14 +20,19 @@ Table of Contents
 	f) Network
 
 1) Overview
-
-2) Assumptions
-
+	a) Confidentality
+	b) Integrity
+	c) Availability
+2) Assumptions 
 3) Functionality
-
-a) File handling
-b) Key Generation
-c) Machine_Authentication
-d) Encryption
-e) Messages
-f) Network
+	a) File handling
+	b) Key Generation
+	c) Machine_Authentication
+		i) session key exchange protocol
+		ii) message protocol
+	d) Encryption
+		i) RSA
+		ii) AES
+		iii) HMACs
+	e) Messages
+	f) Network
