@@ -29,10 +29,16 @@ All communication between machines are subject to Dolov-Yao attacks. Because of 
 
 b) Integrity
 
-We guarantee the integrity of both the data sent between machines as well as data stored on disk by calculating an HMAC of the unencrypted data before encrypting the the concatenation of the HMAC and the unencrypted data. As mentioned in the online lecture notes "[2/10] Applied Cryptography Notes" under the section (Part 2: Integrity), 
+We guarantee the integrity of both the data sent between machines as well as data stored on disk by calculating an HMAC of the unencrypted data before encrypting the the concatenation of the HMAC and the unencrypted data. As mentioned in the online lecture notes "[2/10] Applied Cryptography Notes" under the section (Part 3: Confidentiality and Integrity), the process of 'MAC then Encrypt' is considered safe and guarantees integrity.
 
 c) Availability
+
+We use TCP to address issues of availability that involves dropped or out of order packets. 
+
 2) Assumptions 
+
+We assume attackers do not have physical access to the hardware of a user while the user is using the application. Attackers also do not have access to the computer’s software nor exploit software vulnerabilities unrelated to the system. Furthermore, we assume users have access to read and modify files on their system while using the application.
+
 3) Functionality
 a) File handling
 b) Key Generation
