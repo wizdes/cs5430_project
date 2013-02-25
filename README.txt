@@ -14,11 +14,8 @@ Table of Contents:
 		i) messages
 		ii) demo
 	d) Testing 
-		i) Machine Authentication
-		ii) RSA Crypto
-		iii) Encryption
-		iv) Messages
-		v) Network 
+		i) Machine Authentication (network, messages, file encryption, machine authentication protocols)
+		ii) Encryption (encryption)
 
 1) Introduction:
 
