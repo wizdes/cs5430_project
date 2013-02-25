@@ -16,6 +16,7 @@ Table of Contents:
 	d) Testing 
 		i) Machine Authentication (network, messages, file encryption, machine authentication protocols)
 		ii) Encryption (encryption)
+3) Running our Scaffolding Code
 
 1) Introduction:
 
@@ -118,3 +119,4 @@ CipherFactoryAESTest.java - a class that test our implementation of AES Encrypti
 CipherFactoryHMACTest.java - a class that tests our implementation of HMACing messages
 CipherFactoryRSATest.java - a class that tests our implementation of RSA public/private key encryption 
 
+3) Running our Scaffolding Code

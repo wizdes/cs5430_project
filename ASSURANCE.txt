@@ -42,3 +42,5 @@ f) HMACs
 	We are using HMACs to ensure the integrity of the data we are sending. The HMAC is generated using the standard Java implementation of HMACs.
 g) Code Reviews
 	We used Github's 'Pull Request' feature to code review all commits going into the master branch. This allows us to confirm all changes with the entire team and reduce the number of errors pushed into code.
+
+h) Class Design 
