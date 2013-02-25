@@ -23,16 +23,15 @@ public class EncryptionDemoFunctionality {
     public EncryptionDemoFunctionality(EncryptionDemoGUI gui, Node host){
         this.gui = gui;
         
-        //Temporary Field
-        String password = "d2cb415e067c7b13";   //should be 16 bytes
-        
-        
-        if (host.getID().equals("1")) {
-            System.out.println("I'm talking to 2");
-            collaborator = new Node("2", "localhost", 4002);
-        } else {
+        String password;
+        if (host.getID().equals("0")) {
+            password = "pass0000pass0000";
             System.out.println("I'm talking to 1");
-            collaborator = new Node("1", "localhost", 4001);
+            collaborator = new Node("1", "localhost", 4002);
+        } else {
+            password = "pass1111pass1111";   //should be 16 bytes
+            System.out.println("I'm talking to 1");
+            collaborator = new Node("0", "localhost", 4001);
         }
         
         communication = new Communication(password, host);
@@ -80,8 +79,7 @@ public class EncryptionDemoFunctionality {
      * @return Encrypted version of message.
      */
     public String sendEncryptedMessage(String plaintextMsg) {
-        DemoMessage dm = new DemoMessage(collaborator, "1", plaintextMsg);
-        
+        DemoMessage dm = new DemoMessage(collaborator, "", plaintextMsg);
         String ciphertext = (String)communication.sendAESEncryptedMessage(dm);
         return ciphertext;
     }
@@ -123,7 +121,7 @@ public class EncryptionDemoFunctionality {
                     System.out.println(m);
                     if (m instanceof DemoMessage) {
                         DemoMessage dm = (DemoMessage)m;
-                        String crypted = "Hmmmm.....";   
+                        String crypted = "This has been encrypted, trust us...";   
                         System.out.println("here");
                         System.out.println(dm.getContents());
                         displayIncomingMessage(dm.getContents(), crypted);

@@ -85,6 +85,9 @@ public class SecureTransport implements SecureTransportInterface{
     
     @Override
     public boolean authenticate(Node dest) {
+        if(authInstance.hasAuthenticated(dest.getID())){
+            return true;
+        }
         final Lock authenticateLock = new ReentrantLock(true);
         int nonce1 = KeyFactory.generateNonce();
         Msg01_AuthenticationRequest msg = new Msg01_AuthenticationRequest(dest, nonce1);

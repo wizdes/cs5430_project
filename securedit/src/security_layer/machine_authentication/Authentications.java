@@ -34,6 +34,12 @@ public class Authentications {
     public void removeAuthentication(String ident){
         authentications.remove(ident);
     }
+    public boolean hasAuthenticated(String ident){
+        if(keys.getSymmetricKey(ident) == null){
+            return false;
+        }
+        return true;
+    }
         
     private class Authentication{
         Message message;

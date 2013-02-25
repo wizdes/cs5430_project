@@ -492,6 +492,10 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
             appNodeId = args[0];
             appHost = args[1];
             appPort = Integer.parseInt(args[2]);
+        } else{
+            appNodeId = "0";
+            appHost = "localhost";
+            appPort = 4001;
         }
         
         /* Create and display the form */
