@@ -25,19 +25,21 @@ import transport_layer.network.Node;
  */
 public class CommunicationTest {
     
-    Node myNode = new Node("1", "localhost", 4001);
-    Node theirNode = new Node("2", "localhost", 4002);
+    Node myNode = new Node("0", "localhost", 4001);
+    Node theirNode = new Node("1", "localhost", 4002);
     CommunicationInterface myCommunicator;
     CommunicationInterface theirCommunicator;
     
-    static String password = "1234567890123456";
+    static String password_0 = "pass0000pass0000";
+    static String password_1 = "pass1111pass1111";
     static SecretKey secretKey =  (SecretKey)KeyFactory.generateSymmetricKey();
         
     @Before
     public void setUp() throws Exception {
-        myCommunicator = new Communication(password, myNode);
+        myCommunicator = new Communication(password_0, myNode);
+        System.out.println("will we see this?");
         SecureTransportInterface s1 = myCommunicator.getSecureTransport();
-        theirCommunicator = new Communication(password, theirNode);
+        theirCommunicator = new Communication(password_1, theirNode);
 //theirCommunicator.getSecureTransport().setKeys(s1.getKeys());
     }
 
@@ -64,7 +66,7 @@ public class CommunicationTest {
         assertEquals(recieved, iterations);
     }    
     
-    @Test
+    //@Test
     public void testSendRSAMessage_Msg01() {
         int iterations = 100;
         int recieved = 0;
@@ -82,7 +84,7 @@ public class CommunicationTest {
         assertEquals(recieved, iterations);
     }     
 
-    @Test
+    //@Test
     public void testSendRSAMessage_Msg02() {
         int iterations = 100;
         int recieved = 0;
@@ -101,7 +103,7 @@ public class CommunicationTest {
         assertEquals(recieved, iterations);
     }  
     
-    @Test
+    //@Test
     public void testSendRSAMessage_Msg03() {
         int iterations = 100;
         int recieved = 0;

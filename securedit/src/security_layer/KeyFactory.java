@@ -51,7 +51,7 @@ public class KeyFactory {
         byte[] passBytes = password.getBytes();
         //assert passBytes.length == 16 : passBytes.length;
         if(passBytes.length != 16){
-            passBytes = fix_bad_length_key(passBytes);
+           // passBytes = fix_bad_length_key(passBytes);
         }
         return new SecretKeySpec(passBytes, "AES");
     }
@@ -65,5 +65,10 @@ public class KeyFactory {
             Logger.getLogger(KeyFactory.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
+    }
+
+    public static int generateNonce() {
+        SecureRandom rand = new SecureRandom();
+        return rand.nextInt();
     }
 }

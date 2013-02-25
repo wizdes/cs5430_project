@@ -17,4 +17,5 @@ public interface NetworkTransportInterface {
      * **************************************/
     public void send(Node to, Serializable msg);
     public void shutdown();
+    public Node getHost();
 }
