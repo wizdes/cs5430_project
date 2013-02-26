@@ -4,13 +4,12 @@
  */
 package transport_layer.network;
 
-import application.encryption_demo.CommunicationInterface;
-import application.messages.Message;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import security_layer.EncryptedMessage;
 import security_layer.SecureTransportInterface;
 
 /**
@@ -18,23 +17,31 @@ import security_layer.SecureTransportInterface;
  * @author Patrick C. Berens
  */
 public class NetworkTransport implements NetworkTransportInterface{
-    
+    static final String MESSAGE_RECIEVED_ACK = "OK";
+    static final String CONNECTION_FINISHED = "MSG_FIN";
     private Server server;
     private Client client;
-    private HashMap<String, Node> neighbors = new HashMap<>();
-    private Node host;
+    //private HashMap<String, Node> neighbors = new HashMap<>();
+    private Topology topology;
+    private SecureTransportInterface secureTransport;
     
-    public NetworkTransport(Node host, SecureTransportInterface secureTransport) {
-        System.out.println("instantiate NT " + host);
+    public NetworkTransport(String ident, String host, int port, SecureTransportInterface secureTransport) {
+        this.topology = new Topology(new Node(ident, host, port));
+        this.secureTransport = secureTransport;
         client = new Client();
-        server = new Server(host, secureTransport);
+        server = new Server(port, this);
         server.listen();
-        this.host = host;
     }
     
     @Override
-    public void send(Node to, Serializable m) {
-        client.send(to, m);
+    public boolean send(String destination, EncryptedMessage m) {
+        Node destNode = topology.getNode(destination);
+        if(destNode == null){
+            return false;
+        }
+        NetworkMessage netMsg = new NetworkMessage(topology.getMyNode(), destNode, m);
+        client.send(destNode, netMsg);
+        return true;
     }
         
     @Override
@@ -42,18 +49,17 @@ public class NetworkTransport implements NetworkTransportInterface{
         this.server.shutdown();
         this.client.closeConnections();
     }
-    
-    public Node getHost() {
-        return host;
+
+    @Override
+    public void addPeer(String peerIdent, String host, int port) {
+        topology.addNode(peerIdent, host, port);
     }
-    
-    public static void debugBytes(byte[] bytes, String label) {
+
+    void depositEncryptedMessage(NetworkMessage msg) {
         try {
-            System.out.println(label + "[" + bytes.length + "]");
-            System.out.println(new String(bytes, "UTF-8"));
-            System.out.println("");
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(Message.class.getName()).log(Level.SEVERE, null, ex);
-        }   
+            secureTransport.processEncryptedMessage(msg.source.id, msg.content);
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(NetworkTransport.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

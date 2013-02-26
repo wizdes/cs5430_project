@@ -19,18 +19,17 @@ import java.util.logging.Logger;
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
 /**
  *
  * @author Patrick C. Berens
  */
-public class CipherFactory {
+class CipherFactory {
     /**************************************
      * patrick's
      * ****************************************/
-    public static Cipher constructAESEncryptionCipher(Key key, byte[] iv) {
+    static Cipher constructAESEncryptionCipher(Key key, byte[] iv) {
         try {
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
@@ -40,7 +39,7 @@ public class CipherFactory {
             return null;
         }
     }
-    public static Cipher constructAESDecryptionCipher(Key key, byte[] iv){
+    static Cipher constructAESDecryptionCipher(Key key, byte[] iv){
         assert iv.length == 16 : iv;
         try {
             Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
@@ -51,7 +50,7 @@ public class CipherFactory {
             return null;
         }
     }
-    public static Cipher constructRSAEncryptionCipher(Key key){
+    static Cipher constructRSAEncryptionCipher(Key key){
         try {
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.ENCRYPT_MODE, key);
@@ -61,7 +60,7 @@ public class CipherFactory {
             return null;
         }
     }
-    public static Cipher constructRSADecryptionCipher(Key key){
+    static Cipher constructRSADecryptionCipher(Key key){
         try {
             Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.DECRYPT_MODE, key);
@@ -73,7 +72,7 @@ public class CipherFactory {
         
     }
     
-    public static byte[] generateRandomIV(){
+    static byte[] generateRandomIV(){
         try {
             //SecureRandom random = new SecureRandom();
            SecureRandom sr = SecureRandom.getInstance("SHA1PRNG", "SUN");
@@ -86,18 +85,7 @@ public class CipherFactory {
         }
     }
     
-    public static byte[] HMAC(Key sk, byte[] DataToHash){
-        try {
-            Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(sk);
-            return mac.doFinal(DataToHash);
-        } catch (InvalidKeyException | NoSuchAlgorithmException ex) {
-            Logger.getLogger(CipherFactory.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
-    }
-    
-    public static byte[] HMAC(Key sk, Object DataToHash){
+    static byte[] HMAC(Key sk, Object DataToHash){
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ObjectOutput out = new ObjectOutputStream(bos); 
@@ -106,8 +94,18 @@ public class CipherFactory {
         }
         catch (IOException ex) {
             Logger.getLogger(CipherFactory.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
         }
-        return null;
     }
-
+    
+    private static byte[] HMAC(Key sk, byte[] DataToHash){
+        try {
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(sk);
+            return mac.doFinal(DataToHash);
+        } catch (InvalidKeyException | NoSuchAlgorithmException ex) {
+            Logger.getLogger(CipherFactory.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
+    }
 }

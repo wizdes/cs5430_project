@@ -1,14 +1,6 @@
-/*
- * Purpose is to perform all operations the GUI requires and to allow manipulation
- *   of the GUI.
- * 
- */
 package application.encryption_demo;
 
-import application.messages.DemoMessage;
-import application.messages.Message;
 import java.util.Collection;
-import transport_layer.network.Node;
 
 /**
  *
@@ -18,23 +10,11 @@ public class EncryptionDemoFunctionality {
     private EncryptionDemoGUI gui;
     private String openedFilename;
     private CommunicationInterface communication;
-    private Node collaborator;
+
         
-    public EncryptionDemoFunctionality(EncryptionDemoGUI gui, Node host){
+    EncryptionDemoFunctionality(EncryptionDemoGUI gui, String ident, String host, int port, String password){
         this.gui = gui;
-        
-        String password;
-        if (host.getID().equals("0")) {
-            password = "pass0000pass0000";
-            System.out.println("I'm talking to 1");
-            collaborator = new Node("1", "localhost", 4002);
-        } else {
-            password = "pass1111pass1111";   //should be 16 bytes
-            System.out.println("I'm talking to 1");
-            collaborator = new Node("0", "localhost", 4001);
-        }
-        
-        communication = new Communication(password, host);
+        this.communication = new Communication(ident, host, port, password);
         listenForMessages();
     }
     
@@ -47,9 +27,9 @@ public class EncryptionDemoFunctionality {
      * @param filename
      * @return String representation of the file.
      */
-    public String openFile(String filename){
+    String openFile(String filename){
         openedFilename = filename;
-        String contents = (String)communication.readUnencryptedFile(filename);
+        String contents = (String)communication.readFile(filename);
         return contents;
     }
     
@@ -58,9 +38,9 @@ public class EncryptionDemoFunctionality {
      * @param plaintext String representation of file in plaintext
      * @return Encrypted version of the file.
      */
-    public String encryptFile(String plaintext){
-        String ciphertext = (String)communication.writeEncryptedFile(openedFilename, plaintext);
-        return ciphertext;
+    String encryptFile(String plaintext){
+        communication.writeEncryptedFile(openedFilename, plaintext);
+        return "This file was encrypted. Open it to see the encrpted text\n";
     }
     
     /**
@@ -68,7 +48,7 @@ public class EncryptionDemoFunctionality {
      * @param ciphertext String representation of file in ciphertext
      * @return Plaintext of file after being decrypted.
      */
-    public String decryptFile(String ciphertext){
+    String decryptFile(String ciphertext){
         String plaintext = (String)communication.readEncryptedFile(openedFilename);
         return plaintext;
     }
@@ -78,14 +58,12 @@ public class EncryptionDemoFunctionality {
      * @param plaintextMsg Message in plaintext
      * @return Encrypted version of message.
      */
-    public String sendEncryptedMessage(String plaintextMsg) {
-        DemoMessage dm = new DemoMessage(collaborator, "", plaintextMsg);
-        String ciphertext = (String)communication.sendAESEncryptedMessage(dm);
-        return ciphertext;
+    boolean sendEncryptedMessage(String ident, String plaintextMsg) {
+        return communication.sendMessage(ident, plaintextMsg);
     }
     
-    public String authenticateMachine(){
-        boolean wasSuccessful = communication.authenticateMachine(collaborator);
+    String authenticateMachine(String ident){
+        boolean wasSuccessful = communication.authenticateMachine(ident);
         if(wasSuccessful){
             return "Successfully authenticated machine\n";
         } else{
@@ -102,14 +80,14 @@ public class EncryptionDemoFunctionality {
      * @param plaintext Decrypted version of the message.
      * @param ciphertext Encrypted version of the message.
      */
-    public void displayIncomingMessage(String plaintext, String ciphertext){
+    void displayIncomingMessage(String plaintext, String ciphertext){
         //This should be called by thread that handles reading the message queue.
         gui.displayMessages(plaintext, ciphertext);
     }
     
     private class GUIListenerThread extends Thread {
         
-        public GUIListenerThread() {
+        private GUIListenerThread() {
             super("GUIListenerThread");
         }
 
@@ -119,12 +97,12 @@ public class EncryptionDemoFunctionality {
                 Collection<Message> messages = communication.waitForMessages();
                 for (Message m : messages) {
                     System.out.println(m);
-                    if (m instanceof DemoMessage) {
-                        DemoMessage dm = (DemoMessage)m;
+                    if (m instanceof StringMessage) {
+                        String message = ((StringMessage)m).contents;
                         String crypted = "This has been encrypted, trust us...";   
                         System.out.println("here");
-                        System.out.println(dm.getContents());
-                        displayIncomingMessage(dm.getContents(), crypted);
+                        System.out.println(message);
+                        displayIncomingMessage(message, crypted);
                     }
                 }
             }

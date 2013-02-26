@@ -6,19 +6,17 @@ package security_layer;
 
 
 import application.encryption_demo.CommunicationInterface;
-import application.messages.Message;
+import application.encryption_demo.Message;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.Key;
-import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
@@ -26,14 +24,10 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SealedObject;
 import javax.crypto.SecretKey;
-import security_layer.machine_authentication.AuthenticationMessage;
-import security_layer.machine_authentication.Authentications;
-import security_layer.machine_authentication.Msg01_AuthenticationRequest;
 import transport_layer.files.FileHandler;
 import transport_layer.files.FileTransportInterface;
 import transport_layer.network.NetworkTransport;
 import transport_layer.network.NetworkTransportInterface;
-import transport_layer.network.Node;
 
 
 
@@ -53,52 +47,53 @@ public class SecureTransport implements SecureTransportInterface{
      * *******************************************/
     public SecureTransport(String password){
         Key personalKey = KeyFactory.generateSymmetricKey(password);
-        System.out.println(personalKey.hashCode());
         keys = new EncryptionKeys(personalKey);
         authInstance = new Authentications(keys);
     }
     
-    public SecureTransport(String password, Node host, CommunicationInterface communication) {
+    public SecureTransport(String ident, String host, int port, String password, CommunicationInterface communication) {
         assert password.length() == 16: password.length();
         
-        System.out.println("st " + host);
-        this.networkTransport = new NetworkTransport(host, this);
+        this.networkTransport = new NetworkTransport(ident, host, port, this);
         this.communication = communication;
         
-        
         Key personalKey = KeyFactory.generateSymmetricKey(password);
-        System.out.println("personal key = " + personalKey.hashCode());
-        keys = new EncryptionKeys(host.getID(), personalKey);
-        KeysObject keyObj = (KeysObject)readEncryptedFile("keys_" + host.getID());
-        PrivateKey privateKey = keyObj.getPrivateKey();
+        keys = new EncryptionKeys(ident, personalKey);
+        KeysObject keyObj = (KeysObject)readEncryptedFile("keys_" + ident);
+        PrivateKey privateKey = keyObj.privateKey;
         keys.privateKey = privateKey;
-        keys.publicKeys = keyObj.getPublicKeys();
-//        keys.secretKeys.put("0", keyObj.getSecretKey());
-//        keys.secretKeys.put("1", keyObj.getSecretKey());
-//        keys.secretKeys.put("2", keyObj.getSecretKey());
-                
-//        Key secretKey = KeyFactory.generateSymmetricKey();  //Replace with authentication
-        //KeyPair asymmetricKeys = KeyFactory.generateAsymmetricKeys();
+        keys.publicKeys = keyObj.publicKeys;
         
         authInstance = new Authentications(keys);
+        
+        //Hacked for now
+        for(String peerId: keys.publicKeys.keySet()){
+            if(!peerId.equals(ident)){
+                networkTransport.addPeer(peerId, "localhost", 4000 + Integer.parseInt(peerId));
+            }
+        }
     }
     
     @Override
-    public boolean authenticate(Node dest) {
-        if(authInstance.hasAuthenticated(dest.getID())){
+    public boolean authenticate(String machineIdent) {
+        System.out.println("Starting authentication...");
+        if(authInstance.hasAuthenticated(machineIdent) || machineIdent.equals(keys.ident)){
             return true;
         }
         final Lock authenticateLock = new ReentrantLock(true);
-        int nonce1 = KeyFactory.generateNonce();
-        Msg01_AuthenticationRequest msg = new Msg01_AuthenticationRequest(dest, nonce1);
+
+        AuthenticationMessage msg = authInstance.constructInitialAuthMessage();
         Condition authenticationComplete = authenticateLock.newCondition();
         
+        System.out.println("grabbing lock");
         try {
             authenticateLock.lock();
-            authInstance.addAuthentication(dest.getID(), msg, authenticationComplete, authenticateLock);
-            sendRSAEncryptedMessage(msg);
+            authInstance.addAuthentication(machineIdent, msg, authenticationComplete, authenticateLock);
+            sendRSAEncryptedMessage(machineIdent, msg);
+            System.out.println("Waiting");
             authenticationComplete.await();
-            authInstance.removeAuthentication(dest.getID());
+            System.out.println("Awoke");
+            authInstance.removeAuthentication(machineIdent);
         } catch (InterruptedException ex) {
             Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
             return false;
@@ -110,76 +105,82 @@ public class SecureTransport implements SecureTransportInterface{
     }
         
     @Override
-    public Serializable sendAESEncryptedMessage(Message m) {
-        byte[] iv = CipherFactory.generateRandomIV();
-        SecretKey secretKey = keys.getSymmetricKey(m.getTo().getID());
+    public boolean sendAESEncryptedMessage(String destination, Message m) {
+        SecretKey secretKey = keys.getSymmetricKey(destination);
         
         if (secretKey == null) {
-            System.out.println("No symemetric key found for " + m.getTo().getID());
-            return null;
+            System.out.println("No symemetric key found for " + destination);
+            return false;
         }
+        byte[] iv = CipherFactory.generateRandomIV();
         
         Cipher cipher = CipherFactory.constructAESEncryptionCipher(secretKey, iv);
-        m.setFrom(this.networkTransport.getHost());
-        return sendEncryptedMessage(m, cipher, iv, CipherFactory.HMAC(secretKey, m));
-    }
-
-    @Override
-    public Serializable sendRSAEncryptedMessage(Message m) {
-        byte[] iv = new byte[16];
-        PublicKey publicKey = keys.getPublicKey(m.getTo().getID());
-        Cipher cipher = CipherFactory.constructRSAEncryptionCipher(publicKey);
-        m.setFrom(this.networkTransport.getHost());
-        return sendEncryptedMessage(m, cipher, iv, null);
-    }
-
-    private Serializable sendEncryptedMessage(Message m, Cipher cipher, byte[] iv, byte[] hmac) {
-        Node from = this.networkTransport.getHost();
+        byte[] hmac = CipherFactory.HMAC(secretKey, m);
+        
+        AESMessage aesMessage = new AESMessage(m, hmac);
         
         try {
-            Serializable send_obj = m;
-            if (hmac != null){
-                send_obj = new HMACMessage(m, hmac);
-            }
-            SealedObject encryptedObject = new SealedObject(send_obj, cipher);
-            EncryptedObject encryptedMessage = new EncryptedObject(encryptedObject, iv, from);
-            
-            networkTransport.send(m.getTo(), encryptedMessage);
-            return encryptedObject.toString();          //Doesn't return encrypted text
+            SealedObject encryptedObject = new SealedObject(aesMessage, cipher);
+            EncryptedAESMessage encryptedMessage = new EncryptedAESMessage(encryptedObject, iv);
+            return networkTransport.send(destination, encryptedMessage);
         } catch (IOException | IllegalBlockSizeException ex) {
             Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
+            return false;
         }
     }
 
     @Override
-    public Message processEncryptedMessage(Serializable encryptedNetMsg) throws NoSuchAlgorithmException {
-        EncryptedObject encryptedObject = (EncryptedObject)encryptedNetMsg;
+    public boolean sendRSAEncryptedMessage(String destination, Message m) {
+        System.out.println("Sending RSA Message");
+        byte[] iv = new byte[16];
+        PublicKey publicKey = keys.getPublicKey(destination);
+        Cipher cipher = CipherFactory.constructRSAEncryptionCipher(publicKey);
+        try {
+            SealedObject encryptedObject = new SealedObject(m, cipher);
+            EncryptedMessage encryptedMessage = new EncryptedRSAMessage(encryptedObject);
+
+            boolean wasSuccessful = networkTransport.send(destination, encryptedMessage);
+            return wasSuccessful;
+        } catch (IOException | IllegalBlockSizeException ex) {
+            Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+    }
+
+    @Override
+    public Message processEncryptedMessage(String sourceOfMessage, EncryptedMessage encryptedMsg) throws NoSuchAlgorithmException {
+        EncryptedMessage encryptedMessage = (EncryptedMessage)encryptedMsg;
         Message decryptedMsg = null;
         SecretKey secretKey = null;
-                
+        
+        SealedObject encryptedObject;
         try {
             Cipher cipher = null;
-            switch(encryptedObject.encryptedObject.getAlgorithm()){
+            switch(encryptedMessage.getAlgorithm()){
                 case "AES/CBC/PKCS5Padding":
-                    secretKey = keys.getSymmetricKey(encryptedObject.getFrom().getID());
-                    cipher = CipherFactory.constructAESDecryptionCipher(secretKey, encryptedObject.iv);
+                    EncryptedAESMessage aesMessage = (EncryptedAESMessage)encryptedMsg;
+                    encryptedObject = aesMessage.encryptedObject;
+                    secretKey = keys.getSymmetricKey(sourceOfMessage);
+                    cipher = CipherFactory.constructAESDecryptionCipher(secretKey, aesMessage.iv);
                     break;
                 case "RSA/ECB/PKCS1Padding":
+                    EncryptedRSAMessage rsaMessage = (EncryptedRSAMessage)encryptedMsg;
+                    encryptedObject = rsaMessage.encryptedObject;
+                    System.out.println("Received RSA message");
                     cipher = CipherFactory.constructRSADecryptionCipher(keys.privateKey);
                     break;
                 default:
                     throw new NoSuchAlgorithmException("Attempted to process a message encrypted with an unsupported algorithm.");
             }
             
-            Object obj = encryptedObject.encryptedObject.getObject(cipher);
+            Object obj = encryptedObject.getObject(cipher);
             decryptedMsg = messageFromEncryptedObject(obj, secretKey);
             if (decryptedMsg instanceof AuthenticationMessage) {
                 System.out.println("[DEBUG] processing AuthenticationMessage");
-                Message m = authInstance.processAuthenticationRequest((AuthenticationMessage)decryptedMsg);
+                Message m = authInstance.processAuthenticationRequest(sourceOfMessage, (AuthenticationMessage)decryptedMsg);
                 if (m != null) {
                     System.out.println("[DEBUG] sendRSAEncryptedMessage");
-                    sendRSAEncryptedMessage(m);
+                    sendRSAEncryptedMessage(sourceOfMessage, m);
                 }
             } else {
                 communication.depositMessage(decryptedMsg);
@@ -193,8 +194,8 @@ public class SecureTransport implements SecureTransportInterface{
         
     private Message messageFromEncryptedObject(Object obj, SecretKey secretKey) {
         Message decryptedMsg = null;
-        if (obj instanceof HMACMessage) {
-            HMACMessage hmacMessage = (HMACMessage)obj;
+        if (obj instanceof AESMessage) {
+            AESMessage hmacMessage = (AESMessage)obj;
             byte[] hmac = CipherFactory.HMAC(secretKey, hmacMessage.getMessage());
             if (Arrays.equals(hmac, hmacMessage.getHMAC())) {
                 decryptedMsg = hmacMessage.getMessage();
@@ -209,35 +210,31 @@ public class SecureTransport implements SecureTransportInterface{
     }
     
     @Override
-    public Serializable writeEncryptedFile(String filename, Serializable contents) {
+    public boolean writeEncryptedFile(String filename, Message contents) {
         try {
             //Encrypt file with personal key
             byte[] iv = CipherFactory.generateRandomIV();
-            System.out.println("file.iv = " + Arrays.toString(iv));
             Cipher cipher = CipherFactory.constructAESEncryptionCipher(keys.personalKey, iv);
             SealedObject encryptedObject = new SealedObject(contents, cipher);
             
-            EncryptedObject file = new EncryptedObject(encryptedObject, iv, null);
-            fileTransport.writeFile(filename, file);
-            return encryptedObject.toString();          //Doens't return encrypted text
+            EncryptedAESMessage file = new EncryptedAESMessage(encryptedObject, iv);
+            return fileTransport.writeFile(filename, file);
+            
         } catch (IOException | IllegalBlockSizeException ex) {
             Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
+            return false;
         }
         
     }
 
     @Override
-    public Serializable readEncryptedFile(String filename) {
+    public Message readEncryptedFile(String filename) {
         try {
-            //return fileTransport.readFile(filename);
             System.out.println("filename: " + filename);
-            EncryptedObject file = (EncryptedObject)fileTransport.readFile(filename);
+            EncryptedAESMessage file = (EncryptedAESMessage)fileTransport.readFile(filename);
             
-            System.out.println("keys.personalKey = " + keys.personalKey.hashCode());
-            System.out.println("file.iv = " + Arrays.toString(file.iv));
             Cipher cipher = CipherFactory.constructAESDecryptionCipher(keys.personalKey, file.iv);
-            return (Serializable)file.encryptedObject.getObject(cipher);
+            return (Message)file.encryptedObject.getObject(cipher);
         } catch (IOException | ClassNotFoundException | IllegalBlockSizeException | BadPaddingException ex) {
             Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
             return null;
@@ -245,8 +242,8 @@ public class SecureTransport implements SecureTransportInterface{
     }
 
     @Override
-    public Serializable readUnencryptedFile(String filename) {
-        return (Serializable)fileTransport.openUnserializedFile(filename);
+    public String readUnencryptedFile(String filename) {
+        return fileTransport.openUnserializedFile(filename);
     }
     
     @Override

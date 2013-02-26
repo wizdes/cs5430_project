@@ -10,20 +10,20 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 
-public class ClientListenerThread extends Thread {
+class ClientListenerThread extends Thread {
         
     private boolean listening = true;
     private ServerSocket serverSocket; 
     private int port;
     private Server server;
 
-    public ClientListenerThread(Server server) {
+    ClientListenerThread(Server server, int port) {
         super("ClientListener");
         this.server = server;
-        this.port = this.server.getHost().getPort();
+        this.port = port;
     }
 
-    public void stopListening() {
+    void stopListening() {
         this.listening = false;
         try {
             if (this.serverSocket != null) {

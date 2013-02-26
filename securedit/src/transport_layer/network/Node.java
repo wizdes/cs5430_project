@@ -11,30 +11,17 @@ import java.io.Serializable;
  *
  */
 public class Node implements Serializable {
-
-    private String host;
-    private int port;
-    private String id;
+    String host;
+    int port;
+    String id;
     
-    public Node(String id, String h, int p) {
-        this.host = h;
-        this.port = p;
+    Node(String id, String host, int port) {
         this.id = id;
-    }
-
-    public String getHost() {
-        return this.host;
-    }
-
-    public int getPort() {
-        return this.port;
+        this.host = host;
+        this.port = port;
     }
     
-    public String getID() {
-        return this.id;
-    }
-    
-    public static Node fromString(String str) {
+    static Node fromString(String str) {
         String[] arr = str.split(":");
         return new Node(arr[0], arr[1], Integer.parseInt(arr[2]));
     }
@@ -58,9 +45,9 @@ public class Node implements Serializable {
     }
     
     public boolean equals(Node other) {
-        return getID().equals(other.getID())
-               && getPort() == other.getPort()
-               && getHost().equals(other.getHost());
+        return id.equals(other.id)
+               && port == other.port
+               && host.equals(other.host);
     }
     
 }

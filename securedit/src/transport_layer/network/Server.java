@@ -5,40 +5,32 @@
 
 package transport_layer.network;
 
-import application.encryption_demo.CommunicationInterface;
-import application.messages.Message;
-import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
-import security_layer.SecureTransportInterface;
 
 
 public class Server {
     
     private ClientListenerThread clientListener;
-    private Node host;
-    private SecureTransportInterface secureTransport;
+    private int port;
+    private NetworkTransport network;
+    //private SecureTransportInterface secureTransport;
     
-    public Server(Node host, SecureTransportInterface secureTransport) {
-        this.host = host;
-        this.secureTransport = secureTransport;
+    Server(int port, NetworkTransport network) {
+        this.port = port;
+        this.network = network;
     }
     
-    public void listen() {
-        System.out.println(this.host + " listening...");
-        this.clientListener = new ClientListenerThread(this);
+    void listen() {
+        System.out.println(this.port + " listening...");
+        this.clientListener = new ClientListenerThread(this, port);
         this.clientListener.start();
     }
 
-    public void depositMessage(Serializable m) throws NoSuchAlgorithmException {
-        this.secureTransport.processEncryptedMessage(m);
+    void processNetworkMessage(NetworkMessage m) throws NoSuchAlgorithmException {
+        this.network.depositEncryptedMessage(m);
     }    
     
-    public void shutdown() {
+    void shutdown() {
         this.clientListener.stopListening();
     }
-    
-    public Node getHost() {
-        return this.host;
-    }
-  
 }

@@ -4,8 +4,6 @@
  */
 package application.encryption_demo;
 
-import application.messages.DemoMessage;
-import application.messages.Message;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,9 +14,9 @@ import org.junit.Before;
 import org.junit.Test;
 import security_layer.KeyFactory;
 import security_layer.SecureTransportInterface;
-import security_layer.machine_authentication.Msg01_AuthenticationRequest;
-import security_layer.machine_authentication.Msg02_KeyResponse;
-import security_layer.machine_authentication.Msg03_AuthenticationAgreement;
+import security_layer.MA_Msg1;
+import security_layer.MA_Msg2;
+import security_layer.MA_Msg3;
 import transport_layer.network.Node;
 
 /**
@@ -60,7 +58,7 @@ public class CommunicationTest {
         while (recieved < iterations) {
             Collection<Message> messages = myCommunicator.waitForMessages();
             for (Message m : messages) {
-                DemoMessage dm = (DemoMessage)m;
+                StringMessage dm = (StringMessage)m;
                 assertEquals("hello world " + recieved++, dm.getContents());
             }
         }
@@ -87,7 +85,7 @@ public class CommunicationTest {
         while (recieved < iterations) {
             Collection<Message> messages = myCommunicator.waitForMessages();
             for (Message m : messages) {
-                DemoMessage dm = (DemoMessage)m;
+                StringMessage dm = (StringMessage)m;
                 assertEquals("hello world " + recieved++, dm.getContents());
             }
         }
@@ -104,7 +102,7 @@ public class CommunicationTest {
         while (recieved < iterations) {
             Collection<Message> messages = myCommunicator.waitForMessages();
             for (Message m : messages) {
-                Msg01_AuthenticationRequest dm = (Msg01_AuthenticationRequest)m;
+                MA_Msg1 dm = (MA_Msg1)m;
                 assertEquals(recieved, dm.getNonce());
                 recieved++;
             }
@@ -122,7 +120,7 @@ public class CommunicationTest {
         while (recieved < iterations) {
             Collection<Message> messages = myCommunicator.waitForMessages();
             for (Message m : messages) {
-                Msg02_KeyResponse dm = (Msg02_KeyResponse)m;
+                MA_Msg2 dm = (MA_Msg2)m;
                 assertEquals(recieved, dm.getNonce2());
                 assertEquals(recieved, dm.getNonce1Response());
                 recieved++;
@@ -141,7 +139,7 @@ public class CommunicationTest {
         while (recieved < iterations) {
             Collection<Message> messages = myCommunicator.waitForMessages();
             for (Message m : messages) {
-                Msg03_AuthenticationAgreement dm = (Msg03_AuthenticationAgreement)m;
+                MA_Msg3 dm = (MA_Msg3)m;
                 assertEquals(recieved, dm.getNonce2Response());
                 recieved++;
             }
@@ -179,7 +177,7 @@ public class CommunicationTest {
         
         @Override
         public void sendMessage(CommunicationInterface c, Node target, int i) {
-            DemoMessage dm = new DemoMessage(target, "message-" + i, "hello world " + i);
+            StringMessage dm = new StringMessage(target, "message-" + i, "hello world " + i);
             c.sendAESEncryptedMessage(dm);
         }
 
@@ -188,7 +186,7 @@ public class CommunicationTest {
     private static class RSAMessageSender_msg01 implements MessageSender {
         @Override
         public void sendMessage(CommunicationInterface c, Node target, int i) {
-            Message m = new Msg01_AuthenticationRequest(target, i);
+            Message m = new MA_Msg1(target, i);
             c.sendRSAEncryptedMessage(m);
         }
     }       
@@ -196,7 +194,7 @@ public class CommunicationTest {
     private static class RSAMessageSender_msg02 implements MessageSender {
         @Override
         public void sendMessage(CommunicationInterface c, Node target, int i) {
-            Message m = new Msg02_KeyResponse(target, secretKey, i, i);
+            Message m = new MA_Msg2(target, secretKey, i, i);
             c.sendRSAEncryptedMessage(m);
         }
     }
@@ -204,7 +202,7 @@ public class CommunicationTest {
     private static class RSAMessageSender_msg03 implements MessageSender {
         @Override
         public void sendMessage(CommunicationInterface c, Node target, int i) {
-            Message m = new Msg03_AuthenticationAgreement(target, i);
+            Message m = new MA_Msg3(target, i);
             c.sendRSAEncryptedMessage(m);
         }
     }     

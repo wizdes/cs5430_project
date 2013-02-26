@@ -5,7 +5,6 @@
 
 package transport_layer.network;
 
-import application.messages.CloseConnection;
 import java.io.*;
 import java.net.*;
 import java.security.NoSuchAlgorithmException;
@@ -13,44 +12,36 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ServerThread extends Thread {
-    
-    public static final String MESSAGE_RECIEVED_ACK = "OK";
-    public static final String CONNECTION_FINISHED = "MSG_FIN";
     private Socket socket = null;
     private Server server = null;
     private PrintWriter out = null;
     private ObjectInputStream in = null;
-    private ByteArrayOutputStream baos = null;
-    private Node client;
         
-    public ServerThread(Socket socket, Server server) {
+    ServerThread(Socket socket, Server server) {
         super("ServerThread");
         this.socket = socket;
         this.server = server;
-        this.client = client;
     }
     
     @Override
     public void run() {
-        
         try {
             
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new ObjectInputStream(socket.getInputStream());
-            baos = new ByteArrayOutputStream();
             
-            Serializable m = (Serializable)in.readObject();
-            out.println(MESSAGE_RECIEVED_ACK);
+            NetworkMessage m = (NetworkMessage)in.readObject();
+            out.println(NetworkTransport.MESSAGE_RECIEVED_ACK);
             while (! (m instanceof CloseConnection)) {
                 
                 try {
-                    this.server.depositMessage(m);
+                    this.server.processNetworkMessage(m);
                 } catch (NoSuchAlgorithmException ex) {
                     Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 
-                m = (Serializable)in.readObject();
-                out.println(MESSAGE_RECIEVED_ACK);
+                m = (NetworkMessage)in.readObject();
+                out.println(NetworkTransport.MESSAGE_RECIEVED_ACK);
             }
             
         } catch (ClassNotFoundException ex) {
@@ -64,7 +55,7 @@ public class ServerThread extends Thread {
         }
     }
     
-    private void close() {
+    void close() {
         try {
             if (out != null) {
                 out.close();

@@ -3,8 +3,8 @@
  * and open the template in the editor.
  */
 package security_layer;
-import application.messages.DemoMessage;
-import application.messages.Message;
+import application.encryption_demo.StringMessage;
+import application.encryption_demo.Message;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,9 +20,6 @@ import org.junit.Before;
 import org.junit.Test;
 import security_layer.KeyFactory;
 import security_layer.SecureTransportInterface;
-import security_layer.machine_authentication.Msg01_AuthenticationRequest;
-import security_layer.machine_authentication.Msg02_KeyResponse;
-import security_layer.machine_authentication.Msg03_AuthenticationAgreement;
 import transport_layer.network.Node;
 
 

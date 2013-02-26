@@ -4,27 +4,27 @@
  */
 package security_layer;
 
-import application.messages.Message;
+import application.encryption_demo.Message;
 import java.io.Serializable;
 
 /**
  *
  * @author yjli_000
  */
-public class HMACMessage implements Serializable{
+class AESMessage implements Serializable{
     byte[] HMAC;
     Message m;
-    HMACMessage(Message m, byte[] hmac)
+    AESMessage(Message m, byte[] hmac)
     {
         this.HMAC = hmac;
         this.m = m;
     }
     
-    public byte[] getHMAC() {
+    byte[] getHMAC() {
         return HMAC;
     }
 
-    public Message getMessage() {
+    Message getMessage() {
         return m;
     } 
     

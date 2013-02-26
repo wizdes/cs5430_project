@@ -4,23 +4,21 @@
  */
 package security_layer;
 
-import application.messages.Message;
-import java.io.Serializable;
+import application.encryption_demo.Message;
 import java.security.NoSuchAlgorithmException;
-import transport_layer.network.Node;
-
 
 /**
  *
  * @author Patrick C. Berens
  */
 public interface SecureTransportInterface {
-    public java.io.Serializable sendAESEncryptedMessage(Message m);
-    public java.io.Serializable sendRSAEncryptedMessage(Message m);
-    public Message processEncryptedMessage(Serializable encryptedNetMsg) throws NoSuchAlgorithmException;
-    public java.io.Serializable writeEncryptedFile(String filename, java.io.Serializable contents);
-    public java.io.Serializable readEncryptedFile(String filename);
-    public java.io.Serializable readUnencryptedFile(String filename);
-    public boolean authenticate(Node dest);
+    public boolean sendAESEncryptedMessage(String destination, Message m);
+    public boolean sendRSAEncryptedMessage(String destination, Message m);
+    public Message processEncryptedMessage(String sourceOfMessage, EncryptedMessage encryptedMsg) throws NoSuchAlgorithmException;
+    public boolean writeEncryptedFile(String filename, Message contents);
+    public Message readEncryptedFile(String filename);
+    public String readUnencryptedFile(String filename);
+    public boolean authenticate(String destination);
     public void shutdown();
+    
 }

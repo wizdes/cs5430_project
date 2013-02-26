@@ -4,8 +4,6 @@
  */
 package application.encryption_demo;
 
-import application.messages.DemoMessage;
-import application.messages.Message;
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
@@ -58,16 +56,16 @@ public class CommunicationInterfaceTest {
         int iterations = 100;
         int received = 0;
         for (int i = 0; i < iterations; i++) {
-            DemoMessage dm = new DemoMessage(theirNode, "", "hello world " + i);
+            StringMessage dm = new StringMessage(theirNode, "", "hello world " + i);
             myCommunicator.sendAESEncryptedMessage(dm);
-            dm = new DemoMessage(thirdNode, "", "hello world " + i);
+            dm = new StringMessage(thirdNode, "", "hello world " + i);
             myCommunicator.sendAESEncryptedMessage(dm);
         }
         
         while (received < iterations) {
             for (Message m : theirCommunicator.waitForMessages()) {
-                if (m instanceof DemoMessage) {
-                    DemoMessage dm2 = (DemoMessage)m;
+                if (m instanceof StringMessage) {
+                    StringMessage dm2 = (StringMessage)m;
                     System.out.println(dm2.getContents());
                     assertEquals("hello world " + received++, dm2.getContents());
                 }
@@ -78,8 +76,8 @@ public class CommunicationInterfaceTest {
         received = 0;
         while (received < iterations) {
             for (Message m : thirdCommunicator.waitForMessages()) {
-                if (m instanceof DemoMessage) {
-                    DemoMessage dm2 = (DemoMessage)m;
+                if (m instanceof StringMessage) {
+                    StringMessage dm2 = (StringMessage)m;
                     System.out.println(dm2.getContents());
                     assertEquals("hello world " + received++, dm2.getContents());
                 }
@@ -89,14 +87,14 @@ public class CommunicationInterfaceTest {
         
         received = 0;
         for (int i = 0; i < iterations; i++) {
-            DemoMessage dm = new DemoMessage(myNode, "", "hello world " + i);
+            StringMessage dm = new StringMessage(myNode, "", "hello world " + i);
             theirCommunicator.sendAESEncryptedMessage(dm);
         }
         
         while (received < iterations) {
             for (Message m : myCommunicator.waitForMessages()) {
-                if (m instanceof DemoMessage) {
-                    DemoMessage dm2 = (DemoMessage)m;
+                if (m instanceof StringMessage) {
+                    StringMessage dm2 = (StringMessage)m;
                     System.out.println(dm2.getContents());
                     assertEquals("hello world " + received++, dm2.getContents());
                 }
@@ -106,14 +104,14 @@ public class CommunicationInterfaceTest {
         
         received = 0;
         for (int i = 0; i < iterations; i++) {
-            DemoMessage dm = new DemoMessage(myNode, "", "hello world " + i);
+            StringMessage dm = new StringMessage(myNode, "", "hello world " + i);
             thirdCommunicator.sendAESEncryptedMessage(dm);
         }
         
         while (received < iterations) {
             for (Message m : myCommunicator.waitForMessages()) {
-                if (m instanceof DemoMessage) {
-                    DemoMessage dm2 = (DemoMessage)m;
+                if (m instanceof StringMessage) {
+                    StringMessage dm2 = (StringMessage)m;
                     System.out.println(dm2.getContents());
                     assertEquals("hello world " + received++, dm2.getContents());
                 }
