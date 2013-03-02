@@ -21,9 +21,13 @@ import javax.crypto.spec.SecretKeySpec;
  * @author Patrick C. Berens
  */
 class KeyFactory {
+    
+    static final String SIGNING_ALGORITHM = "SHA1withRSA";
+    
     /**********************************************
      * patrick's
      * ********************************************/
+    
     static KeyPair generateAsymmetricKeys(){
         try {
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");

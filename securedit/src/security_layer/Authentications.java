@@ -63,7 +63,7 @@ class Authentications {
     *  verify r2+1, generate
     * A -> B : {r2' + 1} K_B
     */
-    Message processAuthenticationRequest(String sourceOfMsg, AuthenticationMessage message) {
+    void processAuthenticationRequest(String sourceOfMsg, AuthenticationMessage message, SecureTransportInterface sti) {
         String idOfNodeAuthenticationWith = sourceOfMsg;
         if (message instanceof MA_Msg1) {
             System.out.println("[DEBUG] processing Msg01_AuthenticationRequest");
@@ -77,7 +77,7 @@ class Authentications {
             
             Message m = new MA_Msg2(symmetricKey, nonce1Response, nonce2);
             addAuthentication(idOfNodeAuthenticationWith, m);
-            return m;
+            sti.sendRSAEncryptedMessage(sourceOfMsg, m);
             
         } else if (message instanceof MA_Msg2) {
             System.out.println("[DEBUG] processing Msg02_KeyResponse");
@@ -89,22 +89,20 @@ class Authentications {
             if (msg.r1 - 1 != ((MA_Msg1)auth.message).nonce1) {
                 System.out.println("[DEBUG] Bad Nonce msg02! Expecting: " + (((MA_Msg1)auth.message).nonce1 + 1) + ", found: " + msg.r1);
                 authentications.remove(idOfNodeAuthenticationWith);
-                return null;
+                return;
             }
             Message m = new MA_Msg3(nonce2Response);
             
             keys.addSymmetricKey(idOfNodeAuthenticationWith, msg.SK);
             
-            System.out.println("[DEBUG] grabbinglock");
+            sti.sendRSAEncryptedMessage(sourceOfMsg, m);
+            
             auth.lock.lock();
             try {
                 auth.cond.signal();
             } finally {
                 auth.lock.unlock();
             }
-            
-            System.out.println("[DEBUG] releasing lock");
-            return m;
             
         } else if (message instanceof MA_Msg3) {
             System.out.println("[DEBUG] processing Msg03_AuthenticationAgreement");
@@ -116,12 +114,12 @@ class Authentications {
             if (msg.nonce2Response - 1 != msg2.r2) {
                 System.out.println("[DEBUG] Bad Nonce msg03!");
                 authentications.remove(idOfNodeAuthenticationWith);
-                return null;
+                return;
             }   
+
             keys.addSymmetricKey(idOfNodeAuthenticationWith, msg2.SK);
             removeAuthentication(idOfNodeAuthenticationWith);
-            return null;
         }
-        return null;
+
     }
 }
