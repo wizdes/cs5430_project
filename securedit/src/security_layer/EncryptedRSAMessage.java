@@ -4,6 +4,7 @@
  */
 package security_layer;
 
+import java.security.SignedObject;
 import javax.crypto.SealedObject;
 
 /**
@@ -11,14 +12,14 @@ import javax.crypto.SealedObject;
  * @author Patrick C. Berens
  */
 class EncryptedRSAMessage implements EncryptedMessage{
-    SealedObject encryptedObject;
+    SignedObject signedObject;
     
-    EncryptedRSAMessage(SealedObject encryptedObject){
-        this.encryptedObject = encryptedObject;
+    EncryptedRSAMessage(SignedObject signedObject){
+        this.signedObject = signedObject;
     }
 
     @Override
     public String getAlgorithm() {
-        return encryptedObject.getAlgorithm();
+        return signedObject.getAlgorithm();
     }
 }

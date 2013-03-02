@@ -13,7 +13,6 @@ public class Server {
     private ClientListenerThread clientListener;
     private int port;
     private NetworkTransport network;
-    //private SecureTransportInterface secureTransport;
     
     Server(int port, NetworkTransport network) {
         this.port = port;

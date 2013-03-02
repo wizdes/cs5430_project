@@ -8,11 +8,14 @@ package security_layer;
 import application.encryption_demo.CommunicationInterface;
 import application.encryption_demo.Message;
 import java.io.IOException;
-import java.io.Serializable;
+import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.security.SignedObject;
 import java.util.Arrays;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -28,8 +31,6 @@ import transport_layer.files.FileHandler;
 import transport_layer.files.FileTransportInterface;
 import transport_layer.network.NetworkTransport;
 import transport_layer.network.NetworkTransportInterface;
-
-
 
 /**
  *
@@ -53,6 +54,7 @@ public class SecureTransport implements SecureTransportInterface{
     
     public SecureTransport(String ident, String host, int port, String password, CommunicationInterface communication) {
         assert password.length() == 16: password.length();
+        assert port == 4000 + Integer.parseInt(ident);
         
         this.networkTransport = new NetworkTransport(ident, host, port, this);
         this.communication = communication;
@@ -85,14 +87,11 @@ public class SecureTransport implements SecureTransportInterface{
         AuthenticationMessage msg = authInstance.constructInitialAuthMessage();
         Condition authenticationComplete = authenticateLock.newCondition();
         
-        System.out.println("grabbing lock");
         try {
             authenticateLock.lock();
             authInstance.addAuthentication(machineIdent, msg, authenticationComplete, authenticateLock);
             sendRSAEncryptedMessage(machineIdent, msg);
-            System.out.println("Waiting");
             authenticationComplete.await();
-            System.out.println("Awoke");
             authInstance.removeAuthentication(machineIdent);
         } catch (InterruptedException ex) {
             Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
@@ -106,6 +105,7 @@ public class SecureTransport implements SecureTransportInterface{
         
     @Override
     public boolean sendAESEncryptedMessage(String destination, Message m) {
+        System.out.println("Sending AES Message to " + destination);
         SecretKey secretKey = keys.getSymmetricKey(destination);
         
         if (secretKey == null) {
@@ -131,7 +131,7 @@ public class SecureTransport implements SecureTransportInterface{
 
     @Override
     public boolean sendRSAEncryptedMessage(String destination, Message m) {
-        System.out.println("Sending RSA Message");
+        System.out.println("Sending RSA Message to " + destination);
         byte[] iv = new byte[16];
         PublicKey publicKey = keys.getPublicKey(destination);
         if (publicKey == null) {
@@ -141,11 +141,14 @@ public class SecureTransport implements SecureTransportInterface{
         Cipher cipher = CipherFactory.constructRSAEncryptionCipher(publicKey);
         try {
             SealedObject encryptedObject = new SealedObject(m, cipher);
-            EncryptedMessage encryptedMessage = new EncryptedRSAMessage(encryptedObject);
+            Signature signature = Signature.getInstance(KeyFactory.SIGNING_ALGORITHM);
+            SignedObject signedObject = new SignedObject(encryptedObject, (PrivateKey)keys.privateKey, signature);
+
+            EncryptedMessage encryptedMessage = new EncryptedRSAMessage(signedObject);
 
             boolean wasSuccessful = networkTransport.send(destination, encryptedMessage);
             return wasSuccessful;
-        } catch (IOException | IllegalBlockSizeException ex) {
+        } catch (IOException | IllegalBlockSizeException | NoSuchAlgorithmException | InvalidKeyException | SignatureException ex) {
             Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
@@ -161,18 +164,31 @@ public class SecureTransport implements SecureTransportInterface{
         try {
             Cipher cipher = null;
             switch(encryptedMessage.getAlgorithm()){
+                
                 case "AES/CBC/PKCS5Padding":
                     EncryptedAESMessage aesMessage = (EncryptedAESMessage)encryptedMsg;
                     encryptedObject = aesMessage.encryptedObject;
                     secretKey = keys.getSymmetricKey(sourceOfMessage);
+                    if (secretKey == null) {
+                        System.out.println("No symmetric key for " + sourceOfMessage);
+                    }
                     cipher = CipherFactory.constructAESDecryptionCipher(secretKey, aesMessage.iv);
                     break;
-                case "RSA/ECB/PKCS1Padding":
+                    
+                case KeyFactory.SIGNING_ALGORITHM:
                     EncryptedRSAMessage rsaMessage = (EncryptedRSAMessage)encryptedMsg;
-                    encryptedObject = rsaMessage.encryptedObject;
-                    System.out.println("Received RSA message");
-                    cipher = CipherFactory.constructRSADecryptionCipher(keys.privateKey);
+                    SignedObject signedObject = rsaMessage.signedObject;
+                    PublicKey publicKey = keys.getPublicKey(sourceOfMessage);
+                    Signature sig = Signature.getInstance(KeyFactory.SIGNING_ALGORITHM);
+                    boolean verified = signedObject.verify(publicKey, sig);
+                    if (!verified) {
+                        throw new SignatureException("Unverified message from " + sourceOfMessage);
+                    } else {
+                        encryptedObject = (SealedObject)signedObject.getObject();
+                        cipher = CipherFactory.constructRSADecryptionCipher(keys.privateKey);
+                    }
                     break;
+                   
                 default:
                     throw new NoSuchAlgorithmException("Attempted to process a message encrypted with an unsupported algorithm.");
             }
@@ -181,15 +197,13 @@ public class SecureTransport implements SecureTransportInterface{
             decryptedMsg = messageFromEncryptedObject(obj, secretKey);
             if (decryptedMsg instanceof AuthenticationMessage) {
                 System.out.println("[DEBUG] processing AuthenticationMessage");
-                Message m = authInstance.processAuthenticationRequest(sourceOfMessage, (AuthenticationMessage)decryptedMsg);
-                if (m != null) {
-                    System.out.println("[DEBUG] sendRSAEncryptedMessage");
-                    sendRSAEncryptedMessage(sourceOfMessage, m);
-                }
+                authInstance.processAuthenticationRequest(sourceOfMessage, 
+                                                          (AuthenticationMessage)decryptedMsg,
+                                                          this);
             } else {
                 communication.depositMessage(decryptedMsg);
             }
-        } catch (IOException | ClassNotFoundException | IllegalBlockSizeException | BadPaddingException ex) {
+        } catch (IOException | ClassNotFoundException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | SignatureException ex) {
             Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
         }
         
@@ -234,7 +248,6 @@ public class SecureTransport implements SecureTransportInterface{
     @Override
     public Message readEncryptedFile(String filename) {
         try {
-            System.out.println("filename: " + filename);
             EncryptedAESMessage file = (EncryptedAESMessage)fileTransport.readFile(filename);
             
             Cipher cipher = CipherFactory.constructAESDecryptionCipher(keys.personalKey, file.iv);

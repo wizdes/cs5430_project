@@ -26,7 +26,6 @@ class Client {
     boolean send(Node destNode, NetworkMessage m) {  
         String key = destNode.toString();
         
-        System.out.println("[debug] sned 1 ");
         if (!channelMap.containsKey(key)) {
             Channel c = new Channel(destNode);
             channelMap.putIfAbsent(key, c);
@@ -66,12 +65,9 @@ class Client {
             if (out != null && in != null) { 
                 try {                    
                     // send message
-                    System.out.println("[debug] write object");
                     out.writeObject(message);
                     out.flush();
-                    System.out.println("[debug] read");
                     response = in.readLine();
-                    System.out.println("[debug] read it");
                 } catch (IOException ex) {
                     ex.printStackTrace();
                     System.err.println("Client error reading from : " + node + " after send");
