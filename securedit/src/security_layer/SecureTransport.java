@@ -134,6 +134,10 @@ public class SecureTransport implements SecureTransportInterface{
         System.out.println("Sending RSA Message");
         byte[] iv = new byte[16];
         PublicKey publicKey = keys.getPublicKey(destination);
+        if (publicKey == null) {
+            System.out.println("No public key found for " + destination);
+            return false;
+        }        
         Cipher cipher = CipherFactory.constructRSAEncryptionCipher(publicKey);
         try {
             SealedObject encryptedObject = new SealedObject(m, cipher);
