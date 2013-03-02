@@ -28,9 +28,9 @@ public class CommunicationInterfaceTest {
         
     @Before
     public void setUp() throws Exception {
-        myCommunicator = new Communication(myIdent, "localhost", 4001, password_0);
-        theirCommunicator = new Communication(theirIdent, "localhost", 4002, password_1);
-        thirdCommunicator = new Communication(thirdIdent, "localhost", 4003, password_2);
+        myCommunicator = new Communication(myIdent, "localhost", 4000, password_0);
+        theirCommunicator = new Communication(theirIdent, "localhost", 4001, password_1);
+        thirdCommunicator = new Communication(thirdIdent, "localhost", 4002, password_2);
     }
 
     @After
@@ -44,72 +44,71 @@ public class CommunicationInterfaceTest {
     public void testMachineAuthentication() {
         assertTrue(myCommunicator.authenticateMachine(theirIdent));
         assertTrue(myCommunicator.authenticateMachine(thirdIdent));
-        return;
-//        int iterations = 100;
-//        int received = 0;
-//        for (int i = 0; i < iterations; i++) {
-//            StringMessage dm = new StringMessage("hello world " + i);
-//            myCommunicator.sendMessage(theirIdent, dm);
-//            dm = new StringMessage("hello world " + i);
-//            myCommunicator.sendMessage(thirdIdent, dm);
-//        }
-//        
-//        while (received < iterations) {
-//            for (Message m : theirCommunicator.waitForMessages()) {
-//                if (m instanceof StringMessage) {
-//                    StringMessage dm2 = (StringMessage)m;
-//                    System.out.println(dm2.contents);
-//                    assertEquals("hello world " + received++, dm2.contents);
-//                }
-//            }
-//        }
-//        assertTrue(received == iterations);
-//        
-//        received = 0;
-//        while (received < iterations) {
-//            for (Message m : thirdCommunicator.waitForMessages()) {
-//                if (m instanceof StringMessage) {
-//                    StringMessage dm2 = (StringMessage)m;
-//                    System.out.println(dm2.contents);
-//                    assertEquals("hello world " + received++, dm2.contents);
-//                }
-//            }
-//        }
-//        assertTrue(received == iterations);
-//        
-//        received = 0;
-//        for (int i = 0; i < iterations; i++) {
-//            StringMessage dm = new StringMessage("hello world " + i);
-//            theirCommunicator.sendMessage(myIdent, dm);
-//        }
-//        
-//        while (received < iterations) {
-//            for (Message m : myCommunicator.waitForMessages()) {
-//                if (m instanceof StringMessage) {
-//                    StringMessage dm2 = (StringMessage)m;
-//                    System.out.println(dm2.contents);
-//                    assertEquals("hello world " + received++, dm2.contents);
-//                }
-//            }
-//        }        
-//        assertTrue(received == iterations);
-//        
-//        received = 0;
-//        for (int i = 0; i < iterations; i++) {
-//            StringMessage dm = new StringMessage("hello world " + i);
-//            thirdCommunicator.sendMessage(myIdent, dm);
-//        }
-//        
-//        while (received < iterations) {
-//            for (Message m : myCommunicator.waitForMessages()) {
-//                if (m instanceof StringMessage) {
-//                    StringMessage dm2 = (StringMessage)m;
-//                    System.out.println(dm2.contents);
-//                    assertEquals("hello world " + received++, dm2.contents);
-//                }
-//            }
-//        }        
-//        assertTrue(received == iterations);        
+        int iterations = 100;
+        int received = 0;
+        for (int i = 0; i < iterations; i++) {
+            StringMessage dm = new StringMessage("hello world " + i);
+            myCommunicator.sendMessage(theirIdent, dm);
+            dm = new StringMessage("hello world " + i);
+            myCommunicator.sendMessage(thirdIdent, dm);
+        }
+        
+        while (received < iterations) {
+            for (Message m : theirCommunicator.waitForMessages()) {
+                if (m instanceof StringMessage) {
+                    StringMessage dm2 = (StringMessage)m;
+                    System.out.println(dm2.contents);
+                    assertEquals("hello world " + received++, dm2.contents);
+                }
+            }
+        }
+        assertTrue(received == iterations);
+        
+        received = 0;
+        while (received < iterations) {
+            for (Message m : thirdCommunicator.waitForMessages()) {
+                if (m instanceof StringMessage) {
+                    StringMessage dm2 = (StringMessage)m;
+                    System.out.println(dm2.contents);
+                    assertEquals("hello world " + received++, dm2.contents);
+                }
+            }
+        }
+        assertTrue(received == iterations);
+        
+        received = 0;
+        for (int i = 0; i < iterations; i++) {
+            StringMessage dm = new StringMessage("hello world " + i);
+            theirCommunicator.sendMessage(myIdent, dm);
+        }
+        
+        while (received < iterations) {
+            for (Message m : myCommunicator.waitForMessages()) {
+                if (m instanceof StringMessage) {
+                    StringMessage dm2 = (StringMessage)m;
+                    System.out.println(dm2.contents);
+                    assertEquals("hello world " + received++, dm2.contents);
+                }
+            }
+        }        
+        assertTrue(received == iterations);
+        
+        received = 0;
+        for (int i = 0; i < iterations; i++) {
+            StringMessage dm = new StringMessage("hello world " + i);
+            thirdCommunicator.sendMessage(myIdent, dm);
+        }
+        
+        while (received < iterations) {
+            for (Message m : myCommunicator.waitForMessages()) {
+                if (m instanceof StringMessage) {
+                    StringMessage dm2 = (StringMessage)m;
+                    System.out.println(dm2.contents);
+                    assertEquals("hello world " + received++, dm2.contents);
+                }
+            }
+        }        
+        assertTrue(received == iterations);        
     }
     
 }
