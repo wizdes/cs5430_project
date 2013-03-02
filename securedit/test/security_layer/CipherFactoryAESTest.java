@@ -3,7 +3,6 @@
  * and open the template in the editor.
  */
 package security_layer;
-import application.encryption_demo.StringMessage;
 import application.encryption_demo.Message;
 import java.security.Key;
 import java.util.Arrays;
@@ -29,14 +28,10 @@ import transport_layer.network.Node;
  */
 public class CipherFactoryAESTest {
 
-    Node theirNode = new Node("1", "localhost", 4002);
-    Node myNode = new Node("2", "localhost", 4002);
     
     @Test
     public void testAESGen(){
         try {
-            Message m = new Message(theirNode, "asdf");
-            Message Trudy_M = new Message(myNode, "asdf");
             byte[] iv = CipherFactory.generateRandomIV();
             Key sk = KeyFactory.generateSymmetricKey("password123");
             Cipher encrypt = CipherFactory.constructAESEncryptionCipher(sk, iv);

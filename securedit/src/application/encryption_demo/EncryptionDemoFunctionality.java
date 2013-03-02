@@ -59,7 +59,7 @@ public class EncryptionDemoFunctionality {
      * @return Encrypted version of message.
      */
     boolean sendEncryptedMessage(String ident, String plaintextMsg) {
-        return communication.sendMessage(ident, plaintextMsg);
+        return communication.sendMessage(ident, new StringMessage(plaintextMsg));
     }
     
     String authenticateMachine(String ident){

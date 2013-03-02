@@ -15,7 +15,7 @@ import security_layer.SecureTransportInterface;
  */
 public interface CommunicationInterface {
     
-    public boolean sendMessage(String destination, String contents);
+    public boolean sendMessage(String destination, Message m);
     public boolean authenticateMachine(String machineIdent);
     
     public Collection<Message> waitForMessages();
