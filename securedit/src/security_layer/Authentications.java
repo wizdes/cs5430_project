@@ -10,8 +10,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import javax.crypto.SecretKey;
-import security_layer.EncryptionKeys;
-import security_layer.KeyFactory;
 
 /**
  *

@@ -63,8 +63,7 @@ public class Communication implements CommunicationInterface {
     }
 
     @Override
-    public boolean sendMessage(String destination, String contents) {
-        Message msg = new StringMessage(contents);
+    public boolean sendMessage(String destination, Message msg) {
         return secureTransport.sendAESEncryptedMessage(destination, msg);
     }
 
