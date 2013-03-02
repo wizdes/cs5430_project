@@ -3,23 +3,14 @@
  * and open the template in the editor.
  */
 package security_layer;
-import application.encryption_demo.Message;
 import java.security.Key;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.SecretKey;
-import org.junit.After;
-import static org.junit.Assert.*;
-import org.junit.Before;
 import org.junit.Test;
-import security_layer.KeyFactory;
-import security_layer.SecureTransportInterface;
-import transport_layer.network.Node;
 
 
 /**

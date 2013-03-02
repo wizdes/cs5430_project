@@ -7,8 +7,6 @@ import application.encryption_demo.Message;
 import java.security.Key;
 import java.util.Arrays;
 import org.junit.Test;
-import security_layer.KeyFactory;
-import transport_layer.network.Node;
 
 
 /**
