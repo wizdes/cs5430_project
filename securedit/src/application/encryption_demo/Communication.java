@@ -5,7 +5,6 @@
 
 package application.encryption_demo;
 
-import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.LinkedList;
