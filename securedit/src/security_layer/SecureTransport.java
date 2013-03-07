@@ -62,9 +62,10 @@ public class SecureTransport implements SecureTransportInterface{
         Key personalKey = KeyFactory.generateSymmetricKey(password);
         keys = new EncryptionKeys(ident, personalKey);
         KeysObject keyObj = (KeysObject)readEncryptedFile("keys_" + ident);
-        PrivateKey privateKey = keyObj.privateKey;
-        keys.privateKey = privateKey;
+        keys.privateKey = keyObj.privateKey;
+        keys.signingKey = keyObj.signingKey;
         keys.publicKeys = keyObj.publicKeys;
+        keys.verifyingKeys = keyObj.verifiyngKeys;
         
         authInstance = new Authentications(keys);
         
@@ -115,13 +116,11 @@ public class SecureTransport implements SecureTransportInterface{
         byte[] iv = CipherFactory.generateRandomIV();
         
         Cipher cipher = CipherFactory.constructAESEncryptionCipher(secretKey, iv);
-        byte[] hmac = CipherFactory.HMAC(secretKey, m);
-        
-        AESMessage aesMessage = new AESMessage(m, hmac);
-        
+                
         try {
-            SealedObject encryptedObject = new SealedObject(aesMessage, cipher);
-            EncryptedAESMessage encryptedMessage = new EncryptedAESMessage(encryptedObject, iv);
+            SealedObject encryptedObject = new SealedObject(m, cipher);
+            byte[] hmac = CipherFactory.HMAC(keys.getHMACKey(destination), encryptedObject);
+            EncryptedAESMessage encryptedMessage = new EncryptedAESMessage(encryptedObject, iv, hmac);
             return networkTransport.send(destination, encryptedMessage);
         } catch (IOException | IllegalBlockSizeException ex) {
             Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
@@ -142,7 +141,7 @@ public class SecureTransport implements SecureTransportInterface{
         try {
             SealedObject encryptedObject = new SealedObject(m, cipher);
             Signature signature = Signature.getInstance(KeyFactory.SIGNING_ALGORITHM);
-            SignedObject signedObject = new SignedObject(encryptedObject, (PrivateKey)keys.privateKey, signature);
+            SignedObject signedObject = new SignedObject(encryptedObject, (PrivateKey)keys.signingKey, signature);
 
             EncryptedMessage encryptedMessage = new EncryptedRSAMessage(signedObject);
 
@@ -168,6 +167,11 @@ public class SecureTransport implements SecureTransportInterface{
                 case "AES/CBC/PKCS5Padding":
                     EncryptedAESMessage aesMessage = (EncryptedAESMessage)encryptedMsg;
                     encryptedObject = aesMessage.encryptedObject;
+                    byte[] hmac = CipherFactory.HMAC(keys.getHMACKey(sourceOfMessage), encryptedObject);
+                    
+                    if (!Arrays.equals(hmac, aesMessage.HMAC)) {
+                        throw new SignatureException("Invalid HMAC");
+                    }                           
                     secretKey = keys.getSymmetricKey(sourceOfMessage);
                     if (secretKey == null) {
                         System.out.println("No symmetric key for " + sourceOfMessage);
@@ -178,7 +182,7 @@ public class SecureTransport implements SecureTransportInterface{
                 case KeyFactory.SIGNING_ALGORITHM:
                     EncryptedRSAMessage rsaMessage = (EncryptedRSAMessage)encryptedMsg;
                     SignedObject signedObject = rsaMessage.signedObject;
-                    PublicKey publicKey = keys.getPublicKey(sourceOfMessage);
+                    PublicKey publicKey = keys.getVerifyingKey(sourceOfMessage);
                     Signature sig = Signature.getInstance(KeyFactory.SIGNING_ALGORITHM);
                     boolean verified = signedObject.verify(publicKey, sig);
                     if (!verified) {
@@ -194,7 +198,7 @@ public class SecureTransport implements SecureTransportInterface{
             }
             
             Object obj = encryptedObject.getObject(cipher);
-            decryptedMsg = messageFromEncryptedObject(obj, secretKey);
+            decryptedMsg = (Message)obj;
             if (decryptedMsg instanceof AuthenticationMessage) {
                 System.out.println("[DEBUG] processing AuthenticationMessage");
                 authInstance.processAuthenticationRequest(sourceOfMessage, 
@@ -209,23 +213,6 @@ public class SecureTransport implements SecureTransportInterface{
         
         return decryptedMsg;
     }
-        
-    private Message messageFromEncryptedObject(Object obj, SecretKey secretKey) {
-        Message decryptedMsg = null;
-        if (obj instanceof AESMessage) {
-            AESMessage hmacMessage = (AESMessage)obj;
-            byte[] hmac = CipherFactory.HMAC(secretKey, hmacMessage.getMessage());
-            if (Arrays.equals(hmac, hmacMessage.getHMAC())) {
-                decryptedMsg = hmacMessage.getMessage();
-            } else {
-                System.out.println("Invalid HMAC");
-            }
-        } else {
-            decryptedMsg = (Message)obj;
-        }
-        
-        return decryptedMsg;
-    }
     
     @Override
     public boolean writeEncryptedFile(String filename, Message contents) {
@@ -235,7 +222,8 @@ public class SecureTransport implements SecureTransportInterface{
             Cipher cipher = CipherFactory.constructAESEncryptionCipher(keys.personalKey, iv);
             SealedObject encryptedObject = new SealedObject(contents, cipher);
             
-            EncryptedAESMessage file = new EncryptedAESMessage(encryptedObject, iv);
+            // TODO hash personalKey somehow into an unrelated HMAC key we can use
+            EncryptedAESMessage file = new EncryptedAESMessage(encryptedObject, iv, null);
             return fileTransport.writeFile(filename, file);
             
         } catch (IOException | IllegalBlockSizeException ex) {

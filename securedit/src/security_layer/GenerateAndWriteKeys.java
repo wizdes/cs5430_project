@@ -29,25 +29,34 @@ class GenerateAndWriteKeys {
 
         //Generate keys
         PrivateKey privateKeys[] = new PrivateKey[3];
+        PrivateKey signingKeys[] = new PrivateKey[3];
         ConcurrentMap<String, PublicKey> publicKeys = new ConcurrentHashMap<>();
-        SecretKey secretKey = (SecretKey)KeyFactory.generateSymmetricKey();
+        ConcurrentMap<String, PublicKey> verifyingKeys = new ConcurrentHashMap<>();
+        
         for(int i = 0; i < 3; i++){
             String pw = "pass" + i + i + i + i + "pass" + i + i + i + i;
             transport = new SecureTransport(pw);
             KeyPair keys = KeyFactory.generateAsymmetricKeys();
             publicKeys.put(i + "", keys.getPublic());
             privateKeys[i] = keys.getPrivate();
-            System.out.println("Generated key: " + i);
+            System.out.println("Generated public/private key: " + i);
+            
+            KeyPair signingKeyPair = KeyFactory.generateAsymmetricKeys();
+            verifyingKeys.put(i + "", signingKeyPair.getPublic());
+            signingKeys[i] = signingKeyPair.getPrivate();
+            System.out.println("Generated verifying/signing key: " + i);            
         }
         
         //Write keys files
         KeysObject keysObject = new KeysObject();
-        keysObject.publicKeys = publicKeys;
-        keysObject.secretKey = secretKey;
+        keysObject.publicKeys = publicKeys;        
+        keysObject.verifiyngKeys = verifyingKeys;        
+       
         for(int i = 0; i < 3; i++){
             transport = new SecureTransport("pass" + i + i + i + i + "pass" + i + i + i + i);
             keysObject.ident = i + "";
             keysObject.privateKey = privateKeys[i];
+            keysObject.signingKey = signingKeys[i];
             transport.writeEncryptedFile("keys_" + i, keysObject);
         }
     }
