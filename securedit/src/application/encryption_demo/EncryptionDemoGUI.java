@@ -15,12 +15,12 @@ import javax.swing.JOptionPane;
  * @author Patrick C. Berens
  */
 public class EncryptionDemoGUI extends javax.swing.JFrame {
-    private static String appNodeId = "";
-    private static String appHost = "";
-    private static int appPort;
-    private static String username = "";
-    private static String password = "";
-    private static boolean nonDefaultSet = false;
+    private String appNodeId = "";
+    private String appHost = "";
+    private int appPort;
+    private String username = "";
+    private String password = "";
+    private boolean nonDefaultSet = false;
     
     private String filename;
     private JFileChooser fileChooser;
@@ -28,7 +28,14 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
     /**
      * Creates new form EncryptionDemoGUI
      */
-    public EncryptionDemoGUI() {
+    public EncryptionDemoGUI(String appNodeId, String appHost, int appPort, String password) {
+        this.appNodeId = appNodeId;
+        this.appHost = appHost;
+        this.appPort = appPort;
+        this.password = password;
+        
+    }
+    private void initAllComponents(){
         fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File("."));
         initComponents();
@@ -38,9 +45,8 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
         PortTextField.setText(appPort + "");
         PasswordTextField.setText(password);
         
-        if(nonDefaultSet){  //script so create functionality now
-            functionality = new EncryptionDemoFunctionality(this, appNodeId, appHost, appPort, password);
-        }
+        functionality = new EncryptionDemoFunctionality(this, appNodeId, appHost, appPort, password);
+        
         SendTextField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -60,7 +66,6 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
             }
         });
     }
-    
     public void displayMessages(String plaintext, String ciphertext){
         ReceivedCiphertextTextArea.setText(ReceivedCiphertextTextArea.getText() + ciphertext + "\n");
         DecryptedPlaintextTextArea.setText(DecryptedPlaintextTextArea.getText() + plaintext + "\n");
@@ -636,51 +641,14 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
     private void handleException(Exception ex) {
         JOptionPane.showMessageDialog(this, ex.getMessage());
     }
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(EncryptionDemoGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(EncryptionDemoGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(EncryptionDemoGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(EncryptionDemoGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        
-        if(args.length == 4){
-            appNodeId = args[0];
-            appHost = args[1];
-            appPort = Integer.parseInt(args[2]);
-            password = args[3];
-            nonDefaultSet = true;
-        } else{
-            appNodeId = "0";
-            appHost = "localhost";
-            appPort = 4000;
-            password = "pass0000pass0000";
-        }
-        
+    public void launchGUI(){        
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new EncryptionDemoGUI().setVisible(true);
+                //new EncryptionDemoGUI().setVisible(true);
+                initAllComponents();
+                setVisible(true);
             }
         });
     }
