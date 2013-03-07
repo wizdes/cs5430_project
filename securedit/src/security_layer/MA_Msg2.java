@@ -13,11 +13,9 @@ import javax.crypto.SecretKey;
 class MA_Msg2 implements AuthenticationMessage {
     SecretKey SK;     //K_AB
     int r1;           //r1 + 1
-    int r2;           //r2
     
-    MA_Msg2(SecretKey symmetricKey, int nonce1Response, int nonce2) {
+    MA_Msg2(SecretKey symmetricKey, int nonce1Response) {
         this.SK = symmetricKey;
         this.r1 = nonce1Response;
-        this.r2 = nonce2;
     } 
 }

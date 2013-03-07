@@ -13,11 +13,13 @@ import javax.crypto.SealedObject;
 class EncryptedAESMessage implements EncryptedMessage {
     byte[] iv;
     SealedObject encryptedObject;
+    byte[] HMAC;
     
-    EncryptedAESMessage(SealedObject encryptedObject, byte[] iv){
+    EncryptedAESMessage(SealedObject encryptedObject, byte[] iv, byte[] hmac){
         assert iv.length == 16: iv;
         this.iv = iv;
         this.encryptedObject = encryptedObject;
+        this.HMAC = hmac;
     }
 
     @Override

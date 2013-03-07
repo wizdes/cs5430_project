@@ -26,9 +26,12 @@ class EncryptionKeys {
     Key personalKey;    //Generated from password for AES files
     
     ConcurrentMap<String, SecretKey> secretKeys = new ConcurrentHashMap<>();      //Generated randomly for AES communication
+    ConcurrentMap<String, SecretKey> HMACKeys = new ConcurrentHashMap<>();
     ConcurrentMap<String, PublicKey> publicKeys = new ConcurrentHashMap<>();      
+    ConcurrentMap<String, PublicKey> verifyingKeys = new ConcurrentHashMap<>();
     
     Key privateKey;     //RSA
+    Key signingKey;     //RSA
     
     EncryptionKeys(){}
     EncryptionKeys(Key personalKey){
@@ -49,12 +52,30 @@ class EncryptionKeys {
     void addSymmetricKey(String ident, SecretKey secretKey) {
         secretKeys.putIfAbsent(ident, secretKey);
     }
+    void addVerifyingKey(String ident, PublicKey publicKey) {
+        verifyingKeys.putIfAbsent(ident, publicKey);
+    }    
+    void addHMACKey(String ident, SecretKey secretKey) {
+        HMACKeys.putIfAbsent(ident, secretKey);
+    }
     boolean hasSymmetricKey(String ident){
         return secretKeys.containsKey(ident);
     }
-   SecretKey getSymmetricKey(String ident) {
-        return secretKeys.get(ident);
+    boolean hasVerifyingKey(String ident){
+        return verifyingKeys.containsKey(ident);
     }    
+    boolean hasHMACKey(String ident){
+        return HMACKeys.containsKey(ident);
+    }    
+    SecretKey getSymmetricKey(String ident) {
+        return secretKeys.get(ident);
+    }   
+    PublicKey getVerifyingKey(String ident) {
+        return verifyingKeys.get(ident);
+    }     
+    SecretKey getHMACKey(String ident) {
+        return HMACKeys.get(ident);
+    }      
     
     void addPublicKey(String ident, PublicKey publicKey) {
         publicKeys.putIfAbsent(ident, publicKey);
