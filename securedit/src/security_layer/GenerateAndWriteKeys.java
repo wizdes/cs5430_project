@@ -22,7 +22,6 @@ class GenerateAndWriteKeys {
     public static void main(String[] args) {
         GenerateAndWriteKeys generateKeys = new GenerateAndWriteKeys();
         generateKeys.run(args);
-        
     }
     private void run(String[] args){
         Scanner scan = new Scanner(System.in);

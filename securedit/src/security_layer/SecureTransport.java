@@ -17,6 +17,9 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.SignedObject;
 import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -42,6 +45,8 @@ public class SecureTransport implements SecureTransportInterface{
     private NetworkTransportInterface networkTransport;
     private CommunicationInterface communication;
     private Authentications authInstance;
+    private ConcurrentMap<String, Integer> lastReceived = new ConcurrentHashMap<>();
+    private AtomicInteger counter = new AtomicInteger();
     
     /********************************************
      * patrick's 
@@ -116,9 +121,9 @@ public class SecureTransport implements SecureTransportInterface{
         byte[] iv = CipherFactory.generateRandomIV();
         
         Cipher cipher = CipherFactory.constructAESEncryptionCipher(secretKey, iv);
-                
+        ApplicationMessage appMessage = new ApplicationMessage(m, counter.incrementAndGet());    
         try {
-            SealedObject encryptedObject = new SealedObject(m, cipher);
+            SealedObject encryptedObject = new SealedObject(appMessage, cipher);
             byte[] hmac = CipherFactory.HMAC(keys.getHMACKey(destination), encryptedObject);
             EncryptedAESMessage encryptedMessage = new EncryptedAESMessage(encryptedObject, iv, hmac);
             return networkTransport.send(destination, encryptedMessage);
@@ -197,15 +202,21 @@ public class SecureTransport implements SecureTransportInterface{
                     throw new NoSuchAlgorithmException("Attempted to process a message encrypted with an unsupported algorithm.");
             }
             
-            Object obj = encryptedObject.getObject(cipher);
-            decryptedMsg = (Message)obj;
-            if (decryptedMsg instanceof AuthenticationMessage) {
+            Object decryptedObj = encryptedObject.getObject(cipher);
+            if (decryptedObj instanceof AuthenticationMessage) {
                 System.out.println("[DEBUG] processing AuthenticationMessage");
                 authInstance.processAuthenticationRequest(sourceOfMessage, 
-                                                          (AuthenticationMessage)decryptedMsg,
+                                                          (AuthenticationMessage)decryptedObj,
                                                           this);
-            } else {
-                communication.depositMessage(decryptedMsg);
+            } else if (decryptedObj instanceof ApplicationMessage) {
+                ApplicationMessage appMessage = (ApplicationMessage)decryptedObj;
+                Integer currentCounter = lastReceived.get(sourceOfMessage);
+                if (currentCounter == null || appMessage.counter > currentCounter) {
+                    communication.depositMessage(appMessage.message);
+                    lastReceived.put(sourceOfMessage, appMessage.counter);
+                } else {
+                    System.out.println("Invalid counter on AES message");
+                }
             }
         } catch (IOException | ClassNotFoundException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | SignatureException ex) {
             Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
