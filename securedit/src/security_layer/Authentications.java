@@ -70,14 +70,19 @@ class Authentications {
             
             MA_Msg1 msg = (MA_Msg1)message;
             
-            SecretKey symmetricKey = (SecretKey)KeyFactory.generateSymmetricKey();
+            SecretKey symmetricKey = (SecretKey)KeyFactory.generateSymmetricKey();            
+            SecretKey HMACKey = (SecretKey)KeyFactory.generateSymmetricKey();
             
             int nonce1Response = msg.nonce1 + 1;
-            int nonce2 = KeyFactory.generateNonce();
             
-            Message m = new MA_Msg2(symmetricKey, nonce1Response, nonce2);
-            addAuthentication(idOfNodeAuthenticationWith, m);
+            Message m = new MA_Msg2(symmetricKey, nonce1Response);
+            
             sti.sendRSAEncryptedMessage(sourceOfMsg, m);
+            keys.addSymmetricKey(idOfNodeAuthenticationWith, symmetricKey);
+            
+            Message m3 = new MA_Msg3(HMACKey, nonce1Response);
+            sti.sendRSAEncryptedMessage(sourceOfMsg, m3);
+            keys.addHMACKey(idOfNodeAuthenticationWith, HMACKey);            
             
         } else if (message instanceof MA_Msg2) {
             System.out.println("[DEBUG] processing Msg02_KeyResponse");
@@ -85,17 +90,32 @@ class Authentications {
             MA_Msg2 msg = (MA_Msg2)message;
             Authentication auth = authentications.get(idOfNodeAuthenticationWith);
             
-            int nonce2Response = msg.r2 + 1;
             if (msg.r1 - 1 != ((MA_Msg1)auth.message).nonce1) {
                 System.out.println("[DEBUG] Bad Nonce msg02! Expecting: " + (((MA_Msg1)auth.message).nonce1 + 1) + ", found: " + msg.r1);
                 authentications.remove(idOfNodeAuthenticationWith);
                 return;
             }
-            Message m = new MA_Msg3(nonce2Response);
             
             keys.addSymmetricKey(idOfNodeAuthenticationWith, msg.SK);
             
-            sti.sendRSAEncryptedMessage(sourceOfMsg, m);
+        } else if (message instanceof MA_Msg3) {
+            System.out.println("[DEBUG] processing Msg03_AuthenticationAgreement");
+            
+            MA_Msg3 msg = (MA_Msg3)message;
+            Authentication auth = authentications.get(idOfNodeAuthenticationWith);
+            
+            if (msg.r - 1 != ((MA_Msg1)auth.message).nonce1) {
+                System.out.println("[DEBUG] Bad Nonce msg02! Expecting: " + (((MA_Msg1)auth.message).nonce1 + 1) + ", found: " + msg.r);
+                authentications.remove(idOfNodeAuthenticationWith);
+                return;
+            }
+            
+            keys.addHMACKey(idOfNodeAuthenticationWith, msg.SK);
+            
+            if (!keys.hasSymmetricKey(idOfNodeAuthenticationWith)) {
+                System.out.println("no symmetric key found for "+ idOfNodeAuthenticationWith);
+                return;
+            }
             
             auth.lock.lock();
             try {
@@ -104,20 +124,6 @@ class Authentications {
                 auth.lock.unlock();
             }
             
-        } else if (message instanceof MA_Msg3) {
-            System.out.println("[DEBUG] processing Msg03_AuthenticationAgreement");
-            
-            MA_Msg3 msg = (MA_Msg3)message;
-            Authentication auth = authentications.get(idOfNodeAuthenticationWith);
-            MA_Msg2 msg2 = (MA_Msg2)auth.message;
-            
-            if (msg.nonce2Response - 1 != msg2.r2) {
-                System.out.println("[DEBUG] Bad Nonce msg03!");
-                authentications.remove(idOfNodeAuthenticationWith);
-                return;
-            }   
-
-            keys.addSymmetricKey(idOfNodeAuthenticationWith, msg2.SK);
             removeAuthentication(idOfNodeAuthenticationWith);
         }
 
