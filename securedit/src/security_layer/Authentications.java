@@ -37,7 +37,7 @@ class Authentications {
     boolean hasAuthenticated(String ident){
         return keys.hasSymmetricKey(ident);
     }
-    AuthenticationMessage constructInitialAuthMessage(){
+    MachineAuthenticationMessage constructInitialAuthMessage(){
         return new MA_Msg1(KeyFactory.generateNonce());
     }
     private class Authentication{
@@ -57,13 +57,14 @@ class Authentications {
     }
     
     /*
-    * A -> B : {r2} K_B
+    * A -> B : {r} K_B
     * B generates K_AB
-    * B -> A : {K_AB, r2 + 1, r2'} K_A
-    *  verify r2+1, generate
-    * A -> B : {r2' + 1} K_B
+    * B -> A : {K_AB, r + 1} K_A
+    *  verify r+1
+    * B -> A : {HMAC_K_AB, r + 2} K_A
+    *  verify r+2
     */
-    void processAuthenticationRequest(String sourceOfMsg, AuthenticationMessage message, SecureTransportInterface sti) {
+    void processMachineAuthenticationRequest(String sourceOfMsg, MachineAuthenticationMessage message, SecureTransportInterface sti) {
         String idOfNodeAuthenticationWith = sourceOfMsg;
         if (message instanceof MA_Msg1) {
             System.out.println("[DEBUG] processing Msg01_AuthenticationRequest");
@@ -73,25 +74,25 @@ class Authentications {
             SecretKey symmetricKey = (SecretKey)KeyFactory.generateSymmetricKey();            
             SecretKey HMACKey = (SecretKey)KeyFactory.generateSymmetricKey();
             
-            int nonce1Response = msg.nonce1 + 1;
+            int nonceResponse1 = msg.nonce + 1;
             
-            Message m = new MA_Msg2(symmetricKey, nonce1Response);
+            Message m = new MA_Msg2(symmetricKey, nonceResponse1);
             
             sti.sendRSAEncryptedMessage(sourceOfMsg, m);
             keys.addSymmetricKey(idOfNodeAuthenticationWith, symmetricKey);
             
-            Message m3 = new MA_Msg3(HMACKey, nonce1Response);
+            int nonceResponse2 = msg.nonce + 2;
+            Message m3 = new MA_Msg3(HMACKey, nonceResponse2);
             sti.sendRSAEncryptedMessage(sourceOfMsg, m3);
             keys.addHMACKey(idOfNodeAuthenticationWith, HMACKey);            
-            
         } else if (message instanceof MA_Msg2) {
             System.out.println("[DEBUG] processing Msg02_KeyResponse");
             
             MA_Msg2 msg = (MA_Msg2)message;
             Authentication auth = authentications.get(idOfNodeAuthenticationWith);
             
-            if (msg.r1 - 1 != ((MA_Msg1)auth.message).nonce1) {
-                System.out.println("[DEBUG] Bad Nonce msg02! Expecting: " + (((MA_Msg1)auth.message).nonce1 + 1) + ", found: " + msg.r1);
+            if (msg.r - 1 != ((MA_Msg1)auth.message).nonce) {
+                System.out.println("[DEBUG] Bad Nonce msg02! Expecting: " + (((MA_Msg1)auth.message).nonce + 1) + ", found: " + msg.r);
                 authentications.remove(idOfNodeAuthenticationWith);
                 return;
             }
@@ -104,8 +105,8 @@ class Authentications {
             MA_Msg3 msg = (MA_Msg3)message;
             Authentication auth = authentications.get(idOfNodeAuthenticationWith);
             
-            if (msg.r - 1 != ((MA_Msg1)auth.message).nonce1) {
-                System.out.println("[DEBUG] Bad Nonce msg02! Expecting: " + (((MA_Msg1)auth.message).nonce1 + 1) + ", found: " + msg.r);
+            if (msg.r - 2 != ((MA_Msg1)auth.message).nonce) {
+                System.out.println("[DEBUG] Bad Nonce msg02! Expecting: " + (((MA_Msg1)auth.message).nonce + 1) + ", found: " + msg.r);
                 authentications.remove(idOfNodeAuthenticationWith);
                 return;
             }

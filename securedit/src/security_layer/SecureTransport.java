@@ -90,7 +90,7 @@ public class SecureTransport implements SecureTransportInterface{
         }
         final Lock authenticateLock = new ReentrantLock(true);
 
-        AuthenticationMessage msg = authInstance.constructInitialAuthMessage();
+        MachineAuthenticationMessage msg = authInstance.constructInitialAuthMessage();
         Condition authenticationComplete = authenticateLock.newCondition();
         
         try {
@@ -203,10 +203,10 @@ public class SecureTransport implements SecureTransportInterface{
             }
             
             Object decryptedObj = encryptedObject.getObject(cipher);
-            if (decryptedObj instanceof AuthenticationMessage) {
+            if (decryptedObj instanceof MachineAuthenticationMessage) {
                 System.out.println("[DEBUG] processing AuthenticationMessage");
-                authInstance.processAuthenticationRequest(sourceOfMessage, 
-                                                          (AuthenticationMessage)decryptedObj,
+                authInstance.processMachineAuthenticationRequest(sourceOfMessage, 
+                                                          (MachineAuthenticationMessage)decryptedObj,
                                                           this);
             } else if (decryptedObj instanceof ApplicationMessage) {
                 ApplicationMessage appMessage = (ApplicationMessage)decryptedObj;
