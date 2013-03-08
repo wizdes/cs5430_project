@@ -85,6 +85,7 @@ public class SecureTransport implements SecureTransportInterface{
     @Override
     public boolean authenticate(String machineIdent) {
         System.out.println("Starting authentication...");
+        //If machine has been authenticated or trying to authenticate with itself, return
         if(authInstance.hasAuthenticated(machineIdent) || machineIdent.equals(keys.ident)){
             return true;
         }
