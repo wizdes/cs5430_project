@@ -4,6 +4,7 @@
  */
 package security_layer;
 
+import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -22,7 +23,6 @@ import javax.crypto.spec.SecretKeySpec;
  */
 class KeyFactory {
     
-    static final String SIGNING_ALGORITHM = "SHA1withRSA";
     
     /**********************************************
      * patrick's
@@ -41,12 +41,16 @@ class KeyFactory {
     }
     
     static Key generateSymmetricKey(String password){
-        byte[] passBytes = password.getBytes();
-        //assert passBytes.length == 16 : passBytes.length;
-        if(passBytes.length != 16){
-           passBytes = fix_bad_length_key(passBytes);
+        try {
+            byte[] passBytes = password.getBytes("UTF-8");
+            return new SecretKeySpec(fix_bad_length_key(passBytes), "AES");
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(KeyFactory.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
         }
-        return new SecretKeySpec(passBytes, "AES");
+    }
+    static Key generateSymmetricKey(String password, String salt){
+        return generateSymmetricKey(password + salt);
     }
     static Key generateSymmetricKey(){
         try {
@@ -61,13 +65,31 @@ class KeyFactory {
     }
 
     static int generateNonce() {
-        SecureRandom rand = new SecureRandom();
-        return rand.nextInt();
+        SecureRandom rand;
+        try {
+            rand = SecureRandom.getInstance("SHA1PRNG", "SUN");
+            return rand.nextInt();
+        } catch (NoSuchAlgorithmException | NoSuchProviderException ex) {
+            Logger.getLogger(KeyFactory.class.getName()).log(Level.SEVERE, null, ex);
+            return -1;
+        }
+    }
+    
+    static String generateSalt(){
+        try {
+            byte[] salt = new byte[20];
+            SecureRandom rand = SecureRandom.getInstance("SHA1PRNG", "SUN");
+            rand.nextBytes(salt);
+            return new String(salt, "UTF-8");
+        } catch (UnsupportedEncodingException | NoSuchAlgorithmException | NoSuchProviderException ex) {
+            Logger.getLogger(KeyFactory.class.getName()).log(Level.SEVERE, null, ex);
+            return null;
+        }
     }
        
     private static byte[] fix_bad_length_key(byte[] passBytes){
         try {
-            MessageDigest sha = MessageDigest.getInstance("SHA-1");
+            MessageDigest sha = MessageDigest.getInstance("SHA-256");
             byte[] key = sha.digest(passBytes);
             return Arrays.copyOf(key, 16); // use only first 128 bit
         } catch (NoSuchAlgorithmException ex) {

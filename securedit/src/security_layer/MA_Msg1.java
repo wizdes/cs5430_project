@@ -8,9 +8,9 @@ package security_layer;
  * A -> B: {r1}K_B
  * @author Patrick C. Berens
  */
-class MA_Msg1 implements AuthenticationMessage {
-    int nonce1;             //r1
+class MA_Msg1 implements MachineAuthenticationMessage {
+    int nonce;             //r1
     MA_Msg1(int nonce1) {
-        this.nonce1 = nonce1;
+        this.nonce = nonce1;
     }
 }

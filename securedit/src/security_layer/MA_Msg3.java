@@ -11,7 +11,7 @@ import javax.crypto.SecretKey;
  * A -> B: {r2 + 1}K_B
  * @author Patrick C. Berens
  */
-class MA_Msg3 implements AuthenticationMessage{
+class MA_Msg3 implements MachineAuthenticationMessage{
     SecretKey SK;     //K_AB
     int r;           //r1 + 1
     
