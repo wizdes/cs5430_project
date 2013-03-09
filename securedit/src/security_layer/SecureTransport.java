@@ -48,24 +48,20 @@ public class SecureTransport implements SecureTransportInterface{
     private ConcurrentMap<String, Integer> lastReceived = new ConcurrentHashMap<>();
     private AtomicInteger counter = new AtomicInteger();
     
-    /********************************************
-     * patrick's 
-     * *******************************************/
     public SecureTransport(String password){
         Key personalKey = KeyFactory.generateSymmetricKey(password);
-        keys = new EncryptionKeys(personalKey);
+        keys = new EncryptionKeys(personalKey, password);
         authInstance = new Authentications(keys);
     }
     
     public SecureTransport(String ident, String host, int port, String password, CommunicationInterface communication) {
-        assert password.length() == 16: password.length();
         assert port == 4000 + Integer.parseInt(ident);
         
         this.networkTransport = new NetworkTransport(ident, host, port, this);
         this.communication = communication;
         
         Key personalKey = KeyFactory.generateSymmetricKey(password);
-        keys = new EncryptionKeys(ident, personalKey);
+        keys = new EncryptionKeys(personalKey, ident, password);
         KeysObject keyObj = (KeysObject)readEncryptedFile("keys_" + ident);
         keys.privateKey = keyObj.privateKey;
         keys.signingKey = keyObj.signingKey;
@@ -146,7 +142,7 @@ public class SecureTransport implements SecureTransportInterface{
         Cipher cipher = CipherFactory.constructRSAEncryptionCipher(publicKey);
         try {
             SealedObject encryptedObject = new SealedObject(m, cipher);
-            Signature signature = Signature.getInstance(KeyFactory.SIGNING_ALGORITHM);
+            Signature signature = Signature.getInstance(CipherFactory.SIGNING_ALGORITHM);
             SignedObject signedObject = new SignedObject(encryptedObject, (PrivateKey)keys.signingKey, signature);
 
             EncryptedMessage encryptedMessage = new EncryptedRSAMessage(signedObject);
@@ -169,8 +165,7 @@ public class SecureTransport implements SecureTransportInterface{
         try {
             Cipher cipher = null;
             switch(encryptedMessage.getAlgorithm()){
-                
-                case "AES/CBC/PKCS5Padding":
+                case CipherFactory.AES_ALGORITHM:
                     EncryptedAESMessage aesMessage = (EncryptedAESMessage)encryptedMsg;
                     encryptedObject = aesMessage.encryptedObject;
                     byte[] hmac = CipherFactory.HMAC(keys.getHMACKey(sourceOfMessage), encryptedObject);
@@ -185,11 +180,11 @@ public class SecureTransport implements SecureTransportInterface{
                     cipher = CipherFactory.constructAESDecryptionCipher(secretKey, aesMessage.iv);
                     break;
                     
-                case KeyFactory.SIGNING_ALGORITHM:
+                case CipherFactory.SIGNING_ALGORITHM:
                     EncryptedRSAMessage rsaMessage = (EncryptedRSAMessage)encryptedMsg;
                     SignedObject signedObject = rsaMessage.signedObject;
                     PublicKey publicKey = keys.getVerifyingKey(sourceOfMessage);
-                    Signature sig = Signature.getInstance(KeyFactory.SIGNING_ALGORITHM);
+                    Signature sig = Signature.getInstance(CipherFactory.SIGNING_ALGORITHM);
                     boolean verified = signedObject.verify(publicKey, sig);
                     if (!verified) {
                         throw new SignatureException("Unverified message from " + sourceOfMessage);
@@ -234,25 +229,34 @@ public class SecureTransport implements SecureTransportInterface{
             Cipher cipher = CipherFactory.constructAESEncryptionCipher(keys.personalKey, iv);
             SealedObject encryptedObject = new SealedObject(contents, cipher);
             
-            // TODO hash personalKey somehow into an unrelated HMAC key we can use
-            EncryptedAESMessage file = new EncryptedAESMessage(encryptedObject, iv, null);
+            String salt = KeyFactory.generateSalt();
+            Key hmacKey = KeyFactory.generateSymmetricKey(keys.password, salt);
+            byte[] hmac = CipherFactory.HMAC(hmacKey, encryptedObject);
+            
+            EncryptedAESFile file = new EncryptedAESFile(encryptedObject, iv, hmac, salt);
             return fileTransport.writeFile(filename, file);
             
         } catch (IOException | IllegalBlockSizeException ex) {
             Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
             return false;
-        }
-        
+        }   
     }
 
     @Override
     public Message readEncryptedFile(String filename) {
         try {
-            EncryptedAESMessage file = (EncryptedAESMessage)fileTransport.readFile(filename);
+            EncryptedAESFile file = (EncryptedAESFile)fileTransport.readFile(filename);
+            
+            //Verify hmac
+            Key hmacKey = KeyFactory.generateSymmetricKey(keys.password, file.hmacSalt);
+            byte[] hmac = CipherFactory.HMAC(hmacKey, file.encryptedObject);        
+            if (!Arrays.equals(hmac, file.HMAC)) {
+                throw new SignatureException("Invalid HMAC");
+            }
             
             Cipher cipher = CipherFactory.constructAESDecryptionCipher(keys.personalKey, file.iv);
             return (Message)file.encryptedObject.getObject(cipher);
-        } catch (IOException | ClassNotFoundException | IllegalBlockSizeException | BadPaddingException ex) {
+        } catch (IOException | ClassNotFoundException | IllegalBlockSizeException | SignatureException | BadPaddingException ex) {
             Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }

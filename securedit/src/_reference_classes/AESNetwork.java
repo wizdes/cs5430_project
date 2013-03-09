@@ -11,6 +11,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,7 +33,7 @@ public class AESNetwork {
             
             //SIMPLE AES ENCRYPTION SETUP
             SecretKey secret = (SecretKey)key;
-            SecureRandom random = new SecureRandom();
+            SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
             byte[] iv = new byte[16];
             random.nextBytes(iv);
             
@@ -46,7 +47,11 @@ public class AESNetwork {
             //   SealedObject and Message are serializable.
             SealedObject sealedObject = new SealedObject(msg, cipher);
             out.writeObject(sealedObject);
-        } catch (IllegalBlockSizeException | IOException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException ex) {
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(AESNetwork.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSuchProviderException ex) {
+            Logger.getLogger(AESNetwork.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalBlockSizeException | IOException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException ex) {
             Logger.getLogger(AESNetwork.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

@@ -23,7 +23,9 @@ import javax.crypto.SecretKey;
 class EncryptionKeys {
     //Have access to keys directly only inside security_layer package.
     String ident;
+    String password;
     Key personalKey;    //Generated from password for AES files
+    Key personalHMACKey;
     
     ConcurrentMap<String, SecretKey> secretKeys = new ConcurrentHashMap<>();      //Generated randomly for AES communication
     ConcurrentMap<String, SecretKey> HMACKeys = new ConcurrentHashMap<>();
@@ -34,16 +36,19 @@ class EncryptionKeys {
     Key signingKey;     //RSA
     
     EncryptionKeys(){}
-    EncryptionKeys(Key personalKey){
+    EncryptionKeys(Key personalKey, String password){
         this.personalKey = personalKey;
+        this.password = password;
     }
-    EncryptionKeys(String ident, Key personalKey){
+    EncryptionKeys(Key personalKey, String ident, String password){
         this.ident = ident;
+        this.password = password;
         this.personalKey = personalKey;
     }
 
-    EncryptionKeys(String ident, Key personalKey, PublicKey publicKey, PrivateKey privateKey){
+    EncryptionKeys(Key personalKey, PublicKey publicKey, PrivateKey privateKey, String ident, String password){
         this.ident = ident;
+        this.password = password;
         this.personalKey = personalKey;
         addPublicKey(ident, publicKey);
         this.privateKey = privateKey;
