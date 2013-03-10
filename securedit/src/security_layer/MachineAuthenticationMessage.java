@@ -9,5 +9,5 @@ import application.encryption_demo.Message;
  *
  * @author Patrick C. Berens
  */
-interface AuthenticationMessage extends Message{
+interface MachineAuthenticationMessage extends Message{
 }

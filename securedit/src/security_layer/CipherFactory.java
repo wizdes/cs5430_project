@@ -26,12 +26,13 @@ import javax.crypto.spec.IvParameterSpec;
  * @author Patrick C. Berens
  */
 class CipherFactory {
-    /**************************************
-     * patrick's
-     * ****************************************/
+    static final String RSA_ALGORITHM = "RSA/ECB/PKCS1Padding";
+    static final String AES_ALGORITHM = "AES/CBC/PKCS5Padding";
+    static final String SIGNING_ALGORITHM = "SHA1withRSA";
+    
     static Cipher constructAESEncryptionCipher(Key key, byte[] iv) {
         try {
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            Cipher cipher = Cipher.getInstance(AES_ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
             return cipher;
         } catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchPaddingException ex) {
@@ -42,7 +43,7 @@ class CipherFactory {
     static Cipher constructAESDecryptionCipher(Key key, byte[] iv){
         assert iv.length == 16 : iv;
         try {
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            Cipher cipher = Cipher.getInstance(AES_ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
             return cipher;
         } catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchPaddingException ex) {
@@ -52,7 +53,7 @@ class CipherFactory {
     }
     static Cipher constructRSAEncryptionCipher(Key key){
         try {
-            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            Cipher cipher = Cipher.getInstance(RSA_ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, key);
             return cipher;
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException ex) {
@@ -62,7 +63,7 @@ class CipherFactory {
     }
     static Cipher constructRSADecryptionCipher(Key key){
         try {
-            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            Cipher cipher = Cipher.getInstance(RSA_ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE, key);
             return cipher;
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException ex) {

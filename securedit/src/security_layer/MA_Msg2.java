@@ -7,15 +7,15 @@ package security_layer;
 import javax.crypto.SecretKey;
 
 /**
- * B -> A: {K_AB, r1 + 1, r2}K_A
+ * B -> A: {K_AB, r + 1, r2}K_A
  * @author Patrick C. Berens
  */
-class MA_Msg2 implements AuthenticationMessage {
+class MA_Msg2 implements MachineAuthenticationMessage {
     SecretKey SK;     //K_AB
-    int r1;           //r1 + 1
+    int r;           //r1 + 1
     
     MA_Msg2(SecretKey symmetricKey, int nonce1Response) {
         this.SK = symmetricKey;
-        this.r1 = nonce1Response;
+        this.r = nonce1Response;
     } 
 }
