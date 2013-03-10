@@ -602,7 +602,9 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
         } catch(NumberFormatException ex){
             handleException(ex);
         }
-        functionality = new EncryptionDemoFunctionality(this, appNodeId, appHost, appPort, password);
+        if (!nonDefaultSet) {
+            functionality = new EncryptionDemoFunctionality(this, appNodeId, appHost, appPort, password);
+        }
     }//GEN-LAST:event_UpdatePropertiesButtonActionPerformed
 
     private void AuthorizeMachineButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AuthorizeMachineButtonActionPerformed

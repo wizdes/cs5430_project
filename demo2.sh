@@ -1,1 +1,1 @@
-java -jar "securedit/dist/securedit.jar" "2" "localhost" 4002
+java -jar securedit.jar 1 localhost 4001 pass1111pass1111
