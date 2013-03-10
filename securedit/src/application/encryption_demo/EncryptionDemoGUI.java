@@ -54,7 +54,9 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
         PortTextField.setText(appPort + "");
         PasswordTextField.setText(password);
         
-        functionality = new EncryptionDemoFunctionality(this, appNodeId, appHost, appPort, password);
+        if (nonDefaultSet) {
+            functionality = new EncryptionDemoFunctionality(this, appNodeId, appHost, appPort, password);
+        }
         
         SendTextField.addKeyListener(new KeyAdapter() {
             @Override
