@@ -54,7 +54,9 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
         PortTextField.setText(appPort + "");
         PasswordTextField.setText(password);
         
-        functionality = new EncryptionDemoFunctionality(this, appNodeId, appHost, appPort, password);
+        if (nonDefaultSet) {
+            functionality = new EncryptionDemoFunctionality(this, appNodeId, appHost, appPort, password);
+        }
         
         SendTextField.addKeyListener(new KeyAdapter() {
             @Override
@@ -635,7 +637,9 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
         } catch(NumberFormatException ex){
             handleException(ex);
         }
-        functionality = new EncryptionDemoFunctionality(this, appNodeId, appHost, appPort, password);
+        if (!nonDefaultSet) {
+            functionality = new EncryptionDemoFunctionality(this, appNodeId, appHost, appPort, password);
+        }
     }//GEN-LAST:event_UpdatePropertiesButtonActionPerformed
 
     private void AuthorizeMachineButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AuthorizeMachineButtonActionPerformed
