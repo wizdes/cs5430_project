@@ -10,7 +10,6 @@ public class EncryptionDemoFunctionality {
     private EncryptionDemoGUI gui;
     private String openedFilename;
     private CommunicationInterface communication;
-
         
     EncryptionDemoFunctionality(EncryptionDemoGUI gui, String ident, String host, int port, String password){
         this.gui = gui;
@@ -60,6 +59,20 @@ public class EncryptionDemoFunctionality {
      */
     boolean sendEncryptedMessage(String ident, String plaintextMsg) {
         return communication.sendMessage(ident, new StringMessage(plaintextMsg));
+    }
+    
+    boolean broadcastEncryptedMessage(String plaintextMsg){
+        
+        boolean failure = false;
+        for(String peer: gui.peers){
+            authenticateMachine(peer);
+            failure = !sendEncryptedMessage(peer, plaintextMsg) ? true : failure;
+        }
+        if(failure){
+            return false;
+        } else{
+            return true;
+        }
     }
     
     String authenticateMachine(String ident){
