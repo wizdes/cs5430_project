@@ -480,6 +480,11 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
         });
 
         GeneratePINButton.setText("Generate PIN");
+        GeneratePINButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                GeneratePINButtonMouseClicked(evt);
+            }
+        });
 
         SendChatButton.setText("Send");
         SendChatButton.addActionListener(new java.awt.event.ActionListener() {
@@ -699,6 +704,12 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
            JOptionPane.showMessageDialog(this, "Message: \"" +  plaintext + "\" failed to encrypt and send."); 
         }
     }//GEN-LAST:event_SendChatButtonActionPerformed
+
+    private void GeneratePINButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_GeneratePINButtonMouseClicked
+        String newPIN = functionality.properPINInfo.getPIN();
+        functionality.properPINInfo.storePIN(newPIN);
+        JOptionPane.showMessageDialog(this, newPIN);
+    }//GEN-LAST:event_GeneratePINButtonMouseClicked
     private void handleException(Exception ex) {
         JOptionPane.showMessageDialog(this, ex.getMessage());
     }

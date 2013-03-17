@@ -1,5 +1,6 @@
 package application.encryption_demo;
 
+import human_authentication.PINFunctionality;
 import java.util.Collection;
 
 /**
@@ -10,8 +11,10 @@ public class EncryptionDemoFunctionality {
     private EncryptionDemoGUI gui;
     private String openedFilename;
     private CommunicationInterface communication;
+    public PINFunctionality properPINInfo;
         
     EncryptionDemoFunctionality(EncryptionDemoGUI gui, String ident, String host, int port, String password){
+        this.properPINInfo = new PINFunctionality();
         this.gui = gui;
         this.communication = new Communication(ident, host, port, password);
         listenForMessages();
