@@ -1,6 +1,6 @@
 package application.encryption_demo;
 
-import human_authentication.PINFunctionality;
+import security_layer.PINFunctionality;
 import java.util.Collection;
 
 /**
