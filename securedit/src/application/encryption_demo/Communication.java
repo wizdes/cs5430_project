@@ -25,8 +25,8 @@ public class Communication implements CommunicationInterface {
     private BlockingQueue<Message> messageQueue = new LinkedBlockingDeque<>();
     private SecureTransportInterface secureTransport;
     
-    public Communication(String ident, String host, int port, String password) {
-        this.secureTransport = new SecureTransport(ident, host, port, password, this);
+    public Communication(String ident, String password) {
+        this.secureTransport = new SecureTransport(ident, password, this);
     }
     
     @Override

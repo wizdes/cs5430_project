@@ -8,6 +8,7 @@ import org.junit.After;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+import security_layer.Profile;
 
 /**
  *
@@ -28,9 +29,22 @@ public class CommunicationInterfaceTest {
         
     @Before
     public void setUp() throws Exception {
-        myCommunicator = new Communication(myIdent, "localhost", 4000, password_0);
-        theirCommunicator = new Communication(theirIdent, "localhost", 4001, password_1);
-        thirdCommunicator = new Communication(thirdIdent, "localhost", 4002, password_2);
+        Profile.deleteProfile(myIdent);
+        Profile p1 = Profile.writeProfile(myIdent, password_0, 4000, "localhost");
+        
+        Profile.deleteProfile(theirIdent);
+        Profile p2 = Profile.writeProfile(theirIdent, password_1, 4001, "localhost");
+        
+        Profile.deleteProfile(thirdIdent);
+        Profile p3 = Profile.writeProfile(thirdIdent, password_2, 4002, "localhost");
+        
+        p1.addPublicKeysFrom(p2); p1.addPublicKeysFrom(p3); p1.save(password_0);
+        p2.addPublicKeysFrom(p1); p2.addPublicKeysFrom(p3); p2.save(password_1);
+        p3.addPublicKeysFrom(p1); p3.addPublicKeysFrom(p2); p3.save(password_2);
+        
+        myCommunicator = new Communication(myIdent, password_0);
+        theirCommunicator = new Communication(theirIdent, password_1);
+        thirdCommunicator = new Communication(thirdIdent, password_2);        
     }
 
     @After

@@ -11,9 +11,9 @@ public class EncryptionDemoFunctionality {
     private String openedFilename;
     private CommunicationInterface communication;
         
-    EncryptionDemoFunctionality(EncryptionDemoGUI gui, String ident, String host, int port, String password){
+    public EncryptionDemoFunctionality(EncryptionDemoGUI gui, String ident, String password){
         this.gui = gui;
-        this.communication = new Communication(ident, host, port, password);
+        this.communication = new Communication(ident, password);
         listenForMessages();
     }
     
@@ -57,11 +57,11 @@ public class EncryptionDemoFunctionality {
      * @param plaintextMsg Message in plaintext
      * @return Encrypted version of message.
      */
-    boolean sendEncryptedMessage(String ident, String plaintextMsg) {
+    public boolean sendEncryptedMessage(String ident, String plaintextMsg) {
         return communication.sendMessage(ident, new StringMessage(plaintextMsg));
     }
     
-    boolean broadcastEncryptedMessage(String plaintextMsg){
+    public boolean broadcastEncryptedMessage(String plaintextMsg){
         
         boolean failure = false;
         for(String peer: gui.peers){
@@ -75,7 +75,7 @@ public class EncryptionDemoFunctionality {
         }
     }
     
-    String authenticateMachine(String ident){
+    public String authenticateMachine(String ident){
         boolean wasSuccessful = communication.authenticateMachine(ident);
         if(wasSuccessful){
             return "Successfully authenticated machine\n";
