@@ -5,6 +5,8 @@
 package security_layer;
 
 import application.encryption_demo.Message;
+import java.security.Key;
+import java.security.PublicKey;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Condition;
@@ -18,8 +20,10 @@ import javax.crypto.SecretKey;
 class Authentications {
     private ConcurrentMap<String, Authentication> authentications = new ConcurrentHashMap<>();
     private EncryptionKeys keys;
+    PINFunctionality pf;
     
     Authentications(EncryptionKeys keys) {
+        pf = new PINFunctionality();
         this.keys = keys;
     }
     
@@ -40,6 +44,12 @@ class Authentications {
     MachineAuthenticationMessage constructInitialAuthMessage(){
         return new MA_Msg1(KeyFactory.generateNonce());
     }
+    
+    HumanAuthenticationMessage constructInitialHAuthMessage(){
+        return new HA_Msg1("A", KeyFactory.generateNonce());
+    }
+    
+    
     private class Authentication{
         Message message;
         Condition cond;
@@ -54,6 +64,64 @@ class Authentications {
         private Authentication(Message message) {
             this.message = message;
         }
+    }
+    
+    //This should send a  HumanAuthenticationMessage TCP saying "Hi, I'm A and I am discovering"
+    //     which is a dummy message for now. it should send it to one of the peers(you pick).
+    //MAJOR ASSUMPTION. PIN OPERATIONS FOR A USER ARE DONE OUTSIDE OF THIS
+    //THEY NEED TO BE PUT IN keys.getSymmetricKey(sourceOfMessage)
+    void processHumanAuthenticationRequest(String sourceOfMsg, HumanAuthenticationMessage message, SecureTransportInterface sti) {
+        String idOfNodeAuthenticationWith = sourceOfMsg;
+        if (message instanceof HA_Msg1) {
+            //generate a PIN
+            String PIN = pf.getPIN();
+            //send info into GUI somehow
+            
+            HA_Msg1 msg = (HA_Msg1)message;
+            SecretKey publicKey = (SecretKey)keys.personalKey;
+            SecretKey pinKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN);
+            int nonceResponse1 = msg.nonce + 1;
+            Message m = new HA_Msg2(publicKey, nonceResponse1, keys.ident);
+            sti.sendAESEncryptedMessage(idOfNodeAuthenticationWith, m, pinKey);
+        }
+        else if (message instanceof HA_Msg2) {
+            HA_Msg2 msg = (HA_Msg2)message;
+            Authentication auth = authentications.get(idOfNodeAuthenticationWith);
+            if (msg.nonce - 1 != ((HA_Msg1)auth.message).nonce) {
+                System.out.println("[DEBUG] Bad Nonce msg02! Expecting: " + (((MA_Msg1)auth.message).nonce + 1) + ", found: " + msg.nonce);
+                authentications.remove(idOfNodeAuthenticationWith);
+                return;
+            }
+            PublicKey otherPublicKey = (PublicKey) msg.publicKey;
+            keys.addPublicKey(idOfNodeAuthenticationWith, otherPublicKey);
+            
+            SecretKey publicKey = (SecretKey)keys.personalKey;
+            int nonceResponse1 = msg.nonce + 1;
+            Message m = new HA_Msg3(publicKey, nonceResponse1);
+            sti.sendAESEncryptedMessage(idOfNodeAuthenticationWith, m, keys.getSymmetricKey(idOfNodeAuthenticationWith));
+            
+            if(auth != null){
+                auth.lock.lock();
+                try {
+                    auth.cond.signal();
+                } finally {
+                    auth.lock.unlock();
+                }
+                removeAuthentication(idOfNodeAuthenticationWith);
+            }
+        }
+        else {
+            HA_Msg3 msg = (HA_Msg3)message;
+            Authentication auth = authentications.get(idOfNodeAuthenticationWith);
+            if (msg.nonce - 1 != ((HA_Msg1)auth.message).nonce) {
+                System.out.println("[DEBUG] Bad Nonce msg02! Expecting: " + (((MA_Msg1)auth.message).nonce + 1) + ", found: " + msg.nonce);
+                authentications.remove(idOfNodeAuthenticationWith);
+                return;
+            }
+            PublicKey otherPublicKey = (PublicKey) msg.publicKey;
+            keys.addPublicKey(idOfNodeAuthenticationWith, otherPublicKey);
+        }
+        
     }
     
     /*
