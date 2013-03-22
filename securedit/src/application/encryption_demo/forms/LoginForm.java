@@ -2,6 +2,7 @@ package application.encryption_demo.forms;
 
 import application.encryption_demo.EncryptionDemoFunctionality;
 import javax.swing.JOptionPane;
+import security_layer.Profile;
 
 /*
  * To change this template, choose Tools | Templates
@@ -211,14 +212,14 @@ public class LoginForm extends javax.swing.JFrame {
     }//GEN-LAST:event_loginUsernameTextFieldActionPerformed
 
     private void createAccountButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createAccountButtonActionPerformed
-        String password = passwordTextField.getPassword().toString();
+        String password = new String(passwordTextField.getPassword());
         if (!isValidPassword(password)) {
             String message = "Passwords must be of length 16 and contain >= 1 non alphanumeric character";
             JOptionPane.showMessageDialog(this, message);
             return;
         }   
         
-        String appNodeId = usernameTextField.getText().trim();
+        String username = usernameTextField.getText().trim();
         String appHost = hostTextField.getText().trim();
         
         int appPort = 0;
@@ -226,8 +227,10 @@ public class LoginForm extends javax.swing.JFrame {
             appPort = Integer.parseInt(portTextField.getText());
         } catch(NumberFormatException ex){
             handleException(ex);
+            return;
         }
-        EncryptionDemoFunctionality functionality = new EncryptionDemoFunctionality(null, appNodeId, password);
+        Profile profile = Profile.writeProfile(username, password, appPort, appHost);
+        EncryptionDemoFunctionality functionality = new EncryptionDemoFunctionality(null, profile, password);
         this.dispose();
         UserOwnerForm form = new UserOwnerForm(functionality);
         form.setVisible(true);
@@ -235,16 +238,22 @@ public class LoginForm extends javax.swing.JFrame {
         
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginButtonActionPerformed
         String username = loginUsernameTextField.getText().trim();
-        String password = loginPasswordTextField.getPassword().toString();
-        String appHost = hostTextField.getText().trim();
-        int appPort = 5001;
-        EncryptionDemoFunctionality functionality = new EncryptionDemoFunctionality(null, username, password);
-        this.dispose();
-        UserOwnerForm form = new UserOwnerForm(functionality);
-        form.setVisible(true);
+        String password = new String(loginPasswordTextField.getPassword());
+        Profile profile = Profile.readProfile(username, password);
+        if (profile != null) {
+            EncryptionDemoFunctionality functionality = new EncryptionDemoFunctionality(null, profile, password);
+            this.dispose();
+            UserOwnerForm form = new UserOwnerForm(functionality);
+            form.setVisible(true);            
+        } else {
+            JOptionPane.showMessageDialog(this, "Invalid credentials");
+        }
     }//GEN-LAST:event_loginButtonActionPerformed
     
     private boolean isValidPassword(String pass) {
+        System.out.println("password");
+        System.out.println(pass);
+        System.out.println(pass.length());
         return pass.length() == 16
                && pass.matches(".*[^a-zA-Z\\s0-9].*");
     }

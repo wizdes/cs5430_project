@@ -10,6 +10,7 @@ import java.io.File;
 import java.util.ArrayList;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import security_layer.Profile;
 
 /**
  *
@@ -55,7 +56,8 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
         PasswordTextField.setText(password);
         
         if (nonDefaultSet) {
-            functionality = new EncryptionDemoFunctionality(this, appNodeId, password);
+            Profile profile = Profile.readProfile(appNodeId, password);
+            functionality = new EncryptionDemoFunctionality(this, profile, password);
         }
         
         SendTextField.addKeyListener(new KeyAdapter() {
@@ -638,7 +640,8 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
             handleException(ex);
         }
         if (!nonDefaultSet) {
-            functionality = new EncryptionDemoFunctionality(this, appNodeId, password);
+            Profile profile = Profile.readProfile(appNodeId, password);
+            functionality = new EncryptionDemoFunctionality(this, profile, password);
         }
     }//GEN-LAST:event_UpdatePropertiesButtonActionPerformed
 

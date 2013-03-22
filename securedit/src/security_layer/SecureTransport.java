@@ -48,37 +48,33 @@ public class SecureTransport implements SecureTransportInterface{
     private Authentications authInstance;
     private ConcurrentMap<String, Integer> lastReceived = new ConcurrentHashMap<>();
     private AtomicInteger counter = new AtomicInteger();
+    public boolean authenticated = false;
     
     public SecureTransport(String password){
         Key personalKey = KeyFactory.generateSymmetricKey(password);
         keys = new EncryptionKeys(personalKey, password);
         authInstance = new Authentications(keys);
+        authenticated = true;
     }
     
-    public SecureTransport(String ident, String password, CommunicationInterface communication) {        
+    public SecureTransport(Profile profile, String password, CommunicationInterface communication) {        
         
         Key personalKey = KeyFactory.generateSymmetricKey(password);
-        keys = new EncryptionKeys(personalKey, ident, password);
-       
-        Profile profile = Profile.readProfile(ident, password);
-        
-        if (profile == null) {
-            return;
-        }
-        
+        keys = new EncryptionKeys(personalKey, profile.ident, password);
+                
         keys.privateKey = profile.keys.privateKey;
         keys.signingKey = profile.keys.signingKey;
         keys.publicKeys = profile.keys.publicKeys;
         keys.verifyingKeys = profile.keys.verifiyngKeys;
        
-        this.networkTransport = new NetworkTransport(ident, profile.host, profile.port, this);
+        this.networkTransport = new NetworkTransport(profile.ident, profile.host, profile.port, this);
         this.communication = communication;
         
         authInstance = new Authentications(keys);
         
         //Hacked for now
         for(String peerId: keys.publicKeys.keySet()){
-            if(!peerId.equals(ident)){
+            if(!peerId.equals(profile.ident)){
                 networkTransport.addPeer(peerId, "localhost", 4000 + Integer.parseInt(peerId));
             }
         }

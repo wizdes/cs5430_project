@@ -1,6 +1,7 @@
 package application.encryption_demo;
 
 import java.util.Collection;
+import security_layer.Profile;
 
 /**
  *
@@ -11,9 +12,9 @@ public class EncryptionDemoFunctionality {
     private String openedFilename;
     private CommunicationInterface communication;
         
-    public EncryptionDemoFunctionality(EncryptionDemoGUI gui, String ident, String password){
+    public EncryptionDemoFunctionality(EncryptionDemoGUI gui, Profile profile, String password){
         this.gui = gui;
-        this.communication = new Communication(ident, password);
+        this.communication = new Communication(profile, password);
         listenForMessages();
     }
     

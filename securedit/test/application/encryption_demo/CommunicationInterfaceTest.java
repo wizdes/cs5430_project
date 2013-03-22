@@ -42,9 +42,9 @@ public class CommunicationInterfaceTest {
         p2.addPublicKeysFrom(p1); p2.addPublicKeysFrom(p3); p2.save(password_1);
         p3.addPublicKeysFrom(p1); p3.addPublicKeysFrom(p2); p3.save(password_2);
         
-        myCommunicator = new Communication(myIdent, password_0);
-        theirCommunicator = new Communication(theirIdent, password_1);
-        thirdCommunicator = new Communication(thirdIdent, password_2);        
+        myCommunicator = new Communication(p1, password_0);
+        theirCommunicator = new Communication(p2, password_1);
+        thirdCommunicator = new Communication(p3, password_2);        
     }
 
     @After
