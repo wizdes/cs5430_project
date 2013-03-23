@@ -17,6 +17,7 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.SignedObject;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -69,7 +70,7 @@ public class SecureTransport implements SecureTransportInterface{
        
         this.networkTransport = new NetworkTransport(profile.ident, profile.host, profile.port, this);
         this.communication = communication;
-        
+
         authInstance = new Authentications(keys);
         
         //Hacked for now
@@ -107,11 +108,21 @@ public class SecureTransport implements SecureTransportInterface{
             return true;
         }
     }
+
+    public boolean sendClearMessage(String destination, Message m){
+        SecretKey commonKey = (SecretKey) KeyFactory.generateSymmetricKey("CommonKey");
+        return sendAESEncryptedMessage(destination, m, commonKey);
+    }
         
     @Override
     public boolean sendAESEncryptedMessage(String destination, Message m) {
+        return sendAESEncryptedMessage(destination, m, keys.getSymmetricKey(destination));
+    }
+    
+    @Override
+    public boolean sendAESEncryptedMessage(String destination, Message m, SecretKey secretKey) {
         System.out.println("Sending AES Message to " + destination);
-        SecretKey secretKey = keys.getSymmetricKey(destination);
+        if (secretKey == null) secretKey = keys.getSymmetricKey(destination);
         
         if (secretKey == null) {
             System.out.println("No symemetric key found for " + destination);
@@ -135,6 +146,7 @@ public class SecureTransport implements SecureTransportInterface{
     @Override
     public boolean sendRSAEncryptedMessage(String destination, Message m) {
         System.out.println("Sending RSA Message to " + destination);
+        byte[] iv = new byte[16];
         PublicKey publicKey = keys.getPublicKey(destination);
         if (publicKey == null) {
             System.out.println("No public key found for " + destination);
@@ -200,7 +212,12 @@ public class SecureTransport implements SecureTransportInterface{
             }
             
             Object decryptedObj = encryptedObject.getObject(cipher);
-            if (decryptedObj instanceof MachineAuthenticationMessage) {
+            if (decryptedObj instanceof HumanAuthenticationMessage) {
+                System.out.println("[DEBUG] processing AuthenticationMessage");
+                authInstance.processHumanAuthenticationRequest(sourceOfMessage, 
+                                                          (HumanAuthenticationMessage)decryptedObj,
+                                                          this);
+            } else if (decryptedObj instanceof MachineAuthenticationMessage) {
                 System.out.println("[DEBUG] processing AuthenticationMessage");
                 authInstance.processMachineAuthenticationRequest(sourceOfMessage, 
                                                           (MachineAuthenticationMessage)decryptedObj,
@@ -277,5 +294,42 @@ public class SecureTransport implements SecureTransportInterface{
     @Override
     public void shutdown() {
         this.networkTransport.shutdown();
+    }
+
+
+    @Override
+    public ArrayList<Integer> findPeers(int myID) {
+        ArrayList<Integer> peers = new ArrayList<Integer>();
+        peers.add(0);
+        peers.add(1);
+        peers.add(2);
+        return peers;
+    }
+
+    @Override
+    public boolean initializeHumanAuthenticate(String ID) {
+        //authInstance
+        System.out.println("Starting authentication...");
+
+        final Lock authenticateLock = new ReentrantLock(true);
+
+        HumanAuthenticationMessage msg = authInstance.constructInitialHAuthMessage();
+        Condition authenticationComplete = authenticateLock.newCondition();
+        
+        try {
+            authenticateLock.lock();
+            // send the message and wait
+            authInstance.addAuthentication(ID, msg, authenticationComplete, authenticateLock);
+            sendClearMessage(ID, msg);
+            authenticationComplete.await();
+            authInstance.removeAuthentication(ID);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+        finally{
+            authenticateLock.unlock();
+            return true;
+        }
     }
 }
