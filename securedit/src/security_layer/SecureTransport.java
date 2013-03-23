@@ -7,6 +7,7 @@ package security_layer;
 
 import application.encryption_demo.CommunicationInterface;
 import application.encryption_demo.Message;
+import java.io.File;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -55,25 +56,24 @@ public class SecureTransport implements SecureTransportInterface{
         authInstance = new Authentications(keys);
     }
     
-    public SecureTransport(String ident, String host, int port, String password, CommunicationInterface communication) {
-        assert port == 4000 + Integer.parseInt(ident);
-        
-        this.networkTransport = new NetworkTransport(ident, host, port, this);
-        this.communication = communication;
+    public SecureTransport(Profile profile, String password, CommunicationInterface communication) {        
         
         Key personalKey = KeyFactory.generateSymmetricKey(password);
-        keys = new EncryptionKeys(personalKey, ident, password);
-        KeysObject keyObj = (KeysObject)readEncryptedFile("keys_" + ident);
-        keys.privateKey = keyObj.privateKey;
-        keys.signingKey = keyObj.signingKey;
-        keys.publicKeys = keyObj.publicKeys;
-        keys.verifyingKeys = keyObj.verifiyngKeys;
-        
+        keys = new EncryptionKeys(personalKey, profile.ident, password);
+                
+        keys.privateKey = profile.keys.privateKey;
+        keys.signingKey = profile.keys.signingKey;
+        keys.publicKeys = profile.keys.publicKeys;
+        keys.verifyingKeys = profile.keys.verifiyngKeys;
+       
+        this.networkTransport = new NetworkTransport(profile.ident, profile.host, profile.port, this);
+        this.communication = communication;
+
         authInstance = new Authentications(keys);
         
         //Hacked for now
         for(String peerId: keys.publicKeys.keySet()){
-            if(!peerId.equals(ident)){
+            if(!peerId.equals(profile.ident)){
                 networkTransport.addPeer(peerId, "localhost", 4000 + Integer.parseInt(peerId));
             }
         }
@@ -83,7 +83,7 @@ public class SecureTransport implements SecureTransportInterface{
     public boolean authenticate(String machineIdent) {
         System.out.println("Starting authentication...");
         //If machine has been authenticated or trying to authenticate with itself, return
-        if(authInstance.hasAuthenticated(machineIdent) || machineIdent.equals(keys.ident)){
+        if (authInstance.hasAuthenticated(machineIdent) || machineIdent.equals(keys.ident)) {
             return true;
         }
         final Lock authenticateLock = new ReentrantLock(true);
@@ -106,7 +106,7 @@ public class SecureTransport implements SecureTransportInterface{
             return true;
         }
     }
-    
+
     public boolean sendClearMessage(String destination, Message m){
         SecretKey commonKey = (SecretKey) KeyFactory.generateSymmetricKey("CommonKey");
         return sendAESEncryptedMessage(destination, m, commonKey);
@@ -120,7 +120,7 @@ public class SecureTransport implements SecureTransportInterface{
     @Override
     public boolean sendAESEncryptedMessage(String destination, Message m, SecretKey secretKey) {
         System.out.println("Sending AES Message to " + destination);
-        if(secretKey == null) secretKey = keys.getSymmetricKey(destination);
+        if (secretKey == null) secretKey = keys.getSymmetricKey(destination);
         
         if (secretKey == null) {
             System.out.println("No symemetric key found for " + destination);
@@ -149,7 +149,7 @@ public class SecureTransport implements SecureTransportInterface{
         if (publicKey == null) {
             System.out.println("No public key found for " + destination);
             return false;
-        }        
+        }
         Cipher cipher = CipherFactory.constructRSAEncryptionCipher(publicKey);
         try {
             SealedObject encryptedObject = new SealedObject(m, cipher);
@@ -260,6 +260,9 @@ public class SecureTransport implements SecureTransportInterface{
 
     @Override
     public Message readEncryptedFile(String filename) {
+        if (!new File(filename).exists()) {
+            return null;
+        }
         try {
             EncryptedAESFile file = (EncryptedAESFile)fileTransport.readFile(filename);
             
@@ -272,7 +275,10 @@ public class SecureTransport implements SecureTransportInterface{
             
             Cipher cipher = CipherFactory.constructAESDecryptionCipher(keys.personalKey, file.iv);
             return (Message)file.encryptedObject.getObject(cipher);
-        } catch (IOException | ClassNotFoundException | IllegalBlockSizeException | SignatureException | BadPaddingException ex) {
+        } catch (SignatureException ex) {
+            System.out.println("Bad signature reading " + filename);
+            return null;
+        } catch (IOException | ClassNotFoundException | IllegalBlockSizeException | BadPaddingException ex) {
             Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
             return null;
         }
@@ -287,6 +293,7 @@ public class SecureTransport implements SecureTransportInterface{
     public void shutdown() {
         this.networkTransport.shutdown();
     }
+
 
     @Override
     public ArrayList<Integer> findPeers(int myID) {

@@ -24,7 +24,6 @@ class GenerateAndWriteKeys {
         generateKeys.run(args);
     }
     private void run(String[] args){
-        Scanner scan = new Scanner(System.in);
 
         //Generate keys
         PrivateKey privateKeys[] = new PrivateKey[3];

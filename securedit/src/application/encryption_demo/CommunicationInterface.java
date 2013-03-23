@@ -26,7 +26,4 @@ public interface CommunicationInterface {
     public String readFile(String filename);
     
     public void shutdown();
-    
-    // for testing only
-    public SecureTransportInterface getSecureTransport();
 }

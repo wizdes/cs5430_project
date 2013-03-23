@@ -1,7 +1,9 @@
 package application.encryption_demo;
 
-import security_layer.PINFunctionality;
+
 import java.util.Collection;
+import security_layer.PINFunctionality;
+import security_layer.Profile;
 
 /**
  *
@@ -13,10 +15,10 @@ public class EncryptionDemoFunctionality {
     private CommunicationInterface communication;
     public PINFunctionality properPINInfo;
         
-    EncryptionDemoFunctionality(EncryptionDemoGUI gui, String ident, String host, int port, String password){
+    public EncryptionDemoFunctionality(EncryptionDemoGUI gui, Profile profile, String password){
         this.properPINInfo = new PINFunctionality();
         this.gui = gui;
-        this.communication = new Communication(ident, host, port, password);
+        this.communication = new Communication(profile, password);
         listenForMessages();
     }
     
@@ -60,12 +62,12 @@ public class EncryptionDemoFunctionality {
      * @param plaintextMsg Message in plaintext
      * @return Encrypted version of message.
      */
-    boolean sendEncryptedMessage(String ident, String plaintextMsg) {
+
+    public boolean sendEncryptedMessage(String ident, String plaintextMsg) {
         return communication.sendMessage(ident, new StringMessage(plaintextMsg));
     }
     
-    boolean broadcastEncryptedMessage(String plaintextMsg){
-        
+    public boolean broadcastEncryptedMessage(String plaintextMsg){        
         boolean failure = false;
         for(String peer: gui.peers){
             authenticateMachine(peer);
@@ -78,7 +80,7 @@ public class EncryptionDemoFunctionality {
         }
     }
     
-    String authenticateMachine(String ident){
+    public String authenticateMachine(String ident){
         boolean wasSuccessful = communication.authenticateMachine(ident);
         if(wasSuccessful){
             return "Successfully authenticated machine\n";
