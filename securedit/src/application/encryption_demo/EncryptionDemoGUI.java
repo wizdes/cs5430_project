@@ -10,6 +10,7 @@ import java.io.File;
 import java.util.ArrayList;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import security_layer.Profile;
 
 /**
  *
@@ -55,7 +56,8 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
         PasswordTextField.setText(password);
         
         if (nonDefaultSet) {
-            functionality = new EncryptionDemoFunctionality(this, appNodeId, appHost, appPort, password);
+            Profile profile = Profile.readProfile(appNodeId, password);
+            functionality = new EncryptionDemoFunctionality(this, profile, password);
         }
         
         SendTextField.addKeyListener(new KeyAdapter() {
@@ -210,7 +212,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                                         .addComponent(UsernameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                         .addGap(0, 0, Short.MAX_VALUE))))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AuthorizationLabelLayout.createSequentialGroup()
-                .addGap(0, 0, Short.MAX_VALUE)
+                .addGap(0, 385, Short.MAX_VALUE)
                 .addGroup(AuthorizationLabelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(AuthenticateWithLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(AuthenticateWithComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -245,7 +247,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                             .addComponent(PasswordLabel))
                         .addGap(18, 18, 18)
                         .addComponent(UpdatePropertiesButton)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                        .addGap(0, 118, Short.MAX_VALUE))
                     .addGroup(AuthorizationLabelLayout.createSequentialGroup()
                         .addContainerGap(275, Short.MAX_VALUE)
                         .addGroup(AuthorizationLabelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -295,7 +297,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(FilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(FilePanelLayout.createSequentialGroup()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 591, Short.MAX_VALUE)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 600, Short.MAX_VALUE)
                         .addGroup(FilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(FilePanelLayout.createSequentialGroup()
                                 .addGap(24, 24, 24)
@@ -368,7 +370,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                     .addGroup(SentMessagesPanelLayout.createSequentialGroup()
                         .addGroup(SentMessagesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(SentMessagesPanelLayout.createSequentialGroup()
-                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addGap(0, 27, Short.MAX_VALUE)
                                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 330, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
                             .addGroup(SentMessagesPanelLayout.createSequentialGroup()
@@ -412,7 +414,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                 .addGroup(SentMessagesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(PeerComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(PeerLabel))
-                .addContainerGap(63, Short.MAX_VALUE))
+                .addContainerGap(67, Short.MAX_VALUE))
         );
 
         CryptographyTabbedPane.addTab("Sent Messages", SentMessagesPanel);
@@ -440,7 +442,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, SentMessagesPanel1Layout.createSequentialGroup()
                 .addGroup(SentMessagesPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(SentMessagesPanel1Layout.createSequentialGroup()
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap(33, Short.MAX_VALUE)
                         .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 330, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
                     .addGroup(SentMessagesPanel1Layout.createSequentialGroup()
@@ -462,7 +464,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                 .addGroup(SentMessagesPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(131, Short.MAX_VALUE))
+                .addContainerGap(149, Short.MAX_VALUE))
         );
 
         CryptographyTabbedPane.addTab("Received Messages", SentMessagesPanel1);
@@ -529,13 +531,13 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                 .addGroup(ChatPanelLayout.createSequentialGroup()
                     .addContainerGap()
                     .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 528, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(168, Short.MAX_VALUE)))
+                    .addContainerGap(195, Short.MAX_VALUE)))
         );
         ChatPanelLayout.setVerticalGroup(
             ChatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, ChatPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 257, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 266, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(GeneratePINButton)
                 .addGap(29, 29, 29)
@@ -548,7 +550,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                 .addGroup(ChatPanelLayout.createSequentialGroup()
                     .addContainerGap()
                     .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 291, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(88, Short.MAX_VALUE)))
+                    .addContainerGap(111, Short.MAX_VALUE)))
         );
 
         CryptographyTabbedPane.addTab("Chat", ChatPanel);
@@ -643,7 +645,8 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
             handleException(ex);
         }
         if (!nonDefaultSet) {
-            functionality = new EncryptionDemoFunctionality(this, appNodeId, appHost, appPort, password);
+            Profile profile = Profile.readProfile(appNodeId, password);
+            functionality = new EncryptionDemoFunctionality(this, profile, password);
         }
     }//GEN-LAST:event_UpdatePropertiesButtonActionPerformed
 

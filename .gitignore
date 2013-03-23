@@ -16,3 +16,5 @@
 securedit/keys_0
 securedit/keys_1
 securedit/keys_2
+
+securedit/*.profile

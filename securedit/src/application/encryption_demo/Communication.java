@@ -13,6 +13,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import security_layer.Profile;
 import security_layer.SecureTransport;
 import security_layer.SecureTransportInterface;
 
@@ -25,8 +26,8 @@ public class Communication implements CommunicationInterface {
     private BlockingQueue<Message> messageQueue = new LinkedBlockingDeque<>();
     private SecureTransportInterface secureTransport;
     
-    public Communication(String ident, String host, int port, String password) {
-        this.secureTransport = new SecureTransport(ident, host, port, password, this);
+    public Communication(Profile profile, String password) {
+        this.secureTransport = new SecureTransport(profile, password, this);
     }
     
     @Override
@@ -89,10 +90,5 @@ public class Communication implements CommunicationInterface {
     @Override
     public void shutdown() {
         secureTransport.shutdown();
-    }
-
-    @Override
-    public SecureTransportInterface getSecureTransport() {
-        return secureTransport;
     }
 }
