@@ -49,13 +49,11 @@ public class SecureTransport implements SecureTransportInterface{
     private Authentications authInstance;
     private ConcurrentMap<String, Integer> lastReceived = new ConcurrentHashMap<>();
     private AtomicInteger counter = new AtomicInteger();
-    public boolean authenticated = false;
     
     public SecureTransport(String password){
         Key personalKey = KeyFactory.generateSymmetricKey(password);
         keys = new EncryptionKeys(personalKey, password);
         authInstance = new Authentications(keys);
-        authenticated = true;
     }
     
     public SecureTransport(Profile profile, String password, CommunicationInterface communication) {        
