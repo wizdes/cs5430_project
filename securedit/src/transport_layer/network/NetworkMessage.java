@@ -14,8 +14,8 @@ import security_layer.EncryptedMessage;
 class NetworkMessage implements Serializable{
     Node destination;
     Node source;
-    EncryptedMessage content;
-    NetworkMessage(Node source, Node destination, EncryptedMessage content) {
+    Serializable content;
+    NetworkMessage(Node source, Node destination, Serializable content) {
         this.destination = destination;
         this.source = source;
         this.content = content;

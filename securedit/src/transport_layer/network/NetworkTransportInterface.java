@@ -4,6 +4,7 @@
  */
 package transport_layer.network;
 
+import java.io.Serializable;
 import security_layer.EncryptedMessage;
 
 
@@ -15,7 +16,7 @@ public interface NetworkTransportInterface {
     /***************************************
      * Matt's package
      * **************************************/
-    public boolean send(String destination, EncryptedMessage msg);
+    public boolean send(String destination, Serializable msg);
     public void addPeer(String peerIdent, String host, int port);
     public void shutdown();
 }

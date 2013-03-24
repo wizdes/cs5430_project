@@ -11,6 +11,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import security_layer.EncryptedMessage;
 import security_layer.SecureTransportInterface;
+import transport_layer.discovery.DiscoveryResponseMessage;
+import transport_layer.discovery.DiscoveryTransport;
 
 /**
  *
@@ -21,7 +23,7 @@ public class NetworkTransport implements NetworkTransportInterface{
     static final String CONNECTION_FINISHED = "MSG_FIN";
     private Server server;
     private Client client;
-    //private HashMap<String, Node> neighbors = new HashMap<>();
+    
     private Topology topology;
     private SecureTransportInterface secureTransport;
     
@@ -34,7 +36,7 @@ public class NetworkTransport implements NetworkTransportInterface{
     }
     
     @Override
-    public boolean send(String destination, EncryptedMessage m) {
+    public boolean send(String destination, Serializable m) {
         Node destNode = topology.getNode(destination);
         if(destNode == null){
             return false;
@@ -57,9 +59,12 @@ public class NetworkTransport implements NetworkTransportInterface{
 
     void depositEncryptedMessage(NetworkMessage msg) {
         try {
-            secureTransport.processEncryptedMessage(msg.source.id, msg.content);
+            secureTransport.processEncryptedMessage(msg.source.id, (EncryptedMessage)msg.content);
         } catch (NoSuchAlgorithmException ex) {
             Logger.getLogger(NetworkTransport.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    void depositDiscoveryMessage(NetworkMessage msg) {
+        secureTransport.processDiscoveryResponse((DiscoveryResponseMessage)msg.content);
     }
 }

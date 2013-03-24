@@ -1,12 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package security_layer;
 
 
 import application.encryption_demo.CommunicationInterface;
 import application.encryption_demo.Message;
+import application.encryption_demo.Peers;
+import application.encryption_demo.Peers.Peer;
 import java.io.File;
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -32,6 +30,8 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SealedObject;
 import javax.crypto.SecretKey;
+import transport_layer.discovery.DiscoveryResponseMessage;
+import transport_layer.discovery.DiscoveryTransport;
 import transport_layer.files.FileHandler;
 import transport_layer.files.FileTransportInterface;
 import transport_layer.network.NetworkTransport;
@@ -45,6 +45,7 @@ public class SecureTransport implements SecureTransportInterface{
     private EncryptionKeys keys;
     private FileTransportInterface fileTransport = new FileHandler();
     private NetworkTransportInterface networkTransport;
+    private DiscoveryTransport discoveryTransport;
     private CommunicationInterface communication;
     private Authentications authInstance;
     private ConcurrentMap<String, Integer> lastReceived = new ConcurrentHashMap<>();
@@ -57,7 +58,6 @@ public class SecureTransport implements SecureTransportInterface{
     }
     
     public SecureTransport(Profile profile, String password, CommunicationInterface communication) {        
-        
         Key personalKey = KeyFactory.generateSymmetricKey(password);
         keys = new EncryptionKeys(personalKey, profile.ident, password);
                 
@@ -67,8 +67,9 @@ public class SecureTransport implements SecureTransportInterface{
         keys.verifyingKeys = profile.keys.verifiyngKeys;
        
         this.networkTransport = new NetworkTransport(profile.ident, profile.host, profile.port, this);
+        this.discoveryTransport = new DiscoveryTransport(profile, networkTransport);
         this.communication = communication;
-
+        
         authInstance = new Authentications(keys);
         
         //Hacked for now
@@ -238,6 +239,16 @@ public class SecureTransport implements SecureTransportInterface{
     }
     
     @Override
+    public void processDiscoveryResponse(DiscoveryResponseMessage msg){
+        System.out.println(keys.ident + ": Process discovery response");
+        PublicKey pk = keys.getPublicKey(msg.ident);
+        if(pk != null && pk.serialVersionUID == msg.keyVersion){
+            communication.updatePeers(msg.ident, msg.ip, msg.port, msg.documents, false);
+        } else{
+            communication.updatePeers(msg.ident, msg.ip, msg.port, msg.documents, true);
+        }
+    }
+    @Override
     public boolean writeEncryptedFile(String filename, Message contents) {
         try {
             //Encrypt file with personal key
@@ -329,5 +340,10 @@ public class SecureTransport implements SecureTransportInterface{
             authenticateLock.unlock();
             return true;
         }
+    }
+
+    @Override
+    public void broadcastDiscovery() {
+        discoveryTransport.broadcastDiscovery();
     }
 }
