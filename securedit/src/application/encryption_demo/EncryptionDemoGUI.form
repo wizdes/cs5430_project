@@ -6,6 +6,7 @@
   </Properties>
   <SyntheticProperties>
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
+    <SyntheticProperty name="generateCenter" type="boolean" value="false"/>
   </SyntheticProperties>
   <AuxValues>
     <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
@@ -75,23 +76,20 @@
                               <EmptySpace min="69" pref="642" max="32767" attributes="0"/>
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
-                              <Group type="103" groupAlignment="1" attributes="0">
-                                  <Component id="UpdatePropertiesButton" min="-2" max="-2" attributes="0"/>
-                                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                      <Group type="102" alignment="1" attributes="0">
-                                          <Component id="PasswordLabel" min="-2" max="-2" attributes="0"/>
-                                          <EmptySpace max="32767" attributes="0"/>
-                                          <Component id="PasswordTextField" min="-2" pref="126" max="-2" attributes="0"/>
-                                      </Group>
-                                      <Group type="102" alignment="0" attributes="0">
-                                          <Component id="NodeIDLabel" min="-2" max="-2" attributes="0"/>
-                                          <EmptySpace min="-2" pref="43" max="-2" attributes="0"/>
-                                          <Group type="103" groupAlignment="0" attributes="0">
-                                              <Component id="HostTextField" min="-2" pref="126" max="-2" attributes="0"/>
-                                              <Component id="NodeIDTextField" min="-2" pref="126" max="-2" attributes="0"/>
-                                              <Component id="PortTextField" alignment="0" min="-2" pref="126" max="-2" attributes="0"/>
-                                              <Component id="UsernameTextField" alignment="0" min="-2" pref="126" max="-2" attributes="0"/>
-                                          </Group>
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                  <Group type="102" alignment="1" attributes="0">
+                                      <Component id="PasswordLabel" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace max="32767" attributes="0"/>
+                                      <Component id="PasswordTextField" min="-2" pref="126" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="NodeIDLabel" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="43" max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="0" attributes="0">
+                                          <Component id="HostTextField" min="-2" pref="126" max="-2" attributes="0"/>
+                                          <Component id="NodeIDTextField" min="-2" pref="126" max="-2" attributes="0"/>
+                                          <Component id="PortTextField" alignment="0" min="-2" pref="126" max="-2" attributes="0"/>
+                                          <Component id="UsernameTextField" alignment="0" min="-2" pref="126" max="-2" attributes="0"/>
                                       </Group>
                                   </Group>
                               </Group>
@@ -100,7 +98,7 @@
                       </Group>
                   </Group>
                   <Group type="102" alignment="1" attributes="0">
-                      <EmptySpace min="0" pref="385" max="32767" attributes="0"/>
+                      <EmptySpace min="0" pref="454" max="32767" attributes="0"/>
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
                           <Component id="AuthenticateWithLabel" max="32767" attributes="0"/>
                           <Component id="AuthenticateWithComboBox" max="32767" attributes="0"/>
@@ -141,12 +139,10 @@
                                   <Component id="PasswordTextField" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="PasswordLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace type="separate" max="-2" attributes="0"/>
-                              <Component id="UpdatePropertiesButton" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace min="0" pref="118" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                           </Group>
                           <Group type="102" alignment="1" attributes="0">
-                              <EmptySpace pref="275" max="32767" attributes="0"/>
+                              <EmptySpace pref="319" max="32767" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Component id="AuthenticateWithLabel" min="-2" max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="3" attributes="0">
@@ -200,14 +196,6 @@
             </Component>
             <Component class="javax.swing.JTextField" name="PortTextField">
             </Component>
-            <Component class="javax.swing.JButton" name="UpdatePropertiesButton">
-              <Properties>
-                <Property name="text" type="java.lang.String" value="Update Properties"/>
-              </Properties>
-              <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="UpdatePropertiesButtonActionPerformed"/>
-              </Events>
-            </Component>
             <Component class="javax.swing.JLabel" name="UsernameLabel">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
@@ -258,7 +246,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="0" attributes="0">
-                              <Component id="jScrollPane1" pref="600" max="32767" attributes="0"/>
+                              <Component id="jScrollPane1" pref="618" max="32767" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" attributes="0">
                                       <EmptySpace min="-2" pref="24" max="-2" attributes="0"/>
@@ -294,7 +282,7 @@
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
                               <Component id="OpenFileButton" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace pref="211" max="32767" attributes="0"/>
+                              <EmptySpace pref="255" max="32767" attributes="0"/>
                               <Component id="EncryptButton" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
                               <Component id="DecryptButton" min="-2" max="-2" attributes="0"/>
@@ -437,7 +425,7 @@
                           <Component id="PeerComboBox" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="PeerLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="67" max="32767" attributes="0"/>
+                      <EmptySpace pref="107" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -533,7 +521,7 @@
                   <Group type="102" alignment="1" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="0" attributes="0">
-                              <EmptySpace pref="33" max="32767" attributes="0"/>
+                              <EmptySpace pref="37" max="32767" attributes="0"/>
                               <Component id="jScrollPane5" min="-2" pref="330" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
@@ -563,7 +551,7 @@
                           <Component id="jScrollPane5" alignment="0" min="-2" pref="238" max="-2" attributes="0"/>
                           <Component id="jScrollPane6" alignment="0" min="-2" pref="238" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="149" max="32767" attributes="0"/>
+                      <EmptySpace pref="175" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -632,7 +620,7 @@
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="1" attributes="0">
-                      <EmptySpace max="32767" attributes="0"/>
+                      <EmptySpace pref="24" max="32767" attributes="0"/>
                       <Group type="103" groupAlignment="1" attributes="0">
                           <Group type="102" alignment="1" attributes="0">
                               <Component id="SendChatTextField" min="-2" pref="518" max="-2" attributes="0"/>
@@ -645,7 +633,7 @@
                                       <EmptySpace max="-2" attributes="0"/>
                                   </Group>
                                   <Group type="102" alignment="1" attributes="0">
-                                      <EmptySpace min="0" pref="12" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="25" max="32767" attributes="0"/>
                                       <Component id="GeneratePINButton" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace min="-2" pref="63" max="-2" attributes="0"/>
                                   </Group>
@@ -671,7 +659,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="1" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jScrollPane2" pref="266" max="32767" attributes="0"/>
+                      <Component id="jScrollPane2" pref="301" max="32767" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="GeneratePINButton" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="29" max="-2" attributes="0"/>
@@ -686,7 +674,7 @@
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="jScrollPane7" min="-2" pref="291" max="-2" attributes="0"/>
-                          <EmptySpace pref="111" max="32767" attributes="0"/>
+                          <EmptySpace pref="132" max="32767" attributes="0"/>
                       </Group>
                   </Group>
               </Group>
@@ -749,6 +737,93 @@
                     </Property>
                     <Property name="selectionMode" type="int" value="0"/>
                   </Properties>
+                </Component>
+              </SubComponents>
+            </Container>
+          </SubComponents>
+        </Container>
+        <Container class="javax.swing.JPanel" name="DiscoveryPanel">
+          <Constraints>
+            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
+              <JTabbedPaneConstraints tabName="Discovery">
+                <Property name="tabTitle" type="java.lang.String" value="Discovery"/>
+              </JTabbedPaneConstraints>
+            </Constraint>
+          </Constraints>
+
+          <Layout>
+            <DimensionLayout dim="0">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" attributes="0">
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="102" alignment="1" attributes="0">
+                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                  <Component id="ManuallyAddPeerButton" max="32767" attributes="0"/>
+                                  <Component id="DiscoverPeersButton" max="32767" attributes="0"/>
+                              </Group>
+                          </Group>
+                          <Component id="jScrollPane8" alignment="0" pref="713" max="32767" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="-2" attributes="0"/>
+                  </Group>
+              </Group>
+            </DimensionLayout>
+            <DimensionLayout dim="1">
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="102" alignment="1" attributes="0">
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="jScrollPane8" pref="356" max="32767" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Component id="DiscoverPeersButton" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="ManuallyAddPeerButton" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="4" max="-2" attributes="0"/>
+                  </Group>
+              </Group>
+            </DimensionLayout>
+          </Layout>
+          <SubComponents>
+            <Component class="javax.swing.JButton" name="DiscoverPeersButton">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Discover Peers"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="DiscoverPeersButtonActionPerformed"/>
+              </Events>
+            </Component>
+            <Component class="javax.swing.JButton" name="ManuallyAddPeerButton">
+              <Properties>
+                <Property name="text" type="java.lang.String" value="Manually Add Peer"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="ManuallyAddPeerButtonActionPerformed"/>
+              </Events>
+            </Component>
+            <Container class="javax.swing.JScrollPane" name="jScrollPane8">
+              <AuxValues>
+                <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
+              </AuxValues>
+
+              <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
+              <SubComponents>
+                <Component class="javax.swing.JTable" name="PeersTable">
+                  <Properties>
+                    <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+                      <Connection code="new DefaultTableModel(new String[]{&quot;ID&quot;, &quot;IP&quot;, &quot;Port&quot;, &quot;Document&quot;, &quot;Authenticated&quot;}, 0)" type="code"/>
+                    </Property>
+                    <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
+                      <TableColumnModel selectionModel="1"/>
+                    </Property>
+                    <Property name="columnSelectionAllowed" type="boolean" value="true"/>
+                    <Property name="tableHeader" type="javax.swing.table.JTableHeader" editor="org.netbeans.modules.form.editors2.JTableHeaderEditor">
+                      <TableHeader reorderingAllowed="false" resizingAllowed="true"/>
+                    </Property>
+                  </Properties>
+                  <AuxValues>
+                    <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new javax.swing.JTable()"/>
+                  </AuxValues>
                 </Component>
               </SubComponents>
             </Container>

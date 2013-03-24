@@ -1,6 +1,7 @@
 package application.encryption_demo;
 
 
+import application.encryption_demo.Peers.Peer;
 import java.util.Collection;
 import security_layer.PINFunctionality;
 import security_layer.Profile;
@@ -18,12 +19,15 @@ public class EncryptionDemoFunctionality {
     public EncryptionDemoFunctionality(EncryptionDemoGUI gui, Profile profile, String password){
         this.properPINInfo = new PINFunctionality();
         this.gui = gui;
-        this.communication = new Communication(profile, password);
+        this.communication = new Communication(profile, password, this);
         listenForMessages();
     }
     
     private void listenForMessages() {
         new GUIListenerThread().start();
+    }
+    public void broadcastDiscovery(){
+        communication.broadcastDiscovery();
     }
     
     /**
@@ -87,6 +91,13 @@ public class EncryptionDemoFunctionality {
         } else{
             return "Machine authentication was not successful\n";
         }
+    }
+    
+//    public void addPeerToGUI(Peer peer){
+//        gui.addDiscoveredPeer(peer);
+//    }
+    public void updatePeersInGUI(Peers peers){
+        gui.updateDiscoveredPeers(peers);
     }
 
 /**********************************************************************
