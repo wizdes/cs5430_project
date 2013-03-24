@@ -4,6 +4,8 @@
  */
 package application.encryption_demo;
 
+import security_layer.Profile;
+
 /**
  *
  * @author Patrick C. Berens
@@ -32,13 +34,19 @@ public class MultiGUIDemoDriver {
             java.util.logging.Logger.getLogger(EncryptionDemoGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-        
+                
+        Profile.deleteProfile("0");
+        Profile p1 = Profile.writeProfile("0", "pass0000pass0000", 4000, "localhost");
         EncryptionDemoGUI gui_0 = new EncryptionDemoGUI("0", "localhost", 4000, "pass0000pass0000");
         gui_0.launchGUI();
         
+        Profile.deleteProfile("1");
+        Profile p2 = Profile.writeProfile("1", "pass1111pass1111", 4001, "localhost");
         EncryptionDemoGUI gui_1 = new EncryptionDemoGUI("1", "localhost", 4001, "pass1111pass1111");
         gui_1.launchGUI();
-        
+      
+        Profile.deleteProfile("2");
+        Profile p3 = Profile.writeProfile("2", "pass2222pass2222", 4002, "localhost");
         EncryptionDemoGUI gui_2 = new EncryptionDemoGUI("2", "localhost", 4002, "pass2222pass2222");
         gui_2.launchGUI();
     }

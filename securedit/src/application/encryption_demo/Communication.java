@@ -5,9 +5,12 @@
 
 package application.encryption_demo;
 
+import application.encryption_demo.Peers.Peer;
+import transport_layer.discovery.DiscoveryTransport;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.locks.Condition;
@@ -25,9 +28,16 @@ public class Communication implements CommunicationInterface {
     private Condition newMessageArrived = queueLock.newCondition();
     private BlockingQueue<Message> messageQueue = new LinkedBlockingDeque<>();
     private SecureTransportInterface secureTransport;
+    private Peers peers = new Peers();
+    private EncryptionDemoFunctionality guiFunctionality;
     
     public Communication(Profile profile, String password) {
+        //Only used for test packages
         this.secureTransport = new SecureTransport(profile, password, this);
+    }
+    public Communication(Profile profile, String password, EncryptionDemoFunctionality guiFunctionality) {
+        this.secureTransport = new SecureTransport(profile, password, this);
+        this.guiFunctionality = guiFunctionality;
     }
     
     @Override
@@ -90,5 +100,17 @@ public class Communication implements CommunicationInterface {
     @Override
     public void shutdown() {
         secureTransport.shutdown();
+    }
+
+    @Override
+    public void broadcastDiscovery() {
+        secureTransport.broadcastDiscovery();
+    }
+
+    @Override
+    public void updatePeers(String ident, String ip, int port, List<String> docs, boolean needsHumanAuth) {
+        peers.addPeer(ident, ip, port, docs, needsHumanAuth);
+        //guiFunctionality.addPeerToGUI(peers.getPeer(ident));
+        guiFunctionality.updatePeersInGUI(peers);
     }
 }
