@@ -5,7 +5,6 @@
 package security_layer;
 
 import application.encryption_demo.Message;
-import java.security.Key;
 import java.security.PublicKey;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -49,7 +48,7 @@ class Authentications {
         return new HA_Msg1("A", KeyFactory.generateNonce());
     }
     
-    
+
     private class Authentication{
         Message message;
         Condition cond;
