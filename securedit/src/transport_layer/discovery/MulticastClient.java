@@ -2,14 +2,18 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package transport_layer.network.broadcasttest;
+package transport_layer.discovery;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import security_layer.Profile;
+import transport_layer.network.NetworkTransportInterface;
 
 /**
  * This is a Multicast "Client" which processes Discovery packets.
@@ -17,12 +21,21 @@ import java.util.logging.Logger;
  *         So Multicast "servers" are users looking to discover available documents.
  * @author Patrick C. Berens
  */
-public class MulticastClient  {
+class MulticastClient extends Thread {
     private static final String groupAddress = "230.0.0.1";    //All "clients"(owners of documents) listen on this.
     private static final int discoveryPort = 5446;      //All "clients" use this port.
     private static final String ENCODING = "UTF-8";
     
-    public static void main(String[] args) {
+    private Profile profile;
+    private NetworkTransportInterface networkTransport;
+    
+    MulticastClient(Profile profile, NetworkTransportInterface networkTransport){
+        this.profile = profile;
+        this.networkTransport = networkTransport;
+    }
+    
+    @Override
+    public void run(){
         MulticastSocket socket = null;
         InetAddress address = null;
         try {
@@ -43,22 +56,28 @@ public class MulticastClient  {
                 //Check checksum here...
                 DiscoveryPacket discoveryPacket = DiscoveryPacket.fromString(received);
                 if (discoveryPacket != null) {
-                    System.out.println("Discovery Packet Contents: " + discoveryPacket.toString());   
-                    //Process packet. If not currently doing human authentication or if not currently connected with,
-                    //  then alert OnwerGUI of potential human to authenticate with.
+                    //Process packet.
+                    if(!discoveryPacket.myID.equals(profile.ident)){
+                        List<String> documentNames = new ArrayList<>();
+                        documentNames.add("Doc1_MulticastClient");
+                        DiscoveryResponseMessage responseMessage = new DiscoveryResponseMessage(profile.ident, profile.host, profile.port, documentNames, profile.keyVersion);
+                        networkTransport.addPeer(discoveryPacket.myID, discoveryPacket.myIP, discoveryPacket.myPort);
+                        networkTransport.send(discoveryPacket.myID, responseMessage);
+                    }
                 }
             } while (true);
-                
         } catch (IOException ex) {
             Logger.getLogger(MulticastClient.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         /* Leave group and close socket */
         try {
-            socket.leaveGroup(address);
+            if(socket != null){
+                socket.leaveGroup(address);
+                socket.close();
+            }
         } catch (IOException ex) {
             Logger.getLogger(MulticastClient.class.getName()).log(Level.SEVERE, null, ex);
         }
-        socket.close();
-    }
+    } 
 }

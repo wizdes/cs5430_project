@@ -6,6 +6,8 @@
 package transport_layer.network;
 
 import java.security.NoSuchAlgorithmException;
+import security_layer.EncryptedMessage;
+import transport_layer.discovery.DiscoveryResponseMessage;
 
 
 public class Server {
@@ -26,7 +28,11 @@ public class Server {
     }
 
     void processNetworkMessage(NetworkMessage m) throws NoSuchAlgorithmException {
-        this.network.depositEncryptedMessage(m);
+        if(m.content instanceof EncryptedMessage){
+            this.network.depositEncryptedMessage(m);
+        } else if(m.content instanceof DiscoveryResponseMessage){
+            this.network.depositDiscoveryMessage(m);
+        }
     }    
     
     void shutdown() {

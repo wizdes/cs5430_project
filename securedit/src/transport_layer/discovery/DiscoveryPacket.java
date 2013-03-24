@@ -1,4 +1,4 @@
-package transport_layer.network.broadcasttest;
+package transport_layer.discovery;
 
 /**
  *

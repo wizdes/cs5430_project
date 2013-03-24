@@ -8,6 +8,7 @@ import application.encryption_demo.Message;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import javax.crypto.SecretKey;
+import transport_layer.discovery.DiscoveryResponseMessage;
 
 /**
  *
@@ -27,4 +28,7 @@ public interface SecureTransportInterface {
 
     public ArrayList<Integer> findPeers(int myID);
     public boolean initializeHumanAuthenticate(String ID);
+    
+    public void broadcastDiscovery();
+    public void processDiscoveryResponse(DiscoveryResponseMessage msg);
 }

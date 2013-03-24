@@ -1,4 +1,4 @@
-package transport_layer.network.broadcasttest;
+package transport_layer.discovery;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -14,7 +14,7 @@ import java.util.logging.Logger;
  *         So Multicast "servers" are users looking to discover available documents.
  * @author Patrick C. Berens
  */
-public class MulticastServer extends Thread {
+class MulticastServer extends Thread{
     private static final String groupAddress = "230.0.0.1";    //All "clients"(owners of documents) listen on this.
     private static final int discoveryPort = 5446;      //All "clients" use this port.
     private static final String ENCODING = "UTF-8";
@@ -22,21 +22,13 @@ public class MulticastServer extends Thread {
     private DatagramSocket socket = null;
     private static final int numTimesBroadcast = 3;
     
-    public static void main(String[] args) throws java.io.IOException {
-        new MulticastServer().start();
-    }
-    MulticastServer(){
-        try {
-            socket = new DatagramSocket(4445);  //Must not be used by anyone else on server. So maybe port + offset(so for id=0, tcp=4000, udp=4000+500)
-        } catch (SocketException ex) {
-            Logger.getLogger(MulticastServer.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+    private DiscoveryPacket discoveryPacket;
+    
+    @Override
     public void run(){
         try {
-            /* Create packet and convert to byte buffer */
-            DiscoveryPacket data = new DiscoveryPacket("0", "127.0.0.1", 4000);
-            byte[] buf = data.toString().getBytes(ENCODING);    //Check max size...
+            /* Convert packet to byte buffer */
+            byte[] buf = discoveryPacket.toString().getBytes(ENCODING);    //Check max size...
             //May want to use Base64 instead/in addition to ENCODING....
 
             /* Try to send packet a few times in case dropped */
@@ -46,11 +38,22 @@ public class MulticastServer extends Thread {
                 InetAddress group = InetAddress.getByName(groupAddress);
                 DatagramPacket packet = new DatagramPacket(buf, buf.length, group, discoveryPort);
                 socket.send(packet);
-                sleep(5000);
+                Thread.sleep(5000);
             }
         } catch (InterruptedException | IOException ex) {
             Logger.getLogger(MulticastServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         socket.close();
     }
+    
+    void broadcast(String ident, String host, int port){
+        try {
+            int id = Integer.parseInt(ident);
+            socket = new DatagramSocket(6000 + id + 666);  //Must not be used by anyone else on server. So maybe port + offset(so for id=0, tcp=4000, udp=4000+500)
+            discoveryPacket = new DiscoveryPacket(ident, host, port);
+            start();
+        } catch (SocketException ex) {
+            Logger.getLogger(MulticastServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }   
 }

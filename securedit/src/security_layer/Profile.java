@@ -18,6 +18,7 @@ public class Profile implements Message {
     public String host;
     public int port;
     KeysObject keys;
+    public long keyVersion;
     
     public void save(String pw) {
         SecureTransport transport = new SecureTransport(pw);
@@ -58,6 +59,8 @@ public class Profile implements Message {
         profile.keys.verifiyngKeys.put(username, signingKeyPair.getPublic());
         profile.keys.signingKey = signingKeyPair.getPrivate();
         profile.save(pw);
+        
+        profile.keyVersion = profile.keys.publicKeys.get(profile.ident).serialVersionUID;
         return profile;
     }    
 }
