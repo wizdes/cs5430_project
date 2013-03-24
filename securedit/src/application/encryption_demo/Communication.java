@@ -81,6 +81,11 @@ public class Communication implements CommunicationInterface {
     public boolean authenticateMachine(String machineIdent) {
         return secureTransport.authenticate(machineIdent);
     }
+    
+    @Override
+    public boolean authenticateHuman(String machineIdent) {
+        return secureTransport.initializeHumanAuthenticate(machineIdent);
+    }
 
     @Override
     public boolean writeEncryptedFile(String filename, String contents) {
@@ -110,7 +115,13 @@ public class Communication implements CommunicationInterface {
     @Override
     public void updatePeers(String ident, String ip, int port, List<String> docs, boolean needsHumanAuth) {
         peers.addPeer(ident, ip, port, docs, needsHumanAuth);
+        secureTransport.addPeer(ident, ip, port);
         //guiFunctionality.addPeerToGUI(peers.getPeer(ident));
-        guiFunctionality.updatePeersInGUI(peers);
+        if(guiFunctionality != null) guiFunctionality.updatePeersInGUI(peers);
+    }
+
+    @Override
+    public void updatePin(String ID, String PIN) {
+        secureTransport.addPIN(ID, PIN);
     }
 }

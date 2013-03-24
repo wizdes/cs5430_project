@@ -11,6 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.crypto.SecretKey;
 
 /**
@@ -48,6 +50,30 @@ class Authentications {
     HumanAuthenticationMessage constructInitialHAuthMessage(){
         return new HA_Msg1("A", KeyFactory.generateNonce());
     }
+
+    public boolean signalID(String ID) {
+        Authentication auth = authentications.get(ID);
+        auth.lock.lock();
+        try {
+            auth.cond.signal();
+        } finally {
+            auth.lock.unlock();
+        }
+        return true;
+    }
+    
+    public void waitID(String ID){
+        Authentication auth = authentications.get(ID);
+        auth.lock.lock();
+        try {
+            auth.cond.await();
+        }
+        catch (InterruptedException ex) {
+            Logger.getLogger(Authentications.class.getName()).log(Level.SEVERE, null, ex);
+        }finally {
+            auth.lock.unlock();
+        }
+    }
     
     
     private class Authentication{
@@ -73,18 +99,28 @@ class Authentications {
     void processHumanAuthenticationRequest(String sourceOfMsg, HumanAuthenticationMessage message, SecureTransportInterface sti) {
         String idOfNodeAuthenticationWith = sourceOfMsg;
         if (message instanceof HA_Msg1) {
+            System.out.println("MESSAGE ONE RECEIVED");
             //generate a PIN
             String PIN = pf.getPIN();
+            String PINHMAC = PIN + "HMAC";
+            System.out.println("PIN is: " + PIN);
             //send info into GUI somehow
             
             HA_Msg1 msg = (HA_Msg1)message;
-            SecretKey publicKey = (SecretKey)keys.personalKey;
+            PublicKey publicKey = keys.publicKeys.get(keys.ident);
             SecretKey pinKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN);
+            SecretKey HMACKey = (SecretKey) KeyFactory.generateSymmetricKey(PINHMAC);
+            
+            keys.secretKeys.put(sourceOfMsg, pinKey);
+            keys.HMACKeys.put(sourceOfMsg, HMACKey);
+            
+            addAuthentication(sourceOfMsg, msg, null, null);
             int nonceResponse1 = msg.nonce + 1;
             Message m = new HA_Msg2(publicKey, nonceResponse1, keys.ident);
-            sti.sendAESEncryptedMessage(idOfNodeAuthenticationWith, m, pinKey);
+            sti.sendAESEncryptedMessage(idOfNodeAuthenticationWith, m, pinKey, HMACKey);
         }
         else if (message instanceof HA_Msg2) {
+            System.out.println("MESSAGE TWO RECEIVED");
             HA_Msg2 msg = (HA_Msg2)message;
             Authentication auth = authentications.get(idOfNodeAuthenticationWith);
             if (msg.nonce - 1 != ((HA_Msg1)auth.message).nonce) {
@@ -92,34 +128,30 @@ class Authentications {
                 authentications.remove(idOfNodeAuthenticationWith);
                 return;
             }
-            PublicKey otherPublicKey = (PublicKey) msg.publicKey;
+            PublicKey otherPublicKey = msg.publicKey;
             keys.addPublicKey(idOfNodeAuthenticationWith, otherPublicKey);
             
-            SecretKey publicKey = (SecretKey)keys.personalKey;
+            PublicKey publicKey = keys.publicKeys.get(keys.ident);
             int nonceResponse1 = msg.nonce + 1;
             Message m = new HA_Msg3(publicKey, nonceResponse1);
-            sti.sendAESEncryptedMessage(idOfNodeAuthenticationWith, m, keys.getSymmetricKey(idOfNodeAuthenticationWith));
-            
-            if(auth != null){
-                auth.lock.lock();
-                try {
-                    auth.cond.signal();
-                } finally {
-                    auth.lock.unlock();
-                }
-                removeAuthentication(idOfNodeAuthenticationWith);
-            }
+            sti.sendAESEncryptedMessage(idOfNodeAuthenticationWith, m,
+                    keys.getSymmetricKey(idOfNodeAuthenticationWith), keys.getHMACKey(idOfNodeAuthenticationWith));
         }
         else {
+            System.out.println("MESSAGE THREE RECEIVED");
             HA_Msg3 msg = (HA_Msg3)message;
             Authentication auth = authentications.get(idOfNodeAuthenticationWith);
-            if (msg.nonce - 1 != ((HA_Msg1)auth.message).nonce) {
+            if (msg.nonce - 2 != ((HA_Msg1)auth.message).nonce) {
                 System.out.println("[DEBUG] Bad Nonce msg02! Expecting: " + (((MA_Msg1)auth.message).nonce + 1) + ", found: " + msg.nonce);
                 authentications.remove(idOfNodeAuthenticationWith);
                 return;
             }
-            PublicKey otherPublicKey = (PublicKey) msg.publicKey;
+            authentications.remove(idOfNodeAuthenticationWith);
+            PublicKey otherPublicKey = msg.publicKey;
             keys.addPublicKey(idOfNodeAuthenticationWith, otherPublicKey);
+            
+            keys.secretKeys.remove(sourceOfMsg);
+            keys.HMACKeys.remove(sourceOfMsg);
         }
         
     }

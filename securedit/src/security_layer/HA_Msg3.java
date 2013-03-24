@@ -4,6 +4,7 @@
  */
 package security_layer;
 
+import java.security.PublicKey;
 import javax.crypto.SecretKey;
 
 /**
@@ -11,9 +12,9 @@ import javax.crypto.SecretKey;
  * @author Yi
  */
 public class HA_Msg3 implements HumanAuthenticationMessage{
-    SecretKey publicKey;
+    PublicKey publicKey;
     int nonce;
-    HA_Msg3(SecretKey publicKey, int nonceResponse1) {
+    HA_Msg3(PublicKey publicKey, int nonceResponse1) {
         this.publicKey = publicKey;
         this.nonce = nonceResponse1;
     }
