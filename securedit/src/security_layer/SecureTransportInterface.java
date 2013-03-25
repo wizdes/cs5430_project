@@ -16,7 +16,7 @@ import transport_layer.discovery.DiscoveryResponseMessage;
  */
 public interface SecureTransportInterface {
     public boolean sendAESEncryptedMessage(String destination, Message m);
-    public boolean sendAESEncryptedMessage(String destination, Message m, SecretKey secretKey);
+    public boolean sendAESEncryptedMessage(String destination, Message m, SecretKey secretKey, SecretKey HMACKey);
     public boolean sendRSAEncryptedMessage(String destination, Message m);
     public Message processEncryptedMessage(String sourceOfMessage, EncryptedMessage encryptedMsg) throws NoSuchAlgorithmException;
     public boolean writeEncryptedFile(String filename, Message contents);
@@ -26,9 +26,14 @@ public interface SecureTransportInterface {
 
     public void shutdown();
 
+    //FOR TESTING PURPOSES ONLY
+    public void addPeer(String peerIdent, String host, int port);
+    
     public ArrayList<Integer> findPeers(int myID);
     public boolean initializeHumanAuthenticate(String ID);
     
     public void broadcastDiscovery();
     public void processDiscoveryResponse(DiscoveryResponseMessage msg);
+
+    public void addPIN(String ID, String PIN);
 }
