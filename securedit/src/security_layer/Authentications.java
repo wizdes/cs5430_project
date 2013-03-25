@@ -136,6 +136,8 @@ class Authentications {
             Message m = new HA_Msg3(publicKey, nonceResponse1);
             sti.sendAESEncryptedMessage(idOfNodeAuthenticationWith, m,
                     keys.getSymmetricKey(idOfNodeAuthenticationWith), keys.getHMACKey(idOfNodeAuthenticationWith));
+            keys.secretKeys.remove(sourceOfMsg);
+            keys.HMACKeys.remove(sourceOfMsg);
         }
         else {
             System.out.println("MESSAGE THREE RECEIVED");
