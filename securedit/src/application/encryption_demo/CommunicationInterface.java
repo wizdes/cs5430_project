@@ -5,11 +5,9 @@
 
 package application.encryption_demo;
 
-import application.encryption_demo.Peers.Peer;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.List;
-import security_layer.SecureTransportInterface;
 
 /**
  *
