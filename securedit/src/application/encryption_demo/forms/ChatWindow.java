@@ -13,8 +13,6 @@ import javax.swing.JOptionPane;
  */
 public class ChatWindow extends javax.swing.JFrame {
     String appNodeId = "";
-    private String appHost = "";
-    private int appPort;
     private EncryptionDemoFunctionality functionality;
     
     /**
@@ -49,11 +47,6 @@ public class ChatWindow extends javax.swing.JFrame {
         ChatWindow.setRows(5);
         jScrollPane7.setViewportView(ChatWindow);
 
-        PeersList.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "0", "1", "2" };
-            public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
-        });
         PeersList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         jScrollPane2.setViewportView(PeersList);
 
