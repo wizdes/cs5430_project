@@ -352,9 +352,11 @@ public class SecureTransport implements SecureTransportInterface{
         System.out.println("Starting authentication...");
 
         final Lock authenticateLock = new ReentrantLock(true);
-
+        
+        System.out.println("send initial hauth message");
         HumanAuthenticationMessage msg = authInstance.constructInitialHAuthMessage();
         Condition authenticationComplete = authenticateLock.newCondition();
+        System.out.println("recd initial hauth message");
         
         try {
             authenticateLock.lock();

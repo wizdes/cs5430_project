@@ -84,7 +84,11 @@ public class Communication implements CommunicationInterface {
     
     @Override
     public boolean authenticateHuman(String machineIdent) {
-        return secureTransport.initializeHumanAuthenticate(machineIdent);
+        if (peers.getPeer(machineIdent).needsHumanAuth) {
+            return secureTransport.initializeHumanAuthenticate(machineIdent);
+        } else {
+            return true;
+        }
     }
 
     @Override

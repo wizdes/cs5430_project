@@ -21,7 +21,7 @@ public class HAuthFunctionality {
     static String password_0 = "pass0000pass0000";
     static String password_1 = "pass1111pass1111";
     
-        public void setUp() throws Exception {
+    public void setUp() throws Exception {
         Profile.deleteProfile(myIdent);
         Profile p1 = Profile.writeProfile(myIdent, password_0, 4000, "localhost");
         

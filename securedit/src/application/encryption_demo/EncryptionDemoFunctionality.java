@@ -90,6 +90,16 @@ public class EncryptionDemoFunctionality {
         }
     }
     
+    public String authenticate(String ident) {
+        if (!this.communication.authenticateHuman(ident)) {
+            return "Human authentication failed\n";
+        }
+        if (!this.communication.authenticateMachine(ident)) {
+            return "Machine authentication failed\n";
+        }
+        return "Authentication successful\n";
+    }
+    
     public String authenticateMachine(String ident){
         boolean wasSuccessful = communication.authenticateMachine(ident);
         if(wasSuccessful){

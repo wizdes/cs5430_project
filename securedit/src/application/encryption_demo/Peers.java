@@ -37,11 +37,11 @@ public class Peers {
     }
     
     public class Peer {
-        private String id;
-        private String ip;
-        private int port;
-        private Set<String> documents;
-        private boolean needsHumanAuth;
+        public String id;
+        public String ip;
+        public int port;
+        public Set<String> documents;
+        public boolean needsHumanAuth;
 
         private Peer(String id, String ip, int port, List<String> docs, boolean needsHumanAuth) {
             this.id = id;

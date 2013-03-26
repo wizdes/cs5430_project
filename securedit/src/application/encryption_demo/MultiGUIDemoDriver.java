@@ -4,6 +4,7 @@
  */
 package application.encryption_demo;
 
+import application.encryption_demo.forms.ChatWindow;
 import security_layer.Profile;
 
 /**
@@ -25,29 +26,29 @@ public class MultiGUIDemoDriver {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(EncryptionDemoGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MultiGUIDemoDriver.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(EncryptionDemoGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MultiGUIDemoDriver.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(EncryptionDemoGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MultiGUIDemoDriver.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(EncryptionDemoGUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MultiGUIDemoDriver.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
                 
         Profile.deleteProfile("0");
         Profile p1 = Profile.writeProfile("0", "pass0000pass0000", 4000, "localhost");
-        EncryptionDemoGUI gui_0 = new EncryptionDemoGUI("0", "localhost", 4000, "pass0000pass0000");
-        gui_0.launchGUI();
+        ChatWindow form1 = new ChatWindow(p1, "pass0000pass0000");
+        form1.setVisible(true); 
         
         Profile.deleteProfile("1");
         Profile p2 = Profile.writeProfile("1", "pass1111pass1111", 4001, "localhost");
-        EncryptionDemoGUI gui_1 = new EncryptionDemoGUI("1", "localhost", 4001, "pass1111pass1111");
-        gui_1.launchGUI();
+        ChatWindow form2 = new ChatWindow(p2, "pass1111pass1111");
+        form2.setVisible(true); 
       
-        Profile.deleteProfile("2");
-        Profile p3 = Profile.writeProfile("2", "pass2222pass2222", 4002, "localhost");
-        EncryptionDemoGUI gui_2 = new EncryptionDemoGUI("2", "localhost", 4002, "pass2222pass2222");
-        gui_2.launchGUI();
+//        Profile.deleteProfile("2");
+//        Profile p3 = Profile.writeProfile("2", "pass2222pass2222", 4002, "localhost");
+//        EncryptionDemoGUI gui_2 = new EncryptionDemoGUI("2", "localhost", 4002, "pass2222pass2222");
+//        gui_2.launchGUI();
     }
 }

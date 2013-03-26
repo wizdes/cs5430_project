@@ -4,10 +4,8 @@
  */
 package application.encryption_demo;
 
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import security_layer.Profile;
 
 /**
  *

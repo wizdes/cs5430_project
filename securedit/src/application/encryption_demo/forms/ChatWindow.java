@@ -296,16 +296,19 @@ public class ChatWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_startChatButtonActionPerformed
 
     private void joinChatButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_joinChatButtonActionPerformed
-        // TODO add your handling code here:
-//        this.tabbedPane.add("Chat", this.chatPanel);
-//        this.tabbedPane.setSelectedComponent(this.chatPanel);
         int selectedRow = this.PeersTable.getSelectedRow();
         String peerId = (String)this.PeersTable.getModel().getValueAt(selectedRow, 0);
         System.out.println("join chat with " + peerId);
+        String result = this.functionality.authenticate(peerId);
+        showMessage(result);
     }//GEN-LAST:event_joinChatButtonActionPerformed
 
+    private void showMessage(String m) {
+        JOptionPane.showMessageDialog(this, m);
+    }
+    
     private void handleException(Exception ex) {
-        JOptionPane.showMessageDialog(this, ex.getMessage());
+        showMessage(ex.getMessage());
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
