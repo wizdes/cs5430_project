@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import security_layer.EncryptedMessage;
+import security_layer.PlainTextMessage;
 import security_layer.SecureTransportInterface;
 import transport_layer.discovery.DiscoveryResponseMessage;
 import transport_layer.discovery.DiscoveryTransport;
@@ -55,6 +56,10 @@ public class NetworkTransport implements NetworkTransportInterface{
     @Override
     public void addPeer(String peerIdent, String host, int port) {
         topology.addNode(peerIdent, host, port);
+    }
+    
+    void depositPlainTextMessage(NetworkMessage msg){
+        secureTransport.processPlainTextMessage(msg.source.id, (PlainTextMessage)msg.content);
     }
 
     void depositEncryptedMessage(NetworkMessage msg) {
