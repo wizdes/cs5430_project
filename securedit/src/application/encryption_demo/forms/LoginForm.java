@@ -245,9 +245,8 @@ public class LoginForm extends javax.swing.JFrame {
     }//GEN-LAST:event_loginButtonActionPerformed
     
     private void transitionToChatWindow(Profile profile, String password) {
-        EncryptionDemoFunctionality functionality = new EncryptionDemoFunctionality(null, profile, password);
         this.dispose();
-        ChatWindow form = new ChatWindow(functionality);
+        ChatWindow form = new ChatWindow(profile, password);
         form.setVisible(true); 
     }
     

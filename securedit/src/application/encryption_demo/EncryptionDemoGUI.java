@@ -775,13 +775,9 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                 functionality.manuallyAddPeer(id, host, port, documents);        
             }
         }
-        
-//        
-        
+
     }//GEN-LAST:event_ManuallyAddPeerButtonActionPerformed
-    private void handleException(Exception ex) {
-        JOptionPane.showMessageDialog(this, ex.getMessage());
-    }
+
     public void launchGUI(){        
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {

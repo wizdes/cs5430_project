@@ -2,6 +2,7 @@ package application.encryption_demo;
 
 
 import application.encryption_demo.Peers.Peer;
+import application.encryption_demo.forms.ChatWindow;
 import java.util.ArrayList;
 import java.util.Collection;
 import security_layer.PINFunctionality;
@@ -12,12 +13,12 @@ import security_layer.Profile;
  * @author Patrick C. Berens
  */
 public class EncryptionDemoFunctionality {
-    private EncryptionDemoGUI gui;
+    private ChatWindow gui;
     private String openedFilename;
     private CommunicationInterface communication;
     public PINFunctionality properPINInfo;
         
-    public EncryptionDemoFunctionality(EncryptionDemoGUI gui, Profile profile, String password){
+    public EncryptionDemoFunctionality(ChatWindow gui, Profile profile, String password){
         this.properPINInfo = new PINFunctionality();
         this.gui = gui;
         this.communication = new Communication(profile, password, this);
