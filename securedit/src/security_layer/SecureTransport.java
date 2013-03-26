@@ -5,6 +5,8 @@ import application.encryption_demo.CommunicationInterface;
 import application.encryption_demo.Message;
 import application.encryption_demo.Peers;
 import application.encryption_demo.Peers.Peer;
+import java.awt.EventQueue;
+import java.awt.GridLayout;
 import java.io.File;
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -30,6 +32,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SealedObject;
 import javax.crypto.SecretKey;
+import javax.swing.*;
 import transport_layer.discovery.DiscoveryResponseMessage;
 import transport_layer.discovery.DiscoveryTransport;
 import transport_layer.files.FileHandler;
@@ -49,7 +52,10 @@ public class SecureTransport implements SecureTransportInterface{
     private CommunicationInterface communication;
     private Authentications authInstance;
     private ConcurrentMap<String, Integer> lastReceived = new ConcurrentHashMap<>();
+    private ArrayList<String> authTo = new ArrayList<>();
     private AtomicInteger counter = new AtomicInteger();
+    
+    
     
     public SecureTransport(String password){
         Key personalKey = KeyFactory.generateSymmetricKey(password);
@@ -78,6 +84,10 @@ public class SecureTransport implements SecureTransportInterface{
                 networkTransport.addPeer(peerId, "localhost", 4000 + Integer.parseInt(peerId));
             }
         }
+    }
+    
+    public void addPeer(String peerIdent, String host, int port){
+        networkTransport.addPeer(peerIdent, host, port);
     }
     
     @Override
@@ -110,16 +120,17 @@ public class SecureTransport implements SecureTransportInterface{
 
     public boolean sendClearMessage(String destination, Message m){
         SecretKey commonKey = (SecretKey) KeyFactory.generateSymmetricKey("CommonKey");
-        return sendAESEncryptedMessage(destination, m, commonKey);
+        SecretKey HMACKey = (SecretKey) KeyFactory.generateSymmetricKey("CommonKeyHMAC");
+        return sendAESEncryptedMessage(destination, m, commonKey, HMACKey);
     }
         
     @Override
     public boolean sendAESEncryptedMessage(String destination, Message m) {
-        return sendAESEncryptedMessage(destination, m, keys.getSymmetricKey(destination));
+        return sendAESEncryptedMessage(destination, m, keys.getSymmetricKey(destination), keys.getHMACKey(destination));
     }
     
     @Override
-    public boolean sendAESEncryptedMessage(String destination, Message m, SecretKey secretKey) {
+    public boolean sendAESEncryptedMessage(String destination, Message m, SecretKey secretKey, SecretKey HMACKey) {
         System.out.println("Sending AES Message to " + destination);
         if (secretKey == null) secretKey = keys.getSymmetricKey(destination);
         
@@ -130,10 +141,15 @@ public class SecureTransport implements SecureTransportInterface{
         byte[] iv = CipherFactory.generateRandomIV();
         
         Cipher cipher = CipherFactory.constructAESEncryptionCipher(secretKey, iv);
-        ApplicationMessage appMessage = new ApplicationMessage(m, counter.incrementAndGet());    
+        
+        Message sendingMessage = null;
+        if(m instanceof HumanAuthenticationMessage){
+            sendingMessage = m;
+        }
+        else sendingMessage = (Message) new ApplicationMessage(m, counter.incrementAndGet());    
         try {
-            SealedObject encryptedObject = new SealedObject(appMessage, cipher);
-            byte[] hmac = CipherFactory.HMAC(keys.getHMACKey(destination), encryptedObject);
+            SealedObject encryptedObject = new SealedObject(sendingMessage, cipher);
+            byte[] hmac = CipherFactory.HMAC(HMACKey, encryptedObject);
             EncryptedAESMessage encryptedMessage = new EncryptedAESMessage(encryptedObject, iv, hmac);
             return networkTransport.send(destination, encryptedMessage);
         } catch (IOException | IllegalBlockSizeException ex) {
@@ -172,6 +188,7 @@ public class SecureTransport implements SecureTransportInterface{
         EncryptedMessage encryptedMessage = (EncryptedMessage)encryptedMsg;
         Message decryptedMsg = null;
         SecretKey secretKey = null;
+        SecretKey HMACKey = null;
         
         SealedObject encryptedObject;
         try {
@@ -180,12 +197,26 @@ public class SecureTransport implements SecureTransportInterface{
                 case CipherFactory.AES_ALGORITHM:
                     EncryptedAESMessage aesMessage = (EncryptedAESMessage)encryptedMsg;
                     encryptedObject = aesMessage.encryptedObject;
-                    byte[] hmac = CipherFactory.HMAC(keys.getHMACKey(sourceOfMessage), encryptedObject);
+                    
+                    if(authTo.contains(sourceOfMessage)){
+                        authInstance.waitID(sourceOfMessage);
+                    }
+                    
+                    HMACKey = keys.getHMACKey(sourceOfMessage);
+                    secretKey = keys.getSymmetricKey(sourceOfMessage);
+                    
+                    //for the common key
+                    if(HMACKey == null || secretKey == null){
+                            secretKey = (SecretKey) KeyFactory.generateSymmetricKey("CommonKey");
+                            HMACKey = (SecretKey) KeyFactory.generateSymmetricKey("CommonKeyHMAC");
+                    }
+                    
+                    byte[] hmac = CipherFactory.HMAC(HMACKey, encryptedObject);
                     
                     if (!Arrays.equals(hmac, aesMessage.HMAC)) {
                         throw new SignatureException("Invalid HMAC");
                     }                           
-                    secretKey = keys.getSymmetricKey(sourceOfMessage);
+                    
                     if (secretKey == null) {
                         System.out.println("No symmetric key for " + sourceOfMessage);
                     }
@@ -329,12 +360,8 @@ public class SecureTransport implements SecureTransportInterface{
             authenticateLock.lock();
             // send the message and wait
             authInstance.addAuthentication(ID, msg, authenticationComplete, authenticateLock);
+            authTo.add(ID);
             sendClearMessage(ID, msg);
-            authenticationComplete.await();
-            authInstance.removeAuthentication(ID);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
         }
         finally{
             authenticateLock.unlock();
@@ -345,5 +372,14 @@ public class SecureTransport implements SecureTransportInterface{
     @Override
     public void broadcastDiscovery() {
         discoveryTransport.broadcastDiscovery();
+    }
+
+    @Override
+    public void addPIN(String ID, String PIN) {
+        SecretKey pinKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN);
+        SecretKey HMACKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN + "HMAC");
+        keys.addSymmetricKey(ID, pinKey);
+        keys.addHMACKey(ID, HMACKey);
+        authInstance.signalID(ID);
     }
 }

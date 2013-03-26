@@ -16,6 +16,7 @@ public interface CommunicationInterface {
     public void broadcastDiscovery();
     public boolean sendMessage(String destination, Message m);
     public boolean authenticateMachine(String machineIdent);
+    public boolean authenticateHuman(String machineIdent);
     
     public Collection<Message> waitForMessages();
     
@@ -28,4 +29,6 @@ public interface CommunicationInterface {
     public void shutdown();
     
     public void updatePeers(String ident, String ip, int port, List<String> docs, boolean needsHumanAuth);
+
+    public void updatePin(String ID, String PIN);
 }
