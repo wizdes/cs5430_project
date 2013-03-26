@@ -19,8 +19,8 @@ public interface SecureTransportInterface {
     public boolean sendAESEncryptedMessage(String destination, Message m, SecretKey secretKey, SecretKey HMACKey);
     public boolean sendRSAEncryptedMessage(String destination, Message m);
     public boolean sendPlainTextMessage(String destination, Message m);
-    public Message processPlainTextMessage(String sourceOfMessage, PlainTextMessage msg);
-    public Message processEncryptedMessage(String sourceOfMessage, EncryptedMessage encryptedMsg) throws NoSuchAlgorithmException;
+    public boolean processPlainTextMessage(String sourceOfMessage, PlainTextMessage msg);
+    public boolean processEncryptedMessage(String sourceOfMessage, EncryptedMessage encryptedMsg) throws NoSuchAlgorithmException;
     public boolean writeEncryptedFile(String filename, Message contents);
     public Message readEncryptedFile(String filename);
     public String readUnencryptedFile(String filename);
@@ -37,5 +37,5 @@ public interface SecureTransportInterface {
     public void broadcastDiscovery();
     public void processDiscoveryResponse(DiscoveryResponseMessage msg);
 
-    public void addPIN(String ID, String PIN);
+    public boolean addPIN(String ID, String PIN);
 }

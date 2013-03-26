@@ -30,5 +30,5 @@ public interface CommunicationInterface {
     
     public void updatePeers(String ident, String ip, int port, List<String> docs, boolean needsHumanAuth);
 
-    public void updatePin(String ID, String PIN);
+    public boolean updatePin(String ID, String PIN);
 }

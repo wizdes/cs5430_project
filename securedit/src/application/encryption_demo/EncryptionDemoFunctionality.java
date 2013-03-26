@@ -90,23 +90,16 @@ public class EncryptionDemoFunctionality {
         }
     }
     
-    public String authenticate(String ident) {
-        if (!this.communication.authenticateHuman(ident)) {
-            return "Human authentication failed\n";
-        }
-        if (!this.communication.authenticateMachine(ident)) {
-            return "Machine authentication failed\n";
-        }
-        return "Authentication successful\n";
+    public boolean authenticateHuman(String ident) {
+        return this.communication.authenticateHuman(ident);
     }
     
-    public String authenticateMachine(String ident){
-        boolean wasSuccessful = communication.authenticateMachine(ident);
-        if(wasSuccessful){
-            return "Successfully authenticated machine\n";
-        } else{
-            return "Machine authentication was not successful\n";
-        }
+    public boolean authenticateMachine(String ident){
+        return communication.authenticateMachine(ident);
+    }
+    
+    public boolean addPIN(String ident, String pin) {
+        return this.communication.updatePin(ident, pin);
     }
     
 //    public void addPeerToGUI(Peer peer){

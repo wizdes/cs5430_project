@@ -23,10 +23,6 @@ public class Profile implements Message {
     public long keyVersion;
     public transient ArrayList<String> documents = new ArrayList<>();
     
-    public Profile() {
-        this.documents.add("chat_document");
-    }
-    
     public void save(String pw) {
         SecureTransport transport = new SecureTransport(pw);
         transport.writeEncryptedFile(ident + ".profile", this);

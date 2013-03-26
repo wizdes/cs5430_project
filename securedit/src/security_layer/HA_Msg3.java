@@ -13,9 +13,11 @@ import javax.crypto.SecretKey;
  */
 public class HA_Msg3 implements HumanAuthenticationMessage{
     PublicKey publicKey;
+    PublicKey verifyingKey;
     int nonce;
-    HA_Msg3(PublicKey publicKey, int nonceResponse1) {
+    HA_Msg3(PublicKey publicKey, PublicKey verifyingKey, int nonceResponse1) {
         this.publicKey = publicKey;
+        this.verifyingKey = verifyingKey;
         this.nonce = nonceResponse1;
     }
     

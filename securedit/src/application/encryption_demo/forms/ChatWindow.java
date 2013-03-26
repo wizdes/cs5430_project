@@ -254,9 +254,6 @@ public class ChatWindow extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "You cannot send a private message to yourself. Select another peer.");
         }
 
-        //Authenticate Machine if hasn't already been done.
-        String authResult = functionality.authenticateMachine(peer);
-
         //Send message
         boolean encryptionAndSendSuccessful = functionality.sendEncryptedMessage(peer, profile.ident + ": " + plaintext);
 
@@ -290,7 +287,7 @@ public class ChatWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_ManuallyAddPeerButtonActionPerformed
 
     private void startChatButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startChatButtonActionPerformed
-        // TODO add your handling code here:
+        this.profile.documents.add("Chat");
         this.tabbedPane.add("Chat", this.chatPanel);
         this.tabbedPane.setSelectedComponent(this.chatPanel);
     }//GEN-LAST:event_startChatButtonActionPerformed
@@ -299,8 +296,35 @@ public class ChatWindow extends javax.swing.JFrame {
         int selectedRow = this.PeersTable.getSelectedRow();
         String peerId = (String)this.PeersTable.getModel().getValueAt(selectedRow, 0);
         System.out.println("join chat with " + peerId);
-        String result = this.functionality.authenticate(peerId);
-        showMessage(result);
+        if (!this.functionality.authenticateHuman(peerId)) {
+            showMessage("human authentication failed");
+            return;
+        }
+        
+        String pin = JOptionPane.showInputDialog("Enter PIN for " + peerId);
+        
+        while (!this.functionality.addPIN(peerId, pin)) {
+            int closed = JOptionPane.showOptionDialog(this, 
+                             "Bad PIN! or message not received from server", 
+                             "Bad PIN", 
+                             JOptionPane.OK_CANCEL_OPTION, 
+                             JOptionPane.ERROR_MESSAGE,
+                             null, 
+                             null, 
+                             null);
+            if (closed == JOptionPane.CLOSED_OPTION || closed == JOptionPane.CANCEL_OPTION) {
+                return;
+            }
+            pin = JOptionPane.showInputDialog("Enter PIN for " + peerId);
+        }
+        
+        if (!this.functionality.authenticateMachine(peerId)) {
+            showMessage("machine authentication failed");
+            return;
+        }
+        
+        this.tabbedPane.add("Chat", this.chatPanel);
+        this.tabbedPane.setSelectedComponent(this.chatPanel);
     }//GEN-LAST:event_joinChatButtonActionPerformed
 
     private void showMessage(String m) {

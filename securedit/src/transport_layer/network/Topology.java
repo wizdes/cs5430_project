@@ -18,7 +18,7 @@ class Topology {
         return nodes.get(ident);
     }
     void addNode(String ident, String host, int port){
-        nodes.putIfAbsent(ident, new Node(ident, host, port));
+        nodes.put(ident, new Node(ident, host, port));
     }
     Node removeNode(String ident){
         return nodes.remove(ident);

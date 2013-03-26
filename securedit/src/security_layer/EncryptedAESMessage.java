@@ -15,6 +15,7 @@ class EncryptedAESMessage implements EncryptedMessage {
     SealedObject encryptedObject;
     byte[] HMAC;
     
+    
     EncryptedAESMessage(SealedObject encryptedObject, byte[] iv, byte[] hmac){
         assert iv.length == 16: iv;
         this.iv = iv;
@@ -26,4 +27,6 @@ class EncryptedAESMessage implements EncryptedMessage {
     public String getAlgorithm() {
         return encryptedObject.getAlgorithm();
     }
+    
 }
+

@@ -125,7 +125,7 @@ public class Communication implements CommunicationInterface {
     }
 
     @Override
-    public void updatePin(String ID, String PIN) {
-        secureTransport.addPIN(ID, PIN);
+    public boolean updatePin(String ID, String PIN) {
+        return secureTransport.addPIN(ID, PIN);
     }
 }

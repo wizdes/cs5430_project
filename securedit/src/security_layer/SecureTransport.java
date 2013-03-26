@@ -52,9 +52,8 @@ public class SecureTransport implements SecureTransportInterface{
     private CommunicationInterface communication;
     private Authentications authInstance;
     private ConcurrentMap<String, Integer> lastReceived = new ConcurrentHashMap<>();
-    private ArrayList<String> authTo = new ArrayList<>();
     private AtomicInteger counter = new AtomicInteger();
-    
+    private ConcurrentMap<String, EncryptedAESMessage> pendingHumanAuth = new ConcurrentHashMap<>();
     
     
     public SecureTransport(String password){
@@ -70,6 +69,8 @@ public class SecureTransport implements SecureTransportInterface{
         keys.privateKey = profile.keys.privateKey;
         keys.signingKey = profile.keys.signingKey;
         keys.publicKeys = profile.keys.publicKeys;
+        System.out.println("I have " + keys.publicKeys.size() + " public keys");
+        
         keys.verifyingKeys = profile.keys.verifiyngKeys;
        
         this.networkTransport = new NetworkTransport(profile.ident, profile.host, profile.port, this);
@@ -86,7 +87,9 @@ public class SecureTransport implements SecureTransportInterface{
         }
     }
     
+    @Override
     public void addPeer(String peerIdent, String host, int port){
+        System.out.println("adding " + peerIdent);
         networkTransport.addPeer(peerIdent, host, port);
     }
     
@@ -145,8 +148,9 @@ public class SecureTransport implements SecureTransportInterface{
         Message sendingMessage = null;
         if(m instanceof HumanAuthenticationMessage){
             sendingMessage = m;
+        } else { 
+            sendingMessage = (Message) new ApplicationMessage(m, counter.incrementAndGet()); 
         }
-        else sendingMessage = (Message) new ApplicationMessage(m, counter.incrementAndGet());    
         try {
             SealedObject encryptedObject = new SealedObject(sendingMessage, cipher);
             byte[] hmac = CipherFactory.HMAC(HMACKey, encryptedObject);
@@ -184,42 +188,37 @@ public class SecureTransport implements SecureTransportInterface{
     }
 
     @Override
-    public Message processEncryptedMessage(String sourceOfMessage, EncryptedMessage encryptedMsg) throws NoSuchAlgorithmException {
-        EncryptedMessage encryptedMessage = (EncryptedMessage)encryptedMsg;
+    public boolean processEncryptedMessage(String sourceOfMessage, EncryptedMessage encryptedMessage) throws NoSuchAlgorithmException {
+        boolean success = false;
         Message decryptedMsg = null;
         SecretKey secretKey = null;
         SecretKey HMACKey = null;
-        
+        System.out.println("processing message" + sourceOfMessage);
         SealedObject encryptedObject;
         try {
             Cipher cipher = null;
             switch(encryptedMessage.getAlgorithm()){
                 case CipherFactory.AES_ALGORITHM:
-                    EncryptedAESMessage aesMessage = (EncryptedAESMessage)encryptedMsg;
+     
+//                    if (encryptedMessage instanceof EncryptedAESHumanAuthMessage) {
+//                        EncryptedAESMessage m = ((EncryptedAESHumanAuthMessage)encryptedMessage).aesMessage;
+//                        this.pendingHumanAuth.put(sourceOfMessage, m);
+//                        System.out.println("saving hman auth message");
+//                        return true;
+//                    }
+                    
+                    EncryptedAESMessage aesMessage = (EncryptedAESMessage)encryptedMessage;
                     encryptedObject = aesMessage.encryptedObject;
 
                     HMACKey = keys.getHMACKey(sourceOfMessage);
                     secretKey = keys.getSymmetricKey(sourceOfMessage);
-
+                    System.out.println("I have " + keys.secretKeys.size() + " secret keys");
                     
-                    /*if(authTo.contains(sourceOfMessage)){
-                        authInstance.waitID(sourceOfMessage);
-                    }
-                    
-                    HMACKey = keys.getHMACKey(sourceOfMessage);
-                    secretKey = keys.getSymmetricKey(sourceOfMessage);
-                    
-                    //for the common key
-                    if(HMACKey == null || secretKey == null){
-                            secretKey = (SecretKey) KeyFactory.generateSymmetricKey("CommonKey");
-                            HMACKey = (SecretKey) KeyFactory.generateSymmetricKey("CommonKeyHMAC");
-                    }*/
-                    
-                    while(HMACKey == null || secretKey == null){
-                        authInstance.waitID(sourceOfMessage);
-                        HMACKey = keys.getHMACKey(sourceOfMessage);
-                        secretKey = keys.getSymmetricKey(sourceOfMessage);                        
-                    }
+                    if (HMACKey == null || secretKey == null) {
+                        this.pendingHumanAuth.put(sourceOfMessage, aesMessage);
+                        System.out.println("saving hman auth message");
+                        return true;
+                    }                    
                     
                     byte[] hmac = CipherFactory.HMAC(HMACKey, encryptedObject);
                     
@@ -234,11 +233,11 @@ public class SecureTransport implements SecureTransportInterface{
                     break;
                     
                 case CipherFactory.SIGNING_ALGORITHM:
-                    EncryptedRSAMessage rsaMessage = (EncryptedRSAMessage)encryptedMsg;
+                    EncryptedRSAMessage rsaMessage = (EncryptedRSAMessage)encryptedMessage;
                     SignedObject signedObject = rsaMessage.signedObject;
-                    PublicKey publicKey = keys.getVerifyingKey(sourceOfMessage);
+                    PublicKey verifyingKey = keys.getVerifyingKey(sourceOfMessage);
                     Signature sig = Signature.getInstance(CipherFactory.SIGNING_ALGORITHM);
-                    boolean verified = signedObject.verify(publicKey, sig);
+                    boolean verified = signedObject.verify(verifyingKey, sig);
                     if (!verified) {
                         throw new SignatureException("Unverified message from " + sourceOfMessage);
                     } else {
@@ -253,20 +252,23 @@ public class SecureTransport implements SecureTransportInterface{
             
             Object decryptedObj = encryptedObject.getObject(cipher);
             if (decryptedObj instanceof HumanAuthenticationMessage) {
-                System.out.println("[DEBUG] processing AuthenticationMessage");
+                System.out.println("[DEBUG] processing HumanAuthenticationMessage");
                 authInstance.processHumanAuthenticationRequest(sourceOfMessage, 
                                                           (HumanAuthenticationMessage)decryptedObj,
                                                           this);
+                success = true;
             } else if (decryptedObj instanceof MachineAuthenticationMessage) {
-                System.out.println("[DEBUG] processing AuthenticationMessage");
+                System.out.println("[DEBUG] processing MachineAuthenticationMessage");
                 authInstance.processMachineAuthenticationRequest(sourceOfMessage, 
                                                           (MachineAuthenticationMessage)decryptedObj,
                                                           this);
+                success = true;
             } else if (decryptedObj instanceof ApplicationMessage) {
                 ApplicationMessage appMessage = (ApplicationMessage)decryptedObj;
                 Integer currentCounter = lastReceived.get(sourceOfMessage);
                 if (currentCounter == null || appMessage.counter > currentCounter) {
                     communication.depositMessage(appMessage.message);
+                    success = true;
                     lastReceived.put(sourceOfMessage, appMessage.counter);
                 } else {
                     System.out.println("Invalid counter on AES message");
@@ -276,7 +278,7 @@ public class SecureTransport implements SecureTransportInterface{
             Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        return decryptedMsg;
+        return success;
     }
     
     @Override
@@ -372,7 +374,6 @@ public class SecureTransport implements SecureTransportInterface{
             authenticateLock.lock();
             // send the message and wait
             authInstance.addAuthentication(ID, msg, authenticationComplete, authenticateLock);
-            authTo.add(ID);
             sendPlainTextMessage(ID, msg);
         }
         finally{
@@ -387,12 +388,27 @@ public class SecureTransport implements SecureTransportInterface{
     }
 
     @Override
-    public void addPIN(String ID, String PIN) {
+    public boolean addPIN(String ID, String PIN) {
+        if (!this.pendingHumanAuth.containsKey(ID)) {
+            System.out.println("haven't received message from server");
+            return false;
+        }
+        
         SecretKey pinKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN);
         SecretKey HMACKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN + "HMAC");
         keys.addSymmetricKey(ID, pinKey);
         keys.addHMACKey(ID, HMACKey);
-        authInstance.signalID(ID);
+        
+        EncryptedAESMessage m = this.pendingHumanAuth.get(ID);
+        try {
+            boolean r = processEncryptedMessage(ID, m);
+            System.out.println("decrypted : " +r);
+            return r;
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("failed to decrpy with error");
+            return false;
+        }
     }
 
     @Override
@@ -404,11 +420,11 @@ public class SecureTransport implements SecureTransportInterface{
     }
 
     @Override
-    public Message processPlainTextMessage(String sourceOfMessage, PlainTextMessage msg) {
+    public boolean processPlainTextMessage(String sourceOfMessage, PlainTextMessage msg) {
         System.out.println("[DEBUG] processing AuthenticationMessage");
         authInstance.processHumanAuthenticationRequest(sourceOfMessage, 
                                                   (HumanAuthenticationMessage)msg.m,
                                                   this);
-        return msg.m;
+        return true;
     }
 }

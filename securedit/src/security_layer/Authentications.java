@@ -29,11 +29,11 @@ class Authentications {
     }
     
     private void addAuthentication(String ident, Message message){
-        authentications.putIfAbsent(ident, new Authentication(message));
+        authentications.put(ident, new Authentication(message));
     }
     
     void addAuthentication(String ident, Message message, Condition cond, Lock lock){
-        authentications.putIfAbsent(ident, new Authentication(message, cond, lock));
+        authentications.put(ident, new Authentication(message, cond, lock));
     }
     
     void removeAuthentication(String ident){
@@ -100,13 +100,14 @@ class Authentications {
         if (message instanceof HA_Msg1) {
             System.out.println("MESSAGE ONE RECEIVED");
             //generate a PIN
-            String PIN = pf.getPIN();
+            String PIN = pf.getPIN().substring(0, 3);
             String PINHMAC = PIN + "HMAC";
             System.out.println("PIN is: " + PIN);
             //send info into GUI somehow
             
             HA_Msg1 msg = (HA_Msg1)message;
             PublicKey publicKey = keys.publicKeys.get(keys.ident);
+            PublicKey verifyingKey = keys.verifyingKeys.get(keys.ident);
             SecretKey pinKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN);
             SecretKey HMACKey = (SecretKey) KeyFactory.generateSymmetricKey(PINHMAC);
             
@@ -115,10 +116,10 @@ class Authentications {
             
             addAuthentication(sourceOfMsg, msg, null, null);
             int nonceResponse1 = msg.nonce + 1;
-            Message m = new HA_Msg2(publicKey, nonceResponse1, keys.ident);
-            sti.sendAESEncryptedMessage(idOfNodeAuthenticationWith, m, pinKey, HMACKey);
-        }
-        else if (message instanceof HA_Msg2) {
+            Message m = new HA_Msg2(publicKey, verifyingKey, nonceResponse1, keys.ident);
+            boolean result = sti.sendAESEncryptedMessage(idOfNodeAuthenticationWith, m, pinKey, HMACKey);
+            System.out.println("result: " + result);
+        } else if (message instanceof HA_Msg2) {
             System.out.println("MESSAGE TWO RECEIVED");
             HA_Msg2 msg = (HA_Msg2)message;
             Authentication auth = authentications.get(idOfNodeAuthenticationWith);
@@ -128,11 +129,15 @@ class Authentications {
                 return;
             }
             PublicKey otherPublicKey = msg.publicKey;
+            System.out.println("idofNode = " + idOfNodeAuthenticationWith);
+            System.out.println("otherPublicKey = " + otherPublicKey);
             keys.addPublicKey(idOfNodeAuthenticationWith, otherPublicKey);
+            keys.addVerifyingKey(idOfNodeAuthenticationWith, msg.verifyingKey);
             
             PublicKey publicKey = keys.publicKeys.get(keys.ident);
+            PublicKey verifyingKey = keys.verifyingKeys.get(keys.ident);
             int nonceResponse1 = msg.nonce + 1;
-            Message m = new HA_Msg3(publicKey, nonceResponse1);
+            Message m = new HA_Msg3(publicKey, verifyingKey, nonceResponse1);
             sti.sendAESEncryptedMessage(idOfNodeAuthenticationWith, m,
                     keys.getSymmetricKey(idOfNodeAuthenticationWith), keys.getHMACKey(idOfNodeAuthenticationWith));
             keys.secretKeys.remove(sourceOfMsg);
@@ -150,6 +155,7 @@ class Authentications {
             authentications.remove(idOfNodeAuthenticationWith);
             PublicKey otherPublicKey = msg.publicKey;
             keys.addPublicKey(idOfNodeAuthenticationWith, otherPublicKey);
+            keys.addVerifyingKey(idOfNodeAuthenticationWith, msg.verifyingKey);
             
             keys.secretKeys.remove(sourceOfMsg);
             keys.HMACKeys.remove(sourceOfMsg);

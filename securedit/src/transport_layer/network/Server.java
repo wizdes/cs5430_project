@@ -29,16 +29,17 @@ public class Server {
     }
 
     void processNetworkMessage(NetworkMessage m) throws NoSuchAlgorithmException {
-        if(m.content instanceof EncryptedMessage){
+        
+        this.network.addPeer(m.source.id, m.source.host, m.source.port);
+        
+        if (m.content instanceof EncryptedMessage){
             this.network.depositEncryptedMessage(m);
         } else if(m.content instanceof DiscoveryResponseMessage){
             this.network.depositDiscoveryMessage(m);
-        }
-        else if(m.content instanceof PlainTextMessage){
+        } else if(m.content instanceof PlainTextMessage){
             this.network.depositPlainTextMessage(m);
         }
     }    
-    
     
     void shutdown() {
         this.clientListener.stopListening();

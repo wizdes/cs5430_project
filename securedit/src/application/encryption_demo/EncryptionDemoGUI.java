@@ -58,7 +58,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
         PasswordTextField.setText(password);
         
         Profile profile = Profile.readProfile(appNodeId, password);
-        functionality = new EncryptionDemoFunctionality(this, profile, password);
+//        functionality = new EncryptionDemoFunctionality(this, profile, password);
         
         SendTextField.addKeyListener(new KeyAdapter() {
             @Override
@@ -700,8 +700,8 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "You must first press button \"Update Properties\"");
             return;
         }
-        String authResult = functionality.authenticateMachine(String.valueOf(AuthenticateWithComboBox.getSelectedItem()).trim());
-        JOptionPane.showMessageDialog(this, authResult);
+//        String authResult = functionality.authenticateMachine(String.valueOf(AuthenticateWithComboBox.getSelectedItem()).trim());
+//        JOptionPane.showMessageDialog(this, authResult);
     }//GEN-LAST:event_AuthorizeMachineButtonActionPerformed
 
     private void BroadcastChatButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BroadcastChatButtonActionPerformed
@@ -736,7 +736,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
         }
         
         //Authenticate Machine if hasn't already been done.
-        String authResult = functionality.authenticateMachine(peer);
+//        String authResult = functionality.authenticateMachine(peer);
 
         //Send message
         boolean encryptionAndSendSuccessful = functionality.sendEncryptedMessage(peer, appNodeId + ": " + plaintext);

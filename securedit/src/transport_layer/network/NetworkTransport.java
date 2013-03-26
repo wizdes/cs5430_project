@@ -39,7 +39,9 @@ public class NetworkTransport implements NetworkTransportInterface{
     @Override
     public boolean send(String destination, Serializable m) {
         Node destNode = topology.getNode(destination);
+        System.out.println("sending to " + destination);
         if(destNode == null){
+            System.out.println("I dont know " + destination);
             return false;
         }
         NetworkMessage netMsg = new NetworkMessage(topology.getMyNode(), destNode, m);
