@@ -16,14 +16,12 @@ public class ChatWindow extends javax.swing.JFrame {
     private String appHost = "";
     private int appPort;
     private EncryptionDemoFunctionality functionality;
-    boolean isOwner;
     
     /**
      * Creates new form ChatWindow
      */
-    public ChatWindow(EncryptionDemoFunctionality functionality, boolean isOwner) {
+    public ChatWindow(EncryptionDemoFunctionality functionality) {
         this.functionality = functionality;
-        this.isOwner = isOwner;
         initComponents();
     }
 

@@ -765,6 +765,19 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
     
     private void ManuallyAddPeerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ManuallyAddPeerButtonActionPerformed
         // TODO add your handling code here:
+        for (int i = 0; i < 3; i++) {
+            if (!(i + "").equals(appNodeId)) {
+                String id = i + "";
+                String host = "localhost";
+                int port = 4000 + i;
+                ArrayList<String> documents = new ArrayList<>();
+                documents.add("chat");
+                functionality.manuallyAddPeer(id, host, port, documents);        
+            }
+        }
+        
+//        
+        
     }//GEN-LAST:event_ManuallyAddPeerButtonActionPerformed
     private void handleException(Exception ex) {
         JOptionPane.showMessageDialog(this, ex.getMessage());

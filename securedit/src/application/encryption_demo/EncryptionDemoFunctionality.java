@@ -2,6 +2,7 @@ package application.encryption_demo;
 
 
 import application.encryption_demo.Peers.Peer;
+import java.util.ArrayList;
 import java.util.Collection;
 import security_layer.PINFunctionality;
 import security_layer.Profile;
@@ -28,6 +29,10 @@ public class EncryptionDemoFunctionality {
     }
     public void broadcastDiscovery(){
         communication.broadcastDiscovery();
+    }
+    
+    public void manuallyAddPeer(String id, String host, int port, ArrayList<String> docs) {
+        communication.updatePeers(id, host, port, docs, true);
     }
     
     /**
