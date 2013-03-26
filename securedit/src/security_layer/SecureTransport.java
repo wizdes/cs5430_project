@@ -197,8 +197,12 @@ public class SecureTransport implements SecureTransportInterface{
                 case CipherFactory.AES_ALGORITHM:
                     EncryptedAESMessage aesMessage = (EncryptedAESMessage)encryptedMsg;
                     encryptedObject = aesMessage.encryptedObject;
+
+                    HMACKey = keys.getHMACKey(sourceOfMessage);
+                    secretKey = keys.getSymmetricKey(sourceOfMessage);
+
                     
-                    if(authTo.contains(sourceOfMessage)){
+                    /*if(authTo.contains(sourceOfMessage)){
                         authInstance.waitID(sourceOfMessage);
                     }
                     
@@ -209,6 +213,12 @@ public class SecureTransport implements SecureTransportInterface{
                     if(HMACKey == null || secretKey == null){
                             secretKey = (SecretKey) KeyFactory.generateSymmetricKey("CommonKey");
                             HMACKey = (SecretKey) KeyFactory.generateSymmetricKey("CommonKeyHMAC");
+                    }*/
+                    
+                    while(HMACKey == null || secretKey == null){
+                        authInstance.waitID(sourceOfMessage);
+                        HMACKey = keys.getHMACKey(sourceOfMessage);
+                        secretKey = keys.getSymmetricKey(sourceOfMessage);                        
                     }
                     
                     byte[] hmac = CipherFactory.HMAC(HMACKey, encryptedObject);
@@ -361,7 +371,7 @@ public class SecureTransport implements SecureTransportInterface{
             // send the message and wait
             authInstance.addAuthentication(ID, msg, authenticationComplete, authenticateLock);
             authTo.add(ID);
-            sendClearMessage(ID, msg);
+            sendPlainTextMessage(ID, msg);
         }
         finally{
             authenticateLock.unlock();
@@ -381,5 +391,22 @@ public class SecureTransport implements SecureTransportInterface{
         keys.addSymmetricKey(ID, pinKey);
         keys.addHMACKey(ID, HMACKey);
         authInstance.signalID(ID);
+    }
+
+    @Override
+    public boolean sendPlainTextMessage(String destination, Message m) {
+        System.out.println("Sending plainText Message to " + destination);
+        PlainTextMessage sendMsg = new PlainTextMessage();
+        sendMsg.m = m;
+        return networkTransport.send(destination, sendMsg);
+    }
+
+    @Override
+    public Message processPlainTextMessage(String sourceOfMessage, PlainTextMessage msg) {
+        System.out.println("[DEBUG] processing AuthenticationMessage");
+        authInstance.processHumanAuthenticationRequest(sourceOfMessage, 
+                                                  (HumanAuthenticationMessage)msg.m,
+                                                  this);
+        return msg.m;
     }
 }

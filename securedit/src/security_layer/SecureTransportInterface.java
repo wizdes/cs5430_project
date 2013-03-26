@@ -18,6 +18,8 @@ public interface SecureTransportInterface {
     public boolean sendAESEncryptedMessage(String destination, Message m);
     public boolean sendAESEncryptedMessage(String destination, Message m, SecretKey secretKey, SecretKey HMACKey);
     public boolean sendRSAEncryptedMessage(String destination, Message m);
+    public boolean sendPlainTextMessage(String destination, Message m);
+    public Message processPlainTextMessage(String sourceOfMessage, PlainTextMessage msg);
     public Message processEncryptedMessage(String sourceOfMessage, EncryptedMessage encryptedMsg) throws NoSuchAlgorithmException;
     public boolean writeEncryptedFile(String filename, Message contents);
     public Message readEncryptedFile(String filename);

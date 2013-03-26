@@ -7,6 +7,7 @@ package transport_layer.network;
 
 import java.security.NoSuchAlgorithmException;
 import security_layer.EncryptedMessage;
+import security_layer.PlainTextMessage;
 import transport_layer.discovery.DiscoveryResponseMessage;
 
 
@@ -33,7 +34,11 @@ public class Server {
         } else if(m.content instanceof DiscoveryResponseMessage){
             this.network.depositDiscoveryMessage(m);
         }
+        else if(m.content instanceof PlainTextMessage){
+            this.network.depositPlainTextMessage(m);
+        }
     }    
+    
     
     void shutdown() {
         this.clientListener.stopListening();
