@@ -222,7 +222,7 @@ public class LoginForm extends javax.swing.JFrame {
         String username = usernameTextField.getText().trim();
         String appHost = hostTextField.getText().trim();
         
-        int appPort = 0;
+        int appPort;
         try{
             appPort = Integer.parseInt(portTextField.getText());
         } catch(NumberFormatException ex){
@@ -230,10 +230,7 @@ public class LoginForm extends javax.swing.JFrame {
             return;
         }
         Profile profile = Profile.writeProfile(username, password, appPort, appHost);
-        EncryptionDemoFunctionality functionality = new EncryptionDemoFunctionality(null, profile, password);
-        this.dispose();
-        UserOwnerForm form = new UserOwnerForm(functionality);
-        form.setVisible(true);
+        transitionToChatWindow(profile, password);
     }//GEN-LAST:event_createAccountButtonActionPerformed
         
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginButtonActionPerformed
@@ -241,14 +238,17 @@ public class LoginForm extends javax.swing.JFrame {
         String password = new String(loginPasswordTextField.getPassword());
         Profile profile = Profile.readProfile(username, password);
         if (profile != null) {
-            EncryptionDemoFunctionality functionality = new EncryptionDemoFunctionality(null, profile, password);
-            this.dispose();
-            UserOwnerForm form = new UserOwnerForm(functionality);
-            form.setVisible(true);            
+            transitionToChatWindow(profile, password);           
         } else {
             JOptionPane.showMessageDialog(this, "Invalid credentials");
         }
     }//GEN-LAST:event_loginButtonActionPerformed
+    
+    private void transitionToChatWindow(Profile profile, String password) {
+        this.dispose();
+        ChatWindow form = new ChatWindow(profile, password);
+        form.setVisible(true); 
+    }
     
     private boolean isValidPassword(String pass) {
         System.out.println("password");

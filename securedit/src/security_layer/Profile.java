@@ -6,8 +6,10 @@
 package security_layer;
 
 import application.encryption_demo.Message;
+import java.beans.Transient;
 import java.io.File;
 import java.security.KeyPair;
+import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -19,6 +21,11 @@ public class Profile implements Message {
     public int port;
     KeysObject keys;
     public long keyVersion;
+    public transient ArrayList<String> documents = new ArrayList<>();
+    
+    public Profile() {
+        this.documents.add("chat_document");
+    }
     
     public void save(String pw) {
         SecureTransport transport = new SecureTransport(pw);
