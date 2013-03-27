@@ -5,6 +5,7 @@
 
 package application.encryption_demo;
 
+import application.encryption_demo.Messages.Message;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
 public interface CommunicationInterface {
     public void broadcastDiscovery();
     public boolean sendMessage(String destination, Message m);
+    public boolean broadcastMessage(Message m);
     public boolean authenticateMachine(String machineIdent);
     public boolean authenticateHuman(String machineIdent);
     

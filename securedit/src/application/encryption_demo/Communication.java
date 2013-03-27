@@ -5,7 +5,9 @@
 
 package application.encryption_demo;
 
-import application.encryption_demo.Peers.Peer;
+import application.encryption_demo.Messages.Message;
+import application.encryption_demo.Messages.StringMessage;
+import application.encryption_demo.DiscoveredPeers.Peer;
 import transport_layer.discovery.DiscoveryTransport;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
@@ -28,7 +30,7 @@ public class Communication implements CommunicationInterface {
     private Condition newMessageArrived = queueLock.newCondition();
     private BlockingQueue<Message> messageQueue = new LinkedBlockingDeque<>();
     private SecureTransportInterface secureTransport;
-    private Peers peers = new Peers();
+    private DiscoveredPeers discoveredPeers = new DiscoveredPeers();
     private EncryptionDemoFunctionality guiFunctionality;
     
     public Communication(Profile profile, String password) {
@@ -76,6 +78,21 @@ public class Communication implements CommunicationInterface {
     public boolean sendMessage(String destination, Message msg) {
         return secureTransport.sendAESEncryptedMessage(destination, msg);
     }
+    
+    @Override
+    public boolean broadcastMessage(Message msg){
+        boolean failure = false;
+        System.out.println("Num peers:" + discoveredPeers.getPeers().values().size());
+        for(Peer peer: discoveredPeers.getPeers().values()){
+            authenticateMachine(peer.id);
+            failure = !sendMessage(peer.id, msg) ? true : failure;
+        }
+        if(failure){
+            return false;
+        } else{
+            return true;
+        }
+    }
 
     @Override
     public boolean authenticateMachine(String machineIdent) {
@@ -84,7 +101,7 @@ public class Communication implements CommunicationInterface {
     
     @Override
     public boolean authenticateHuman(String machineIdent) {
-        if (peers.getPeer(machineIdent).needsHumanAuth) {
+        if (discoveredPeers.getPeer(machineIdent).needsHumanAuth) {
             return secureTransport.initializeHumanAuthenticate(machineIdent);
         } else {
             return true;
@@ -118,10 +135,10 @@ public class Communication implements CommunicationInterface {
 
     @Override
     public void updatePeers(String ident, String ip, int port, List<String> docs, boolean needsHumanAuth) {
-        peers.addPeer(ident, ip, port, docs, needsHumanAuth);
+        discoveredPeers.addPeer(ident, ip, port, docs, needsHumanAuth);
         secureTransport.addPeer(ident, ip, port);
         //guiFunctionality.addPeerToGUI(peers.getPeer(ident));
-        if(guiFunctionality != null) guiFunctionality.updatePeersInGUI(peers);
+        if(guiFunctionality != null) guiFunctionality.updatePeersInGUI(discoveredPeers);
     }
 
     @Override

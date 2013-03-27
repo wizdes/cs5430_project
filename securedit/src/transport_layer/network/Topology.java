@@ -15,7 +15,12 @@ class Topology {
         this.host = host;
     }
     Node getNode(String ident){
-        return nodes.get(ident);
+        if(ident.equals(host.id)){
+            return host;
+        }   
+        else{
+            return nodes.get(ident);
+        }
     }
     void addNode(String ident, String host, int port){
         nodes.put(ident, new Node(ident, host, port));

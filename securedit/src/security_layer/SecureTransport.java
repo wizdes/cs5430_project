@@ -2,13 +2,14 @@ package security_layer;
 
 
 import application.encryption_demo.CommunicationInterface;
-import application.encryption_demo.Message;
-import application.encryption_demo.Peers;
-import application.encryption_demo.Peers.Peer;
+import application.encryption_demo.Messages.Message;
+import application.encryption_demo.DiscoveredPeers;
+import application.encryption_demo.DiscoveredPeers.Peer;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -69,9 +70,12 @@ public class SecureTransport implements SecureTransportInterface{
         keys.privateKey = profile.keys.privateKey;
         keys.signingKey = profile.keys.signingKey;
         keys.publicKeys = profile.keys.publicKeys;
-        System.out.println("I have " + keys.publicKeys.size() + " public keys");
-        
         keys.verifyingKeys = profile.keys.verifiyngKeys;
+
+        //Add a symmetricKey for self so can send messages to self
+        keys.addSymmetricKey(profile.ident, (SecretKey)KeyFactory.generateSymmetricKey());
+        keys.addHMACKey(profile.ident, (SecretKey)KeyFactory.generateSymmetricKey());
+        
        
         this.networkTransport = new NetworkTransport(profile.ident, profile.host, profile.port, this);
         this.discoveryTransport = new DiscoveryTransport(profile, networkTransport);
@@ -145,11 +149,11 @@ public class SecureTransport implements SecureTransportInterface{
         
         Cipher cipher = CipherFactory.constructAESEncryptionCipher(secretKey, iv);
         
-        Message sendingMessage = null;
+        Serializable sendingMessage = null;
         if(m instanceof HumanAuthenticationMessage){
             sendingMessage = m;
         } else { 
-            sendingMessage = (Message) new ApplicationMessage(m, counter.incrementAndGet()); 
+            sendingMessage = new ApplicationMessage(m, counter.incrementAndGet()); 
         }
         try {
             SealedObject encryptedObject = new SealedObject(sendingMessage, cipher);

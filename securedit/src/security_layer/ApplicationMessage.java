@@ -5,7 +5,7 @@
 
 package security_layer;
 
-import application.encryption_demo.Message;
+import application.encryption_demo.Messages.Message;
 import java.io.Serializable;
 
 /**

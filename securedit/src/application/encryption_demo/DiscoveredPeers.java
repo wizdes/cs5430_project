@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author Patrick
  */
-public class Peers {
+public class DiscoveredPeers {
     private ConcurrentMap<String, Peer> peers = new ConcurrentHashMap<>();
     
     public void addPeer(String id, String ip, int port, List<String> documents, boolean needsHumanAuth){

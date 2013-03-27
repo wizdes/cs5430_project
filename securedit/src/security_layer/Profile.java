@@ -5,7 +5,7 @@
 
 package security_layer;
 
-import application.encryption_demo.Message;
+import application.encryption_demo.Messages.Message;
 import java.beans.Transient;
 import java.io.File;
 import java.security.KeyPair;

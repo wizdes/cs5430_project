@@ -2,9 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package application.encryption_demo;
+package _old_stuff;
 
-import application.encryption_demo.Peers.Peer;
+import application.encryption_demo.DiscoveredPeers;
+import application.encryption_demo.DiscoveredPeers.Peer;
+import application.encryption_demo.EncryptionDemoFunctionality;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -80,9 +82,9 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
         });
     }
     public void displayMessages(String plaintext, String ciphertext){
-        ReceivedCiphertextTextArea.setText(ReceivedCiphertextTextArea.getText() + ciphertext + "\n");
-        DecryptedPlaintextTextArea.setText(DecryptedPlaintextTextArea.getText() + plaintext + "\n");
-        ChatWindow.setText(ChatWindow.getText() + plaintext + "\n");
+//        ReceivedCiphertextTextArea.setText(ReceivedCiphertextTextArea.getText() + ciphertext + "\n");
+//        DecryptedPlaintextTextArea.setText(DecryptedPlaintextTextArea.getText() + plaintext + "\n");
+//        ChatWindow.setText(ChatWindow.getText() + plaintext + "\n");
     }
 //    public void addDiscoveredPeer(Peer peer){
 //        Object[][] rows = peer.getRowRepresentations();
@@ -91,17 +93,17 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
 //            ((DefaultTableModel)PeersTable.getModel()).addRow(rows[i]);
 //        }
 //    }
-    public void updateDiscoveredPeers(Peers peers){
-        //Clear table and repopulate it
-        ((DefaultTableModel)PeersTable.getModel()).setRowCount(0);
-        
-        for(Peer peer: peers.getPeers().values()){
-            Object[][] rows = peer.getRowRepresentations();
-        
-            for(int i = 0; i < rows.length; i++){
-                ((DefaultTableModel)PeersTable.getModel()).addRow(rows[i]);
-            }
-        }
+    public void updateDiscoveredPeers(DiscoveredPeers peers){
+//        //Clear table and repopulate it
+//        ((DefaultTableModel)PeersTable.getModel()).setRowCount(0);
+//        
+//        for(Peer peer: peers.getPeers().values()){
+//            Object[][] rows = peer.getRowRepresentations();
+//        
+//            for(int i = 0; i < rows.length; i++){
+//                ((DefaultTableModel)PeersTable.getModel()).addRow(rows[i]);
+//            }
+//        }
     }
 
     /**
@@ -226,7 +228,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                                     .addComponent(UsernameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE))))
                         .addGap(0, 0, Short.MAX_VALUE))))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, AuthorizationLabelLayout.createSequentialGroup()
-                .addGap(0, 454, Short.MAX_VALUE)
+                .addGap(0, 527, Short.MAX_VALUE)
                 .addGroup(AuthorizationLabelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(AuthenticateWithLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(AuthenticateWithComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -259,7 +261,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                         .addGroup(AuthorizationLabelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(PasswordTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(PasswordLabel))
-                        .addGap(0, 0, Short.MAX_VALUE))
+                        .addGap(0, 255, Short.MAX_VALUE))
                     .addGroup(AuthorizationLabelLayout.createSequentialGroup()
                         .addContainerGap(319, Short.MAX_VALUE)
                         .addGroup(AuthorizationLabelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -309,7 +311,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(FilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(FilePanelLayout.createSequentialGroup()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 618, Short.MAX_VALUE)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 691, Short.MAX_VALUE)
                         .addGroup(FilePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(FilePanelLayout.createSequentialGroup()
                                 .addGap(24, 24, 24)
@@ -335,7 +337,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                         .addContainerGap())
                     .addGroup(FilePanelLayout.createSequentialGroup()
                         .addComponent(OpenFileButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 255, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 278, Short.MAX_VALUE)
                         .addComponent(EncryptButton)
                         .addGap(18, 18, 18)
                         .addComponent(DecryptButton)
@@ -382,7 +384,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                     .addGroup(SentMessagesPanelLayout.createSequentialGroup()
                         .addGroup(SentMessagesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(SentMessagesPanelLayout.createSequentialGroup()
-                                .addGap(0, 27, Short.MAX_VALUE)
+                                .addGap(0, 100, Short.MAX_VALUE)
                                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 330, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
                             .addGroup(SentMessagesPanelLayout.createSequentialGroup()
@@ -426,7 +428,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                 .addGroup(SentMessagesPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(PeerComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(PeerLabel))
-                .addContainerGap(107, Short.MAX_VALUE))
+                .addContainerGap(130, Short.MAX_VALUE))
         );
 
         CryptographyTabbedPane.addTab("Sent Messages", SentMessagesPanel);
@@ -454,7 +456,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, SentMessagesPanel1Layout.createSequentialGroup()
                 .addGroup(SentMessagesPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(SentMessagesPanel1Layout.createSequentialGroup()
-                        .addContainerGap(37, Short.MAX_VALUE)
+                        .addContainerGap(110, Short.MAX_VALUE)
                         .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 330, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
                     .addGroup(SentMessagesPanel1Layout.createSequentialGroup()
@@ -476,7 +478,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                 .addGroup(SentMessagesPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane5, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 238, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(175, Short.MAX_VALUE))
+                .addContainerGap(198, Short.MAX_VALUE))
         );
 
         CryptographyTabbedPane.addTab("Received Messages", SentMessagesPanel1);
@@ -520,7 +522,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
         ChatPanelLayout.setHorizontalGroup(
             ChatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, ChatPanelLayout.createSequentialGroup()
-                .addContainerGap(24, Short.MAX_VALUE)
+                .addContainerGap(66, Short.MAX_VALUE)
                 .addGroup(ChatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(ChatPanelLayout.createSequentialGroup()
                         .addComponent(SendChatTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 518, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -528,11 +530,11 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                         .addGroup(ChatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(ChatPanelLayout.createSequentialGroup()
                                 .addComponent(BroadcastChatButton)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 45, Short.MAX_VALUE)
                                 .addComponent(SendChatButton)
                                 .addContainerGap())
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, ChatPanelLayout.createSequentialGroup()
-                                .addGap(0, 25, Short.MAX_VALUE)
+                                .addGap(0, 56, Short.MAX_VALUE)
                                 .addComponent(GeneratePINButton)
                                 .addGap(63, 63, 63))))
                     .addGroup(ChatPanelLayout.createSequentialGroup()
@@ -543,13 +545,13 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                 .addGroup(ChatPanelLayout.createSequentialGroup()
                     .addContainerGap()
                     .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 528, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(195, Short.MAX_VALUE)))
+                    .addContainerGap(268, Short.MAX_VALUE)))
         );
         ChatPanelLayout.setVerticalGroup(
             ChatPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, ChatPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 301, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 324, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(GeneratePINButton)
                 .addGap(29, 29, 29)
@@ -562,7 +564,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                 .addGroup(ChatPanelLayout.createSequentialGroup()
                     .addContainerGap()
                     .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 291, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(132, Short.MAX_VALUE)))
+                    .addContainerGap(155, Short.MAX_VALUE)))
         );
 
         CryptographyTabbedPane.addTab("Chat", ChatPanel);
@@ -599,14 +601,14 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
                         .addGroup(DiscoveryPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(ManuallyAddPeerButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(DiscoverPeersButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addComponent(jScrollPane8, javax.swing.GroupLayout.DEFAULT_SIZE, 713, Short.MAX_VALUE))
+                    .addComponent(jScrollPane8, javax.swing.GroupLayout.DEFAULT_SIZE, 786, Short.MAX_VALUE))
                 .addContainerGap())
         );
         DiscoveryPanelLayout.setVerticalGroup(
             DiscoveryPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, DiscoveryPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane8, javax.swing.GroupLayout.DEFAULT_SIZE, 356, Short.MAX_VALUE)
+                .addComponent(jScrollPane8, javax.swing.GroupLayout.DEFAULT_SIZE, 379, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(DiscoverPeersButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -645,54 +647,54 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void OpenFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_OpenFileButtonActionPerformed
-        if(functionality == null){
-            JOptionPane.showMessageDialog(this, "You must first press button \"Update Properties\"");
-            return;
-        }
-        int ret = fileChooser.showOpenDialog(EncryptionDemoGUI.this);
-        if(ret == JFileChooser.APPROVE_OPTION){
-            filename = fileChooser.getSelectedFile().getName();
-            FileLabel.setText(filename);
-            
-            String filetext = functionality.openFile(filename);
-            FileTextArea.setText(filetext);
-        }
+//        if(functionality == null){
+//            JOptionPane.showMessageDialog(this, "You must first press button \"Update Properties\"");
+//            return;
+//        }
+//        int ret = fileChooser.showOpenDialog(EncryptionDemoGUI.this);
+//        if(ret == JFileChooser.APPROVE_OPTION){
+//            filename = fileChooser.getSelectedFile().getName();
+//            FileLabel.setText(filename);
+//            
+//            String filetext = functionality.openFile(filename);
+//            FileTextArea.setText(filetext);
+//        }
     }//GEN-LAST:event_OpenFileButtonActionPerformed
 
     private void EncryptButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_EncryptButtonActionPerformed
-        if(functionality == null){
-            JOptionPane.showMessageDialog(this, "You must first press button \"Update Properties\"");
-            return;
-        }
-        FileTextArea.setText(functionality.encryptFile(FileTextArea.getText()));
+//        if(functionality == null){
+//            JOptionPane.showMessageDialog(this, "You must first press button \"Update Properties\"");
+//            return;
+//        }
+//        FileTextArea.setText(functionality.encryptFile(FileTextArea.getText()));
     }//GEN-LAST:event_EncryptButtonActionPerformed
 
     private void DecryptButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DecryptButtonActionPerformed
-        if(functionality == null){
-            JOptionPane.showMessageDialog(this, "You must first press button \"Update Properties\"");
-            return;
-        }
-        FileTextArea.setText(functionality.decryptFile(FileTextArea.getText()));
+//        if(functionality == null){
+//            JOptionPane.showMessageDialog(this, "You must first press button \"Update Properties\"");
+//            return;
+//        }
+//        FileTextArea.setText(functionality.decryptFile(FileTextArea.getText()));
     }//GEN-LAST:event_DecryptButtonActionPerformed
 
     private void SendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SendButtonActionPerformed
-        if(functionality == null){
-            JOptionPane.showMessageDialog(this, "You must first press button \"Update Properties\"");
-            return;
-        }
-        String plaintext = SendTextField.getText();
-        String peer = String.valueOf(PeerComboBox.getSelectedItem()).trim();
-        
-        boolean encryptionAndSendSuccessful = functionality.sendEncryptedMessage(peer, peer + ": " + plaintext);
-       
-        if(encryptionAndSendSuccessful){
-            EnteredPlaintext.setText(EnteredPlaintext.getText() + appNodeId + ": " + plaintext + "\n");
-            ChatWindow.setText(ChatWindow.getText() + appNodeId + ": " + plaintext + "\n");
-            SentCipherText.setText(SentCipherText.getText() + "Sent encrypted message succesfully" + "\n");
-            SendTextField.setText("");
-        } else{
-            JOptionPane.showMessageDialog(this, "Message: \"" +  plaintext + "\" failed to encrypt and send.");
-        }
+//        if(functionality == null){
+//            JOptionPane.showMessageDialog(this, "You must first press button \"Update Properties\"");
+//            return;
+//        }
+//        String plaintext = SendTextField.getText();
+//        String peer = String.valueOf(PeerComboBox.getSelectedItem()).trim();
+//        
+//        boolean encryptionAndSendSuccessful = functionality.sendEncryptedMessage(peer, peer + ": " + plaintext);
+//       
+//        if(encryptionAndSendSuccessful){
+//            EnteredPlaintext.setText(EnteredPlaintext.getText() + appNodeId + ": " + plaintext + "\n");
+//            ChatWindow.setText(ChatWindow.getText() + appNodeId + ": " + plaintext + "\n");
+//            SentCipherText.setText(SentCipherText.getText() + "Sent encrypted message succesfully" + "\n");
+//            SendTextField.setText("");
+//        } else{
+//            JOptionPane.showMessageDialog(this, "Message: \"" +  plaintext + "\" failed to encrypt and send.");
+//        }
     }//GEN-LAST:event_SendButtonActionPerformed
 
     private void AuthorizeMachineButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AuthorizeMachineButtonActionPerformed
@@ -705,52 +707,52 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_AuthorizeMachineButtonActionPerformed
 
     private void BroadcastChatButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BroadcastChatButtonActionPerformed
-        String plaintext = SendChatTextField.getText();
-
-        //Send message
-        boolean encryptionAndSendSuccessful = functionality.broadcastEncryptedMessage(appNodeId + ": " + plaintext);
-       
-        //Update GUI if message sent successfully
-        if(encryptionAndSendSuccessful){
-            EnteredPlaintext.setText(EnteredPlaintext.getText() + appNodeId + ": " + plaintext + "\n");
-            ChatWindow.setText(ChatWindow.getText() + appNodeId + ": " + plaintext + "\n");
-            SentCipherText.setText(SentCipherText.getText() + "Sent encrypted message succesfully" + "\n");
-            SendChatTextField.setText("");
-        } else{
-           JOptionPane.showMessageDialog(this, "Message: \"" +  plaintext + "\" failed to encrypt and broadcast."); 
-        }
+//        String plaintext = SendChatTextField.getText();
+//
+//        //Send message
+//        boolean encryptionAndSendSuccessful = functionality.broadcastEncryptedMessage(appNodeId + ": " + plaintext);
+//       
+//        //Update GUI if message sent successfully
+//        if(encryptionAndSendSuccessful){
+//            EnteredPlaintext.setText(EnteredPlaintext.getText() + appNodeId + ": " + plaintext + "\n");
+//            ChatWindow.setText(ChatWindow.getText() + appNodeId + ": " + plaintext + "\n");
+//            SentCipherText.setText(SentCipherText.getText() + "Sent encrypted message succesfully" + "\n");
+//            SendChatTextField.setText("");
+//        } else{
+//           JOptionPane.showMessageDialog(this, "Message: \"" +  plaintext + "\" failed to encrypt and broadcast."); 
+//        }
     }//GEN-LAST:event_BroadcastChatButtonActionPerformed
 
     private void SendChatButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SendChatButtonActionPerformed
-        String plaintext = SendChatTextField.getText();
-        String peer = String.valueOf(PeersList.getSelectedValue()).trim();
-        
-        //Check if a peer is selected
-        if(peer == null){
-            JOptionPane.showMessageDialog(this, "Please select a peer to send a private message.");
-        }
-        
-        //Trying to send a message to yourself.
-        if(peer.equals(appNodeId)){
-            JOptionPane.showMessageDialog(this, "You cannot send a private message to yourself. Select another peer.");
-        }
-        
-        //Authenticate Machine if hasn't already been done.
-//        String authResult = functionality.authenticateMachine(peer);
-
-        //Send message
-        boolean encryptionAndSendSuccessful = functionality.sendEncryptedMessage(peer, appNodeId + ": " + plaintext);
-       
-        //Update GUI if message sent successfully
-        if(encryptionAndSendSuccessful){
-            EnteredPlaintext.setText(EnteredPlaintext.getText() + appNodeId + ": " + plaintext + "\n");
-            ChatWindow.setText(ChatWindow.getText() + appNodeId + ": " + plaintext + "\n");
-            SentCipherText.setText(SentCipherText.getText() + "Sent encrypted message succesfully" + "\n");
-            SendChatTextField.setText("");
-            
-        } else{
-           JOptionPane.showMessageDialog(this, "Message: \"" +  plaintext + "\" failed to encrypt and send."); 
-        }
+//        String plaintext = SendChatTextField.getText();
+//        String peer = String.valueOf(PeersList.getSelectedValue()).trim();
+//        
+//        //Check if a peer is selected
+//        if(peer == null){
+//            JOptionPane.showMessageDialog(this, "Please select a peer to send a private message.");
+//        }
+//        
+//        //Trying to send a message to yourself.
+//        if(peer.equals(appNodeId)){
+//            JOptionPane.showMessageDialog(this, "You cannot send a private message to yourself. Select another peer.");
+//        }
+//        
+//        //Authenticate Machine if hasn't already been done.
+////        String authResult = functionality.authenticateMachine(peer);
+//
+//        //Send message
+//        boolean encryptionAndSendSuccessful = functionality.sendEncryptedMessage(peer, appNodeId + ": " + plaintext);
+//       
+//        //Update GUI if message sent successfully
+//        if(encryptionAndSendSuccessful){
+//            EnteredPlaintext.setText(EnteredPlaintext.getText() + appNodeId + ": " + plaintext + "\n");
+//            ChatWindow.setText(ChatWindow.getText() + appNodeId + ": " + plaintext + "\n");
+//            SentCipherText.setText(SentCipherText.getText() + "Sent encrypted message succesfully" + "\n");
+//            SendChatTextField.setText("");
+//            
+//        } else{
+//           JOptionPane.showMessageDialog(this, "Message: \"" +  plaintext + "\" failed to encrypt and send."); 
+//        }
     }//GEN-LAST:event_SendChatButtonActionPerformed
 
     private void GeneratePINButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_GeneratePINButtonMouseClicked

@@ -4,7 +4,7 @@
  */
 package security_layer;
 
-import application.encryption_demo.Message;
+import application.encryption_demo.Messages.Message;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.concurrent.ConcurrentHashMap;

@@ -1,10 +1,18 @@
 package application.encryption_demo;
 
 
-import application.encryption_demo.Peers.Peer;
+import application.encryption_demo.Messages.Message;
+import application.encryption_demo.Messages.StringMessage;
+import application.encryption_demo.DiscoveredPeers.Peer;
+import application.encryption_demo.Messages.RequestDocUpdateMessage;
+import application.encryption_demo.Messages.RequestJoinDocMessage;
+import application.encryption_demo.Messages.UpdateDocumentMessage;
 import application.encryption_demo.forms.ChatWindow;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import security_layer.PINFunctionality;
 import security_layer.Profile;
 
@@ -17,10 +25,13 @@ public class EncryptionDemoFunctionality {
     private String openedFilename;
     private CommunicationInterface communication;
     public PINFunctionality properPINInfo;
-        
+    private ConcurrentMap<String, DocumentInstance> docInstances = new ConcurrentHashMap<>();
+    private Profile profile;
+    
     public EncryptionDemoFunctionality(ChatWindow gui, Profile profile, String password){
         this.properPINInfo = new PINFunctionality();
         this.gui = gui;
+        this.profile = profile;
         this.communication = new Communication(profile, password, this);
         listenForMessages();
     }
@@ -67,28 +78,35 @@ public class EncryptionDemoFunctionality {
         return plaintext;
     }
     
-    /**
-     * Sends encrypted message.
-     * @param plaintextMsg Message in plaintext
-     * @return Encrypted version of message.
-     */
-
-    public boolean sendEncryptedMessage(String ident, String plaintextMsg) {
-        return communication.sendMessage(ident, new StringMessage(plaintextMsg));
+//    /**
+//     * Sends encrypted message.
+//     * @param plaintextMsg Message in plaintext
+//     * @return Encrypted version of message.
+//     */
+//
+//    public boolean sendEncryptedMessage(String ident, String plaintextMsg) {
+//        return communication.sendMessage(ident, new StringMessage(plaintextMsg));
+//    }
+    
+    public String createDocumentInstance(String ownerID, String docName){
+        DocumentInstance instance = new DocumentInstance(ownerID, docName);
+        instance.addCollaborators(profile.ident);
+        docInstances.put(instance.getDocumentIdentifer(), instance);
+        return instance.getDocumentIdentifer();
+    }
+    public boolean sendRequestDocUpdate(String docID, String text){
+        DocumentInstance instance = docInstances.get(docID);
+        return communication.sendMessage(instance.ownerID, new RequestDocUpdateMessage(profile.ident, instance.docName, text));
     }
     
-    public boolean broadcastEncryptedMessage(String plaintextMsg){        
-        boolean failure = false;
-        for(String peer: gui.peers){
-            authenticateMachine(peer);
-            failure = !sendEncryptedMessage(peer, plaintextMsg) ? true : failure;
-        }
-        if(failure){
-            return false;
-        } else{
-            return true;
-        }
+    public boolean sendJoinRequestMessage(String ownerIdent, String docName){
+        return communication.sendMessage(ownerIdent, new RequestJoinDocMessage(profile.ident, docName));
     }
+    
+    
+//    public boolean broadcastEncryptedMessage(String plaintextMsg){        
+//        return communication.broadcastMessage(new StringMessage(plaintextMsg));
+//    }
     
     public boolean authenticateHuman(String ident) {
         return this.communication.authenticateHuman(ident);
@@ -105,7 +123,8 @@ public class EncryptionDemoFunctionality {
 //    public void addPeerToGUI(Peer peer){
 //        gui.addDiscoveredPeer(peer);
 //    }
-    public void updatePeersInGUI(Peers peers){
+    public void updatePeersInGUI(DiscoveredPeers peers){
+        System.out.println("Updating gui peers");
         gui.updateDiscoveredPeers(peers);
     }
 
@@ -118,9 +137,9 @@ public class EncryptionDemoFunctionality {
      * @param plaintext Decrypted version of the message.
      * @param ciphertext Encrypted version of the message.
      */
-    void displayIncomingMessage(String plaintext, String ciphertext){
+    void displayIncomingMessage(String plaintext){
         //This should be called by thread that handles reading the message queue.
-        gui.displayMessages(plaintext, ciphertext);
+        gui.displayMessages(plaintext);
     }
     
     private class GUIListenerThread extends Thread {
@@ -136,11 +155,37 @@ public class EncryptionDemoFunctionality {
                 for (Message m : messages) {
                     System.out.println(m);
                     if (m instanceof StringMessage) {
-                        String message = ((StringMessage)m).contents;
-                        String crypted = "This has been encrypted, trust us...";   
-                        System.out.println("here");
-                        System.out.println(message);
-                        displayIncomingMessage(message, crypted);
+//                        String message = ((StringMessage)m).contents;
+//                        String crypted = "This has been encrypted, trust us...";   
+//                        System.out.println("here");
+//                        System.out.println(message);
+//                        displayIncomingMessage(message, crypted);
+                    }
+                    else if(m instanceof RequestJoinDocMessage){
+                        //Owner: Adds sourceID to collaborators for document instance
+                        RequestJoinDocMessage joinMsg = (RequestJoinDocMessage)m;
+                        String docID = DocumentInstance.toDocumentIdentifier(profile.ident, joinMsg.docName);
+                        
+                        DocumentInstance instance = docInstances.get(docID);
+                        instance.addCollaborators(joinMsg.sourceID);
+                    }
+                    else if(m instanceof RequestDocUpdateMessage){
+                        //Owner: Broadcast doc update to everyone(including self)
+                        RequestDocUpdateMessage docUpdate = (RequestDocUpdateMessage)m;
+                        String docID = DocumentInstance.toDocumentIdentifier(profile.ident, docUpdate.docName);
+                        
+                        //Broadcast all atomically
+                        DocumentInstance instance = docInstances.get(docID);
+                        synchronized(instance.collaborators){
+                            for(String collaborator: instance.collaborators.keySet()){
+                                communication.sendMessage(collaborator, new UpdateDocumentMessage(instance.ownerID, instance.docName, docUpdate.text));
+                            }
+                        }
+                    }
+                    else if(m instanceof UpdateDocumentMessage){
+                        //Collaborator: Add text to GUI
+                        String text = ((UpdateDocumentMessage)m).text;
+                        displayIncomingMessage(text);
                     }
                 }
             }

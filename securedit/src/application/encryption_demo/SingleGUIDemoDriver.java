@@ -4,6 +4,8 @@
  */
 package application.encryption_demo;
 
+import _old_stuff.EncryptionDemoGUI;
+
 /**
  *
  * @author Patrick C. Berens

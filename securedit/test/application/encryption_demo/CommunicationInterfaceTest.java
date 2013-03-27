@@ -4,6 +4,8 @@
  */
 package application.encryption_demo;
 
+import application.encryption_demo.Messages.Message;
+import application.encryption_demo.Messages.StringMessage;
 import org.junit.After;
 import static org.junit.Assert.*;
 import org.junit.Before;

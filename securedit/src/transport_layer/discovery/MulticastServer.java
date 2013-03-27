@@ -20,7 +20,7 @@ class MulticastServer extends Thread{
     private static final String ENCODING = "UTF-8";
     
     private DatagramSocket socket = null;
-    private static final int numTimesBroadcast = 3;
+    private static final int numTimesBroadcast = 1;
     
     private DiscoveryPacket discoveryPacket;
     
@@ -38,7 +38,9 @@ class MulticastServer extends Thread{
                 InetAddress group = InetAddress.getByName(groupAddress);
                 DatagramPacket packet = new DatagramPacket(buf, buf.length, group, discoveryPort);
                 socket.send(packet);
-                Thread.sleep(5000);
+                if(i+1 != numTimesBroadcast){
+                    Thread.sleep(1000); //Sleep if not last broadcast
+                }
             }
         } catch (InterruptedException | IOException ex) {
             Logger.getLogger(MulticastServer.class.getName()).log(Level.SEVERE, null, ex);
