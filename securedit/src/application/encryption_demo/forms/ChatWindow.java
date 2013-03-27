@@ -26,7 +26,7 @@ public class ChatWindow extends javax.swing.JFrame {
     EncryptionDemoFunctionality functionality;
     Profile profile;
     ConcurrentMap<Integer, String> docIDs = new ConcurrentHashMap<>();   //<tab index, docID>
-    
+    ConcurrentMap<String, ChatPanel> chatPanels = new ConcurrentHashMap<>();    //<docID, chatPanel>
     public static void main(String[] args) {
         String password = "pass0000pass0000";
         
@@ -50,17 +50,6 @@ public class ChatWindow extends javax.swing.JFrame {
         initComponents();
         this.setTitle("Chat Window - User: " + profile.ident);
         
-        //Sends message on enter press
-        SendChatTextField.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                int key = e.getKeyCode();
-                if (key == KeyEvent.VK_ENTER) {
-                    SendChatButton.doClick();
-                }
-            }
-        });
-        this.tabbedPane.remove(this.tabbedPane.getComponent(1));
     }
 
     /**
@@ -80,13 +69,6 @@ public class ChatWindow extends javax.swing.JFrame {
         joinChatButton = new javax.swing.JButton();
         startChatButton = new javax.swing.JButton();
         addManualPeer = new javax.swing.JButton();
-        chatPanel = new javax.swing.JPanel();
-        SendChatButton = new javax.swing.JButton();
-        SendChatTextField = new javax.swing.JTextField();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        PeersList = new javax.swing.JList();
-        jScrollPane7 = new javax.swing.JScrollPane();
-        chatWindowTextArea = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -178,59 +160,6 @@ public class ChatWindow extends javax.swing.JFrame {
 
         tabbedPane.addTab("Peers", peerPanel);
 
-        SendChatButton.setText("Send");
-        SendChatButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                SendChatButtonActionPerformed(evt);
-            }
-        });
-
-        SendChatTextField.setName("enteredPlainText"); // NOI18N
-
-        PeersList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        jScrollPane2.setViewportView(PeersList);
-
-        chatWindowTextArea.setEditable(false);
-        chatWindowTextArea.setColumns(20);
-        chatWindowTextArea.setRows(5);
-        jScrollPane7.setViewportView(chatWindowTextArea);
-
-        org.jdesktop.layout.GroupLayout chatPanelLayout = new org.jdesktop.layout.GroupLayout(chatPanel);
-        chatPanel.setLayout(chatPanelLayout);
-        chatPanelLayout.setHorizontalGroup(
-            chatPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(chatPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .add(chatPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(chatPanelLayout.createSequentialGroup()
-                        .add(10, 10, 10)
-                        .add(SendChatTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 518, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                    .add(jScrollPane7, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 534, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .add(chatPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(chatPanelLayout.createSequentialGroup()
-                        .add(47, 47, 47)
-                        .add(jScrollPane2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 150, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                    .add(chatPanelLayout.createSequentialGroup()
-                        .add(18, 18, 18)
-                        .add(SendChatButton)))
-                .addContainerGap(84, Short.MAX_VALUE))
-        );
-        chatPanelLayout.setVerticalGroup(
-            chatPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(org.jdesktop.layout.GroupLayout.TRAILING, chatPanelLayout.createSequentialGroup()
-                .addContainerGap(44, Short.MAX_VALUE)
-                .add(chatPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
-                    .add(jScrollPane7)
-                    .add(jScrollPane2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 291, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
-                .add(59, 59, 59)
-                .add(chatPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(SendChatTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .add(SendChatButton))
-                .addContainerGap())
-        );
-
-        tabbedPane.addTab("Chat", chatPanel);
-
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -265,34 +194,18 @@ public class ChatWindow extends javax.swing.JFrame {
         }
     }
     
-    public void displayMessages(String plaintext){
-        chatWindowTextArea.setText(chatWindowTextArea.getText() + plaintext + "\n");
+    public void displayMessages(String docID, String plaintext){
+        ChatPanel panel = chatPanels.get(docID);
+        if(panel != null){
+            panel.displayMessages(plaintext);
+        }
     }    
     
-    private void SendChatButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SendChatButtonActionPerformed
-        String plaintext = SendChatTextField.getText();
-
-        //Send message
-        int currentTabIndex = this.tabbedPane.getSelectedIndex();
-        String docID = docIDs.get(currentTabIndex);
-        
-        boolean encryptionAndSendSuccessful = functionality.sendRequestDocUpdate(docID, profile.ident + ": " + plaintext);
-       
-        //Update GUI if message sent successfully
-        if(encryptionAndSendSuccessful){
-            SendChatTextField.setText("");
-        } else{
-           JOptionPane.showMessageDialog(this, "Message: \"" +  plaintext + "\" failed to encrypt and broadcast."); 
-        }
-    }//GEN-LAST:event_SendChatButtonActionPerformed
-
     private void DiscoverPeersButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DiscoverPeersButtonActionPerformed
-
         functionality.broadcastDiscovery();
     }//GEN-LAST:event_DiscoverPeersButtonActionPerformed
 
     private void addDefaultPeersButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addDefaultPeersButtonActionPerformed
-
         for (int i = 0; i < 3; i++) {
             if (!(i + "").equals(profile.ident)) {
                 String id = i + "";
@@ -316,9 +229,10 @@ public class ChatWindow extends javax.swing.JFrame {
         docIDs.put(this.tabbedPane.getTabCount(), docID);
         this.profile.documents.add(docName);
         
-        JPanel panel = this.chatPanel;  //TODO: panel = new ChatPanel();
+        ChatPanel panel = new ChatPanel();
+        chatPanels.put(docID, panel);
         this.tabbedPane.add("Owner: " + profile.ident + ", Doc: " + docName, panel);
-        this.tabbedPane.setSelectedComponent(this.chatPanel);
+        this.tabbedPane.setSelectedComponent(panel);
     }//GEN-LAST:event_startChatButtonActionPerformed
 
     private void joinChatButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_joinChatButtonActionPerformed
@@ -358,7 +272,6 @@ public class ChatWindow extends javax.swing.JFrame {
         String docID = this.functionality.createDocumentInstance(ownerId, docName);
         
         docIDs.put(this.tabbedPane.getTabCount(), docID);
-        this.profile.documents.add(docName);
         
         if(!this.functionality.sendJoinRequestMessage(ownerId, docName)){
             showMessage("Join chat request failed to send!");
@@ -367,9 +280,10 @@ public class ChatWindow extends javax.swing.JFrame {
         
         //TODO FINAL PHASE: Authorization: Should wait here for authorization telling me chat request was accepted.
         
-        
-        this.tabbedPane.add("Owner: " + ownerId + ", Doc: " + docName, this.chatPanel);
-        this.tabbedPane.setSelectedComponent(this.chatPanel);
+        ChatPanel panel = new ChatPanel();
+        chatPanels.put(docID, panel);
+        this.tabbedPane.add("Owner: " + ownerId + ", Doc: " + docName, panel);
+        this.tabbedPane.setSelectedComponent(panel);
     }//GEN-LAST:event_joinChatButtonActionPerformed
 
     private void addManualPeerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addManualPeerActionPerformed
@@ -407,15 +321,8 @@ public class ChatWindow extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton DiscoverPeersButton;
     private javax.swing.JTable DiscoveredPeersTable;
-    private javax.swing.JList PeersList;
-    private javax.swing.JButton SendChatButton;
-    private javax.swing.JTextField SendChatTextField;
     private javax.swing.JButton addDefaultPeersButton;
     private javax.swing.JButton addManualPeer;
-    private javax.swing.JPanel chatPanel;
-    private javax.swing.JTextArea chatWindowTextArea;
-    private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JScrollPane jScrollPane8;
     private javax.swing.JButton joinChatButton;
     private javax.swing.JPanel peerPanel;

@@ -137,9 +137,9 @@ public class EncryptionDemoFunctionality {
      * @param plaintext Decrypted version of the message.
      * @param ciphertext Encrypted version of the message.
      */
-    void displayIncomingMessage(String plaintext){
+    void displayIncomingMessage(String docID, String plaintext){
         //This should be called by thread that handles reading the message queue.
-        gui.displayMessages(plaintext);
+        gui.displayMessages(docID, plaintext);
     }
     
     private class GUIListenerThread extends Thread {
@@ -184,8 +184,10 @@ public class EncryptionDemoFunctionality {
                     }
                     else if(m instanceof UpdateDocumentMessage){
                         //Collaborator: Add text to GUI
-                        String text = ((UpdateDocumentMessage)m).text;
-                        displayIncomingMessage(text);
+                        UpdateDocumentMessage updateMsg = (UpdateDocumentMessage)m;
+                        String docID = DocumentInstance.toDocumentIdentifier(updateMsg.ownerID, updateMsg.docName);
+                        
+                        displayIncomingMessage(docID, updateMsg.text);
                     }
                 }
             }

@@ -58,7 +58,13 @@ class MulticastClient extends Thread {
                 if (discoveryPacket != null) {
                     //Process packet.
                     if(!discoveryPacket.myID.equals(profile.ident)){
-                        List<String> documentNames = this.profile.documents;
+                        
+                        List<String> documentNames = new ArrayList<>(this.profile.documents);
+                        System.out.print("Documents : ");
+                        for(String doc: documentNames){
+                            System.out.print(doc + ", ");
+                        }
+                        System.out.println();
                         DiscoveryResponseMessage responseMessage = new DiscoveryResponseMessage(profile.ident, profile.host, profile.port, documentNames, profile.keyVersion);
                         networkTransport.addPeer(discoveryPacket.myID, discoveryPacket.myIP, discoveryPacket.myPort);
                         networkTransport.send(discoveryPacket.myID, responseMessage);

@@ -137,8 +137,10 @@ public class Communication implements CommunicationInterface {
     public void updatePeers(String ident, String ip, int port, List<String> docs, boolean needsHumanAuth) {
         discoveredPeers.addPeer(ident, ip, port, docs, needsHumanAuth);
         secureTransport.addPeer(ident, ip, port);
-        //guiFunctionality.addPeerToGUI(peers.getPeer(ident));
-        if(guiFunctionality != null) guiFunctionality.updatePeersInGUI(discoveredPeers);
+        
+        if(guiFunctionality != null){
+            guiFunctionality.updatePeersInGUI(discoveredPeers);
+        }
     }
 
     @Override

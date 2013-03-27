@@ -99,6 +99,10 @@ public class ChatPanel extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    public void displayMessages(String plaintext){
+        chatWindowTextArea.setText(chatWindowTextArea.getText() + plaintext + "\n");
+    }    
+    
     private void SendChatButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_SendChatButtonActionPerformed
         ChatWindow chatWindow = (ChatWindow) SwingUtilities.getWindowAncestor(this);
         
