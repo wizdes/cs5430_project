@@ -58,9 +58,10 @@ public class ChatWindow extends javax.swing.JFrame {
         jScrollPane8 = new javax.swing.JScrollPane();
         PeersTable = new javax.swing.JTable();
         DiscoverPeersButton = new javax.swing.JButton();
-        ManuallyAddPeerButton = new javax.swing.JButton();
+        addDefaultPeersButton = new javax.swing.JButton();
         joinChatButton = new javax.swing.JButton();
         startChatButton = new javax.swing.JButton();
+        addManualPeer = new javax.swing.JButton();
         chatPanel = new javax.swing.JPanel();
         SendChatButton = new javax.swing.JButton();
         SendChatTextField = new javax.swing.JTextField();
@@ -85,10 +86,10 @@ public class ChatWindow extends javax.swing.JFrame {
             }
         });
 
-        ManuallyAddPeerButton.setText("Manually Add Peer");
-        ManuallyAddPeerButton.addActionListener(new java.awt.event.ActionListener() {
+        addDefaultPeersButton.setText("Add Default Peers");
+        addDefaultPeersButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ManuallyAddPeerButtonActionPerformed(evt);
+                addDefaultPeersButtonActionPerformed(evt);
             }
         });
 
@@ -106,23 +107,31 @@ public class ChatWindow extends javax.swing.JFrame {
             }
         });
 
+        addManualPeer.setText("Add Peer Manually");
+        addManualPeer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addManualPeerActionPerformed(evt);
+            }
+        });
+
         org.jdesktop.layout.GroupLayout peerPanelLayout = new org.jdesktop.layout.GroupLayout(peerPanel);
         peerPanel.setLayout(peerPanelLayout);
         peerPanelLayout.setHorizontalGroup(
             peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(peerPanelLayout.createSequentialGroup()
-                .addContainerGap(520, Short.MAX_VALUE)
+                .addContainerGap()
+                .add(addDefaultPeersButton)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 370, Short.MAX_VALUE)
                 .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(org.jdesktop.layout.GroupLayout.TRAILING, peerPanelLayout.createSequentialGroup()
+                    .add(peerPanelLayout.createSequentialGroup()
                         .add(startChatButton)
-                        .add(18, 18, 18)
-                        .add(ManuallyAddPeerButton)
-                        .addContainerGap())
-                    .add(org.jdesktop.layout.GroupLayout.TRAILING, peerPanelLayout.createSequentialGroup()
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                        .add(addManualPeer))
+                    .add(peerPanelLayout.createSequentialGroup()
                         .add(joinChatButton)
-                        .add(33, 33, 33)
-                        .add(DiscoverPeersButton)
-                        .add(16, 16, 16))))
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                        .add(DiscoverPeersButton)))
+                .addContainerGap())
             .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                 .add(peerPanelLayout.createSequentialGroup()
                     .add(11, 11, 11)
@@ -138,8 +147,9 @@ public class ChatWindow extends javax.swing.JFrame {
                     .add(joinChatButton))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(ManuallyAddPeerButton)
-                    .add(startChatButton))
+                    .add(startChatButton)
+                    .add(addDefaultPeersButton)
+                    .add(addManualPeer))
                 .addContainerGap())
             .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                 .add(peerPanelLayout.createSequentialGroup()
@@ -272,7 +282,7 @@ public class ChatWindow extends javax.swing.JFrame {
         functionality.broadcastDiscovery();
     }//GEN-LAST:event_DiscoverPeersButtonActionPerformed
 
-    private void ManuallyAddPeerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ManuallyAddPeerButtonActionPerformed
+    private void addDefaultPeersButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addDefaultPeersButtonActionPerformed
         // TODO add your handling code here:
         for (int i = 0; i < 3; i++) {
             if (!(i + "").equals(profile.ident)) {
@@ -281,10 +291,10 @@ public class ChatWindow extends javax.swing.JFrame {
                 int port = 4000 + i;
                 ArrayList<String> documents = new ArrayList<>();
                 documents.add("chat");
-                functionality.manuallyAddPeer(id, host, port, documents);        
+                functionality.manuallyAddPeer(id, host, port, documents);
             }
         }
-    }//GEN-LAST:event_ManuallyAddPeerButtonActionPerformed
+    }//GEN-LAST:event_addDefaultPeersButtonActionPerformed
 
     private void startChatButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startChatButtonActionPerformed
         this.profile.documents.add("Chat");
@@ -327,6 +337,27 @@ public class ChatWindow extends javax.swing.JFrame {
         this.tabbedPane.setSelectedComponent(this.chatPanel);
     }//GEN-LAST:event_joinChatButtonActionPerformed
 
+    private void addManualPeerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addManualPeerActionPerformed
+        // TODO add your handling code here:
+        String id = JOptionPane.showInputDialog("Username:");
+        if (id == null || id.trim().equals("")) {
+            return;
+        }
+        String host = JOptionPane.showInputDialog("Host:", "localhost");
+        if (host == null || host.trim().equals("")) {
+            return;
+        }        
+        int port = 0;
+        try {
+            port = Integer.parseInt(JOptionPane.showInputDialog("Port:"));
+        } catch (java.lang.NumberFormatException e) {
+            return;
+        }
+        ArrayList<String> documents = new ArrayList<>();
+        documents.add("chat");
+        functionality.manuallyAddPeer(id.trim(), host.trim(), port, documents);
+    }//GEN-LAST:event_addManualPeerActionPerformed
+
     private void showMessage(String m) {
         JOptionPane.showMessageDialog(this, m);
     }
@@ -337,11 +368,12 @@ public class ChatWindow extends javax.swing.JFrame {
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton DiscoverPeersButton;
-    private javax.swing.JButton ManuallyAddPeerButton;
     private javax.swing.JList PeersList;
     private javax.swing.JTable PeersTable;
     private javax.swing.JButton SendChatButton;
     private javax.swing.JTextField SendChatTextField;
+    private javax.swing.JButton addDefaultPeersButton;
+    private javax.swing.JButton addManualPeer;
     private javax.swing.JPanel chatPanel;
     private javax.swing.JTextArea chatWindow;
     private javax.swing.JScrollPane jScrollPane2;
