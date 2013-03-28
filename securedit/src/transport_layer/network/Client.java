@@ -1,9 +1,12 @@
 package transport_layer.network;
 
+import configuration.Constants;
 import java.io.*;
 import java.net.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class Client {
     private ConcurrentMap<String, Client.Channel> channelMap = new ConcurrentHashMap<>();
@@ -52,10 +55,14 @@ class Client {
                 out = new ObjectOutputStream(socket.getOutputStream());
                 in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             } catch(UnknownHostException ex){
-                System.err.println("Unknown host: " + node);
+                if(Constants.DEBUG_ON){
+                    Logger.getLogger(Client.class.getName()).log(Level.SEVERE, "Unknown host: " + node, ex);
+                }
                 close();
             } catch(IOException ex){
-                System.err.println("Couldn't get I/O for the connection : " + node);
+                if(Constants.DEBUG_ON){
+                    Logger.getLogger(Client.class.getName()).log(Level.SEVERE, "Couldn't get I/O for the connection : " + node, ex);
+                }
                 close();
             }
         }
@@ -69,8 +76,9 @@ class Client {
                     out.flush();
                     response = in.readLine();
                 } catch (IOException ex) {
-                    ex.printStackTrace();
-                    System.err.println("Client error reading from : " + node + " after send");
+                    if(Constants.DEBUG_ON){
+                        Logger.getLogger(Client.class.getName()).log(Level.SEVERE, "Client error reading from : " + node + " after send", ex);
+                    }
                 }
             }
             
@@ -78,7 +86,9 @@ class Client {
         }
         
         private void close() {
-            System.out.println("client closing socket");
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client " + node + " closing socket.");
+            }
             try {
                 if (in != null) {
                     in.close();
@@ -90,7 +100,9 @@ class Client {
                     socket.close();
                 }
             } catch (IOException ex) {
-                System.err.println("Couldn't close socket to : " + node);
+                if(Constants.DEBUG_ON){
+                    Logger.getLogger(Client.class.getName()).log(Level.SEVERE, "Couldn't close socket to : " + node, ex);
+                }
             }
         }   
     }

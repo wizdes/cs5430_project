@@ -251,9 +251,6 @@ public class LoginForm extends javax.swing.JFrame {
     }
     
     private boolean isValidPassword(String pass) {
-        System.out.println("password");
-        System.out.println(pass);
-        System.out.println(pass.length());
         return pass.length() == 16
                && pass.matches(".*[^a-zA-Z\\s0-9].*");
     }

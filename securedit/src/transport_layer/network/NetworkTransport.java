@@ -4,16 +4,15 @@
  */
 package transport_layer.network;
 
+import configuration.Constants;
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import security_layer.EncryptedMessage;
-import security_layer.PlainTextMessage;
+import security_layer.PlaintextMessage;
 import security_layer.SecureTransportInterface;
 import transport_layer.discovery.DiscoveryResponseMessage;
-import transport_layer.discovery.DiscoveryTransport;
 
 /**
  *
@@ -39,9 +38,13 @@ public class NetworkTransport implements NetworkTransportInterface{
     @Override
     public boolean send(String destination, Serializable m) {
         Node destNode = topology.getNode(destination);
-        System.out.println("sending to " + destination);
+        if(Constants.DEBUG_ON){
+            Logger.getLogger(NetworkTransport.class.getName()).log(Level.INFO, "[User: " + topology.getMyId() + "] Sending " + NetworkMessage.class.getName() + " to " + destination + ".");
+        }
         if(destNode == null){
-            System.out.println("I dont know " + destination);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(NetworkTransport.class.getName()).log(Level.SEVERE, "[User: " + topology.getMyId() + "] Desintation: " + destination + " isn't in topology file.");
+            }
             return false;
         }
         NetworkMessage netMsg = new NetworkMessage(topology.getMyNode(), destNode, m);
@@ -61,14 +64,16 @@ public class NetworkTransport implements NetworkTransportInterface{
     }
     
     void depositPlainTextMessage(NetworkMessage msg){
-        secureTransport.processPlainTextMessage(msg.source.id, (PlainTextMessage)msg.content);
+        secureTransport.processPlaintextMessage(msg.source.id, (PlaintextMessage)msg.content);
     }
 
     void depositEncryptedMessage(NetworkMessage msg) {
         try {
             secureTransport.processEncryptedMessage(msg.source.id, (EncryptedMessage)msg.content);
         } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(NetworkTransport.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(NetworkTransport.class.getName()).log(Level.SEVERE, "[User: " + topology.getMyId() + "] Couldn't find encryption algorithm when processing " + EncryptedMessage.class.getName() + ".", ex);
+            }
         }
     }
     void depositDiscoveryMessage(NetworkMessage msg) {

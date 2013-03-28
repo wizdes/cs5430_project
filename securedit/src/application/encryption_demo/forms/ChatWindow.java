@@ -182,12 +182,10 @@ public class ChatWindow extends javax.swing.JFrame {
 
     public void updateDiscoveredPeers(DiscoveredPeers peers){
         //Clear table and repopulate it
-        System.out.println("Peers size: " + peers.getPeers().size());
         ((DefaultTableModel)DiscoveredPeersTable.getModel()).setRowCount(0);
         
         for(DiscoveredPeers.Peer peer: peers.getPeers().values()){
             Object[][] rows = peer.getRowRepresentations();
-            System.out.println("peer: " + peer.id);
             for(int i = 0; i < rows.length; i++){
                 ((DefaultTableModel)DiscoveredPeersTable.getModel()).addRow(rows[i]);
             }
@@ -227,7 +225,7 @@ public class ChatWindow extends javax.swing.JFrame {
         String docID = this.functionality.createDocumentInstance(profile.ident, docName);
         
         docIDs.put(this.tabbedPane.getTabCount(), docID);
-        this.profile.documents.add(docName);
+        this.profile.documentsOpenForDiscovery.add(docName);
         
         ChatPanel panel = new ChatPanel();
         chatPanels.put(docID, panel);
@@ -240,7 +238,6 @@ public class ChatWindow extends javax.swing.JFrame {
         String ownerId = (String)this.DiscoveredPeersTable.getModel().getValueAt(selectedRow, 0);
         String docName = (String)this.DiscoveredPeersTable.getModel().getValueAt(selectedRow, 3);
         
-        System.out.println("join chat with " + ownerId);
         if (!this.functionality.authenticateHuman(ownerId)) {
             showMessage("human authentication failed");
             return;

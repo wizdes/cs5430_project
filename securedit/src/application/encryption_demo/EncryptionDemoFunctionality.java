@@ -124,7 +124,6 @@ public class EncryptionDemoFunctionality {
 //        gui.addDiscoveredPeer(peer);
 //    }
     public void updatePeersInGUI(DiscoveredPeers peers){
-        System.out.println("Updating gui peers");
         gui.updateDiscoveredPeers(peers);
     }
 
@@ -153,12 +152,9 @@ public class EncryptionDemoFunctionality {
             while (true) {
                 Collection<Message> messages = communication.waitForMessages();
                 for (Message m : messages) {
-                    System.out.println(m);
                     if (m instanceof StringMessage) {
 //                        String message = ((StringMessage)m).contents;
 //                        String crypted = "This has been encrypted, trust us...";   
-//                        System.out.println("here");
-//                        System.out.println(message);
 //                        displayIncomingMessage(message, crypted);
                     }
                     else if(m instanceof RequestJoinDocMessage){

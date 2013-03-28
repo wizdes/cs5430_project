@@ -5,7 +5,6 @@
 package transport_layer.network;
 
 import java.io.Serializable;
-import security_layer.EncryptedMessage;
 
 /**
  *

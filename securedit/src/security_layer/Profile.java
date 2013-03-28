@@ -6,11 +6,13 @@
 package security_layer;
 
 import application.encryption_demo.Messages.Message;
-import java.beans.Transient;
+import configuration.Constants;
 import java.io.File;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -21,7 +23,12 @@ public class Profile implements Message {
     public int port;
     KeysObject keys;
     public long keyVersion;
-    public transient ArrayList<String> documents = new ArrayList<>();
+    
+    //These documents will be returned when a discovery broadcast is received.
+    public transient ArrayList<String> documentsOpenForDiscovery = new ArrayList<>();
+    
+    //These documents are only available by being manually entered.
+    public transient ArrayList<String> documentsHiddenFromDiscovery = new ArrayList<>();
     
     public void save(String pw) {
         SecureTransport transport = new SecureTransport(pw);
@@ -41,13 +48,17 @@ public class Profile implements Message {
     }
     
     public static Profile readProfile(String username, String pw) {
-        System.out.println("reading profile for " + username + ", " + pw);
+        if(Constants.DEBUG_ON){
+            Logger.getLogger(Profile.class.getName()).log(Level.INFO, "Reading profile for " + username + ", " + pw);
+        }
         SecureTransport transport = new SecureTransport(pw);
         return (Profile)transport.readEncryptedFile(username + ".profile");
     }
 
     public static Profile writeProfile(String username, String pw, int port, String host) {
-        System.out.println("creating new profile for " + username + ", " + pw);
+        if(Constants.DEBUG_ON){
+            Logger.getLogger(Profile.class.getName()).log(Level.INFO, "Creating new profile for " + username + ", " + pw);
+        }
         Profile profile = new Profile();
         profile.host = host;
         profile.port = port;

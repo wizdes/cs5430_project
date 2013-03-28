@@ -5,6 +5,7 @@
 package security_layer;
 
 import application.encryption_demo.Messages.Message;
+import configuration.Constants;
 import java.security.PublicKey;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -68,7 +69,9 @@ class Authentications {
             auth.cond.await();
         }
         catch (InterruptedException ex) {
-            Logger.getLogger(Authentications.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, "[User: " + keys.ident + "]", ex);
+            }
         }finally {
             auth.lock.unlock();
         }
@@ -98,7 +101,10 @@ class Authentications {
     void processHumanAuthenticationRequest(String sourceOfMsg, HumanAuthenticationMessage message, SecureTransportInterface sti) {
         String idOfNodeAuthenticationWith = sourceOfMsg;
         if (message instanceof HA_Msg1) {
-            System.out.println("MESSAGE ONE RECEIVED");
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(Authentications.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Processing Human Authentication Message: " + HA_Msg1.class.getName());
+            }
+            
             //generate a PIN
             String PIN = pf.getPIN().substring(0, 3);
             String PINHMAC = PIN + "HMAC";
@@ -117,20 +123,21 @@ class Authentications {
             addAuthentication(sourceOfMsg, msg, null, null);
             int nonceResponse1 = msg.nonce + 1;
             Message m = new HA_Msg2(publicKey, verifyingKey, nonceResponse1, keys.ident);
-            boolean result = sti.sendAESEncryptedMessage(idOfNodeAuthenticationWith, m, pinKey, HMACKey);
-            System.out.println("result: " + result);
+            sti.sendAESEncryptedMessage(idOfNodeAuthenticationWith, m, pinKey, HMACKey);
         } else if (message instanceof HA_Msg2) {
-            System.out.println("MESSAGE TWO RECEIVED");
+            if(Constants.DEBUG_ON){    
+                Logger.getLogger(Authentications.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Processing Human Authentication Message: " + HA_Msg2.class.getName());
+            }
             HA_Msg2 msg = (HA_Msg2)message;
             Authentication auth = authentications.get(idOfNodeAuthenticationWith);
             if (msg.nonce - 1 != ((HA_Msg1)auth.message).nonce) {
-                System.out.println("[DEBUG] Bad Nonce msg02! Expecting: " + (((MA_Msg1)auth.message).nonce + 1) + ", found: " + msg.nonce);
+                if(Constants.DEBUG_ON){
+                    Logger.getLogger(Authentications.class.getName()).log(Level.SEVERE, "[User: " + keys.ident + "] MA_Msg2 processing: Bad Nonce msg02! Expecting: " + (((MA_Msg1)auth.message).nonce + 1) + ", found: " + msg.nonce);
+                }
                 authentications.remove(idOfNodeAuthenticationWith);
                 return;
             }
             PublicKey otherPublicKey = msg.publicKey;
-            System.out.println("idofNode = " + idOfNodeAuthenticationWith);
-            System.out.println("otherPublicKey = " + otherPublicKey);
             keys.addPublicKey(idOfNodeAuthenticationWith, otherPublicKey);
             keys.addVerifyingKey(idOfNodeAuthenticationWith, msg.verifyingKey);
             
@@ -144,11 +151,15 @@ class Authentications {
             keys.HMACKeys.remove(sourceOfMsg);
         }
         else {
-            System.out.println("MESSAGE THREE RECEIVED");
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(Authentications.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Processing Human Authentication Message: " + HA_Msg3.class.getName());
+            }
             HA_Msg3 msg = (HA_Msg3)message;
             Authentication auth = authentications.get(idOfNodeAuthenticationWith);
             if (msg.nonce - 2 != ((HA_Msg1)auth.message).nonce) {
-                System.out.println("[DEBUG] Bad Nonce msg02! Expecting: " + (((MA_Msg1)auth.message).nonce + 1) + ", found: " + msg.nonce);
+                if(Constants.DEBUG_ON){
+                    Logger.getLogger(Authentications.class.getName()).log(Level.SEVERE, "[User: " + keys.ident + "] MA_Msg2 processing: Bad Nonce msg02! Expecting: " + (((MA_Msg1)auth.message).nonce + 1) + ", found: " + msg.nonce);
+                }
                 authentications.remove(idOfNodeAuthenticationWith);
                 return;
             }
@@ -174,7 +185,9 @@ class Authentications {
     void processMachineAuthenticationRequest(String sourceOfMsg, MachineAuthenticationMessage message, SecureTransportInterface sti) {
         String idOfNodeAuthenticationWith = sourceOfMsg;
         if (message instanceof MA_Msg1) {
-            System.out.println("[DEBUG] processing Msg01_AuthenticationRequest");
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(Authentications.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Processing Machine Authentication Message: " + MA_Msg1.class.getName());
+            }
             
             MA_Msg1 msg = (MA_Msg1)message;
             
@@ -193,13 +206,17 @@ class Authentications {
             sti.sendRSAEncryptedMessage(sourceOfMsg, m3);
             keys.addHMACKey(idOfNodeAuthenticationWith, HMACKey);            
         } else if (message instanceof MA_Msg2) {
-            System.out.println("[DEBUG] processing Msg02_KeyResponse");
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(Authentications.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Processing Machine Authentication Message: " + MA_Msg2.class.getName());
+            }
             
             MA_Msg2 msg = (MA_Msg2)message;
             Authentication auth = authentications.get(idOfNodeAuthenticationWith);
             
             if (msg.r - 1 != ((MA_Msg1)auth.message).nonce) {
-                System.out.println("[DEBUG] Bad Nonce msg02! Expecting: " + (((MA_Msg1)auth.message).nonce + 1) + ", found: " + msg.r);
+                if(Constants.DEBUG_ON){
+                    Logger.getLogger(Authentications.class.getName()).log(Level.SEVERE, "[User: " + keys.ident + "] MA_Msg2 processing: Bad Nonce msg02! Expecting: " + (((MA_Msg1)auth.message).nonce + 1) + ", found: " + msg.r);
+                }
                 authentications.remove(idOfNodeAuthenticationWith);
                 return;
             }
@@ -207,13 +224,17 @@ class Authentications {
             keys.addSymmetricKey(idOfNodeAuthenticationWith, msg.SK);
             
         } else if (message instanceof MA_Msg3) {
-            System.out.println("[DEBUG] processing Msg03_AuthenticationAgreement");
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(Authentications.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Processing Machine Authentication Message: " + MA_Msg3.class.getName());
+            }
             
             MA_Msg3 msg = (MA_Msg3)message;
             Authentication auth = authentications.get(idOfNodeAuthenticationWith);
             
             if (msg.r - 2 != ((MA_Msg1)auth.message).nonce) {
-                System.out.println("[DEBUG] Bad Nonce msg02! Expecting: " + (((MA_Msg1)auth.message).nonce + 1) + ", found: " + msg.r);
+                if(Constants.DEBUG_ON){
+                    Logger.getLogger(Authentications.class.getName()).log(Level.SEVERE, "[User: " + keys.ident + "] MA_Msg3 processing: Bad Nonce msg02! Expecting: " + (((MA_Msg1)auth.message).nonce + 1) + ", found: " + msg.r);
+                }
                 authentications.remove(idOfNodeAuthenticationWith);
                 return;
             }
@@ -221,7 +242,9 @@ class Authentications {
             keys.addHMACKey(idOfNodeAuthenticationWith, msg.SK);
             
             if (!keys.hasSymmetricKey(idOfNodeAuthenticationWith)) {
-                System.out.println("no symmetric key found for "+ idOfNodeAuthenticationWith);
+                if(Constants.DEBUG_ON){
+                    Logger.getLogger(Authentications.class.getName()).log(Level.SEVERE, "[User: " + keys.ident + "] MA_Msg3 processing: No symmetric key found for " + idOfNodeAuthenticationWith);
+                }
                 return;
             }
             

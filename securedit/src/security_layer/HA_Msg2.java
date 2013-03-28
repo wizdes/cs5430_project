@@ -11,7 +11,7 @@ import javax.crypto.SecretKey;
  *
  * @author Yi
  */
-public class HA_Msg2 implements HumanAuthenticationMessage{
+class HA_Msg2 implements HumanAuthenticationMessage{
     PublicKey publicKey;
     PublicKey verifyingKey;
     int nonce;

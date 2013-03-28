@@ -5,10 +5,13 @@
 
 package transport_layer.network;
 
+import configuration.Constants;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 class ClientListenerThread extends Thread {
         
@@ -30,7 +33,9 @@ class ClientListenerThread extends Thread {
                 this.serverSocket.close();
             }
         } catch (IOException ex) {
-
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(ClientListenerThread.class.getName()).log(Level.SEVERE, "Failed to close server socket at port: " + port, ex);
+            }
         }
     } 
 
@@ -39,8 +44,10 @@ class ClientListenerThread extends Thread {
 
         try {
             this.serverSocket = new ServerSocket(port);
-        } catch (IOException e) {
-            System.err.println("Could not listen on port: " + port + ".");
+        } catch (IOException ex) {
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(ClientListenerThread.class.getName()).log(Level.SEVERE, "Could not listen on port: " + port + ".", ex);
+            }
             System.exit(-1);
         }
 
@@ -52,11 +59,13 @@ class ClientListenerThread extends Thread {
             }
             serverSocket.close();
         } catch (SocketException ex) {
-            System.out.println("socket closed from socket exception");
-            //ex.printStackTrace();
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(ClientListenerThread.class.getName()).log(Level.SEVERE, "ServerSocket closed, port: " + port, ex);
+            }
         } catch (IOException ex) {
-            System.out.println("IOException in client listener socket closed");
-           // ex.printStackTrace();
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(ClientListenerThread.class.getName()).log(Level.SEVERE, "ServerSocket closed, port: " + port, ex);
+            }
         } 
     }
 }

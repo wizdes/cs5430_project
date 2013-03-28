@@ -3,10 +3,7 @@ package security_layer;
 
 import application.encryption_demo.CommunicationInterface;
 import application.encryption_demo.Messages.Message;
-import application.encryption_demo.DiscoveredPeers;
-import application.encryption_demo.DiscoveredPeers.Peer;
-import java.awt.EventQueue;
-import java.awt.GridLayout;
+import configuration.Constants;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -33,7 +30,6 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SealedObject;
 import javax.crypto.SecretKey;
-import javax.swing.*;
 import transport_layer.discovery.DiscoveryResponseMessage;
 import transport_layer.discovery.DiscoveryTransport;
 import transport_layer.files.FileHandler;
@@ -93,13 +89,11 @@ public class SecureTransport implements SecureTransportInterface{
     
     @Override
     public void addPeer(String peerIdent, String host, int port){
-        System.out.println("adding " + peerIdent);
         networkTransport.addPeer(peerIdent, host, port);
     }
     
     @Override
     public boolean authenticate(String machineIdent) {
-        System.out.println("Starting authentication...");
         //If machine has been authenticated or trying to authenticate with itself, return
         if (authInstance.hasAuthenticated(machineIdent) || machineIdent.equals(keys.ident)) {
             return true;
@@ -116,19 +110,15 @@ public class SecureTransport implements SecureTransportInterface{
             authenticationComplete.await();
             authInstance.removeAuthentication(machineIdent);
         } catch (InterruptedException ex) {
-            Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + keys.ident + "]", ex);
+            }
             return false;
         }
         finally{
             authenticateLock.unlock();
             return true;
         }
-    }
-
-    public boolean sendClearMessage(String destination, Message m){
-        SecretKey commonKey = (SecretKey) KeyFactory.generateSymmetricKey("CommonKey");
-        SecretKey HMACKey = (SecretKey) KeyFactory.generateSymmetricKey("CommonKeyHMAC");
-        return sendAESEncryptedMessage(destination, m, commonKey, HMACKey);
     }
         
     @Override
@@ -138,11 +128,15 @@ public class SecureTransport implements SecureTransportInterface{
     
     @Override
     public boolean sendAESEncryptedMessage(String destination, Message m, SecretKey secretKey, SecretKey HMACKey) {
-        System.out.println("Sending AES Message to " + destination);
+        if(Constants.DEBUG_ON){
+            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Sending " + EncryptedAESMessage.class.getName() + " to " + destination + ".");
+        }
         if (secretKey == null) secretKey = keys.getSymmetricKey(destination);
         
         if (secretKey == null) {
-            System.out.println("No symemetric key found for " + destination);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + keys.ident + "] No symemetric key found for " + destination + ".");
+            }
             return false;
         }
         byte[] iv = CipherFactory.generateRandomIV();
@@ -161,18 +155,24 @@ public class SecureTransport implements SecureTransportInterface{
             EncryptedAESMessage encryptedMessage = new EncryptedAESMessage(encryptedObject, iv, hmac);
             return networkTransport.send(destination, encryptedMessage);
         } catch (IOException | IllegalBlockSizeException ex) {
-            Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + keys.ident + "]", ex);
+            }
             return false;
         }
     }
 
     @Override
     public boolean sendRSAEncryptedMessage(String destination, Message m) {
-        System.out.println("Sending RSA Message to " + destination);
+        if(Constants.DEBUG_ON){
+            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Sending " + EncryptedRSAMessage.class.getName() + " to " + destination + ".");
+        }
         byte[] iv = new byte[16];
         PublicKey publicKey = keys.getPublicKey(destination);
         if (publicKey == null) {
-            System.out.println("No public key found for " + destination);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + keys.ident + "] No public key found for " + destination + ".");
+            }
             return false;
         }
         Cipher cipher = CipherFactory.constructRSAEncryptionCipher(publicKey);
@@ -186,7 +186,9 @@ public class SecureTransport implements SecureTransportInterface{
             boolean wasSuccessful = networkTransport.send(destination, encryptedMessage);
             return wasSuccessful;
         } catch (IOException | IllegalBlockSizeException | NoSuchAlgorithmException | InvalidKeyException | SignatureException ex) {
-            Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + keys.ident + "]", ex);
+            }
             return false;
         }
     }
@@ -197,7 +199,9 @@ public class SecureTransport implements SecureTransportInterface{
         Message decryptedMsg = null;
         SecretKey secretKey = null;
         SecretKey HMACKey = null;
-        System.out.println("processing message" + sourceOfMessage);
+        if(Constants.DEBUG_ON){
+            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Processing " + EncryptedMessage.class.getName() + " from " + sourceOfMessage + ".");
+        }
         SealedObject encryptedObject;
         try {
             Cipher cipher = null;
@@ -207,7 +211,6 @@ public class SecureTransport implements SecureTransportInterface{
 //                    if (encryptedMessage instanceof EncryptedAESHumanAuthMessage) {
 //                        EncryptedAESMessage m = ((EncryptedAESHumanAuthMessage)encryptedMessage).aesMessage;
 //                        this.pendingHumanAuth.put(sourceOfMessage, m);
-//                        System.out.println("saving hman auth message");
 //                        return true;
 //                    }
                     
@@ -216,22 +219,22 @@ public class SecureTransport implements SecureTransportInterface{
 
                     HMACKey = keys.getHMACKey(sourceOfMessage);
                     secretKey = keys.getSymmetricKey(sourceOfMessage);
-                    System.out.println("I have " + keys.secretKeys.size() + " secret keys");
                     
                     if (HMACKey == null || secretKey == null) {
                         this.pendingHumanAuth.put(sourceOfMessage, aesMessage);
-                        System.out.println("saving hman auth message");
                         return true;
                     }                    
                     
                     byte[] hmac = CipherFactory.HMAC(HMACKey, encryptedObject);
                     
                     if (!Arrays.equals(hmac, aesMessage.HMAC)) {
-                        throw new SignatureException("Invalid HMAC");
+                        throw new SignatureException("[User: " + keys.ident + "] Invalid HMAC from " + sourceOfMessage + ".");
                     }                           
                     
-                    if (secretKey == null) {
-                        System.out.println("No symmetric key for " + sourceOfMessage);
+                    if (secretKey == null) {    //Never enters because of null check above, but leave since might remove that
+                        if(Constants.DEBUG_ON){
+                            Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + keys.ident + "] No symemetric key found for " + sourceOfMessage + ".");
+                        }
                     }
                     cipher = CipherFactory.constructAESDecryptionCipher(secretKey, aesMessage.iv);
                     break;
@@ -243,7 +246,7 @@ public class SecureTransport implements SecureTransportInterface{
                     Signature sig = Signature.getInstance(CipherFactory.SIGNING_ALGORITHM);
                     boolean verified = signedObject.verify(verifyingKey, sig);
                     if (!verified) {
-                        throw new SignatureException("Unverified message from " + sourceOfMessage);
+                        throw new SignatureException("[User: " + keys.ident + "] Unverified message from " + sourceOfMessage);
                     } else {
                         encryptedObject = (SealedObject)signedObject.getObject();
                         cipher = CipherFactory.constructRSADecryptionCipher(keys.privateKey);
@@ -251,23 +254,30 @@ public class SecureTransport implements SecureTransportInterface{
                     break;
                    
                 default:
-                    throw new NoSuchAlgorithmException("Attempted to process a message encrypted with an unsupported algorithm.");
+                    throw new NoSuchAlgorithmException("[User: " + keys.ident + "] Attempted to process a message encrypted with an unsupported algorithm.");
             }
             
             Object decryptedObj = encryptedObject.getObject(cipher);
             if (decryptedObj instanceof HumanAuthenticationMessage) {
-                System.out.println("[DEBUG] processing HumanAuthenticationMessage");
+                if(Constants.DEBUG_ON){
+                    Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Processing decrypted " + HumanAuthenticationMessage.class.getName() + " from " + sourceOfMessage + ".");
+                }
                 authInstance.processHumanAuthenticationRequest(sourceOfMessage, 
                                                           (HumanAuthenticationMessage)decryptedObj,
                                                           this);
                 success = true;
             } else if (decryptedObj instanceof MachineAuthenticationMessage) {
-                System.out.println("[DEBUG] processing MachineAuthenticationMessage");
+                if(Constants.DEBUG_ON){
+                    Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Processing decrypted " + MachineAuthenticationMessage.class.getName() + " from " + sourceOfMessage + ".");
+                }
                 authInstance.processMachineAuthenticationRequest(sourceOfMessage, 
                                                           (MachineAuthenticationMessage)decryptedObj,
                                                           this);
                 success = true;
             } else if (decryptedObj instanceof ApplicationMessage) {
+                if(Constants.DEBUG_ON){
+                    Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Processing decrypted " + ApplicationMessage.class.getName() + " from " + sourceOfMessage + ".");
+                }
                 ApplicationMessage appMessage = (ApplicationMessage)decryptedObj;
                 Integer currentCounter = lastReceived.get(sourceOfMessage);
                 if (currentCounter == null || appMessage.counter > currentCounter) {
@@ -275,11 +285,15 @@ public class SecureTransport implements SecureTransportInterface{
                     success = true;
                     lastReceived.put(sourceOfMessage, appMessage.counter);
                 } else {
-                    System.out.println("Invalid counter on AES message");
+                    if(Constants.DEBUG_ON){
+                        Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + keys.ident + "] Invalid counter on " + ApplicationMessage.class.getName() + " from " + sourceOfMessage + ".");
+                    }
                 }
             }
         } catch (IOException | ClassNotFoundException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | SignatureException ex) {
-            Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + keys.ident + "]", ex);
+            }
         }
         
         return success;
@@ -287,14 +301,26 @@ public class SecureTransport implements SecureTransportInterface{
     
     @Override
     public void processDiscoveryResponse(DiscoveryResponseMessage msg){
-        System.out.println(keys.ident + ": Process discovery response");
-        PublicKey pk = keys.getPublicKey(msg.ident);
+        if(Constants.DEBUG_ON){
+            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Processing " + DiscoveryResponseMessage.class.getName() + " from " + msg.owner + ".");
+        }
+        PublicKey pk = keys.getPublicKey(msg.owner);
         if(pk != null && pk.serialVersionUID == msg.keyVersion){
-            communication.updatePeers(msg.ident, msg.ip, msg.port, msg.documents, false);
+            communication.updatePeers(msg.owner, msg.ip, msg.port, msg.documents, false);
         } else{
-            communication.updatePeers(msg.ident, msg.ip, msg.port, msg.documents, true);
+            communication.updatePeers(msg.owner, msg.ip, msg.port, msg.documents, true);
         }
     }
+    
+    @Override
+    public boolean processPlaintextMessage(String sourceOfMessage, PlaintextMessage msg) {
+        if(Constants.DEBUG_ON){
+            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Processing " + PlaintextMessage.class.getName() + " from " + sourceOfMessage + ".");
+        }
+        authInstance.processHumanAuthenticationRequest(sourceOfMessage, (HumanAuthenticationMessage)msg.m, this);
+        return true;
+    }
+    
     @Override
     public boolean writeEncryptedFile(String filename, Message contents) {
         try {
@@ -311,7 +337,9 @@ public class SecureTransport implements SecureTransportInterface{
             return fileTransport.writeFile(filename, file);
             
         } catch (IOException | IllegalBlockSizeException ex) {
-            Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + keys.ident + "]", ex);
+            }
             return false;
         }   
     }
@@ -328,16 +356,20 @@ public class SecureTransport implements SecureTransportInterface{
             Key hmacKey = KeyFactory.generateSymmetricKey(keys.password, file.hmacSalt);
             byte[] hmac = CipherFactory.HMAC(hmacKey, file.encryptedObject);        
             if (!Arrays.equals(hmac, file.HMAC)) {
-                throw new SignatureException("Invalid HMAC");
+                throw new SignatureException("[User: " + keys.ident + "] Invalid HMAC");
             }
             
             Cipher cipher = CipherFactory.constructAESDecryptionCipher(keys.personalKey, file.iv);
             return (Message)file.encryptedObject.getObject(cipher);
         } catch (SignatureException ex) {
-            System.out.println("Bad signature reading " + filename);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + keys.ident + "] Bad signature reading " + filename + ".");
+            }
             return null;
         } catch (IOException | ClassNotFoundException | IllegalBlockSizeException | BadPaddingException ex) {
-            Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + keys.ident + "]", ex);
+            }
             return null;
         }
     }
@@ -363,22 +395,21 @@ public class SecureTransport implements SecureTransportInterface{
     }
 
     @Override
-    public boolean initializeHumanAuthenticate(String ID) {
-        //authInstance
-        System.out.println("Starting authentication...");
+    public boolean initializeHumanAuthenticate(String destination) {
+        if(Constants.DEBUG_ON){
+            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Starting initial human authentication with " + destination + ".");
+        }
 
         final Lock authenticateLock = new ReentrantLock(true);
         
-        System.out.println("send initial hauth message");
         HumanAuthenticationMessage msg = authInstance.constructInitialHAuthMessage();
         Condition authenticationComplete = authenticateLock.newCondition();
-        System.out.println("recd initial hauth message");
         
         try {
             authenticateLock.lock();
             // send the message and wait
-            authInstance.addAuthentication(ID, msg, authenticationComplete, authenticateLock);
-            sendPlainTextMessage(ID, msg);
+            authInstance.addAuthentication(destination, msg, authenticationComplete, authenticateLock);
+            sendPlainTextMessage(destination, msg);
         }
         finally{
             authenticateLock.unlock();
@@ -392,43 +423,37 @@ public class SecureTransport implements SecureTransportInterface{
     }
 
     @Override
-    public boolean addPIN(String ID, String PIN) {
-        if (!this.pendingHumanAuth.containsKey(ID)) {
-            System.out.println("haven't received message from server");
+    public boolean addPIN(String ownerID, String PIN) {
+        if (!this.pendingHumanAuth.containsKey(ownerID)) {
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Haven't yet received PIN message from owner: " + ownerID + ".");
+            }
             return false;
         }
         
         SecretKey pinKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN);
         SecretKey HMACKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN + "HMAC");
-        keys.addSymmetricKey(ID, pinKey);
-        keys.addHMACKey(ID, HMACKey);
+        keys.addSymmetricKey(ownerID, pinKey);
+        keys.addHMACKey(ownerID, HMACKey);
         
-        EncryptedAESMessage m = this.pendingHumanAuth.get(ID);
+        EncryptedAESMessage m = this.pendingHumanAuth.get(ownerID);
         try {
-            boolean r = processEncryptedMessage(ID, m);
-            System.out.println("decrypted : " +r);
-            return r;
+            return processEncryptedMessage(ownerID, m);
         } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println("failed to decrpy with error");
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + keys.ident + "] Failed to decrypt PIN message from owner: " + ownerID + ".", ex);
+            }
             return false;
         }
     }
 
     @Override
     public boolean sendPlainTextMessage(String destination, Message m) {
-        System.out.println("Sending plainText Message to " + destination);
-        PlainTextMessage sendMsg = new PlainTextMessage();
+        if(Constants.DEBUG_ON){
+            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Sending " + PlaintextMessage.class.getName() + " to " + destination + ".");
+        }
+        PlaintextMessage sendMsg = new PlaintextMessage();
         sendMsg.m = m;
         return networkTransport.send(destination, sendMsg);
-    }
-
-    @Override
-    public boolean processPlainTextMessage(String sourceOfMessage, PlainTextMessage msg) {
-        System.out.println("[DEBUG] processing AuthenticationMessage");
-        authInstance.processHumanAuthenticationRequest(sourceOfMessage, 
-                                                  (HumanAuthenticationMessage)msg.m,
-                                                  this);
-        return true;
     }
 }

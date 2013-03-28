@@ -4,6 +4,9 @@
  */
 package transport_layer.discovery;
 
+import configuration.Constants;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import security_layer.Profile;
 import transport_layer.network.NetworkTransportInterface;
 
@@ -21,7 +24,9 @@ public class DiscoveryTransport {
     }
 
     public void broadcastDiscovery(){
-        System.out.println("Broadcast discovery");
+        if(Constants.DEBUG_ON){
+            Logger.getLogger(DiscoveryTransport.class.getName()).log(Level.INFO, "[User: " + profile.ident + "] Broadcasting Discovery Message");
+        }
         new MulticastServer().broadcast(profile.ident, profile.host, profile.port);
     }
     

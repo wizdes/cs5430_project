@@ -4,6 +4,7 @@
  */
 package security_layer;
 
+import configuration.Constants;
 import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.security.KeyPair;
@@ -35,7 +36,9 @@ class KeyFactory {
             keyGen.initialize(2048);            
             return keyGen.generateKeyPair();
         } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(KeyFactory.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(KeyFactory.class.getName()).log(Level.SEVERE, null, ex);
+            }
             return null;
         }
     }
@@ -45,7 +48,9 @@ class KeyFactory {
             byte[] passBytes = password.getBytes("UTF-8");
             return new SecretKeySpec(fix_bad_length_key(passBytes), "AES");
         } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(KeyFactory.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(KeyFactory.class.getName()).log(Level.SEVERE, null, ex);
+            }
             return null;
         }
     }
@@ -59,7 +64,9 @@ class KeyFactory {
             sr.nextBytes(passBytes);
             return new SecretKeySpec(passBytes, "AES");
         } catch (NoSuchAlgorithmException | NoSuchProviderException ex) {
-            Logger.getLogger(KeyFactory.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(KeyFactory.class.getName()).log(Level.SEVERE, null, ex);
+            }
             return null;
         }
     }
@@ -70,7 +77,9 @@ class KeyFactory {
             rand = SecureRandom.getInstance("SHA1PRNG", "SUN");
             return rand.nextInt();
         } catch (NoSuchAlgorithmException | NoSuchProviderException ex) {
-            Logger.getLogger(KeyFactory.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(KeyFactory.class.getName()).log(Level.SEVERE, null, ex);
+            }
             return -1;
         }
     }
@@ -82,7 +91,9 @@ class KeyFactory {
             rand.nextBytes(salt);
             return new String(salt, "UTF-8");
         } catch (UnsupportedEncodingException | NoSuchAlgorithmException | NoSuchProviderException ex) {
-            Logger.getLogger(KeyFactory.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(KeyFactory.class.getName()).log(Level.SEVERE, null, ex);
+            }
             return null;
         }
     }
@@ -93,7 +104,9 @@ class KeyFactory {
             byte[] key = sha.digest(passBytes);
             return Arrays.copyOf(key, 16); // use only first 128 bit
         } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(KeyFactory.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(KeyFactory.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         return null;        
     }

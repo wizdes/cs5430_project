@@ -4,6 +4,7 @@
  */
 package security_layer;
 
+import configuration.Constants;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutput;
@@ -36,7 +37,9 @@ class CipherFactory {
             cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
             return cipher;
         } catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchPaddingException ex) {
-            Logger.getLogger(CipherFactory.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(CipherFactory.class.getName()).log(Level.SEVERE, null, ex);
+            }
             return null;
         }
     }
@@ -47,7 +50,9 @@ class CipherFactory {
             cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
             return cipher;
         } catch (InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException | NoSuchPaddingException ex) {
-            Logger.getLogger(CipherFactory.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(CipherFactory.class.getName()).log(Level.SEVERE, null, ex);
+            }
             return null;
         }
     }
@@ -57,7 +62,9 @@ class CipherFactory {
             cipher.init(Cipher.ENCRYPT_MODE, key);
             return cipher;
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException ex) {
-            Logger.getLogger(CipherFactory.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(CipherFactory.class.getName()).log(Level.SEVERE, null, ex);
+            }
             return null;
         }
     }
@@ -67,7 +74,9 @@ class CipherFactory {
             cipher.init(Cipher.DECRYPT_MODE, key);
             return cipher;
         } catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException ex) {
-            Logger.getLogger(CipherFactory.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(CipherFactory.class.getName()).log(Level.SEVERE, null, ex);
+            }
             return null;
         }
         
@@ -75,13 +84,14 @@ class CipherFactory {
     
     static byte[] generateRandomIV(){
         try {
-            //SecureRandom random = new SecureRandom();
            SecureRandom sr = SecureRandom.getInstance("SHA1PRNG", "SUN");
             byte[] iv = new byte[16];
             sr.nextBytes(iv);
             return iv;
         } catch (NoSuchAlgorithmException | NoSuchProviderException ex) {
-            Logger.getLogger(CipherFactory.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(CipherFactory.class.getName()).log(Level.SEVERE, null, ex);
+            }
             return null;
         }
     }
@@ -94,7 +104,9 @@ class CipherFactory {
             return HMAC(sk, bos.toByteArray());
         }
         catch (IOException ex) {
-            Logger.getLogger(CipherFactory.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(CipherFactory.class.getName()).log(Level.SEVERE, null, ex);
+            }
             return null;
         }
     }
@@ -105,7 +117,9 @@ class CipherFactory {
             mac.init(sk);
             return mac.doFinal(DataToHash);
         } catch (InvalidKeyException | NoSuchAlgorithmException ex) {
-            Logger.getLogger(CipherFactory.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(CipherFactory.class.getName()).log(Level.SEVERE, null, ex);
+            }
             return null;
         }
     }

@@ -4,6 +4,7 @@
  */
 package transport_layer.files;
 
+import configuration.Constants;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -33,17 +34,23 @@ public class FileHandler implements FileTransportInterface{
             ois = new ObjectInputStream(fis);
             objectFile = (Serializable)ois.readObject();
         } catch (ClassNotFoundException | IOException ex) {
-            Logger.getLogger(FileHandler.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(FileHandler.class.getName()).log(Level.SEVERE, "Reading file with filename: " + filename + ".", ex);
+            }
         } finally {
             try {
                 fis.close();
             } catch (IOException ex) {
-                Logger.getLogger(FileHandler.class.getName()).log(Level.SEVERE, null, ex);
+                if(Constants.DEBUG_ON){
+                    Logger.getLogger(FileHandler.class.getName()).log(Level.SEVERE, "Reading file with filename: " + filename + ".", ex);
+                }
             }
             try {
                 ois.close();
             } catch (IOException ex) {
-                Logger.getLogger(FileHandler.class.getName()).log(Level.SEVERE, null, ex);
+                if(Constants.DEBUG_ON){
+                    Logger.getLogger(FileHandler.class.getName()).log(Level.SEVERE, "Reading file with filename: " + filename + ".", ex);
+                }
             }
         }
         return objectFile;
@@ -58,18 +65,24 @@ public class FileHandler implements FileTransportInterface{
             oos = new ObjectOutputStream(fos);
             oos.writeObject(content);
         } catch (IOException ex) {
-            Logger.getLogger(FileHandler.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(FileHandler.class.getName()).log(Level.SEVERE, "Writing file with filename: " + filename + ".", ex);
+            }
         } finally {
             try {
                 fos.close();
             } catch (IOException ex) {
-                Logger.getLogger(FileHandler.class.getName()).log(Level.SEVERE, null, ex);
+                if(Constants.DEBUG_ON){
+                    Logger.getLogger(FileHandler.class.getName()).log(Level.SEVERE, "Writing file with filename: " + filename + ".", ex);
+                }
             }
             try {
                 oos.close();
                 return true;
             } catch (IOException ex) {
-                Logger.getLogger(FileHandler.class.getName()).log(Level.SEVERE, null, ex);
+                if(Constants.DEBUG_ON){
+                    Logger.getLogger(FileHandler.class.getName()).log(Level.SEVERE, "Writing file with filename: " + filename + ".", ex);
+                }
             }
         }
         return false;
@@ -82,7 +95,9 @@ public class FileHandler implements FileTransportInterface{
             byte[] fileArray = Files.readAllBytes(path);
             return new String(fileArray);
         } catch (IOException ex) {
-            Logger.getLogger(FileHandler.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(FileHandler.class.getName()).log(Level.SEVERE, "Opening unserialized file with filename: " + filename + ".", ex);
+            }
             return null;
         }
         

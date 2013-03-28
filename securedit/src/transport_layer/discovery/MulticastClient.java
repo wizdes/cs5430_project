@@ -4,6 +4,7 @@
  */
 package transport_layer.discovery;
 
+import configuration.Constants;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -44,7 +45,10 @@ class MulticastClient extends Thread {
             address = InetAddress.getByName(groupAddress);
             socket.joinGroup(address);
             
-            System.out.println("Document Owner(MulticastClient) is waiting for discovery packets...");
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(MulticastClient.class.getName()).log(Level.INFO, "[User: " + profile.ident + "] Owner waiting for discovery packets.");
+            }
+         
             do{
                 /* Receive discovery packet */
                 DatagramPacket packet;
@@ -59,12 +63,7 @@ class MulticastClient extends Thread {
                     //Process packet.
                     if(!discoveryPacket.myID.equals(profile.ident)){
                         
-                        List<String> documentNames = new ArrayList<>(this.profile.documents);
-                        System.out.print("Documents : ");
-                        for(String doc: documentNames){
-                            System.out.print(doc + ", ");
-                        }
-                        System.out.println();
+                        List<String> documentNames = new ArrayList<>(this.profile.documentsOpenForDiscovery);   //must copy here, possibly due to transient flag
                         DiscoveryResponseMessage responseMessage = new DiscoveryResponseMessage(profile.ident, profile.host, profile.port, documentNames, profile.keyVersion);
                         networkTransport.addPeer(discoveryPacket.myID, discoveryPacket.myIP, discoveryPacket.myPort);
                         networkTransport.send(discoveryPacket.myID, responseMessage);
@@ -72,7 +71,9 @@ class MulticastClient extends Thread {
                 }
             } while (true);
         } catch (IOException ex) {
-            Logger.getLogger(MulticastClient.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(MulticastClient.class.getName()).log(Level.SEVERE, "[User: " + profile.ident + "]", ex);
+            }
         }
         
         /* Leave group and close socket */
@@ -82,7 +83,9 @@ class MulticastClient extends Thread {
                 socket.close();
             }
         } catch (IOException ex) {
-            Logger.getLogger(MulticastClient.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(MulticastClient.class.getName()).log(Level.SEVERE, "[User: " + profile.ident + "]", ex);
+            }
         }
     } 
 }

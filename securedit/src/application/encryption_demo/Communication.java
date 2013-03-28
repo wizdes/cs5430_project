@@ -8,7 +8,7 @@ package application.encryption_demo;
 import application.encryption_demo.Messages.Message;
 import application.encryption_demo.Messages.StringMessage;
 import application.encryption_demo.DiscoveredPeers.Peer;
-import transport_layer.discovery.DiscoveryTransport;
+import configuration.Constants;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -18,6 +18,8 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import security_layer.Profile;
 import security_layer.SecureTransport;
 import security_layer.SecureTransportInterface;
@@ -32,12 +34,14 @@ public class Communication implements CommunicationInterface {
     private SecureTransportInterface secureTransport;
     private DiscoveredPeers discoveredPeers = new DiscoveredPeers();
     private EncryptionDemoFunctionality guiFunctionality;
-    
+    private Profile profile;
     public Communication(Profile profile, String password) {
         //Only used for test packages
+        this.profile = profile;
         this.secureTransport = new SecureTransport(profile, password, this);
     }
     public Communication(Profile profile, String password, EncryptionDemoFunctionality guiFunctionality) {
+        this.profile = profile;
         this.secureTransport = new SecureTransport(profile, password, this);
         this.guiFunctionality = guiFunctionality;
     }
@@ -52,7 +56,9 @@ public class Communication implements CommunicationInterface {
           try {
             this.newMessageArrived.await();
           } catch (InterruptedException ex) {
-            System.out.println("queueItemAdded.await() interrupted");
+              if(Constants.DEBUG_ON){
+                  Logger.getLogger(Communication.class.getName()).log(Level.SEVERE, "[User: " + profile.ident + "] Messages Queue interrupted exception.", ex);
+              }
           }
         }
         this.messageQueue.drainTo(messages);
@@ -82,7 +88,6 @@ public class Communication implements CommunicationInterface {
     @Override
     public boolean broadcastMessage(Message msg){
         boolean failure = false;
-        System.out.println("Num peers:" + discoveredPeers.getPeers().values().size());
         for(Peer peer: discoveredPeers.getPeers().values()){
             authenticateMachine(peer.id);
             failure = !sendMessage(peer.id, msg) ? true : failure;
@@ -144,7 +149,7 @@ public class Communication implements CommunicationInterface {
     }
 
     @Override
-    public boolean updatePin(String ID, String PIN) {
-        return secureTransport.addPIN(ID, PIN);
+    public boolean updatePin(String ownerID, String PIN) {
+        return secureTransport.addPIN(ownerID, PIN);
     }
 }

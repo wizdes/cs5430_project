@@ -1,5 +1,6 @@
 package transport_layer.discovery;
 
+import configuration.Constants;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -33,7 +34,9 @@ class MulticastServer extends Thread{
 
             /* Try to send packet a few times in case dropped */
             for (int i = 0; i < numTimesBroadcast; i++) {
-                System.out.println("User(MulticastServer): Sending discovery packet.");
+                if(Constants.DEBUG_ON){
+                    Logger.getLogger(MulticastServer.class.getName()).log(Level.INFO, "[User: " + discoveryPacket.myID + "] Broadcasting " + DiscoveryPacket.class.getName() + ": " + discoveryPacket);
+                }
                 /* Send data to anyone listening to group 230.0.0.1 and sleep for 5 secs*/
                 InetAddress group = InetAddress.getByName(groupAddress);
                 DatagramPacket packet = new DatagramPacket(buf, buf.length, group, discoveryPort);
@@ -43,19 +46,23 @@ class MulticastServer extends Thread{
                 }
             }
         } catch (InterruptedException | IOException ex) {
-            Logger.getLogger(MulticastServer.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(MulticastServer.class.getName()).log(Level.SEVERE, "[User: " + discoveryPacket.myID + "] Failed when broadcasting " + DiscoveryPacket.class.getName() + ": " + discoveryPacket, ex);
+            }
         }
         socket.close();
     }
     
     void broadcast(String ident, String host, int port){
+        int id = Integer.parseInt(ident);
         try {
-            int id = Integer.parseInt(ident);
             socket = new DatagramSocket(6000 + id + 666);  //Must not be used by anyone else on server. So maybe port + offset(so for id=0, tcp=4000, udp=4000+500)
             discoveryPacket = new DiscoveryPacket(ident, host, port);
             start();
         } catch (SocketException ex) {
-            Logger.getLogger(MulticastServer.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(MulticastServer.class.getName()).log(Level.SEVERE, "[User: " + ident + "] Failed when intializing DatagramSocket @port: " + (6000 + id + 666) + " for broadcast to (" + ident + ", " + host + ", " + port + ")", ex);
+            }
         }
     }   
 }

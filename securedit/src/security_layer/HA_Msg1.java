@@ -8,7 +8,7 @@ package security_layer;
  *
  * @author Yi
  */
-public class HA_Msg1 implements HumanAuthenticationMessage{
+class HA_Msg1 implements HumanAuthenticationMessage{
     String msg;
     int nonce;             //r1
     HA_Msg1(String ID, int nonce){

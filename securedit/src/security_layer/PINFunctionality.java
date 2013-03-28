@@ -4,12 +4,16 @@
  */
 package security_layer;
 
+import configuration.Constants;
 import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import javax.crypto.SecretKey;
-import security_layer.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -17,17 +21,20 @@ import security_layer.*;
  */
 public class PINFunctionality {
     
-    private List<String> validPins = new ArrayList<String>();
+    private final List<String> validPins = Collections.synchronizedList(new ArrayList<String>());
     
     int numBytesPIN = 20 * 8;
     
-    public String getPIN(String seed){
-        SecureRandom random = new SecureRandom(seed.getBytes());
-        return new BigInteger(numBytesPIN, random).toString(32);
-    }
-    
     public String getPIN(){
-        return getPIN("");
+        try {
+            SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
+            return new BigInteger(numBytesPIN, random).toString(32);
+        } catch (NoSuchAlgorithmException | NoSuchProviderException ex) {
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(PINFunctionality.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            return null;
+        }
     }
     
     public void storePIN(String PIN){
@@ -35,13 +42,14 @@ public class PINFunctionality {
     }
     
     public boolean checkPIN(String PIN){
-        if(validPins.contains(PIN)) return true;
-        return false;
+        return validPins.contains(PIN);
     }
     
     public void safeRemove(String PIN){
-        if(validPins.contains(PIN)){
-            validPins.remove(PIN);
+        synchronized(validPins){
+            if(validPins.contains(PIN)){
+                validPins.remove(PIN);
+            }
         }
     }
 }

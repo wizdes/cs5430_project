@@ -5,9 +5,9 @@
 
 package transport_layer.network;
 
+import configuration.Constants;
 import java.io.*;
 import java.net.*;
-import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,23 +33,22 @@ public class ServerThread extends Thread {
             NetworkMessage m = (NetworkMessage)in.readObject();
             out.println(NetworkTransport.MESSAGE_RECIEVED_ACK);
             while (! (m instanceof CloseConnection)) {
-                
-                try {
-                    this.server.processNetworkMessage(m);
-                } catch (NoSuchAlgorithmException ex) {
-                    Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
-                }
-                
+                this.server.processNetworkMessage(m);
+            
                 m = (NetworkMessage)in.readObject();
                 out.println(NetworkTransport.MESSAGE_RECIEVED_ACK);
             }
             
         } catch (ClassNotFoundException ex) {
-            Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
+            }
         } catch (java.io.EOFException ex) {
             // this is expected when server closes socket
-        } catch (IOException e) {
-            System.out.println("server thread IOException");
+        } catch (IOException ex) {
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
+            }
         } finally {
             close();
         }
@@ -67,7 +66,9 @@ public class ServerThread extends Thread {
                 socket.close();
             }
         } catch (IOException ex) {
-            Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 }

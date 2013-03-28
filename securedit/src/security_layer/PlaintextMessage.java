@@ -10,6 +10,6 @@ import application.encryption_demo.Messages.Message;
  *
  * @author yjli
  */
-public class PlainTextMessage implements java.io.Serializable {
+public class PlaintextMessage implements java.io.Serializable {
     Message m;
 }
