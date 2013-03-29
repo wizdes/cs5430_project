@@ -85,19 +85,21 @@ public class Communication implements CommunicationInterface {
         return secureTransport.sendAESEncryptedMessage(destination, msg);
     }
     
-    @Override
-    public boolean broadcastMessage(Message msg){
-        boolean failure = false;
-        for(Peer peer: discoveredPeers.getPeers().values()){
-            authenticateMachine(peer.id);
-            failure = !sendMessage(peer.id, msg) ? true : failure;
-        }
-        if(failure){
-            return false;
-        } else{
-            return true;
-        }
-    }
+//    @Override
+//    public boolean broadcastMessage(Message msg){
+//        //Might need to protect this when iterating..but probably not
+//        boolean failure = false;
+//        
+//        for(String peerID: discoveredPeers.peers.keySet()){
+//            authenticateMachine(peerID);
+//            failure = !sendMessage(peerID, msg) ? true : failure;
+//        }
+//        if(failure){
+//            return false;
+//        } else{
+//            return true;
+//        }
+//    }
 
     @Override
     public boolean authenticateMachine(String machineIdent) {
@@ -106,7 +108,7 @@ public class Communication implements CommunicationInterface {
     
     @Override
     public boolean authenticateHuman(String machineIdent) {
-        if (discoveredPeers.getPeer(machineIdent).needsHumanAuth) {
+        if (!discoveredPeers.getPeer(machineIdent).hasHumanAuthenticated) {
             return secureTransport.initializeHumanAuthenticate(machineIdent);
         } else {
             return true;
@@ -139,13 +141,18 @@ public class Communication implements CommunicationInterface {
     }
 
     @Override
-    public void updatePeers(String ident, String ip, int port, List<String> docs, boolean needsHumanAuth) {
-        discoveredPeers.addPeer(ident, ip, port, docs, needsHumanAuth);
+    public void updatePeers(String ident, String ip, int port, List<String> docs, boolean hasHumanAuthenticated) {
+        discoveredPeers.addPeer(ident, ip, port, docs, hasHumanAuthenticated);
         secureTransport.addPeer(ident, ip, port);
         
         if(guiFunctionality != null){
             guiFunctionality.updatePeersInGUI(discoveredPeers);
         }
+    }
+    @Override
+    public void updateHumanAuthStatus(String ident, boolean hasHumanAuthenticated){
+        discoveredPeers.updateHumanAuthStatus(ident, hasHumanAuthenticated);
+        guiFunctionality.updatePeersInGUI(discoveredPeers);
     }
 
     @Override

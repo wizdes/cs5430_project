@@ -35,7 +35,7 @@ class MulticastServer extends Thread{
             /* Try to send packet a few times in case dropped */
             for (int i = 0; i < numTimesBroadcast; i++) {
                 if(Constants.DEBUG_ON){
-                    Logger.getLogger(MulticastServer.class.getName()).log(Level.INFO, "[User: " + discoveryPacket.myID + "] Broadcasting " + DiscoveryPacket.class.getName() + ": " + discoveryPacket);
+                    Logger.getLogger(MulticastServer.class.getName()).log(Level.INFO, "[User: " + discoveryPacket.sourceID + "] Broadcasting " + DiscoveryPacket.class.getName() + ": " + discoveryPacket);
                 }
                 /* Send data to anyone listening to group 230.0.0.1 and sleep for 5 secs*/
                 InetAddress group = InetAddress.getByName(groupAddress);
@@ -47,7 +47,7 @@ class MulticastServer extends Thread{
             }
         } catch (InterruptedException | IOException ex) {
             if(Constants.DEBUG_ON){
-                Logger.getLogger(MulticastServer.class.getName()).log(Level.SEVERE, "[User: " + discoveryPacket.myID + "] Failed when broadcasting " + DiscoveryPacket.class.getName() + ": " + discoveryPacket, ex);
+                Logger.getLogger(MulticastServer.class.getName()).log(Level.SEVERE, "[User: " + discoveryPacket.sourceID + "] Failed when broadcasting " + DiscoveryPacket.class.getName() + ": " + discoveryPacket, ex);
             }
         }
         socket.close();

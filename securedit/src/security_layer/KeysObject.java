@@ -18,6 +18,7 @@ import javax.crypto.SecretKey;
 class KeysObject implements Message {
     ConcurrentMap<String, PublicKey> publicKeys = new ConcurrentHashMap<>();  //<Ident, publicKey>
     ConcurrentMap<String, PublicKey> verifiyngKeys = new ConcurrentHashMap<>();  //<Ident, publicKey>
+    ConcurrentHashMap<String, Long> asymmetricKeyVersions = new ConcurrentHashMap<>();
     PrivateKey privateKey;
     String ident;
     PrivateKey signingKey;

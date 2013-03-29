@@ -10,6 +10,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import security_layer.EncryptedMessage;
+import security_layer.InvalidHMACException;
 import security_layer.PlaintextMessage;
 import security_layer.SecureTransportInterface;
 import transport_layer.discovery.DiscoveryResponseMessage;
@@ -70,9 +71,9 @@ public class NetworkTransport implements NetworkTransportInterface{
     void depositEncryptedMessage(NetworkMessage msg) {
         try {
             secureTransport.processEncryptedMessage(msg.source.id, (EncryptedMessage)msg.content);
-        } catch (NoSuchAlgorithmException ex) {
+        } catch (InvalidHMACException ex) {
             if(Constants.DEBUG_ON){
-                Logger.getLogger(NetworkTransport.class.getName()).log(Level.SEVERE, "[User: " + topology.getMyId() + "] Couldn't find encryption algorithm when processing " + EncryptedMessage.class.getName() + ".", ex);
+                Logger.getLogger(NetworkTransport.class.getName()).log(Level.SEVERE, "[User: " + topology.getMyId() + "] Couldn't verify message integrity with HMAC when processing " + EncryptedMessage.class.getName() + ".", ex);
             }
         }
     }

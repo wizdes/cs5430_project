@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.ReentrantLock;
 import security_layer.PINFunctionality;
 import security_layer.Profile;
 
@@ -44,7 +45,7 @@ public class EncryptionDemoFunctionality {
     }
     
     public void manuallyAddPeer(String id, String host, int port, ArrayList<String> docs) {
-        communication.updatePeers(id, host, port, docs, true);
+        communication.updatePeers(id, host, port, docs, false);
     }
     
     /**
@@ -88,9 +89,14 @@ public class EncryptionDemoFunctionality {
 //        return communication.sendMessage(ident, new StringMessage(plaintextMsg));
 //    }
     
-    public String createDocumentInstance(String ownerID, String docName){
-        DocumentInstance instance = new DocumentInstance(ownerID, docName);
-        instance.addCollaborators(profile.ident);
+    public String createDocumentInstance(String ownerID, String newDocName){
+        for(DocumentInstance docInstance: docInstances.values()){
+            if(newDocName.equals(docInstance.docName)){
+                return null;
+            }
+        }
+        DocumentInstance instance = new DocumentInstance(ownerID, newDocName);
+        instance.addCollaborator(profile.ident);
         docInstances.put(instance.getDocumentIdentifer(), instance);
         return instance.getDocumentIdentifer();
     }
@@ -119,6 +125,9 @@ public class EncryptionDemoFunctionality {
     public boolean addPIN(String ident, String pin) {
         return this.communication.updatePin(ident, pin);
     }
+    public void updateHumanAuthStatus(String id, boolean hasHumanAuthenticated){
+        this.communication.updateHumanAuthStatus(id, hasHumanAuthenticated);
+    }
     
 //    public void addPeerToGUI(Peer peer){
 //        gui.addDiscoveredPeer(peer);
@@ -140,6 +149,7 @@ public class EncryptionDemoFunctionality {
         //This should be called by thread that handles reading the message queue.
         gui.displayMessages(docID, plaintext);
     }
+    private final ReentrantLock atomicBroadcastLock = new ReentrantLock();
     
     private class GUIListenerThread extends Thread {
         
@@ -163,7 +173,7 @@ public class EncryptionDemoFunctionality {
                         String docID = DocumentInstance.toDocumentIdentifier(profile.ident, joinMsg.docName);
                         
                         DocumentInstance instance = docInstances.get(docID);
-                        instance.addCollaborators(joinMsg.sourceID);
+                        instance.addCollaborator(joinMsg.sourceID);
                     }
                     else if(m instanceof RequestDocUpdateMessage){
                         //Owner: Broadcast doc update to everyone(including self)
@@ -172,11 +182,15 @@ public class EncryptionDemoFunctionality {
                         
                         //Broadcast all atomically
                         DocumentInstance instance = docInstances.get(docID);
-                        synchronized(instance.collaborators){
+                        atomicBroadcastLock.lock();
+                        try{
                             for(String collaborator: instance.collaborators.keySet()){
                                 communication.sendMessage(collaborator, new UpdateDocumentMessage(instance.ownerID, instance.docName, docUpdate.text));
                             }
+                        } finally{
+                            atomicBroadcastLock.unlock();
                         }
+                        
                     }
                     else if(m instanceof UpdateDocumentMessage){
                         //Collaborator: Add text to GUI

@@ -15,13 +15,18 @@ public class DiscoveryResponseMessage implements java.io.Serializable{
     public String ip;
     public int port;
     public List<String> documents;
-    public long keyVersion;
-
-    public DiscoveryResponseMessage(String owner, String ip, int port, List<String> docs, long keyVersion) {
+    public long ownerAsymmetricKeyVersion;
+    public long clientsKeyVersionNumberHeldByOwner;
+    public DiscoveryResponseMessage(String owner, String ip, int port, List<String> docs, long ownerAsymmetricKeyVersion, long clientsKeyVersionNumberHeldByOwner) {
         this.owner = owner;
         this.ip = ip;
         this.port = port;
         this.documents = docs;
-        this.keyVersion = keyVersion;
+        this.ownerAsymmetricKeyVersion = ownerAsymmetricKeyVersion;
+        this.clientsKeyVersionNumberHeldByOwner = clientsKeyVersionNumberHeldByOwner;
+    }
+    @Override
+    public String toString(){
+        return "owner: " + owner + ", ip: " + ip + ", port: " + port + "docs size: " + documents.size();
     }
 }

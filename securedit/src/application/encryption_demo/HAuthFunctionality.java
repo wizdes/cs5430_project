@@ -34,8 +34,8 @@ public class HAuthFunctionality {
         myCommunicator = new Communication(p1, password_0);
         theirCommunicator = new Communication(p2, password_1);
         
-        myCommunicator.updatePeers(theirIdent, "localhost", 4001, new ArrayList<String>(), true);
-        theirCommunicator.updatePeers(myIdent, "localhost", 4000, new ArrayList<String>(), true);
+        myCommunicator.updatePeers(theirIdent, "localhost", 4001, new ArrayList<String>(), false);
+        theirCommunicator.updatePeers(myIdent, "localhost", 4000, new ArrayList<String>(), false);
     }
         
     public void testHumanAuthentication() {

@@ -20,7 +20,7 @@ public interface SecureTransportInterface {
     public boolean sendRSAEncryptedMessage(String destination, Message m);
     public boolean sendPlainTextMessage(String destination, Message m);
     public boolean processPlaintextMessage(String sourceOfMessage, PlaintextMessage msg);
-    public boolean processEncryptedMessage(String sourceOfMessage, EncryptedMessage encryptedMsg) throws NoSuchAlgorithmException;
+    public boolean processEncryptedMessage(String sourceOfMessage, EncryptedMessage encryptedMsg) throws InvalidHMACException;
     public boolean writeEncryptedFile(String filename, Message contents);
     public Message readEncryptedFile(String filename);
     public String readUnencryptedFile(String filename);

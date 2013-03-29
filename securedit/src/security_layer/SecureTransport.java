@@ -67,7 +67,8 @@ public class SecureTransport implements SecureTransportInterface{
         keys.signingKey = profile.keys.signingKey;
         keys.publicKeys = profile.keys.publicKeys;
         keys.verifyingKeys = profile.keys.verifiyngKeys;
-
+        keys.asymmetricKeyVersions = profile.keys.asymmetricKeyVersions;
+        
         //Add a symmetricKey for self so can send messages to self
         keys.addSymmetricKey(profile.ident, (SecretKey)KeyFactory.generateSymmetricKey());
         keys.addHMACKey(profile.ident, (SecretKey)KeyFactory.generateSymmetricKey());
@@ -194,9 +195,8 @@ public class SecureTransport implements SecureTransportInterface{
     }
 
     @Override
-    public boolean processEncryptedMessage(String sourceOfMessage, EncryptedMessage encryptedMessage) throws NoSuchAlgorithmException {
+    public boolean processEncryptedMessage(String sourceOfMessage, EncryptedMessage encryptedMessage) throws InvalidHMACException {
         boolean success = false;
-        Message decryptedMsg = null;
         SecretKey secretKey = null;
         SecretKey HMACKey = null;
         if(Constants.DEBUG_ON){
@@ -228,10 +228,10 @@ public class SecureTransport implements SecureTransportInterface{
                     byte[] hmac = CipherFactory.HMAC(HMACKey, encryptedObject);
                     
                     if (!Arrays.equals(hmac, aesMessage.HMAC)) {
-                        throw new SignatureException("[User: " + keys.ident + "] Invalid HMAC from " + sourceOfMessage + ".");
-                    }                           
+                        throw new InvalidHMACException("[User: " + keys.ident + "] Invalid HMAC from " + sourceOfMessage + ".");
+                    }
                     
-                    if (secretKey == null) {    //Never enters because of null check above, but leave since might remove that
+                    if (secretKey == null) {    //Never enters because of null check above, but leave since someone might remove that
                         if(Constants.DEBUG_ON){
                             Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + keys.ident + "] No symemetric key found for " + sourceOfMessage + ".");
                         }
@@ -262,9 +262,7 @@ public class SecureTransport implements SecureTransportInterface{
                 if(Constants.DEBUG_ON){
                     Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Processing decrypted " + HumanAuthenticationMessage.class.getName() + " from " + sourceOfMessage + ".");
                 }
-                authInstance.processHumanAuthenticationRequest(sourceOfMessage, 
-                                                          (HumanAuthenticationMessage)decryptedObj,
-                                                          this);
+                authInstance.processHumanAuthenticationRequest(sourceOfMessage, (HumanAuthenticationMessage)decryptedObj, this);
                 success = true;
             } else if (decryptedObj instanceof MachineAuthenticationMessage) {
                 if(Constants.DEBUG_ON){
@@ -290,7 +288,7 @@ public class SecureTransport implements SecureTransportInterface{
                     }
                 }
             }
-        } catch (IOException | ClassNotFoundException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | SignatureException ex) {
+        } catch (IOException | ClassNotFoundException | NoSuchAlgorithmException | IllegalBlockSizeException | BadPaddingException | InvalidKeyException | SignatureException ex) {
             if(Constants.DEBUG_ON){
                 Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + keys.ident + "]", ex);
             }
@@ -305,10 +303,13 @@ public class SecureTransport implements SecureTransportInterface{
             Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Processing " + DiscoveryResponseMessage.class.getName() + " from " + msg.owner + ".");
         }
         PublicKey pk = keys.getPublicKey(msg.owner);
-        if(pk != null && pk.serialVersionUID == msg.keyVersion){
-            communication.updatePeers(msg.owner, msg.ip, msg.port, msg.documents, false);
-        } else{
+        long myKeyVersion = keys.getAsymmetricKeyVersion(keys.ident);
+        long myOwnersKeyVersion = keys.getAsymmetricKeyVersion(msg.owner);
+        
+        if(pk != null && myOwnersKeyVersion == msg.ownerAsymmetricKeyVersion && myKeyVersion == msg.clientsKeyVersionNumberHeldByOwner){
             communication.updatePeers(msg.owner, msg.ip, msg.port, msg.documents, true);
+        } else{
+            communication.updatePeers(msg.owner, msg.ip, msg.port, msg.documents, false);
         }
     }
     
@@ -438,8 +439,16 @@ public class SecureTransport implements SecureTransportInterface{
         
         EncryptedAESMessage m = this.pendingHumanAuth.get(ownerID);
         try {
-            return processEncryptedMessage(ownerID, m);
-        } catch (NoSuchAlgorithmException ex) {
+            boolean success = processEncryptedMessage(ownerID, m);
+            if(success){
+                keys.removeSymmetricKey(ownerID);
+                keys.removeHMACKey(ownerID);
+                pendingHumanAuth.remove(ownerID);
+            }
+            return success;
+        } catch (InvalidHMACException ex) {
+            keys.removeSymmetricKey(ownerID);
+            keys.removeHMACKey(ownerID);
             if(Constants.DEBUG_ON){
                 Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + keys.ident + "] Failed to decrypt PIN message from owner: " + ownerID + ".", ex);
             }

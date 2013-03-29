@@ -43,9 +43,9 @@ public class MultiGUIDemoDriver {
         ChatWindow form2 = new ChatWindow(p2, "pass1111pass1111");
         form2.setVisible(true); 
       
-        Profile.deleteProfile("2");
-        Profile p3 = Profile.writeProfile("2", "pass2222pass2222", 4002, "localhost");
-        ChatWindow form3 = new ChatWindow(p3, "pass2222pass2222");
-        form3.setVisible(true); 
+//        Profile.deleteProfile("2");
+//        Profile p3 = Profile.writeProfile("2", "pass2222pass2222", 4002, "localhost");
+//        ChatWindow form3 = new ChatWindow(p3, "pass2222pass2222");
+//        form3.setVisible(true); 
     }
 }

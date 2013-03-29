@@ -22,7 +22,6 @@ public class Profile implements Message {
     public String host;
     public int port;
     KeysObject keys;
-    public long keyVersion;
     
     //These documents will be returned when a discovery broadcast is received.
     public transient ArrayList<String> documentsOpenForDiscovery = new ArrayList<>();
@@ -38,8 +37,17 @@ public class Profile implements Message {
     public void addPublicKeysFrom(Profile other) {
         this.keys.publicKeys.put(other.ident, other.keys.publicKeys.get(other.ident));
         this.keys.verifiyngKeys.put(other.ident, other.keys.verifiyngKeys.get(other.ident));
+        this.keys.asymmetricKeyVersions.put(other.ident, keys.asymmetricKeyVersions.get(other.ident));
     }
-    
+    /**
+     * Exposes this part of keys to world. Only passes out copy.
+     * @param ident
+     * @return 
+     */
+    public long getAsymmetricKeyVersionNumber(String ident){
+        Long keyVersion = this.keys.asymmetricKeyVersions.get(ident);
+        return (keyVersion == null) ? new Long(-1) : keyVersion;
+    }
     public static void deleteProfile(String username) {
         File f = new File(username + ".profile");
         if (f.exists()) {
@@ -64,17 +72,40 @@ public class Profile implements Message {
         profile.port = port;
         profile.ident = username;
         profile.keys = new KeysObject();
-        KeyPair keys = KeyFactory.generateAsymmetricKeys();
+        KeyPair asymmetricKeys = KeyFactory.generateAsymmetricKeys();
         profile.keys.publicKeys = new ConcurrentHashMap<>();
-        profile.keys.publicKeys.put(username, keys.getPublic());
-        profile.keys.privateKey = keys.getPrivate();
+        profile.keys.publicKeys.put(username, asymmetricKeys.getPublic());
+        profile.keys.privateKey = asymmetricKeys.getPrivate();
         KeyPair signingKeyPair = KeyFactory.generateAsymmetricKeys();
         profile.keys.verifiyngKeys = new ConcurrentHashMap<>();
         profile.keys.verifiyngKeys.put(username, signingKeyPair.getPublic());
         profile.keys.signingKey = signingKeyPair.getPrivate();
+        profile.keys.asymmetricKeyVersions.put(username, (long)0);
         profile.save(pw);
         
-        profile.keyVersion = profile.keys.publicKeys.get(profile.ident).serialVersionUID;
         return profile;
-    }    
+    }
+    
+    public void updateProfilePassword(String newPassword){
+        if(Constants.DEBUG_ON){
+            Logger.getLogger(Profile.class.getName()).log(Level.INFO, "Updating profile for: " + ident + " with new password: " + newPassword);
+        }
+        
+        //Update asymmetric keys
+        KeyPair asymmetricKeys = KeyFactory.generateAsymmetricKeys();
+        keys.publicKeys.put(ident, asymmetricKeys.getPublic());
+        keys.privateKey = asymmetricKeys.getPrivate();
+        
+        //Update signing keys
+        KeyPair signingKeyPair = KeyFactory.generateAsymmetricKeys();
+        keys.verifiyngKeys.put(ident, signingKeyPair.getPublic());
+        keys.signingKey = signingKeyPair.getPrivate();
+        
+        Long versionNum = keys.asymmetricKeyVersions.get(ident);
+        keys.asymmetricKeyVersions.put(ident, versionNum+1);
+        
+        //Update profile with new keys and encrypted with new password
+        save(newPassword);
+        
+    }
 }

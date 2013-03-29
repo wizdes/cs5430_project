@@ -1,6 +1,9 @@
 package application.encryption_demo.forms;
 
 import application.encryption_demo.EncryptionDemoFunctionality;
+import configuration.Constants;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import javax.swing.JOptionPane;
 import security_layer.Profile;
 
@@ -21,6 +24,34 @@ public class LoginForm extends javax.swing.JFrame {
      */
     public LoginForm() {
         initComponents();
+        loginPasswordTextField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                int key = e.getKeyCode();
+                if (key == KeyEvent.VK_ENTER) {
+                    loginButton.doClick();
+                }
+            }
+        });
+        changePasswordRetypeField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                int key = e.getKeyCode();
+                if (key == KeyEvent.VK_ENTER) {
+                    changePasswordButton.doClick();
+                }
+            }
+        });
+        
+        hostTextField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                int key = e.getKeyCode();
+                if (key == KeyEvent.VK_ENTER) {
+                    createAccountButton.doClick();
+                }
+            }
+        });
     }
 
     /**
@@ -48,6 +79,16 @@ public class LoginForm extends javax.swing.JFrame {
         hostTextField = new javax.swing.JTextField();
         createAccountButton = new javax.swing.JButton();
         passwordTextField = new javax.swing.JPasswordField();
+        ChangePasswordPanel = new javax.swing.JPanel();
+        UsernameLabel = new javax.swing.JLabel();
+        changePasswordUsernameField = new javax.swing.JTextField();
+        OldPasswordLabel = new javax.swing.JLabel();
+        changePasswordOldField = new javax.swing.JPasswordField();
+        NewPasswordLabel = new javax.swing.JLabel();
+        changePasswordNewField = new javax.swing.JPasswordField();
+        RetypePasswordLabel = new javax.swing.JLabel();
+        changePasswordRetypeField = new javax.swing.JPasswordField();
+        changePasswordButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -70,8 +111,6 @@ public class LoginForm extends javax.swing.JFrame {
                 loginButtonActionPerformed(evt);
             }
         });
-
-        loginPasswordTextField.setText("jPasswordField1");
 
         org.jdesktop.layout.GroupLayout jPanel1Layout = new org.jdesktop.layout.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -103,7 +142,7 @@ public class LoginForm extends javax.swing.JFrame {
                     .add(loginPasswordTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
                 .add(loginButton)
-                .addContainerGap(87, Short.MAX_VALUE))
+                .addContainerGap(128, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Login", jPanel1);
@@ -182,10 +221,74 @@ public class LoginForm extends javax.swing.JFrame {
                     .add(hostTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(createAccountButton)
-                .addContainerGap(25, Short.MAX_VALUE))
+                .addContainerGap(81, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("New Account", jPanel2);
+
+        UsernameLabel.setText("Username:");
+
+        changePasswordUsernameField.setName("usernameInput"); // NOI18N
+
+        OldPasswordLabel.setText("Old Password:");
+
+        NewPasswordLabel.setText("New Password:");
+
+        RetypePasswordLabel.setText("Retype Password:");
+
+        changePasswordButton.setText("Change Password");
+        changePasswordButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                changePasswordButtonActionPerformed(evt);
+            }
+        });
+
+        org.jdesktop.layout.GroupLayout ChangePasswordPanelLayout = new org.jdesktop.layout.GroupLayout(ChangePasswordPanel);
+        ChangePasswordPanel.setLayout(ChangePasswordPanelLayout);
+        ChangePasswordPanelLayout.setHorizontalGroup(
+            ChangePasswordPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(ChangePasswordPanelLayout.createSequentialGroup()
+                .add(1, 1, 1)
+                .add(ChangePasswordPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                    .add(NewPasswordLabel)
+                    .add(RetypePasswordLabel)
+                    .add(OldPasswordLabel)
+                    .add(UsernameLabel))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                .add(ChangePasswordPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(changePasswordButton)
+                    .add(ChangePasswordPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
+                        .add(org.jdesktop.layout.GroupLayout.LEADING, changePasswordNewField)
+                        .add(org.jdesktop.layout.GroupLayout.LEADING, changePasswordOldField)
+                        .add(org.jdesktop.layout.GroupLayout.LEADING, changePasswordUsernameField)
+                        .add(changePasswordRetypeField, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 197, Short.MAX_VALUE)))
+                .add(0, 57, Short.MAX_VALUE))
+        );
+        ChangePasswordPanelLayout.setVerticalGroup(
+            ChangePasswordPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+            .add(ChangePasswordPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .add(ChangePasswordPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(UsernameLabel)
+                    .add(changePasswordUsernameField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                .add(ChangePasswordPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(OldPasswordLabel)
+                    .add(changePasswordOldField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .add(18, 18, 18)
+                .add(ChangePasswordPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(NewPasswordLabel)
+                    .add(changePasswordNewField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
+                .add(ChangePasswordPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(RetypePasswordLabel)
+                    .add(changePasswordRetypeField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
+                .add(18, 18, 18)
+                .add(changePasswordButton)
+                .addContainerGap(54, Short.MAX_VALUE))
+        );
+
+        jTabbedPane1.addTab("Change Password", ChangePasswordPanel);
 
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -212,9 +315,9 @@ public class LoginForm extends javax.swing.JFrame {
     }//GEN-LAST:event_loginUsernameTextFieldActionPerformed
 
     private void createAccountButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createAccountButtonActionPerformed
-        String password = new String(passwordTextField.getPassword());
+        String password = new String(passwordTextField.getPassword()).trim();
         if (!isValidPassword(password)) {
-            String message = "Passwords must be of length 16 and contain >= 1 non alphanumeric character";
+            String message = "Passwords must contain >= 1 non alphanumeric character, be 12 or more characters in length, and contain no spaces.";
             JOptionPane.showMessageDialog(this, message);
             return;
         }   
@@ -235,7 +338,7 @@ public class LoginForm extends javax.swing.JFrame {
         
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginButtonActionPerformed
         String username = loginUsernameTextField.getText().trim();
-        String password = new String(loginPasswordTextField.getPassword());
+        String password = new String(loginPasswordTextField.getPassword()).trim();
         Profile profile = Profile.readProfile(username, password);
         if (profile != null) {
             transitionToChatWindow(profile, password);           
@@ -243,6 +346,34 @@ public class LoginForm extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Invalid credentials");
         }
     }//GEN-LAST:event_loginButtonActionPerformed
+
+    private void changePasswordButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changePasswordButtonActionPerformed
+        String username = changePasswordUsernameField.getText().trim();
+        String oldPassword = new String(changePasswordOldField.getPassword()).trim();
+        String newPassword = new String(changePasswordNewField.getPassword()).trim();
+        String retypedPassword = new String(changePasswordRetypeField.getPassword()).trim();
+        
+        //Read profile, check that username/password are correct and new ones are valid.
+        Profile profile = Profile.readProfile(username, oldPassword);
+        if(profile == null) {
+            JOptionPane.showMessageDialog(this, "Invalid credentials: Your old password or username weren't valid.");
+            return;
+        }
+        if(!newPassword.equals(retypedPassword)) {
+            JOptionPane.showMessageDialog(this, "The two passwords you entered do not match.");
+            return;
+        }
+        if (!isValidPassword(newPassword)) {
+            String message = "Passwords must contain >= 1 non alphanumeric character, be 12 or more characters in length, and contain no spaces.";
+            JOptionPane.showMessageDialog(this, message);
+            return;
+        }
+        
+        //Update profile asymmetric keys and encrypt with the new password
+        profile.updateProfilePassword(newPassword);
+        
+        transitionToChatWindow(profile, newPassword);
+    }//GEN-LAST:event_changePasswordButtonActionPerformed
     
     private void transitionToChatWindow(Profile profile, String password) {
         this.dispose();
@@ -251,8 +382,7 @@ public class LoginForm extends javax.swing.JFrame {
     }
     
     private boolean isValidPassword(String pass) {
-        return pass.length() == 16
-               && pass.matches(".*[^a-zA-Z\\s0-9].*");
+        return pass.length() >= 12 && pass.matches(Constants.passwordCharacterRegex) && !pass.contains(" ");
     }
     
     private void handleException(Exception ex) {
@@ -295,6 +425,16 @@ public class LoginForm extends javax.swing.JFrame {
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel ChangePasswordPanel;
+    private javax.swing.JLabel NewPasswordLabel;
+    private javax.swing.JLabel OldPasswordLabel;
+    private javax.swing.JLabel RetypePasswordLabel;
+    private javax.swing.JLabel UsernameLabel;
+    private javax.swing.JButton changePasswordButton;
+    private javax.swing.JPasswordField changePasswordNewField;
+    private javax.swing.JPasswordField changePasswordOldField;
+    private javax.swing.JPasswordField changePasswordRetypeField;
+    private javax.swing.JTextField changePasswordUsernameField;
     private javax.swing.JButton createAccountButton;
     private javax.swing.JTextField hostTextField;
     private javax.swing.JLabel jLabel1;

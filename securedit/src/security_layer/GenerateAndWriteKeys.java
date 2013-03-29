@@ -30,6 +30,7 @@ class GenerateAndWriteKeys {
         PrivateKey signingKeys[] = new PrivateKey[3];
         ConcurrentMap<String, PublicKey> publicKeys = new ConcurrentHashMap<>();
         ConcurrentMap<String, PublicKey> verifyingKeys = new ConcurrentHashMap<>();
+        ConcurrentHashMap<String, Long> asymmetricKeyVersions = new ConcurrentHashMap<>();
         
         for(int i = 0; i < 3; i++){
             String pw = "pass" + i + i + i + i + "pass" + i + i + i + i;
@@ -42,7 +43,9 @@ class GenerateAndWriteKeys {
             KeyPair signingKeyPair = KeyFactory.generateAsymmetricKeys();
             verifyingKeys.put(i + "", signingKeyPair.getPublic());
             signingKeys[i] = signingKeyPair.getPrivate();
-            System.out.println("Generated verifying/signing key: " + i);            
+            System.out.println("Generated verifying/signing key: " + i);
+            
+            asymmetricKeyVersions.put(i + "", (long)0);    //Initialize key version to 0
         }
         
         //Write keys files

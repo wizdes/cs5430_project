@@ -22,7 +22,7 @@ public class DocumentInstance {
         this.docName = docName;
         collaborators.put(ownerID, true);
     }
-    public void addCollaborators(String collaboratorID){
+    public void addCollaborator(String collaboratorID){
         collaborators.put(collaboratorID, true);
     }
     public String getDocumentIdentifer(){
