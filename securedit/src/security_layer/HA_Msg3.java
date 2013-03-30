@@ -5,7 +5,6 @@
 package security_layer;
 
 import java.security.PublicKey;
-import javax.crypto.SecretKey;
 
 /**
  *
@@ -14,10 +13,12 @@ import javax.crypto.SecretKey;
 class HA_Msg3 implements HumanAuthenticationMessage{
     PublicKey publicKey;
     PublicKey verifyingKey;
+    long asymmetricKeyVersion;
     int nonce;
-    HA_Msg3(PublicKey publicKey, PublicKey verifyingKey, int nonceResponse1) {
+    HA_Msg3(PublicKey publicKey, PublicKey verifyingKey, long asymmetricKeyVersion, int nonceResponse1) {
         this.publicKey = publicKey;
         this.verifyingKey = verifyingKey;
+        this.asymmetricKeyVersion = asymmetricKeyVersion;
         this.nonce = nonceResponse1;
     }
     

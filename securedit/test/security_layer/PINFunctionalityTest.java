@@ -32,15 +32,15 @@ public class PINFunctionalityTest {
         
         PINFunctionality pinFunctionality = new PINFunctionality();
         String pinWithLowercase = pinFunctionality.getPIN(seedToGenLowercase);
-        assertTrue(pinWithLowercase.contains("[a-z]"));
+        assertTrue(pinWithLowercase.matches(".*[a-z].*"));
         
         String pinWithUppercase = pinFunctionality.getPIN(seedToGenUppercase);
-        assertTrue(pinWithUppercase.contains("[A-Z]"));
+        assertTrue(pinWithUppercase.matches(".*[A-Z].*"));
         
         String pinWithDigit = pinFunctionality.getPIN(seedToGenDigit);
-        assertTrue(pinWithDigit.contains("[0-9]"));
+        assertTrue(pinWithDigit.matches(".*[0-9].*"));
         
         String pinWithSymbol = pinFunctionality.getPIN(seedToGenSymbol);
-        assertTrue(pinWithSymbol.contains(Constants.PIN_SYMBOLS_REGEX));
+        assertTrue(pinWithSymbol.matches(Constants.PIN_SYMBOLS_REGEX));
     }
 }

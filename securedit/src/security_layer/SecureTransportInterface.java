@@ -20,7 +20,7 @@ public interface SecureTransportInterface {
     public boolean sendRSAEncryptedMessage(String destination, Message m);
     public boolean sendPlainTextMessage(String destination, Message m);
     public boolean processPlaintextMessage(String sourceOfMessage, PlaintextMessage msg);
-    public boolean processEncryptedMessage(String sourceOfMessage, EncryptedMessage encryptedMsg) throws NoSuchAlgorithmException;
+    public boolean processEncryptedMessage(String sourceOfMessage, EncryptedMessage encryptedMsg) throws InvalidHMACException;
     public boolean writeEncryptedFile(String filename, Message contents);
     public Message readEncryptedFile(String filename);
     public String readUnencryptedFile(String filename);
@@ -38,4 +38,6 @@ public interface SecureTransportInterface {
     public void processDiscoveryResponse(DiscoveryResponseMessage msg);
 
     public boolean addPIN(String ID, String PIN);
+    public String getPIN(String ID);
+    public void displayPIN(String ID, String PIN);
 }

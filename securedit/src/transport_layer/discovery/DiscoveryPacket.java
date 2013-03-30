@@ -5,18 +5,18 @@ package transport_layer.discovery;
  * @author Patrick C. Berens
  */
 class DiscoveryPacket {
-    String myID;
+    String sourceID;
     String myIP;
     Integer myPort;
     private static final String DELIMINATOR = ",";
     DiscoveryPacket(String myID, String myIP, Integer myPort) {
-        this.myID = myID;
+        this.sourceID = myID;
         this.myIP = myIP;
         this.myPort = myPort;
     }
     @Override
     public String toString(){
-        return myID + DELIMINATOR + myIP + DELIMINATOR + myPort;
+        return sourceID + DELIMINATOR + myIP + DELIMINATOR + myPort;
     }
     static DiscoveryPacket fromString(String data){
         String[] fields = data.split(DELIMINATOR);

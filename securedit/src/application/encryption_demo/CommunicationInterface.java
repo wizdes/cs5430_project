@@ -16,7 +16,7 @@ import java.util.List;
 public interface CommunicationInterface {
     public void broadcastDiscovery();
     public boolean sendMessage(String destination, Message m);
-    public boolean broadcastMessage(Message m);
+//    public boolean broadcastMessage(Message m);
     public boolean authenticateMachine(String machineIdent);
     public boolean authenticateHuman(String machineIdent);
     
@@ -31,6 +31,9 @@ public interface CommunicationInterface {
     public void shutdown();
     
     public void updatePeers(String ident, String ip, int port, List<String> docs, boolean needsHumanAuth);
-
+    public void updateHumanAuthStatus(String ident, boolean hasHumanAuthenticated);
+    
     public boolean updatePin(String ID, String PIN);
+    public String getPIN(String ID);
+    public void displayPIN(String ID, String PIN);
 }

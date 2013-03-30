@@ -6,15 +6,14 @@ package application.encryption_demo.forms;
 
 import application.encryption_demo.EncryptionDemoFunctionality;
 import application.encryption_demo.DiscoveredPeers;
-import application.encryption_demo.DocumentInstance;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.table.DefaultTableModel;
 import security_layer.Profile;
 
@@ -49,7 +48,6 @@ public class ChatWindow extends javax.swing.JFrame {
         this.functionality =  new EncryptionDemoFunctionality(this, profile, password);
         initComponents();
         this.setTitle("Chat Window - User: " + profile.ident);
-        
     }
 
     /**
@@ -63,7 +61,11 @@ public class ChatWindow extends javax.swing.JFrame {
         tabbedPane = new javax.swing.JTabbedPane();
         peerPanel = new javax.swing.JPanel();
         jScrollPane8 = new javax.swing.JScrollPane();
-        DiscoveredPeersTable = new javax.swing.JTable();
+        DiscoveredPeersTable = new javax.swing.JTable(){
+            public boolean isCellEditable(int rowIndex, int colIndex) {
+                return false;   //Disallow the editing of any cell
+            }
+        };
         DiscoverPeersButton = new javax.swing.JButton();
         addDefaultPeersButton = new javax.swing.JButton();
         joinChatButton = new javax.swing.JButton();
@@ -75,7 +77,6 @@ public class ChatWindow extends javax.swing.JFrame {
         peerPanel.setToolTipText("");
 
         DiscoveredPeersTable.setModel(new DefaultTableModel(new String[]{"ID", "IP", "Port", "Document", "Authenticated"}, 0));
-        DiscoveredPeersTable.setColumnSelectionAllowed(true);
         DiscoveredPeersTable.getTableHeader().setReorderingAllowed(false);
         jScrollPane8.setViewportView(DiscoveredPeersTable);
 
@@ -180,14 +181,13 @@ public class ChatWindow extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    public void updateDiscoveredPeers(DiscoveredPeers peers){
+    public synchronized void updateDiscoveredPeers(DiscoveredPeers discoveredPeers){
         //Clear table and repopulate it
-        ((DefaultTableModel)DiscoveredPeersTable.getModel()).setRowCount(0);
-        
-        for(DiscoveredPeers.Peer peer: peers.getPeers().values()){
+        ((DefaultTableModel) DiscoveredPeersTable.getModel()).setRowCount(0);
+        for (DiscoveredPeers.Peer peer : discoveredPeers.peers.values()) {
             Object[][] rows = peer.getRowRepresentations();
-            for(int i = 0; i < rows.length; i++){
-                ((DefaultTableModel)DiscoveredPeersTable.getModel()).addRow(rows[i]);
+            for (int i = 0; i < rows.length; i++) {
+                ((DefaultTableModel) DiscoveredPeersTable.getModel()).addRow(rows[i]);
             }
         }
     }
@@ -217,13 +217,27 @@ public class ChatWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_addDefaultPeersButtonActionPerformed
 
     private void startChatButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startChatButtonActionPerformed
-        String docName = JOptionPane.showInputDialog("Enter document name.", "Chat");
-        if(docName == null || docName.trim().equals("")){
-            return;
+        
+        //Prompt for document name - make sure it is unique
+        String docName = "Chat";
+        String docID = null;
+        while(docID == null){
+            String enteredDocName = JOptionPane.showInputDialog("Enter document name", docName);
+            if(enteredDocName == null){
+                return;
+            }
+            docName = enteredDocName.trim();
+            if(docName.isEmpty()){
+                continue;
+            }
+            
+            docID = this.functionality.createDocumentInstance(profile.ident, docName);
+            if(docID == null){
+                showMessage("The document name: " + docName + " is already in use.");
+            }
         }
         
-        String docID = this.functionality.createDocumentInstance(profile.ident, docName);
-        
+        //Create a new chat panel
         docIDs.put(this.tabbedPane.getTabCount(), docID);
         this.profile.documentsOpenForDiscovery.add(docName);
         
@@ -234,32 +248,36 @@ public class ChatWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_startChatButtonActionPerformed
 
     private void joinChatButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_joinChatButtonActionPerformed
+        //TODO: This needs to be protected with a mutex I think, what if row changes in the middle
         int selectedRow = this.DiscoveredPeersTable.getSelectedRow();
         String ownerId = (String)this.DiscoveredPeersTable.getModel().getValueAt(selectedRow, 0);
         String docName = (String)this.DiscoveredPeersTable.getModel().getValueAt(selectedRow, 3);
+        boolean hasAuthenticated = (Boolean)this.DiscoveredPeersTable.getModel().getValueAt(selectedRow, 4);
         
-        if (!this.functionality.authenticateHuman(ownerId)) {
-            showMessage("human authentication failed");
-            return;
-        }
-        
-        String pin = JOptionPane.showInputDialog("Enter PIN for " + ownerId);
-        
-        while (!this.functionality.addPIN(ownerId, pin)) {
-            int closed = JOptionPane.showOptionDialog(this, 
-                             "Bad PIN! or message not received from server", 
-                             "Bad PIN", 
-                             JOptionPane.OK_CANCEL_OPTION, 
-                             JOptionPane.ERROR_MESSAGE,
-                             null, 
-                             null, 
-                             null);
-            if (closed == JOptionPane.CLOSED_OPTION || closed == JOptionPane.CANCEL_OPTION) {
+        if (!hasAuthenticated) {
+            if (!this.functionality.authenticateHuman(ownerId)) {
+                showMessage("Human authentication failed to initialize.");
                 return;
             }
-            pin = JOptionPane.showInputDialog("Enter PIN for " + ownerId);
+
+            String pin = JOptionPane.showInputDialog("Enter PIN for " + ownerId);
+            while (!this.functionality.addPIN(ownerId, pin)) {
+                int closed = JOptionPane.showOptionDialog(this,
+                        "Bad PIN! or message not received from server",
+                        "Bad PIN",
+                        JOptionPane.OK_CANCEL_OPTION,
+                        JOptionPane.ERROR_MESSAGE,
+                        null,
+                        null,
+                        null);
+                if (closed == JOptionPane.CLOSED_OPTION || closed == JOptionPane.CANCEL_OPTION) {
+                    return;
+                }
+                pin = JOptionPane.showInputDialog("Enter PIN for " + ownerId);
+            }
+        } else{
+            showMessage("Skipping human authentication since already authenticated");
         }
-        
         if (!this.functionality.authenticateMachine(ownerId)) {
             showMessage("machine authentication failed");
             return;
@@ -277,6 +295,7 @@ public class ChatWindow extends javax.swing.JFrame {
         
         //TODO FINAL PHASE: Authorization: Should wait here for authorization telling me chat request was accepted.
         
+        this.functionality.updateHumanAuthStatus(ownerId, true);
         ChatPanel panel = new ChatPanel();
         chatPanels.put(docID, panel);
         this.tabbedPane.add("Owner: " + ownerId + ", Doc: " + docName, panel);
@@ -326,4 +345,13 @@ public class ChatWindow extends javax.swing.JFrame {
     private javax.swing.JButton startChatButton;
     javax.swing.JTabbedPane tabbedPane;
     // End of variables declaration//GEN-END:variables
+
+    public void displayPIN(final String ID, final String PIN){
+        JDialog dialog;
+        dialog = new JDialog(this,ID + ": " + PIN);
+        dialog.setSize(250,80);
+        JLabel dialogLabel = new JLabel("PIN for :" + ID + ": " + PIN);
+        dialog.add(dialogLabel);
+        dialog.setVisible(true);
+    }
 }

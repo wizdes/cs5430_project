@@ -21,12 +21,15 @@ import javax.crypto.SecretKey;
  */
 class Authentications {
     private ConcurrentMap<String, Authentication> authentications = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, String> pins = new ConcurrentHashMap<>();
     private EncryptionKeys keys;
     PINFunctionality pf;
+    SecureTransportInterface secureTransport;
     
-    Authentications(EncryptionKeys keys) {
+    Authentications(EncryptionKeys keys, SecureTransportInterface secureTransport) {
         pf = new PINFunctionality();
         this.keys = keys;
+        this.secureTransport = secureTransport;
     }
     
     private void addAuthentication(String ident, Message message){
@@ -48,7 +51,7 @@ class Authentications {
     }
     
     HumanAuthenticationMessage constructInitialHAuthMessage(){
-        return new HA_Msg1("A", KeyFactory.generateNonce());
+        return new HA_Msg1(KeyFactory.generateNonce());
     }
 
     public boolean signalID(String ID) {
@@ -94,6 +97,10 @@ class Authentications {
         }
     }
     
+    public String getPIN(String ID){
+        return pins.get(ID);
+    }
+    
     //This should send a  HumanAuthenticationMessage TCP saying "Hi, I'm A and I am discovering"
     //     which is a dummy message for now. it should send it to one of the peers(you pick).
     //MAJOR ASSUMPTION. PIN OPERATIONS FOR A USER ARE DONE OUTSIDE OF THIS
@@ -106,14 +113,16 @@ class Authentications {
             }
             
             //generate a PIN
-            String PIN = pf.getPIN().substring(0, 3);
+            String PIN = pf.getPIN();
             String PINHMAC = PIN + "HMAC";
             System.out.println("PIN is: " + PIN);
+            secureTransport.displayPIN(idOfNodeAuthenticationWith, PIN);
             //send info into GUI somehow
             
             HA_Msg1 msg = (HA_Msg1)message;
-            PublicKey publicKey = keys.publicKeys.get(keys.ident);
-            PublicKey verifyingKey = keys.verifyingKeys.get(keys.ident);
+            PublicKey publicKey = keys.getPublicKey(keys.ident);
+            PublicKey verifyingKey = keys.getVerifyingKey(keys.ident);
+            long myAsymmetricKeyVersion = keys.getAsymmetricKeyVersion(keys.ident);
             SecretKey pinKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN);
             SecretKey HMACKey = (SecretKey) KeyFactory.generateSymmetricKey(PINHMAC);
             
@@ -122,7 +131,7 @@ class Authentications {
             
             addAuthentication(sourceOfMsg, msg, null, null);
             int nonceResponse1 = msg.nonce + 1;
-            Message m = new HA_Msg2(publicKey, verifyingKey, nonceResponse1, keys.ident);
+            Message m = new HA_Msg2(publicKey, verifyingKey, myAsymmetricKeyVersion, nonceResponse1);
             sti.sendAESEncryptedMessage(idOfNodeAuthenticationWith, m, pinKey, HMACKey);
         } else if (message instanceof HA_Msg2) {
             if(Constants.DEBUG_ON){    
@@ -137,14 +146,18 @@ class Authentications {
                 authentications.remove(idOfNodeAuthenticationWith);
                 return;
             }
+            
+            
             PublicKey otherPublicKey = msg.publicKey;
-            keys.addPublicKey(idOfNodeAuthenticationWith, otherPublicKey);
+            keys.addPublicKey(idOfNodeAuthenticationWith, otherPublicKey, msg.ownersAsymmetricKeyVersion);
             keys.addVerifyingKey(idOfNodeAuthenticationWith, msg.verifyingKey);
             
             PublicKey publicKey = keys.publicKeys.get(keys.ident);
             PublicKey verifyingKey = keys.verifyingKeys.get(keys.ident);
+            long asymmetricKeyVersion = keys.asymmetricKeyVersions.get(keys.ident);
+            
             int nonceResponse1 = msg.nonce + 1;
-            Message m = new HA_Msg3(publicKey, verifyingKey, nonceResponse1);
+            Message m = new HA_Msg3(publicKey, verifyingKey, asymmetricKeyVersion, nonceResponse1);
             sti.sendAESEncryptedMessage(idOfNodeAuthenticationWith, m,
                     keys.getSymmetricKey(idOfNodeAuthenticationWith), keys.getHMACKey(idOfNodeAuthenticationWith));
             keys.secretKeys.remove(sourceOfMsg);
@@ -165,7 +178,7 @@ class Authentications {
             }
             authentications.remove(idOfNodeAuthenticationWith);
             PublicKey otherPublicKey = msg.publicKey;
-            keys.addPublicKey(idOfNodeAuthenticationWith, otherPublicKey);
+            keys.addPublicKey(idOfNodeAuthenticationWith, otherPublicKey, msg.asymmetricKeyVersion);
             keys.addVerifyingKey(idOfNodeAuthenticationWith, msg.verifyingKey);
             
             keys.secretKeys.remove(sourceOfMsg);

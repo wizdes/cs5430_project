@@ -4,13 +4,13 @@ Patrick Berens (pcb73)
 Matt Goggin (mg343)
 
 Yi Li
-Yi created the interface that generates RSA keys and functions that allows encrypted and decryption with public/private keys. He also implemented the file handling code to take arbitrary lengths of messages and save them to a file. He also implemented the network authentication layer which allows a machine to authenticate another machine, as well as communicate with the other machine. Lastly, he created and used several unit test cases to confirm the functionality and correctness of the implemented code.
-Time : 25 hours
+
+Time : 30 hours
 
 Matt Goggin
-Matt implemented the network layer of the project. This allows us a simple interface to perform network operations. He also implemented our message layer to allow messages to be constructed, encrypted, and decrypted easily. Furthermore, he integrated the network and cryptographic substrate with the project. Lastly, he created and used several unit test cases to confirm the functionality and correctness of the implemented code. 
-(25 hours)
+
+Time : 30 hours
 
 Patrick Berens
-Patrick created the interface that generates AES encryption keys that allow for encryption and decryption. He also created a deterministic key generator for sending the one time password to authenticate humans. He also implemented file encryption. Furthermore, he integrated the network and cryptographic substrate with the project. Lastly, he created and used several unit test cases to confirm the functionality and correctness of the implemented code. 
-(25 hours)
+
+Time : 30 hours
