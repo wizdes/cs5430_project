@@ -39,4 +39,5 @@ public interface SecureTransportInterface {
 
     public boolean addPIN(String ID, String PIN);
     public String getPIN(String ID);
+    public void displayPIN(String ID, String PIN);
 }

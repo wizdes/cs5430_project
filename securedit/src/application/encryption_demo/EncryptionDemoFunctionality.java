@@ -150,6 +150,10 @@ public class EncryptionDemoFunctionality {
         gui.displayMessages(docID, plaintext);
     }
     private final ReentrantLock atomicBroadcastLock = new ReentrantLock();
+
+    public void displayPIN(String ID, String PIN) {
+        gui.displayPIN(ID, PIN);
+    }
     
     private class GUIListenerThread extends Thread {
         

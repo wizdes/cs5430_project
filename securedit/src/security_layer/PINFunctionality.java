@@ -29,10 +29,13 @@ public class PINFunctionality {
         try {
             SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
             random.nextBytes(seedBytes);
-            String randomPIN = new BigInteger(Constants.numBytesPIN, random).toString(32);
+            String randomPIN = "";
+            while(randomPIN.length() < Constants.lengthPIN){
+                randomPIN = new BigInteger(Constants.numBytesPIN, random).toString(Character.MAX_RADIX);
+            }
             String retPIN = "";
             //this makes capital letters
-            for(int i = 0; i < randomPIN.length(); i++){
+            for(int i = 0; i < Constants.lengthPIN; i++){
                 char insertPIN = randomPIN.charAt(i);
                 int upper = random.nextInt(2);
                 if(upper == 1 && !Character.isDigit(insertPIN)){

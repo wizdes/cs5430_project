@@ -24,10 +24,12 @@ class Authentications {
     private ConcurrentMap<String, String> pins = new ConcurrentHashMap<>();
     private EncryptionKeys keys;
     PINFunctionality pf;
+    SecureTransportInterface secureTransport;
     
-    Authentications(EncryptionKeys keys) {
+    Authentications(EncryptionKeys keys, SecureTransportInterface secureTransport) {
         pf = new PINFunctionality();
         this.keys = keys;
+        this.secureTransport = secureTransport;
     }
     
     private void addAuthentication(String ident, Message message){
@@ -114,7 +116,7 @@ class Authentications {
             String PIN = pf.getPIN();
             String PINHMAC = PIN + "HMAC";
             System.out.println("PIN is: " + PIN);
-            pins.put(idOfNodeAuthenticationWith, PIN);
+            secureTransport.displayPIN(idOfNodeAuthenticationWith, PIN);
             //send info into GUI somehow
             
             HA_Msg1 msg = (HA_Msg1)message;
