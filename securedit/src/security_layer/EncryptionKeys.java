@@ -4,6 +4,7 @@
  */
 package security_layer;
 
+import java.io.Serializable;
 import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -20,7 +21,7 @@ import javax.crypto.SecretKey;
  * 
  * @author Patrick C. Berens
  */
-class EncryptionKeys {
+class EncryptionKeys implements Serializable {
     //Have access to keys directly only inside security_layer package.
     String ident;
     String password;

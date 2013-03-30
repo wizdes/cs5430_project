@@ -66,7 +66,7 @@ public class SecureTransport implements SecureTransportInterface{
         keys.privateKey = profile.keys.privateKey;
         keys.signingKey = profile.keys.signingKey;
         keys.publicKeys = profile.keys.publicKeys;
-        keys.verifyingKeys = profile.keys.verifiyngKeys;
+        keys.verifyingKeys = profile.keys.verifyingKeys;
         keys.asymmetricKeyVersions = profile.keys.asymmetricKeyVersions;
         
         //Add a symmetricKey for self so can send messages to self
