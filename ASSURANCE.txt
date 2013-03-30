@@ -9,17 +9,11 @@ Table of Contents
 2) Unit Test Cases
 3) Integration Tests
 4) Other Assurance Mechanics
-	a) AES Encrypted Local Files
+	a) AES Encrypted Local Files with HMACs
 	b) Secure Length for PIN Generation
-	c) RSA Encryption/Decryption
-		i) size of Keys
-	d) AES Encryption/Decryption
-		i) size of Keys
-	e) Nonces
-	f) HMACs
-	g) Code Reviews
-	h) Class Design	
-	x) Network Packet Observation
+	c) Code Reviews
+	d) Class Design	
+	e) Network Packet Observation
 
 
 1) Overview 
@@ -37,3 +31,15 @@ Although created numerous unit test cases to increase our assurance of the syste
 3) Other Assurance Mechanics
 
 There are several other assurance measures that were taken to increase the assurance in the correctness of the system.
+
+a) AES Encrypted Local Files with HMACs
+
+In our system, we did not assume that all elements of a user's operating system are safe. Specifically, we assume that an attacker may be able to gain information from the files on the file system. Because of this, we encrypted all data saved onto the file system with an AES encrpytion key generated from a user defined password. Thus, only users who remember their own passwords are able to access their files.
+
+b) Secure Length for PIN Generation
+
+In our system, we use a PIN to authenticate humans connecting to a server as well as exchanging public/private keys. This PIN needs to be of an adequate length to prevent brute force attacks. The paper in by Melber and Ryberg (http://www.bcs.org/upload/pdf/mobile-computing.pdf) recommends a PIN length of 12; this is the length that is used. 
+
+c) Code Reviews
+d) Class Design	
+e) Network Packet Observation
