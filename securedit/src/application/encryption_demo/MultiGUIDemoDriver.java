@@ -4,7 +4,7 @@
  */
 package application.encryption_demo;
 
-import application.encryption_demo.forms.ChatWindow;
+import application.encryption_demo.forms.LoginForm;
 import configuration.Constants;
 import security_layer.Profile;
 
@@ -33,16 +33,9 @@ public class MultiGUIDemoDriver {
         }
         //</editor-fold>
                 
-        Profile.deleteProfile("0");
-        Profile p1 = Profile.writeProfile("0", "pass0000pass0000", 4000, "localhost");
-        ChatWindow form1 = new ChatWindow(p1, "pass0000pass0000");
-        form1.setVisible(true); 
-        
-        Profile.deleteProfile("1");
-        Profile p2 = Profile.writeProfile("1", "pass1111pass1111", 4001, "localhost");
-        ChatWindow form2 = new ChatWindow(p2, "pass1111pass1111");
-        form2.setVisible(true); 
-      
+        new LoginForm().setVisible(true);
+        new LoginForm().setVisible(true);
+       
 //        Profile.deleteProfile("2");
 //        Profile p3 = Profile.writeProfile("2", "pass2222pass2222", 4002, "localhost");
 //        ChatWindow form3 = new ChatWindow(p3, "pass2222pass2222");
