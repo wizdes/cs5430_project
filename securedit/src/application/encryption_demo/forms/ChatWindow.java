@@ -6,15 +6,11 @@ package application.encryption_demo.forms;
 
 import application.encryption_demo.EncryptionDemoFunctionality;
 import application.encryption_demo.DiscoveredPeers;
-import application.encryption_demo.DocumentInstance;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.table.DefaultTableModel;
 import security_layer.Profile;
 
