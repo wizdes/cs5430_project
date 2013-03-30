@@ -79,13 +79,6 @@ public class SecureTransport implements SecureTransportInterface{
         this.communication = communication;
         
         authInstance = new Authentications(keys, this);
-        
-        //Hacked for now
-        for(String peerId: keys.publicKeys.keySet()){
-            if(!peerId.equals(profile.ident)){
-                networkTransport.addPeer(peerId, "localhost", 4000 + Integer.parseInt(peerId));
-            }
-        }
     }
     
     @Override
