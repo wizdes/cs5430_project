@@ -81,6 +81,11 @@ public class Profile implements Message {
         profile.port = port;
         profile.ident = username;
         profile.keys = new EncryptionKeys();
+        profile.keys.ident = username;
+        profile.keys.password = pw;
+//        profile.keys.personalKey = null;
+//        profile.keys.
+
         KeyPair asymmetricKeys = KeyFactory.generateAsymmetricKeys();
         profile.keys.publicKeys = new ConcurrentHashMap<>();
         profile.keys.publicKeys.put(username, asymmetricKeys.getPublic());
