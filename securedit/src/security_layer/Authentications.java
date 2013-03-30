@@ -21,12 +21,15 @@ import javax.crypto.SecretKey;
  */
 class Authentications {
     private ConcurrentMap<String, Authentication> authentications = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, String> pins = new ConcurrentHashMap<>();
     private EncryptionKeys keys;
     PINFunctionality pf;
+    SecureTransportInterface secureTransport;
     
-    Authentications(EncryptionKeys keys) {
+    Authentications(EncryptionKeys keys, SecureTransportInterface secureTransport) {
         pf = new PINFunctionality();
         this.keys = keys;
+        this.secureTransport = secureTransport;
     }
     
     private void addAuthentication(String ident, Message message){
@@ -94,6 +97,10 @@ class Authentications {
         }
     }
     
+    public String getPIN(String ID){
+        return pins.get(ID);
+    }
+    
     //This should send a  HumanAuthenticationMessage TCP saying "Hi, I'm A and I am discovering"
     //     which is a dummy message for now. it should send it to one of the peers(you pick).
     //MAJOR ASSUMPTION. PIN OPERATIONS FOR A USER ARE DONE OUTSIDE OF THIS
@@ -106,9 +113,10 @@ class Authentications {
             }
             
             //generate a PIN
-            String PIN = pf.getPIN().substring(0, 3);
+            String PIN = pf.getPIN();
             String PINHMAC = PIN + "HMAC";
             System.out.println("PIN is: " + PIN);
+            secureTransport.displayPIN(idOfNodeAuthenticationWith, PIN);
             //send info into GUI somehow
             
             HA_Msg1 msg = (HA_Msg1)message;

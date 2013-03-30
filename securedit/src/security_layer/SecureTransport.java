@@ -56,7 +56,7 @@ public class SecureTransport implements SecureTransportInterface{
     public SecureTransport(String password){
         Key personalKey = KeyFactory.generateSymmetricKey(password);
         keys = new EncryptionKeys(personalKey, password);
-        authInstance = new Authentications(keys);
+        authInstance = new Authentications(keys, this);
     }
     
     public SecureTransport(Profile profile, String password, CommunicationInterface communication) {        
@@ -78,7 +78,7 @@ public class SecureTransport implements SecureTransportInterface{
         this.discoveryTransport = new DiscoveryTransport(profile, networkTransport);
         this.communication = communication;
         
-        authInstance = new Authentications(keys);
+        authInstance = new Authentications(keys, this);
         
         //Hacked for now
         for(String peerId: keys.publicKeys.keySet()){
@@ -422,6 +422,11 @@ public class SecureTransport implements SecureTransportInterface{
     public void broadcastDiscovery() {
         discoveryTransport.broadcastDiscovery();
     }
+    
+    @Override
+    public String getPIN(String ID){
+        return authInstance.getPIN(ID);
+    }
 
     @Override
     public boolean addPIN(String ownerID, String PIN) {
@@ -464,5 +469,10 @@ public class SecureTransport implements SecureTransportInterface{
         PlaintextMessage sendMsg = new PlaintextMessage();
         sendMsg.m = m;
         return networkTransport.send(destination, sendMsg);
+    }
+
+    @Override
+    public void displayPIN(String ID, String PIN) {
+        communication.displayPIN(ID, PIN);
     }
 }

@@ -35,6 +35,11 @@ public class Communication implements CommunicationInterface {
     private DiscoveredPeers discoveredPeers = new DiscoveredPeers();
     private EncryptionDemoFunctionality guiFunctionality;
     private Profile profile;
+    
+    public void displayPIN(String ID, String PIN){
+        guiFunctionality.displayPIN(ID, PIN);
+    }
+    
     public Communication(Profile profile, String password) {
         //Only used for test packages
         this.profile = profile;
@@ -158,5 +163,10 @@ public class Communication implements CommunicationInterface {
     @Override
     public boolean updatePin(String ownerID, String PIN) {
         return secureTransport.addPIN(ownerID, PIN);
+    }
+    
+    @Override
+    public String getPIN(String ID){
+        return secureTransport.getPIN(ID);
     }
 }
