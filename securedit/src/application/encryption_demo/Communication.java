@@ -37,7 +37,9 @@ public class Communication implements CommunicationInterface {
     private Profile profile;
     
     public void displayPIN(String ID, String PIN){
-        guiFunctionality.displayPIN(ID, PIN);
+        if (guiFunctionality != null) {
+            guiFunctionality.displayPIN(ID, PIN);    
+        }
     }
     
     public Communication(Profile profile, String password) {

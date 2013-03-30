@@ -116,6 +116,7 @@ class Authentications {
             String PIN = pf.getPIN();
             String PINHMAC = PIN + "HMAC";
             System.out.println("PIN is: " + PIN);
+            pins.put(sourceOfMsg, PIN);
             secureTransport.displayPIN(idOfNodeAuthenticationWith, PIN);
             //send info into GUI somehow
             
