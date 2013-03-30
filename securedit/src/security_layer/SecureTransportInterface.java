@@ -38,4 +38,5 @@ public interface SecureTransportInterface {
     public void processDiscoveryResponse(DiscoveryResponseMessage msg);
 
     public boolean addPIN(String ID, String PIN);
+    public String getPIN(String ID);
 }

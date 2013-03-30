@@ -5,6 +5,7 @@
 package security_layer;
 
 import configuration.Constants;
+
 import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -21,14 +22,25 @@ import java.util.logging.Logger;
  */
 public class PINFunctionality {
     
+    public final byte[] seedBytes = new byte[512];
     private final List<String> validPins = Collections.synchronizedList(new ArrayList<String>());
-    
-    int numBytesPIN = 20 * 8;
     
     public String getPIN(){
         try {
             SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
-            return new BigInteger(numBytesPIN, random).toString(32);
+            random.nextBytes(seedBytes);
+            String randomPIN = new BigInteger(Constants.numBytesPIN, random).toString(32);
+            String retPIN = "";
+            //this makes capital letters
+            for(int i = 0; i < randomPIN.length(); i++){
+                char insertPIN = randomPIN.charAt(i);
+                int upper = random.nextInt(2);
+                if(upper == 1 && !Character.isDigit(insertPIN)){
+                    insertPIN = Character.toUpperCase(insertPIN);
+                }
+                retPIN += insertPIN;
+            }
+            return retPIN;
         } catch (NoSuchAlgorithmException | NoSuchProviderException ex) {
             if(Constants.DEBUG_ON){
                 Logger.getLogger(PINFunctionality.class.getName()).log(Level.SEVERE, null, ex);

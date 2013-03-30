@@ -34,4 +34,5 @@ public interface CommunicationInterface {
     public void updateHumanAuthStatus(String ident, boolean hasHumanAuthenticated);
     
     public boolean updatePin(String ID, String PIN);
+    public String getPIN(String ID);
 }

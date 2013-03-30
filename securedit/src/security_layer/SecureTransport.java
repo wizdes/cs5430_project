@@ -422,6 +422,11 @@ public class SecureTransport implements SecureTransportInterface{
     public void broadcastDiscovery() {
         discoveryTransport.broadcastDiscovery();
     }
+    
+    @Override
+    public String getPIN(String ID){
+        return authInstance.getPIN(ID);
+    }
 
     @Override
     public boolean addPIN(String ownerID, String PIN) {
