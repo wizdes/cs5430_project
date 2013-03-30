@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.crypto.SecretKey;
 
 /**
  *
@@ -85,11 +86,10 @@ public class Profile implements Message {
         profile.host = host;
         profile.port = port;
         profile.ident = username;
-        profile.keys = new EncryptionKeys();
         profile.keys.ident = username;
-        profile.keys.password = pw;
-        profile.keys.personalKey = KeyFactory.generateSymmetricKey(profile.keys.password);
-
+        SecretKey personalKey = (SecretKey)KeyFactory.generateSymmetricKey(profile.keys.password);
+        profile.keys = new EncryptionKeys(personalKey, pw);
+        
         KeyPair asymmetricKeys = KeyFactory.generateAsymmetricKeys();
         profile.keys.publicKeys = new ConcurrentHashMap<>();
         profile.keys.publicKeys.put(username, asymmetricKeys.getPublic());

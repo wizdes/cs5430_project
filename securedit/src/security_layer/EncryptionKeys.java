@@ -37,24 +37,23 @@ class EncryptionKeys implements Serializable {
     Key privateKey;     //RSA
     Key signingKey;     //RSA
     
-    EncryptionKeys(){}
     EncryptionKeys(Key personalKey, String password){
         this.personalKey = personalKey;
         this.password = password;
     }
-    EncryptionKeys(Key personalKey, String ident, String password){
-        this.ident = ident;
-        this.password = password;
-        this.personalKey = personalKey;
-    }
+//    EncryptionKeys(Key personalKey, String ident, String password){
+//        this.ident = ident;
+//        this.password = password;
+//        this.personalKey = personalKey;
+//    }
 
-    EncryptionKeys(Key personalKey, PublicKey publicKey, PrivateKey privateKey, long asymmetricKeyVersionNumber, String ident, String password){
-        this.ident = ident;
-        this.password = password;
-        this.personalKey = personalKey;
-        addPublicKey(ident, publicKey, asymmetricKeyVersionNumber);
-        this.privateKey = privateKey;
-    }
+//    EncryptionKeys(Key personalKey, PublicKey publicKey, PrivateKey privateKey, long asymmetricKeyVersionNumber, String ident, String password){
+//        this.ident = ident;
+//        this.password = password;
+//        this.personalKey = personalKey;
+//        addPublicKey(ident, publicKey, asymmetricKeyVersionNumber);
+//        this.privateKey = privateKey;
+//    }
     
     void addSymmetricKey(String ident, SecretKey secretKey) {
         secretKeys.putIfAbsent(ident, secretKey);

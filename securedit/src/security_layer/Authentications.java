@@ -168,7 +168,7 @@ class Authentications {
             keys.secretKeys.remove(sourceOfMsg);
             keys.HMACKeys.remove(sourceOfMsg);
             
-//            profile.save(keys.password);
+            profile.save(keys.password);
         }
         else {
             if(Constants.DEBUG_ON){
@@ -191,7 +191,7 @@ class Authentications {
             keys.secretKeys.remove(sourceOfMsg);
             keys.HMACKeys.remove(sourceOfMsg);
             
-//            profile.save(keys.password);            
+            profile.save(keys.password);            
         }
         
     }
