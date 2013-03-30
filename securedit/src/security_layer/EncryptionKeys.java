@@ -24,7 +24,7 @@ import javax.crypto.SecretKey;
 class EncryptionKeys implements Serializable {
     //Have access to keys directly only inside security_layer package.
     String ident;
-    String password;
+    transient String password;
     Key personalKey;    //Generated from password for AES files
     Key personalHMACKey;
     
