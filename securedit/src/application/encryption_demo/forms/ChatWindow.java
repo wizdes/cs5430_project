@@ -250,6 +250,7 @@ public class ChatWindow extends javax.swing.JFrame {
     private void joinChatButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_joinChatButtonActionPerformed
         //TODO: This needs to be protected with a mutex I think, what if row changes in the middle
         int selectedRow = this.DiscoveredPeersTable.getSelectedRow();
+        if(selectedRow < 0) return;
         String ownerId = (String)this.DiscoveredPeersTable.getModel().getValueAt(selectedRow, 0);
         String docName = (String)this.DiscoveredPeersTable.getModel().getValueAt(selectedRow, 3);
         boolean hasAuthenticated = (Boolean)this.DiscoveredPeersTable.getModel().getValueAt(selectedRow, 4);
