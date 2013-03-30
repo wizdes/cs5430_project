@@ -21,7 +21,7 @@ public class Profile implements Message {
     public String ident;
     public String host;
     public int port;
-    KeysObject keys;
+    EncryptionKeys keys;
     
     //These documents will be returned when a discovery broadcast is received.
     public transient ArrayList<String> documentsOpenForDiscovery = new ArrayList<>();
@@ -36,9 +36,12 @@ public class Profile implements Message {
     
     public void addPublicKeysFrom(Profile other) {
         this.keys.publicKeys.put(other.ident, other.keys.publicKeys.get(other.ident));
-        this.keys.verifiyngKeys.put(other.ident, other.keys.verifiyngKeys.get(other.ident));
-        this.keys.asymmetricKeyVersions.put(other.ident, keys.asymmetricKeyVersions.get(other.ident));
+        this.keys.verifyingKeys.put(other.ident, other.keys.verifyingKeys.get(other.ident));
+        // TODO This line causes the integration test to fail?
+        // Cannot figure out why
+//        this.keys.asymmetricKeyVersions.put(other.ident, null);
     }
+    
     /**
      * Exposes this part of keys to world. Only passes out copy.
      * @param ident
@@ -71,14 +74,14 @@ public class Profile implements Message {
         profile.host = host;
         profile.port = port;
         profile.ident = username;
-        profile.keys = new KeysObject();
+        profile.keys = new EncryptionKeys();
         KeyPair asymmetricKeys = KeyFactory.generateAsymmetricKeys();
         profile.keys.publicKeys = new ConcurrentHashMap<>();
         profile.keys.publicKeys.put(username, asymmetricKeys.getPublic());
         profile.keys.privateKey = asymmetricKeys.getPrivate();
         KeyPair signingKeyPair = KeyFactory.generateAsymmetricKeys();
-        profile.keys.verifiyngKeys = new ConcurrentHashMap<>();
-        profile.keys.verifiyngKeys.put(username, signingKeyPair.getPublic());
+        profile.keys.verifyingKeys = new ConcurrentHashMap<>();
+        profile.keys.verifyingKeys.put(username, signingKeyPair.getPublic());
         profile.keys.signingKey = signingKeyPair.getPrivate();
         profile.keys.asymmetricKeyVersions.put(username, (long)0);
         profile.save(pw);
@@ -98,7 +101,7 @@ public class Profile implements Message {
         
         //Update signing keys
         KeyPair signingKeyPair = KeyFactory.generateAsymmetricKeys();
-        keys.verifiyngKeys.put(ident, signingKeyPair.getPublic());
+        keys.verifyingKeys.put(ident, signingKeyPair.getPublic());
         keys.signingKey = signingKeyPair.getPrivate();
         
         Long versionNum = keys.asymmetricKeyVersions.get(ident);
