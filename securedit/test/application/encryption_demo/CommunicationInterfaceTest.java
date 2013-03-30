@@ -20,9 +20,9 @@ import security_layer.Profile;
  * @author goggin
  */
 public class CommunicationInterfaceTest {
-    String p1Ident = "0";
-    String p2Ident = "1";
-    String p3Ident = "2";
+    String p1Ident = "1";
+    String p2Ident = "2";
+    String p3Ident = "3";
     
     CommunicationInterface p1Communicator;
     CommunicationInterface p2Communicator;
@@ -44,11 +44,9 @@ public class CommunicationInterfaceTest {
     public void setUp() throws Exception {
         Profile.deleteProfile(p1Ident);
         p1 = Profile.writeProfile(p1Ident, password_1, p1Port, "localhost");
-//        p1 = Profile.readProfile(p1Ident, password_1);
         
         Profile.deleteProfile(p2Ident);
         p2 = Profile.writeProfile(p2Ident, password_2, p2Port, "localhost");
-//          p2 = Profile.readProfile(p2Ident, password_2);
         
         Profile.deleteProfile(p3Ident);
         p3 = Profile.writeProfile(p3Ident, password_3, p3Port, "localhost");
@@ -94,7 +92,7 @@ public class CommunicationInterfaceTest {
     @Test
     public void testHumanAuthentication() {
         // Connect once from scratch
-        int iterations = 1;
+        int iterations = 100;
         ArrayList<String> documents = new ArrayList<>();
         documents.add("chat");
         p1Communicator = new Communication(p1, password_1);
@@ -102,10 +100,11 @@ public class CommunicationInterfaceTest {
         p3Communicator = new Communication(p3, password_3);
         
         p1Communicator.updatePeers(p2Ident, "localhost", p2Port, documents, false);
+        p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents, false);
+        
         p1Communicator.authenticateHuman(p2Ident);
         pause(250);
         String pin = p2Communicator.getPIN(p1Ident);
-        System.out.println("test pin is " + pin);
         assertTrue(p1Communicator.updatePin(p2Ident, pin));
         assertTrue(p1Communicator.authenticateMachine(p2Ident));
 
@@ -117,7 +116,10 @@ public class CommunicationInterfaceTest {
         p1Communicator.shutdown();
         p2Communicator.shutdown();
         p1Communicator = new Communication(p1, password_1);
-        p2Communicator = new Communication(p2, password_2);        
+        p2Communicator = new Communication(p2, password_2);   
+        p1Communicator.updatePeers(p2Ident, "localhost", p2Port, documents, false);
+        p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents, false);
+        
         assertTrue(p1Communicator.authenticateMachine(p2Ident));
         testSendMessagesFrom(p1Communicator, p2Communicator, p2Ident, 100);
         testSendMessagesFrom(p2Communicator, p1Communicator, p1Ident, 100);  
@@ -129,9 +131,13 @@ public class CommunicationInterfaceTest {
 //        p2Communicator.shutdown();
 //        p1Communicator = new Communication(p1, password_1);
 //        p2Communicator = new Communication(p2, password_2); 
+//        
+//        p1Communicator.updatePeers(p2Ident, "localhost", p2Port, documents, false);
+//        p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents, false);
+//        
 //        p1Communicator.authenticateHuman(p2Ident);
 //        pause(250);
-//        pin = p2Communicator.getPINFor(p1Ident);
+//        pin = p2Communicator.getPIN(p1Ident);
 //        assertTrue(p1Communicator.updatePin(p2Ident, pin));
 //        assertTrue(p1Communicator.authenticateMachine(p2Ident));
         
@@ -158,6 +164,15 @@ public class CommunicationInterfaceTest {
         p1Communicator = new Communication(p1, password_1);
         p2Communicator = new Communication(p2, password_2);
         p3Communicator = new Communication(p3, password_3);  
+        
+        ArrayList<String> documents = new ArrayList<>();
+        documents.add("chat");
+        p1Communicator.updatePeers(p2Ident, "localhost", p2Port, documents, false);
+        p1Communicator.updatePeers(p3Ident, "localhost", p3Port, documents, false);
+        p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents, false);
+        p2Communicator.updatePeers(p3Ident, "localhost", p3Port, documents, false);
+        p3Communicator.updatePeers(p1Ident, "localhost", p1Port, documents, false);
+        p3Communicator.updatePeers(p2Ident, "localhost", p2Port, documents, false);
         
         assertTrue(p1Communicator.authenticateMachine(p2Ident));
         assertTrue(p1Communicator.authenticateMachine(p3Ident));
