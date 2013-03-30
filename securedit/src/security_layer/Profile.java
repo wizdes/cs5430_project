@@ -8,6 +8,7 @@ package security_layer;
 import application.encryption_demo.Messages.Message;
 import configuration.Constants;
 import java.io.File;
+import java.security.Key;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,8 +31,7 @@ public class Profile implements Message {
     public transient ArrayList<String> documentsHiddenFromDiscovery = new ArrayList<>();
     
     public void save(String pw) {
-        System.out.println("save " + pw);
-        SecureTransport transport = new SecureTransport(pw);
+        SecureTransport transport = new SecureTransport(this);
         transport.writeEncryptedFile(ident + ".profile", this);
     }
        
@@ -63,7 +63,12 @@ public class Profile implements Message {
         if(Constants.DEBUG_ON){
             Logger.getLogger(Profile.class.getName()).log(Level.INFO, "Reading profile for " + username + ", " + pw);
         }
-        SecureTransport transport = new SecureTransport(pw);
+        
+        Key personalKey = KeyFactory.generateSymmetricKey(pw);
+        Profile profile = new Profile();
+        profile.keys = new EncryptionKeys(personalKey, pw);
+        SecureTransport transport = new SecureTransport(profile);
+        
         Profile p = (Profile)transport.readEncryptedFile(username + ".profile");
         if (p != null) {
             p.documentsHiddenFromDiscovery = new ArrayList<>();
@@ -83,8 +88,7 @@ public class Profile implements Message {
         profile.keys = new EncryptionKeys();
         profile.keys.ident = username;
         profile.keys.password = pw;
-//        profile.keys.personalKey = null;
-//        profile.keys.
+        profile.keys.personalKey = KeyFactory.generateSymmetricKey(profile.keys.password);
 
         KeyPair asymmetricKeys = KeyFactory.generateAsymmetricKeys();
         profile.keys.publicKeys = new ConcurrentHashMap<>();
