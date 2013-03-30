@@ -4,4 +4,13 @@ Yi Li(yl2326)
 
 FUNCTIONALITY.txt, which should discuss the interface that your system implements. What operations does it export? What is the effect of each operation? Diagram or give high-level psuedocode for the cryptographic protocol being used within each operation or within collection of operations.
 
+Be sure to pay careful attention to the following (and, as appropriate, discuss them in FUNCTIONALITY.txt).
+
+Methods by which keys are chosen or generated and are erased.
+How and where keys are stored.
+Use of correct and efficient cryptographic idioms for confidentiality and for integrity. (E.g., Are you using ECB? Should you be?)
+Padding and other issues associated with message length.
+Sizes of keys and nonces.
+Unnwarranted dependence on assumptions about operating system functionality.
+
 Table of Contents

@@ -5,3 +5,35 @@ Yi Li(yl2326)
 ASSURANCE.txt, which describes how and what you tested in the software being submitted. Also describe here any other means you used to increase assurance in the correctness of the system and in the absence of vulnerabilities.
 
 Table of Contents
+1) Overview 
+2) Unit Test Cases
+3) Integration Tests
+4) Other Assurance Mechanics
+	a) AES Encrypted Local Files
+	b) Secure Length for PIN Generation
+	c) RSA Encryption/Decryption
+		i) size of Keys
+	d) AES Encryption/Decryption
+		i) size of Keys
+	e) Nonces
+	f) HMACs
+	g) Code Reviews
+	h) Class Design	
+	x) Network Packet Observation
+
+
+1) Overview 
+
+For this project, we combined several standard Java implementations of security measures with unit tests and careful code maintenance. 
+
+2) Unit Test Cases
+
+We introduced unit tests for the new functionality introduced into the system.
+
+3) Integration Tests
+
+Although created numerous unit test cases to increase our assurance of the system, we also introduced several Integration Tests to analyze our system from an end-to-end perspective.  
+
+3) Other Assurance Mechanics
+
+There are several other assurance measures that were taken to increase the assurance in the correctness of the system.
