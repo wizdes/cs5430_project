@@ -2,15 +2,98 @@ Patrick Berens(pcb73)
 Matt Goggin(mg343)
 Yi Li(yl2326)
 
-FUNCTIONALITY.txt, which should discuss the interface that your system implements. What operations does it export? What is the effect of each operation? Diagram or give high-level psuedocode for the cryptographic protocol being used within each operation or within collection of operations.
-
+FUNCTIONALITY.txt, which should discuss the interface that your system implements. What operations does it export? What is the effect of each operation? 
 Be sure to pay careful attention to the following (and, as appropriate, discuss them in FUNCTIONALITY.txt).
-
-Methods by which keys are chosen or generated and are erased.
-How and where keys are stored.
-Use of correct and efficient cryptographic idioms for confidentiality and for integrity. (E.g., Are you using ECB? Should you be?)
-Padding and other issues associated with message length.
-Sizes of keys and nonces.
-Unnwarranted dependence on assumptions about operating system functionality.
+* Methods by which secrets (e.g., passwords) are chosen or generated and are erased.
+* Methods by which secrets are stored.
+* Unwarranted dependence on assumptions about operating system functionality.
 
 Table of Contents
+1) Overview
+2) Assumptions 
+3) Functionality
+  a) Human Authentication
+    i) Protocol
+  	ii) PIN Generation
+	b) Hosting a chat
+	c) Joining a chat
+	  i) protocol
+	c) Chatting
+	  i) protocol
+
+1) Overview
+
+In this phase, we are demonstrating our cryptographic substrate and how these operations are used to maintain confidentality, integrity and availability. After reviewing a high level description of our system's interface is used to maintain confidentality, integrity and availability, we go over the assumptions our system makes. Finally, we go in depth in the interfaces our system implements.
+
+a) Confidentality
+
+All communication between machines are subject to Dolov-Yao attacks. Because of this, we encrypt our messages either with AES session keys and exchange this key using public/private key encryption. Furthermore, our program stores public keys safely on the file, encrypting the public keys with AES cipher that is generated using a key generator on a user generated password. This allows the public keys to stored safely on disk (via encryption) without having to store the key on disk.
+
+b) Integrity
+
+We guarantee the integrity of both the data sent between machines as well as data stored on disk by calculating an HMAC of the unencrypted data before encrypting the the concatenation of the HMAC and the unencrypted data. As mentioned in the online lecture notes "[2/10] Applied Cryptography Notes" under the section (Part 3: Confidentiality and Integrity), the process of 'MAC then Encrypt' is considered safe and guarantees integrity.
+
+c) Availability
+
+We use TCP to address issues of availability that involves dropped or out of order packets. 
+
+2) Assumptions 
+
+We assume attackers do not have physical access to the hardware of a user while the user is using the application. Attackers also do not have access to the computer’s software nor exploit software vulnerabilities unrelated to the system. Furthermore, we assume users have access to read and modify files on their system while using the application.
+
+3) Functionality
+
+Here are some details of our regarding the functionality of our code.
+
+a) File handling
+
+The 'FileHandler' class has a several functions that encapsulate file handling:
+public Serializable readFile(String filename);
+public boolean writeFile(String filename, Serializable content);
+public String openUnserializedFile(String filename);
+
+These three functions are write and read from files.
+
+
+b) Machine_Authentication
+
+We use a protocol for machine authentication. 
+
+To exchange session keys, we use the following protocol. 
+A and B are machines.
+A is trying to authenticate to B.
+K_B is the public key of B, and K_A is the public key of A.
+
+1) A -> B : {A, r} K_B, where r is a nonce
+2) B generates K_AB
+3) B -> A : {K_AB, B, r + 1, r'} K_A, where r' is another nonce
+4) A verifies r + 1
+5) A -> B : {r' + 1} K_B
+
+In this protocol, B is able to communicate with A the session key K_AB. The first nonce r is used to confirm the message received at 3 to A is indeed from B. The second nonce r' is used to confirm the message at 5 received by B is indeed from A.
+
+From this, both machines receive a shared key which is then used to encrypt and send messages between each other.  We plan on using this to implement the following message sending protocol:
+A and B are machines.
+A is trying to send a message m to B.
+K_AB is the shared key of A and B.
+
+1) A -> B : {A, B} K_AB
+2) B -> A : {B, A, r} K_AB where r is a nonce
+3) A -> B : {m, A, B, r + 1} K_AB
+
+c) Encryption and MACs
+
+We used several encryption and MAC schemes. 
+
+i) RSA
+We used the standard Java Key Generator and Cipher using the 'RSA/ECB/PKCS1Padding' algorithm to generate public/private RSA key pairs. The size of the key is 3584 bits.
+
+ii) AES
+
+We used the standard Java SecureRandom random number generator to create an initialization vector using the 'SHA1PRNG' algorithm and using the 'AES/CBC/PKCS5Padding' algorithm to generate a symmetric AES key with 128 bytes.
+
+iii) HMACs
+We used the standard Java MAC class to generate an HMAC of our messages using the 'HmacSHA256' algorithm.
+
+d) Network
+  The Network layer provides the functionality to send and receive encrypted messages; the actual application interfaces only with a "send" function, to which it passes objects of type application.Message.  These will be subclassed in subsequent phases to send application specific data. The network layer utilizes the SecureTransport package to encrypt messages using either RSA (for initial exchange of the shared session key), or AES (for exchanging messages with the session key).

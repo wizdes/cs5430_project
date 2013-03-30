@@ -16,6 +16,8 @@ import java.util.List;
 public interface CommunicationInterface {
     public void broadcastDiscovery();
     public boolean sendMessage(String destination, Message m);
+    public boolean sendManualDiscoverMessage(String destination, String ip, int port, Message m);
+    
 //    public boolean broadcastMessage(Message m);
     public boolean authenticateMachine(String machineIdent);
     public boolean authenticateHuman(String machineIdent);

@@ -92,6 +92,13 @@ public class Communication implements CommunicationInterface {
         return secureTransport.sendAESEncryptedMessage(destination, msg);
     }
     
+    @Override 
+    public boolean sendManualDiscoverMessage(String destination, String ip, int port, Message msg) {
+        secureTransport.addPeer(destination, ip, port);
+        return secureTransport.sendPlainTextMessage(destination, msg);
+    }
+    
+    
 //    @Override
 //    public boolean broadcastMessage(Message msg){
 //        //Might need to protect this when iterating..but probably not

@@ -4,10 +4,12 @@ package application.encryption_demo;
 import application.encryption_demo.Messages.Message;
 import application.encryption_demo.Messages.StringMessage;
 import application.encryption_demo.DiscoveredPeers.Peer;
+import application.encryption_demo.Messages.DiscoveryMessage;
 import application.encryption_demo.Messages.RequestDocUpdateMessage;
 import application.encryption_demo.Messages.RequestJoinDocMessage;
 import application.encryption_demo.Messages.UpdateDocumentMessage;
 import application.encryption_demo.forms.ChatWindow;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -45,7 +47,9 @@ public class EncryptionDemoFunctionality {
     }
     
     public void manuallyAddPeer(String id, String host, int port, ArrayList<String> docs) {
-        communication.updatePeers(id, host, port, docs, false);
+//        communication.updatePeers(id, host, port, docs, false);
+        DiscoveryMessage dm = new DiscoveryMessage(profile.ident, profile.host, profile.port);
+        communication.sendManualDiscoverMessage(id, host, port, dm);
     }
     
     /**
@@ -202,6 +206,9 @@ public class EncryptionDemoFunctionality {
                         String docID = DocumentInstance.toDocumentIdentifier(updateMsg.ownerID, updateMsg.docName);
                         
                         displayIncomingMessage(docID, updateMsg.text);
+                    }
+                    else if (m instanceof DiscoveryMessage) {
+
                     }
                 }
             }

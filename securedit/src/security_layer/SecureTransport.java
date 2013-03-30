@@ -2,6 +2,7 @@ package security_layer;
 
 
 import application.encryption_demo.CommunicationInterface;
+import application.encryption_demo.Messages.DiscoveryMessage;
 import application.encryption_demo.Messages.Message;
 import configuration.Constants;
 import java.io.File;
@@ -17,6 +18,7 @@ import java.security.SignatureException;
 import java.security.SignedObject;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -51,7 +53,7 @@ public class SecureTransport implements SecureTransportInterface{
     private ConcurrentMap<String, Integer> lastReceived = new ConcurrentHashMap<>();
     private AtomicInteger counter = new AtomicInteger();
     private ConcurrentMap<String, EncryptedAESMessage> pendingHumanAuth = new ConcurrentHashMap<>();
-    
+    private Profile profile;
     
     public SecureTransport(String password){
         Key personalKey = KeyFactory.generateSymmetricKey(password);
@@ -62,7 +64,9 @@ public class SecureTransport implements SecureTransportInterface{
     public SecureTransport(Profile profile, String password, CommunicationInterface communication) {        
         Key personalKey = KeyFactory.generateSymmetricKey(password);
         keys = new EncryptionKeys(personalKey, profile.ident, password);
-                
+        
+        this.profile = profile;
+        
         keys.privateKey = profile.keys.privateKey;
         keys.signingKey = profile.keys.signingKey;
         keys.publicKeys = profile.keys.publicKeys;
@@ -293,10 +297,31 @@ public class SecureTransport implements SecureTransportInterface{
         long myKeyVersion = keys.getAsymmetricKeyVersion(keys.ident);
         long myOwnersKeyVersion = keys.getAsymmetricKeyVersion(msg.owner);
         
+        System.out.println(pk);
+        System.out.println(myOwnersKeyVersion);
+        System.out.println(msg.ownerAsymmetricKeyVersion);
+        System.out.println(myKeyVersion);
+        System.out.println(msg.clientsKeyVersionNumberHeldByOwner);
+        
+        
         if(pk != null && myOwnersKeyVersion == msg.ownerAsymmetricKeyVersion && myKeyVersion == msg.clientsKeyVersionNumberHeldByOwner){
             communication.updatePeers(msg.owner, msg.ip, msg.port, msg.documents, true);
         } else{
             communication.updatePeers(msg.owner, msg.ip, msg.port, msg.documents, false);
+        }
+    }
+    
+    private void processDiscoveryMessage(DiscoveryMessage dm) {
+        if(Constants.DEBUG_ON){
+            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Processing " + DiscoveryMessage.class.getName() + " from " + dm.sourceID + ".");
+        }
+        if(!dm.sourceID.equals(profile.ident) && this.profile.documentsOpenForDiscovery.size() > 0){
+            List<String> documentNames = new ArrayList<>(this.profile.documentsOpenForDiscovery);   //must copy here, possibly due to transient flag
+            long myKeyVersion = profile.getAsymmetricKeyVersionNumber(this.profile.ident);
+            long clientsKeyVersion = profile.getAsymmetricKeyVersionNumber(dm.sourceID);
+            DiscoveryResponseMessage responseMessage = new DiscoveryResponseMessage(profile.ident, profile.host, profile.port, documentNames, myKeyVersion, clientsKeyVersion);
+            networkTransport.addPeer(dm.sourceID, dm.sourceIP, dm.sourcePort);
+            networkTransport.send(dm.sourceID, responseMessage);
         }
     }
     
@@ -305,7 +330,12 @@ public class SecureTransport implements SecureTransportInterface{
         if(Constants.DEBUG_ON){
             Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Processing " + PlaintextMessage.class.getName() + " from " + sourceOfMessage + ".");
         }
-        authInstance.processHumanAuthenticationRequest(sourceOfMessage, (HumanAuthenticationMessage)msg.m, this);
+        if (msg.m instanceof DiscoveryMessage) {
+            processDiscoveryMessage((DiscoveryMessage)msg.m);
+        } else if (msg.m instanceof HumanAuthenticationMessage) {
+            authInstance.processHumanAuthenticationRequest(sourceOfMessage, (HumanAuthenticationMessage)msg.m, this);
+        }
+        
         return true;
     }
     

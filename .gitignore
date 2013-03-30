@@ -18,3 +18,4 @@ securedit/keys_1
 securedit/keys_2
 
 securedit/*.profile
+*.profile

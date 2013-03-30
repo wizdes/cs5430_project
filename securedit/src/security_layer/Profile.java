@@ -63,7 +63,12 @@ public class Profile implements Message {
             Logger.getLogger(Profile.class.getName()).log(Level.INFO, "Reading profile for " + username + ", " + pw);
         }
         SecureTransport transport = new SecureTransport(pw);
-        return (Profile)transport.readEncryptedFile(username + ".profile");
+        Profile p = (Profile)transport.readEncryptedFile(username + ".profile");
+        if (p != null) {
+            p.documentsHiddenFromDiscovery = new ArrayList<>();
+            p.documentsOpenForDiscovery = new ArrayList<>();            
+        }
+        return p;
     }
 
     public static Profile writeProfile(String username, String pw, int port, String host) {

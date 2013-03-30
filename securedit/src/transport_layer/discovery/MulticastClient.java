@@ -66,7 +66,7 @@ class MulticastClient extends Thread {
                         long myKeyVersion = profile.getAsymmetricKeyVersionNumber(this.profile.ident);
                         long clientsKeyVersion = profile.getAsymmetricKeyVersionNumber(discoveryPacket.sourceID);
                         DiscoveryResponseMessage responseMessage = new DiscoveryResponseMessage(profile.ident, profile.host, profile.port, documentNames, myKeyVersion, clientsKeyVersion);
-                        networkTransport.addPeer(discoveryPacket.sourceID, discoveryPacket.myIP, discoveryPacket.myPort);                    
+                        networkTransport.addPeer(discoveryPacket.sourceID, discoveryPacket.myIP, discoveryPacket.myPort);
                         networkTransport.send(discoveryPacket.sourceID, responseMessage);
                     }
                 }
