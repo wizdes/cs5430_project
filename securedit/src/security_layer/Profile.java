@@ -86,9 +86,9 @@ public class Profile implements Message {
         profile.host = host;
         profile.port = port;
         profile.ident = username;
-        profile.keys.ident = username;
-        SecretKey personalKey = (SecretKey)KeyFactory.generateSymmetricKey(profile.keys.password);
+        SecretKey personalKey = (SecretKey)KeyFactory.generateSymmetricKey(pw);
         profile.keys = new EncryptionKeys(personalKey, pw);
+        profile.keys.ident = username;
         
         KeyPair asymmetricKeys = KeyFactory.generateAsymmetricKeys();
         profile.keys.publicKeys = new ConcurrentHashMap<>();
