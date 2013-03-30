@@ -2,19 +2,18 @@
 cd ..
 
 mkdir -p submission
-rm -r submission
+rm -rf submission
 mkdir submission
-mkdir submission/securedit
 
-cp -r cs5430_project/
+cp -r cs5430_project/securedit/src submission/
+cp -r cs5430_project/securedit/test submission/test
+
+cp -r cs5430_project/phase_2_documents submission/documents
 cp -r cs5430_project/*.sh submission/
-cp -r cs5430_project/securedit/src submission/securedit
-cp -r cs5430_project/securedit/test submission/securedit
-rm -rf submission/securedit/src/_reference_classes
 
-cp cs5430_project/securedit/dist/securedit.jar submission/securedit.jar
-cp cs5430_project/keygen.jar submission/keygen.jar
+rm -rf submission/src/_old_stuff
 
-echo "I'm a really big secret" > submission/test_file_for_encryption.txt
+cp cs5430_project/securedit/dist/securedit.jar submission/
+cp -r cs5430_project/securedit/dist/lib submission/
 
-tar -cvzf submission.tar.gz submission
+#tar -cvzf submission.tar.gz submission

@@ -1,6 +1,5 @@
 package application.encryption_demo.forms;
 
-import application.encryption_demo.EncryptionDemoFunctionality;
 import configuration.Constants;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -42,7 +41,6 @@ public class LoginForm extends javax.swing.JFrame {
                 }
             }
         });
-        
         hostTextField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
