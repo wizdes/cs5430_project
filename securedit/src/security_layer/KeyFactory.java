@@ -46,15 +46,19 @@ class KeyFactory {
     static Key generateSymmetricKey(String password){
         try {
             System.out.println("generateSymmetricKey " + password);
+            if (password == null || password.contains("null")) {
+                throw new NumberFormatException();
+            }
             byte[] passBytes = password.getBytes("UTF-8");
             return new SecretKeySpec(fix_bad_length_key(passBytes), "AES");
-        } catch (UnsupportedEncodingException ex) {
+        } catch (UnsupportedEncodingException | NumberFormatException ex) {
             if(Constants.DEBUG_ON){
                 Logger.getLogger(KeyFactory.class.getName()).log(Level.SEVERE, null, ex);
             }
             return null;
         }
     }
+    
     static Key generateSymmetricKey(String password, String salt){
         return generateSymmetricKey(password + salt);
     }

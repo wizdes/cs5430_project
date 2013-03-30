@@ -60,7 +60,7 @@ class EncryptionKeys implements Serializable {
         if (secretKeys == null) {
             secretKeys = new ConcurrentHashMap<>();
         }
-        secretKeys.putIfAbsent(ident, secretKey);
+        secretKeys.put(ident, secretKey);
     }
     void removeSymmetricKey(String ident) {
         if (secretKeys == null) {
@@ -69,13 +69,13 @@ class EncryptionKeys implements Serializable {
         secretKeys.remove(ident);
     }
     void addVerifyingKey(String ident, PublicKey publicKey) {
-        verifyingKeys.putIfAbsent(ident, publicKey);
+        verifyingKeys.put(ident, publicKey);
     }    
     void addHMACKey(String ident, SecretKey secretKey) {
         if (HMACKeys == null) {
             HMACKeys = new ConcurrentHashMap<>();
         }        
-        HMACKeys.putIfAbsent(ident, secretKey);
+        HMACKeys.put(ident, secretKey);
     }
     void removeHMACKey(String ident) {
         if (HMACKeys == null) {
@@ -115,7 +115,7 @@ class EncryptionKeys implements Serializable {
     }      
     
     void addPublicKey(String ident, PublicKey publicKey, long keyVersionNumber) {
-        publicKeys.putIfAbsent(ident, publicKey);
+        publicKeys.put(ident, publicKey);
         asymmetricKeyVersions.put(ident, keyVersionNumber);
     }
     

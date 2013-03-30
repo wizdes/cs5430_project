@@ -14,6 +14,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import security_layer.Profile;
 
@@ -344,11 +345,6 @@ public class ChatWindow extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
     public void displayPIN(final String ID, final String PIN){
-        JDialog dialog;
-        dialog = new JDialog(this,ID + ": " + PIN);
-        dialog.setSize(250,80);
-        JLabel dialogLabel = new JLabel("PIN for :" + ID + ": " + PIN);
-        dialog.add(dialogLabel);
-        dialog.setVisible(true);
+        new PINDisplayDialog(ID, PIN).setVisible(true);
     }
 }

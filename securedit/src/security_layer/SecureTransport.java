@@ -74,7 +74,7 @@ public class SecureTransport implements SecureTransportInterface{
         this.discoveryTransport = new DiscoveryTransport(profile, networkTransport);
         this.communication = communication;
         
-        authInstance = new Authentications(profile, this);
+        authInstance = new Authentications(profile, password, this);
     }
     
     @Override

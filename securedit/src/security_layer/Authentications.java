@@ -24,14 +24,16 @@ class Authentications {
     private ConcurrentMap<String, String> pins = new ConcurrentHashMap<>();
     private EncryptionKeys keys;
     private Profile profile;
+    private String password;
     PINFunctionality pf;
     SecureTransportInterface secureTransport;
     
-    Authentications(Profile profile, SecureTransportInterface secureTransport) {
+    Authentications(Profile profile, String password, SecureTransportInterface secureTransport) {
         pf = new PINFunctionality();
         this.keys = profile.keys;
         this.profile = profile;
         this.secureTransport = secureTransport;
+        this.password = password;
     }
     
     private void addAuthentication(String ident, Message message){
@@ -168,7 +170,6 @@ class Authentications {
             keys.secretKeys.remove(sourceOfMsg);
             keys.HMACKeys.remove(sourceOfMsg);
             
-            //profile.save(keys.password);
         }
         else {
             if(Constants.DEBUG_ON){
@@ -191,7 +192,7 @@ class Authentications {
             keys.secretKeys.remove(sourceOfMsg);
             keys.HMACKeys.remove(sourceOfMsg);
             
-            profile.save(keys.password);            
+            profile.save(password);            
         }
         
     }

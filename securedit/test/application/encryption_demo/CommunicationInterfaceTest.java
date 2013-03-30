@@ -160,7 +160,7 @@ public class CommunicationInterfaceTest {
 //        assertTrue(p1Communicator.authenticateMachine(p2Ident));
     }
     
-//    @Test
+    @Test
     public void testMachineAuthentication() {
         p1.addPublicKeysFrom(p2); p1.addPublicKeysFrom(p3); p1.save(password_1);
         p2.addPublicKeysFrom(p1); p2.addPublicKeysFrom(p3); p2.save(password_2);
