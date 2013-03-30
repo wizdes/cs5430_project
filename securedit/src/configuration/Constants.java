@@ -11,6 +11,14 @@ package configuration;
 public class Constants {
     public static final boolean DEBUG_ON = true;
     public static final String passwordCharacterRegex = ".*[^a-zA-Z\\s0-9].*";
+    
+    public static final int PIN_LENGTH = 8;
+    public static final String GLOBAL_ENCODING = "UTF-8";
+    
+    //Ascii without alphanumeric, spaces, and junk stuff don't want.
+    public static final String PIN_SYMBOLS_REGEX = ".*[^a-zA-Z\\d\\s].*";
+    
+
     public static final int numBytesPIN = 20 * 8;
     public static final int lengthPIN = 8;
     public static final String groupAddress = "230.0.0.1";    //All "clients"(owners of documents) listen on this.
