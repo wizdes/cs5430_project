@@ -16,12 +16,8 @@ import java.util.logging.Logger;
  * @author Patrick C. Berens
  */
 class MulticastServer extends Thread{
-    private static final String groupAddress = "230.0.0.1";    //All "clients"(owners of documents) listen on this.
-    private static final int discoveryPort = 5446;      //All "clients" use this port.
-    private static final String ENCODING = "UTF-8";
     
     private DatagramSocket socket = null;
-    private static final int numTimesBroadcast = 1;
     
     private DiscoveryPacket discoveryPacket;
     
@@ -29,19 +25,19 @@ class MulticastServer extends Thread{
     public void run(){
         try {
             /* Convert packet to byte buffer */
-            byte[] buf = discoveryPacket.toString().getBytes(ENCODING);    //Check max size...
+            byte[] buf = discoveryPacket.toString().getBytes(Constants.ENCODING);    //Check max size...
             //May want to use Base64 instead/in addition to ENCODING....
 
             /* Try to send packet a few times in case dropped */
-            for (int i = 0; i < numTimesBroadcast; i++) {
+            for (int i = 0; i < Constants.numTimesBroadcast; i++) {
                 if(Constants.DEBUG_ON){
                     Logger.getLogger(MulticastServer.class.getName()).log(Level.INFO, "[User: " + discoveryPacket.sourceID + "] Broadcasting " + DiscoveryPacket.class.getName() + ": " + discoveryPacket);
                 }
                 /* Send data to anyone listening to group 230.0.0.1 and sleep for 5 secs*/
-                InetAddress group = InetAddress.getByName(groupAddress);
-                DatagramPacket packet = new DatagramPacket(buf, buf.length, group, discoveryPort);
+                InetAddress group = InetAddress.getByName(Constants.groupAddress);
+                DatagramPacket packet = new DatagramPacket(buf, buf.length, group, Constants.discoveryPort);
                 socket.send(packet);
-                if(i+1 != numTimesBroadcast){
+                if(i+1 != Constants.numTimesBroadcast){
                     Thread.sleep(1000); //Sleep if not last broadcast
                 }
             }

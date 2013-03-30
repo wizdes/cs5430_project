@@ -10,6 +10,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import security_layer.Profile;
@@ -45,7 +48,6 @@ public class ChatWindow extends javax.swing.JFrame {
         this.functionality =  new EncryptionDemoFunctionality(this, profile, password);
         initComponents();
         this.setTitle("Chat Window - User: " + profile.ident);
-        
     }
 
     /**
@@ -343,4 +345,13 @@ public class ChatWindow extends javax.swing.JFrame {
     private javax.swing.JButton startChatButton;
     javax.swing.JTabbedPane tabbedPane;
     // End of variables declaration//GEN-END:variables
+
+    public void displayPIN(final String ID, final String PIN){
+        JDialog dialog;
+        dialog = new JDialog(this,ID + ": " + PIN);
+        dialog.setSize(250,80);
+        JLabel dialogLabel = new JLabel("PIN for :" + ID + ": " + PIN);
+        dialog.add(dialogLabel);
+        dialog.setVisible(true);
+    }
 }
