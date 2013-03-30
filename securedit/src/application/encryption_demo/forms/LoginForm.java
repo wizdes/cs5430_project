@@ -345,7 +345,7 @@ public class LoginForm extends javax.swing.JFrame {
             handleException(ex);
             return;
         }
-        Profile profile = Profile.writeProfile(username, password, appPort, appHost);
+        Profile profile = Profile.createProfile(username, password, appPort, appHost);
         transitionToChatWindow(profile, password);
     }//GEN-LAST:event_createAccountButtonActionPerformed
         

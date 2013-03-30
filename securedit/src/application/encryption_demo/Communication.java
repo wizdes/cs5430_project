@@ -169,7 +169,9 @@ public class Communication implements CommunicationInterface {
     @Override
     public void updateHumanAuthStatus(String ident, boolean hasHumanAuthenticated){
         discoveredPeers.updateHumanAuthStatus(ident, hasHumanAuthenticated);
-        guiFunctionality.updatePeersInGUI(discoveredPeers);
+        if (guiFunctionality != null) {
+            guiFunctionality.updatePeersInGUI(discoveredPeers);
+        }
         this.profile.save(password);
     }
 

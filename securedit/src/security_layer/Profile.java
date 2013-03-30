@@ -25,6 +25,8 @@ public class Profile implements Message {
     public int port;
     EncryptionKeys keys;
     
+    public Profile() {}
+    
     //These documents will be returned when a discovery broadcast is received.
     public transient ArrayList<String> documentsOpenForDiscovery = new ArrayList<>();
     
@@ -32,6 +34,7 @@ public class Profile implements Message {
     public transient ArrayList<String> documentsHiddenFromDiscovery = new ArrayList<>();
     
     public void save(String pw) {
+        this.keys.password = pw;
         SecureTransport transport = new SecureTransport(this);
         transport.writeEncryptedFile(ident + ".profile", this);
     }
@@ -74,11 +77,12 @@ public class Profile implements Message {
         if (p != null) {
             p.documentsHiddenFromDiscovery = new ArrayList<>();
             p.documentsOpenForDiscovery = new ArrayList<>();            
+            p.keys.personalKey = personalKey;
         }
         return p;
     }
 
-    public static Profile writeProfile(String username, String pw, int port, String host) {
+    public static Profile createProfile(String username, String pw, int port, String host) {
         if(Constants.DEBUG_ON){
             Logger.getLogger(Profile.class.getName()).log(Level.INFO, "Creating new profile for " + username + ", " + pw);
         }

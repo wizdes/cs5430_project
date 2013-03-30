@@ -221,12 +221,17 @@ class Authentications {
             Message m = new MA_Msg2(symmetricKey, nonceResponse1);
             
             sti.sendRSAEncryptedMessage(sourceOfMsg, m);
+            
+            Constants.log(profile.ident + " : adding SYMKEY for " + idOfNodeAuthenticationWith + " = " + symmetricKey);
             keys.addSymmetricKey(idOfNodeAuthenticationWith, symmetricKey);
             
             int nonceResponse2 = msg.nonce + 2;
             Message m3 = new MA_Msg3(HMACKey, nonceResponse2);
             sti.sendRSAEncryptedMessage(sourceOfMsg, m3);
-            keys.addHMACKey(idOfNodeAuthenticationWith, HMACKey);            
+            
+            Constants.log(profile.ident + " : adding HMAC for " + idOfNodeAuthenticationWith + " = " + HMACKey);
+            keys.addHMACKey(idOfNodeAuthenticationWith, HMACKey);
+            
         } else if (message instanceof MA_Msg2) {
             if(Constants.DEBUG_ON){
                 Logger.getLogger(Authentications.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Processing Machine Authentication Message: " + MA_Msg2.class.getName());
@@ -261,6 +266,7 @@ class Authentications {
                 return;
             }
             
+            Constants.log(profile.ident + " : adding HMAC for " + idOfNodeAuthenticationWith + " = " + msg.SK);
             keys.addHMACKey(idOfNodeAuthenticationWith, msg.SK);
             
             if (!keys.hasSymmetricKey(idOfNodeAuthenticationWith)) {

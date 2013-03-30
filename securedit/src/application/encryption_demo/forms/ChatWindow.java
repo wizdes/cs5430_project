@@ -33,7 +33,7 @@ public class ChatWindow extends javax.swing.JFrame {
         if (new File("0.profile").exists()) {
             profile = Profile.readProfile("0", password);
         } else {
-            profile = Profile.writeProfile("0", password, 4000, "localhost");
+            profile = Profile.createProfile("0", password, 4000, "localhost");
         }
         
         ChatWindow form = new ChatWindow(profile, password);
@@ -286,16 +286,12 @@ public class ChatWindow extends javax.swing.JFrame {
         
         //Create document instance and send join request for doc
         String docID = this.functionality.createDocumentInstance(ownerId, docName);
-        
         docIDs.put(this.tabbedPane.getTabCount(), docID);
-        
         if(!this.functionality.sendJoinRequestMessage(ownerId, docName)){
             showMessage("Join chat request failed to send!");
             return;
         }
-        
         //TODO FINAL PHASE: Authorization: Should wait here for authorization telling me chat request was accepted.
-        
         this.functionality.updateHumanAuthStatus(ownerId, true);
         ChatPanel panel = new ChatPanel();
         chatPanels.put(docID, panel);

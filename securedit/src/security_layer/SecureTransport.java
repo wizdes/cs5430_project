@@ -84,8 +84,12 @@ public class SecureTransport implements SecureTransportInterface{
     
     @Override
     public boolean authenticate(String machineIdent) {
+        
+        Constants.log(profile.ident + " : authenticating");
+        
         //If machine has been authenticated or trying to authenticate with itself, return
         if (authInstance.hasAuthenticated(machineIdent) || machineIdent.equals(profile.keys.ident)) {
+            Constants.log(profile.ident + " : has already authenticated with " + machineIdent);
             return true;
         }
         final Lock authenticateLock = new ReentrantLock(true);
@@ -197,6 +201,8 @@ public class SecureTransport implements SecureTransportInterface{
             switch(encryptedMessage.getAlgorithm()){
                 case CipherFactory.AES_ALGORITHM:
                     
+                    Constants.log("AES");
+                    
                     EncryptedAESMessage aesMessage = (EncryptedAESMessage)encryptedMessage;
                     encryptedObject = aesMessage.encryptedObject;
 
@@ -204,6 +210,7 @@ public class SecureTransport implements SecureTransportInterface{
                     secretKey = profile.keys.getSymmetricKey(sourceOfMessage);
                     
                     if (HMACKey == null || secretKey == null) {
+                        Constants.log(SecureTransport.class.getName(), "[User: " + profile.keys.ident + "] adding " + sourceOfMessage + " to pendingHumanAuth");
                         this.pendingHumanAuth.put(sourceOfMessage, aesMessage);
                         return true;
                     }                    
@@ -223,6 +230,9 @@ public class SecureTransport implements SecureTransportInterface{
                     break;
                     
                 case CipherFactory.SIGNING_ALGORITHM:
+                    
+                    Constants.log("SIGNING_ALGORITHM");
+                    
                     EncryptedRSAMessage rsaMessage = (EncryptedRSAMessage)encryptedMessage;
                     SignedObject signedObject = rsaMessage.signedObject;
                     PublicKey verifyingKey = profile.keys.getVerifyingKey(sourceOfMessage);
@@ -231,6 +241,7 @@ public class SecureTransport implements SecureTransportInterface{
                     if (!verified) {
                         throw new SignatureException("[User: " + profile.keys.ident + "] Unverified message from " + sourceOfMessage);
                     } else {
+                        Constants.log("SIGNING_ALGORITHM = 1");
                         encryptedObject = (SealedObject)signedObject.getObject();
                         cipher = CipherFactory.constructRSADecryptionCipher(profile.keys.privateKey);
                     }
