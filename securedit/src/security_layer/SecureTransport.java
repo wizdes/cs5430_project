@@ -207,12 +207,6 @@ public class SecureTransport implements SecureTransportInterface{
             Cipher cipher = null;
             switch(encryptedMessage.getAlgorithm()){
                 case CipherFactory.AES_ALGORITHM:
-     
-//                    if (encryptedMessage instanceof EncryptedAESHumanAuthMessage) {
-//                        EncryptedAESMessage m = ((EncryptedAESHumanAuthMessage)encryptedMessage).aesMessage;
-//                        this.pendingHumanAuth.put(sourceOfMessage, m);
-//                        return true;
-//                    }
                     
                     EncryptedAESMessage aesMessage = (EncryptedAESMessage)encryptedMessage;
                     encryptedObject = aesMessage.encryptedObject;
