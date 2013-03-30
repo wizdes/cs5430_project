@@ -30,10 +30,11 @@ public class Profile implements Message {
     public transient ArrayList<String> documentsHiddenFromDiscovery = new ArrayList<>();
     
     public void save(String pw) {
+        System.out.println("save " + pw);
         SecureTransport transport = new SecureTransport(pw);
         transport.writeEncryptedFile(ident + ".profile", this);
     }
-    
+       
     public void addPublicKeysFrom(Profile other) {
         this.keys.publicKeys.put(other.ident, other.keys.publicKeys.get(other.ident));
         this.keys.verifyingKeys.put(other.ident, other.keys.verifyingKeys.get(other.ident));

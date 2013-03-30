@@ -23,12 +23,14 @@ class Authentications {
     private ConcurrentMap<String, Authentication> authentications = new ConcurrentHashMap<>();
     private ConcurrentMap<String, String> pins = new ConcurrentHashMap<>();
     private EncryptionKeys keys;
+    private Profile profile;
     PINFunctionality pf;
     SecureTransportInterface secureTransport;
     
-    Authentications(EncryptionKeys keys, SecureTransportInterface secureTransport) {
+    Authentications(Profile profile, SecureTransportInterface secureTransport) {
         pf = new PINFunctionality();
-        this.keys = keys;
+        this.keys = profile.keys;
+        this.profile = profile;
         this.secureTransport = secureTransport;
     }
     
@@ -134,6 +136,7 @@ class Authentications {
             int nonceResponse1 = msg.nonce + 1;
             Message m = new HA_Msg2(publicKey, verifyingKey, myAsymmetricKeyVersion, nonceResponse1);
             sti.sendAESEncryptedMessage(idOfNodeAuthenticationWith, m, pinKey, HMACKey);
+                        
         } else if (message instanceof HA_Msg2) {
             if(Constants.DEBUG_ON){    
                 Logger.getLogger(Authentications.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Processing Human Authentication Message: " + HA_Msg2.class.getName());
@@ -153,6 +156,7 @@ class Authentications {
             keys.addPublicKey(idOfNodeAuthenticationWith, otherPublicKey, msg.ownersAsymmetricKeyVersion);
             keys.addVerifyingKey(idOfNodeAuthenticationWith, msg.verifyingKey);
             
+            
             PublicKey publicKey = keys.publicKeys.get(keys.ident);
             PublicKey verifyingKey = keys.verifyingKeys.get(keys.ident);
             long asymmetricKeyVersion = keys.asymmetricKeyVersions.get(keys.ident);
@@ -163,6 +167,8 @@ class Authentications {
                     keys.getSymmetricKey(idOfNodeAuthenticationWith), keys.getHMACKey(idOfNodeAuthenticationWith));
             keys.secretKeys.remove(sourceOfMsg);
             keys.HMACKeys.remove(sourceOfMsg);
+            
+            profile.save(keys.password);
         }
         else {
             if(Constants.DEBUG_ON){
@@ -181,9 +187,11 @@ class Authentications {
             PublicKey otherPublicKey = msg.publicKey;
             keys.addPublicKey(idOfNodeAuthenticationWith, otherPublicKey, msg.asymmetricKeyVersion);
             keys.addVerifyingKey(idOfNodeAuthenticationWith, msg.verifyingKey);
-            
+
             keys.secretKeys.remove(sourceOfMsg);
             keys.HMACKeys.remove(sourceOfMsg);
+            
+            profile.save(keys.password);            
         }
         
     }

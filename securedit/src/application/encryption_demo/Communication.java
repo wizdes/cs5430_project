@@ -35,6 +35,7 @@ public class Communication implements CommunicationInterface {
     private DiscoveredPeers discoveredPeers = new DiscoveredPeers();
     private EncryptionDemoFunctionality guiFunctionality;
     private Profile profile;
+    private String password;
     
     public void displayPIN(String ID, String PIN){
         if (guiFunctionality != null) {
@@ -45,12 +46,14 @@ public class Communication implements CommunicationInterface {
     public Communication(Profile profile, String password) {
         //Only used for test packages
         this.profile = profile;
+        this.password = password;
         this.secureTransport = new SecureTransport(profile, password, this);
     }
     public Communication(Profile profile, String password, EncryptionDemoFunctionality guiFunctionality) {
         this.profile = profile;
         this.secureTransport = new SecureTransport(profile, password, this);
         this.guiFunctionality = guiFunctionality;
+        this.password = password;
     }
     
     @Override
@@ -167,6 +170,7 @@ public class Communication implements CommunicationInterface {
     public void updateHumanAuthStatus(String ident, boolean hasHumanAuthenticated){
         discoveredPeers.updateHumanAuthStatus(ident, hasHumanAuthenticated);
         guiFunctionality.updatePeersInGUI(discoveredPeers);
+        this.profile.save(password);
     }
 
     @Override

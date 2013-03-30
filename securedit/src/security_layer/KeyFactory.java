@@ -45,6 +45,7 @@ class KeyFactory {
     
     static Key generateSymmetricKey(String password){
         try {
+            System.out.println("generateSymmetricKey " + password);
             byte[] passBytes = password.getBytes("UTF-8");
             return new SecretKeySpec(fix_bad_length_key(passBytes), "AES");
         } catch (UnsupportedEncodingException ex) {

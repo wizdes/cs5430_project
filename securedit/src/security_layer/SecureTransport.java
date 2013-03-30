@@ -58,7 +58,7 @@ public class SecureTransport implements SecureTransportInterface{
     public SecureTransport(String password){
         Key personalKey = KeyFactory.generateSymmetricKey(password);
         keys = new EncryptionKeys(personalKey, password);
-        authInstance = new Authentications(keys, this);
+//        authInstance = new Authentications(profile, this);
     }
     
     public SecureTransport(Profile profile, String password, CommunicationInterface communication) {        
@@ -82,7 +82,7 @@ public class SecureTransport implements SecureTransportInterface{
         this.discoveryTransport = new DiscoveryTransport(profile, networkTransport);
         this.communication = communication;
         
-        authInstance = new Authentications(keys, this);
+        authInstance = new Authentications(profile, this);
     }
     
     @Override
@@ -303,7 +303,6 @@ public class SecureTransport implements SecureTransportInterface{
         System.out.println(myKeyVersion);
         System.out.println(msg.clientsKeyVersionNumberHeldByOwner);
         
-        
         if(pk != null && myOwnersKeyVersion == msg.ownerAsymmetricKeyVersion && myKeyVersion == msg.clientsKeyVersionNumberHeldByOwner){
             communication.updatePeers(msg.owner, msg.ip, msg.port, msg.documents, true);
         } else{
@@ -319,7 +318,8 @@ public class SecureTransport implements SecureTransportInterface{
             List<String> documentNames = new ArrayList<>(this.profile.documentsOpenForDiscovery);   //must copy here, possibly due to transient flag
             long myKeyVersion = profile.getAsymmetricKeyVersionNumber(this.profile.ident);
             long clientsKeyVersion = profile.getAsymmetricKeyVersionNumber(dm.sourceID);
-            DiscoveryResponseMessage responseMessage = new DiscoveryResponseMessage(profile.ident, profile.host, profile.port, documentNames, myKeyVersion, clientsKeyVersion);
+            DiscoveryResponseMessage responseMessage = new DiscoveryResponseMessage(profile.ident, 
+                    profile.host, profile.port, documentNames, myKeyVersion, clientsKeyVersion);
             networkTransport.addPeer(dm.sourceID, dm.sourceIP, dm.sourcePort);
             networkTransport.send(dm.sourceID, responseMessage);
         }
