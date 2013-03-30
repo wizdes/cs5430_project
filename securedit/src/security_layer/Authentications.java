@@ -111,7 +111,7 @@ class Authentications {
             }
             
             //generate a PIN
-            String PIN = pf.getPIN().substring(0, 3);
+            String PIN = pf.getPIN();
             String PINHMAC = PIN + "HMAC";
             System.out.println("PIN is: " + PIN);
             pins.put(idOfNodeAuthenticationWith, PIN);
