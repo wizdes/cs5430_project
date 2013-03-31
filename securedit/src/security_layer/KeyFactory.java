@@ -45,7 +45,7 @@ class KeyFactory {
     
     static Key generateSymmetricKey(String password){
         try {
-            System.out.println("generateSymmetricKey " + password);
+            //System.out.println("generateSymmetricKey " + password);
             if (password == null || password.contains("null")) {
                 throw new NumberFormatException();
             }
