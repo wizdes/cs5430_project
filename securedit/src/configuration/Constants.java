@@ -14,11 +14,11 @@ import security_layer.SecureTransport;
  * @author Patrick
  */
 public class Constants {
-    public static final boolean DEBUG_ON = true;
+    public static final boolean DEBUG_ON = false;
     public static final String passwordCharacterRegex = ".*[^a-zA-Z\\s0-9].*";
     public static final int MIN_PASSWORD_LENGTH = 12;
     
-    public static final int PIN_LENGTH = 3;
+    public static final int PIN_LENGTH = 12;
     public static final String GLOBAL_ENCODING = "UTF-8";
     
     //Ascii without alphanumeric, spaces, and junk stuff don't want.
