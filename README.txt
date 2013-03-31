@@ -7,5 +7,8 @@ Source files that contain the source needed to compile and run your software. Th
 files containing the code to authenticate human users that will later be used in your project
 scaffolding and GUI code used in the Demo you give the graders to show that your system actually works as intended.
 
+Not sure if this means we shouldn't list previous encryption code? Either way, it is necessary for human auth too, so
+maybe not in depth.
+
 Table of Contents:
 
