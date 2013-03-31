@@ -30,8 +30,10 @@ A -> B : r    ( where r is fresh and unpredictable at A )
 B -> A : {PK_B, VK_B, r + 1}K_PIN
   B generates a 1 time pin PIN, and uses that to generate an 
   AES key, K_PIN, which B uses to encrypt the message.  At this
-  point B also verbally transfers the PIN to person A
+  point person B also verbally transfers the PIN to person A
 A -> B : {PK_A, VK_A, r + 2}K_PIN
+  After A inputs the PIN into their GUI, they can decrypt the 
+  message from B and sends a reply
 
 At this point, A and B have one another's public keys and verifying keys, and they can proceed with machine authentication as detailed in the previous phase
 
