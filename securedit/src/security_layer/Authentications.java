@@ -23,13 +23,17 @@ class Authentications {
     private ConcurrentMap<String, Authentication> authentications = new ConcurrentHashMap<>();
     private ConcurrentMap<String, String> pins = new ConcurrentHashMap<>();
     private EncryptionKeys keys;
+    private Profile profile;
+    private String password;
     PINFunctionality pf;
     SecureTransportInterface secureTransport;
     
-    Authentications(EncryptionKeys keys, SecureTransportInterface secureTransport) {
+    Authentications(Profile profile, String password, SecureTransportInterface secureTransport) {
         pf = new PINFunctionality();
-        this.keys = keys;
+        this.keys = profile.keys;
+        this.profile = profile;
         this.secureTransport = secureTransport;
+        this.password = password;
     }
     
     private void addAuthentication(String ident, Message message){
@@ -134,6 +138,7 @@ class Authentications {
             int nonceResponse1 = msg.nonce + 1;
             Message m = new HA_Msg2(publicKey, verifyingKey, myAsymmetricKeyVersion, nonceResponse1);
             sti.sendAESEncryptedMessage(idOfNodeAuthenticationWith, m, pinKey, HMACKey);
+                        
         } else if (message instanceof HA_Msg2) {
             if(Constants.DEBUG_ON){    
                 Logger.getLogger(Authentications.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Processing Human Authentication Message: " + HA_Msg2.class.getName());
@@ -153,6 +158,7 @@ class Authentications {
             keys.addPublicKey(idOfNodeAuthenticationWith, otherPublicKey, msg.ownersAsymmetricKeyVersion);
             keys.addVerifyingKey(idOfNodeAuthenticationWith, msg.verifyingKey);
             
+            
             PublicKey publicKey = keys.publicKeys.get(keys.ident);
             PublicKey verifyingKey = keys.verifyingKeys.get(keys.ident);
             long asymmetricKeyVersion = keys.asymmetricKeyVersions.get(keys.ident);
@@ -163,6 +169,7 @@ class Authentications {
                     keys.getSymmetricKey(idOfNodeAuthenticationWith), keys.getHMACKey(idOfNodeAuthenticationWith));
             keys.secretKeys.remove(sourceOfMsg);
             keys.HMACKeys.remove(sourceOfMsg);
+            
         }
         else {
             if(Constants.DEBUG_ON){
@@ -181,9 +188,11 @@ class Authentications {
             PublicKey otherPublicKey = msg.publicKey;
             keys.addPublicKey(idOfNodeAuthenticationWith, otherPublicKey, msg.asymmetricKeyVersion);
             keys.addVerifyingKey(idOfNodeAuthenticationWith, msg.verifyingKey);
-            
+
             keys.secretKeys.remove(sourceOfMsg);
             keys.HMACKeys.remove(sourceOfMsg);
+            
+            profile.save(password);            
         }
         
     }
@@ -213,12 +222,17 @@ class Authentications {
             Message m = new MA_Msg2(symmetricKey, nonceResponse1);
             
             sti.sendRSAEncryptedMessage(sourceOfMsg, m);
+            
+            Constants.log(profile.ident + " : adding SYMKEY for " + idOfNodeAuthenticationWith + " = " + symmetricKey);
             keys.addSymmetricKey(idOfNodeAuthenticationWith, symmetricKey);
             
             int nonceResponse2 = msg.nonce + 2;
             Message m3 = new MA_Msg3(HMACKey, nonceResponse2);
             sti.sendRSAEncryptedMessage(sourceOfMsg, m3);
-            keys.addHMACKey(idOfNodeAuthenticationWith, HMACKey);            
+            
+            Constants.log(profile.ident + " : adding HMAC for " + idOfNodeAuthenticationWith + " = " + HMACKey);
+            keys.addHMACKey(idOfNodeAuthenticationWith, HMACKey);
+            
         } else if (message instanceof MA_Msg2) {
             if(Constants.DEBUG_ON){
                 Logger.getLogger(Authentications.class.getName()).log(Level.INFO, "[User: " + keys.ident + "] Processing Machine Authentication Message: " + MA_Msg2.class.getName());
@@ -253,6 +267,7 @@ class Authentications {
                 return;
             }
             
+            Constants.log(profile.ident + " : adding HMAC for " + idOfNodeAuthenticationWith + " = " + msg.SK);
             keys.addHMACKey(idOfNodeAuthenticationWith, msg.SK);
             
             if (!keys.hasSymmetricKey(idOfNodeAuthenticationWith)) {

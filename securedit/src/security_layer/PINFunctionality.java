@@ -59,12 +59,12 @@ public class PINFunctionality {
      */
     private String generatePIN(SecureRandom seededSecureRandom){
             String randomPIN = "";
-            while(randomPIN.length() < Constants.lengthPIN){
+            while(randomPIN.length() < Constants.PIN_LENGTH){
                 randomPIN = new BigInteger(Constants.numBytesPIN, seededSecureRandom).toString(Character.MAX_RADIX);
             }
             String retPIN = "";
             //this makes capital letters
-            for(int i = 0; i < Constants.lengthPIN; i++){
+            for(int i = 0; i < Constants.PIN_LENGTH; i++){
                 char insertPIN = randomPIN.charAt(i);
                 int upper = seededSecureRandom.nextInt(2);
                 if(upper == 1 && !Character.isDigit(insertPIN)){

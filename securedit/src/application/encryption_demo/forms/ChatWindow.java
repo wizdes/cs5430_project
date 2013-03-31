@@ -14,6 +14,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import security_layer.Profile;
 
@@ -33,7 +34,7 @@ public class ChatWindow extends javax.swing.JFrame {
         if (new File("0.profile").exists()) {
             profile = Profile.readProfile("0", password);
         } else {
-            profile = Profile.writeProfile("0", password, 4000, "localhost");
+            profile = Profile.createProfile("0", password, 4000, "localhost");
         }
         
         ChatWindow form = new ChatWindow(profile, password);
@@ -250,6 +251,7 @@ public class ChatWindow extends javax.swing.JFrame {
     private void joinChatButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_joinChatButtonActionPerformed
         //TODO: This needs to be protected with a mutex I think, what if row changes in the middle
         int selectedRow = this.DiscoveredPeersTable.getSelectedRow();
+        if(selectedRow < 0) return;
         String ownerId = (String)this.DiscoveredPeersTable.getModel().getValueAt(selectedRow, 0);
         String docName = (String)this.DiscoveredPeersTable.getModel().getValueAt(selectedRow, 3);
         boolean hasAuthenticated = (Boolean)this.DiscoveredPeersTable.getModel().getValueAt(selectedRow, 4);
@@ -285,16 +287,12 @@ public class ChatWindow extends javax.swing.JFrame {
         
         //Create document instance and send join request for doc
         String docID = this.functionality.createDocumentInstance(ownerId, docName);
-        
         docIDs.put(this.tabbedPane.getTabCount(), docID);
-        
         if(!this.functionality.sendJoinRequestMessage(ownerId, docName)){
             showMessage("Join chat request failed to send!");
             return;
         }
-        
         //TODO FINAL PHASE: Authorization: Should wait here for authorization telling me chat request was accepted.
-        
         this.functionality.updateHumanAuthStatus(ownerId, true);
         ChatPanel panel = new ChatPanel();
         chatPanels.put(docID, panel);
@@ -347,11 +345,6 @@ public class ChatWindow extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
     public void displayPIN(final String ID, final String PIN){
-        JDialog dialog;
-        dialog = new JDialog(this,ID + ": " + PIN);
-        dialog.setSize(250,80);
-        JLabel dialogLabel = new JLabel("PIN for :" + ID + ": " + PIN);
-        dialog.add(dialogLabel);
-        dialog.setVisible(true);
+        new PINDisplayDialog(ID, PIN).setVisible(true);
     }
 }

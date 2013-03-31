@@ -8,11 +8,13 @@ package security_layer;
 import application.encryption_demo.Messages.Message;
 import configuration.Constants;
 import java.io.File;
+import java.security.Key;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.crypto.SecretKey;
 
 /**
  *
@@ -23,6 +25,8 @@ public class Profile implements Message {
     public int port;
     EncryptionKeys keys;
     
+    public Profile() {}
+    
     //These documents will be returned when a discovery broadcast is received.
     public transient ArrayList<String> documentsOpenForDiscovery = new ArrayList<>();
     
@@ -30,10 +34,11 @@ public class Profile implements Message {
     public transient ArrayList<String> documentsHiddenFromDiscovery = new ArrayList<>();
     
     public void save(String pw) {
-        SecureTransport transport = new SecureTransport(pw);
+        this.keys.password = pw;
+        SecureTransport transport = new SecureTransport(this);
         transport.writeEncryptedFile(ident + ".profile", this);
     }
-    
+       
     public void addPublicKeysFrom(Profile other) {
         this.keys.publicKeys.put(other.ident, other.keys.publicKeys.get(other.ident));
         this.keys.verifyingKeys.put(other.ident, other.keys.verifyingKeys.get(other.ident));
@@ -62,11 +67,22 @@ public class Profile implements Message {
         if(Constants.DEBUG_ON){
             Logger.getLogger(Profile.class.getName()).log(Level.INFO, "Reading profile for " + username + ", " + pw);
         }
-        SecureTransport transport = new SecureTransport(pw);
-        return (Profile)transport.readEncryptedFile(username + ".profile");
+        
+        Key personalKey = KeyFactory.generateSymmetricKey(pw);
+        Profile profile = new Profile();
+        profile.keys = new EncryptionKeys(personalKey, pw);
+        SecureTransport transport = new SecureTransport(profile);
+        
+        Profile p = (Profile)transport.readEncryptedFile(username + ".profile");
+        if (p != null) {
+            p.documentsHiddenFromDiscovery = new ArrayList<>();
+            p.documentsOpenForDiscovery = new ArrayList<>();            
+            p.keys.personalKey = personalKey;
+        }
+        return p;
     }
 
-    public static Profile writeProfile(String username, String pw, int port, String host) {
+    public static Profile createProfile(String username, String pw, int port, String host) {
         if(Constants.DEBUG_ON){
             Logger.getLogger(Profile.class.getName()).log(Level.INFO, "Creating new profile for " + username + ", " + pw);
         }
@@ -74,7 +90,10 @@ public class Profile implements Message {
         profile.host = host;
         profile.port = port;
         profile.ident = username;
-        profile.keys = new EncryptionKeys();
+        SecretKey personalKey = (SecretKey)KeyFactory.generateSymmetricKey(pw);
+        profile.keys = new EncryptionKeys(personalKey, pw);
+        profile.keys.ident = username;
+        
         KeyPair asymmetricKeys = KeyFactory.generateAsymmetricKeys();
         profile.keys.publicKeys = new ConcurrentHashMap<>();
         profile.keys.publicKeys.put(username, asymmetricKeys.getPublic());

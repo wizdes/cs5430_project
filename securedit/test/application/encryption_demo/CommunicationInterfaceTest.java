@@ -43,13 +43,13 @@ public class CommunicationInterfaceTest {
     @Before
     public void setUp() throws Exception {
         Profile.deleteProfile(p1Ident);
-        p1 = Profile.writeProfile(p1Ident, password_1, p1Port, "localhost");
+        p1 = Profile.createProfile(p1Ident, password_1, p1Port, "localhost");
         
         Profile.deleteProfile(p2Ident);
-        p2 = Profile.writeProfile(p2Ident, password_2, p2Port, "localhost");
+        p2 = Profile.createProfile(p2Ident, password_2, p2Port, "localhost");
         
         Profile.deleteProfile(p3Ident);
-        p3 = Profile.writeProfile(p3Ident, password_3, p3Port, "localhost");
+        p3 = Profile.createProfile(p3Ident, password_3, p3Port, "localhost");
     }
 
     @After
@@ -89,6 +89,8 @@ public class CommunicationInterfaceTest {
         assertTrue(received == iterations);    
     }
     
+    
+    
     @Test
     public void testHumanAuthentication() {
         // Connect once from scratch
@@ -106,6 +108,7 @@ public class CommunicationInterfaceTest {
         pause(250);
         String pin = p2Communicator.getPIN(p1Ident);
         assertTrue(p1Communicator.updatePin(p2Ident, pin));
+        p1Communicator.updateHumanAuthStatus(p2Ident, true);
         assertTrue(p1Communicator.authenticateMachine(p2Ident));
 
         testSendMessagesFrom(p1Communicator, p2Communicator, p2Ident, iterations);
@@ -115,14 +118,16 @@ public class CommunicationInterfaceTest {
         // right from machineAuth
         p1Communicator.shutdown();
         p2Communicator.shutdown();
+        p1 = Profile.readProfile(p1Ident, password_1);
+        p2 = Profile.readProfile(p2Ident, password_2);
         p1Communicator = new Communication(p1, password_1);
         p2Communicator = new Communication(p2, password_2);   
-        p1Communicator.updatePeers(p2Ident, "localhost", p2Port, documents, false);
-        p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents, false);
+        p1Communicator.updatePeers(p2Ident, "localhost", p2Port, documents, true);
+//        p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents, true);
         
         assertTrue(p1Communicator.authenticateMachine(p2Ident));
         testSendMessagesFrom(p1Communicator, p2Communicator, p2Ident, 100);
-        testSendMessagesFrom(p2Communicator, p1Communicator, p1Ident, 100);  
+//        testSendMessagesFrom(p2Communicator, p1Communicator, p1Ident, 100);  
         
         // Client resets keys
 //        p1.save(password_1);
