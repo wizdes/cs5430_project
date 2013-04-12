@@ -30,6 +30,9 @@ public interface Document {
                         String rightIdentifier, 
                         String text);
     
+    /* The string identifier for the character at the given index */
+    public String getIdentifierAtIndex(int index);
+    
     /*
      * Remove the given identifiers from the document
      */
