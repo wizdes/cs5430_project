@@ -1,0 +1,25 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package document;
+
+import application.encryption_demo.Messages.Message;
+
+/**
+ *
+ */
+public class CommandMessage implements Message {
+    
+    public String to; // id of network peer to send to
+    public String documentName;  
+    public DocumentCommand command;
+
+    public CommandMessage(String to, String documentName, DocumentCommand command) {
+        this.to = to;
+        this.documentName = documentName;
+        this.command = command;
+    }
+    
+}
