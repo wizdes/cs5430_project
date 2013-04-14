@@ -28,15 +28,32 @@ public class CustomDocument extends DefaultStyledDocument {
         super.insertString(offset, string, attributeSet);
     }    
     
+    public void manualRemove(int offset, int length)
+            throws BadLocationException {
+        // Do something here
+        super.remove(offset, length);
+    } 
+    
     @Override
     public void insertString(int offset, String string, AttributeSet attributeSet)
             throws BadLocationException {
         //actually, send it over the network
         
         //
-        curDoc.observedDelta(offset, string);
+        curDoc.observedDelta(offset, string.length(), string);
         //take thsi out when you're done
         manualInsert(offset, string, attributeSet);
+    }
+    
+    @Override
+    public void remove(int offset, int length)
+            throws BadLocationException {
+        //actually, send it over the network
+        
+        //
+        curDoc.observedDelta(offset, length, "");
+        //take thsi out when you're done
+        manualRemove(offset, length);
     }
     
     public void setColors(int offset, int length, AttributeSet as, boolean replace){

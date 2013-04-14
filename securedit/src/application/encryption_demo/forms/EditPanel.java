@@ -93,7 +93,7 @@ public class EditPanel extends javax.swing.JPanel {
         cd.setColors(offset, length, as, true);
     }
     
-    public void observedDelta(int offset, String string){
+    public void observedDelta(int offset, int length, String string){
         //send over the network
     }
     
