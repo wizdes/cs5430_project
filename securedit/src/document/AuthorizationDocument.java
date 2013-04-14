@@ -11,7 +11,7 @@ import java.util.Set;
  *
  * @author goggin
  */
-public interface AuthorizationDocument extends Document {
+public interface AuthorizationDocument extends DocumentInterface {
     
     /* Add a user to the collection of users collaborating on this document */
     public void addUser(String userId);

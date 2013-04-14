@@ -2,42 +2,139 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package document;
 
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  *
- * @author goggin
  */
-public interface Document {
+public class Document implements DocumentInterface {
     
-    /* Create a new level, with no sections assigned to it */
-    public void addLevel(int levelIdentifier);
+    public static final String BOF = "bof";
+    public static final String EOF = "eof";
     
-    /* Assign an existing level to a section of text */
-    public void assignLevel(int levelIdentifier, String leftIdentifier, String rightIdentifier);
+    private List<Integer> levels = new LinkedList<>();
+    private DocumentValue bofDV = new DocumentValue(BOF, "", -1);
+    private DocumentValue eofDV = new DocumentValue(EOF, "", -1);
+    private Map<String, DocumentValue> valuesMap = new HashMap<>();
+    private long uid = 0L;
     
-    /* 
-     * Attempt to insert the given text at the requested level, at the requested location.
-     * Returns the actual level the text was inserted at.
-     * Returns -1 if the text was not able to be inserted (neither leftIdentifier nor
-     * rightIdentifier existed).
-     */
-    public int doInsert(int levelIdentifier, 
-                        String leftIdentifier, 
-                        String rightIdentifier, 
-                        String text);
+    public Document() {
+        bofDV.appendHere(eofDV);
+        valuesMap.put(BOF, bofDV);
+        valuesMap.put(EOF, eofDV);
+    }
     
-    /* The string identifier for the character at the given index */
-    public String getIdentifierAtIndex(int index);
-    
-    /*
-     * Remove the given identifiers from the document
-     */
-    public void doRemove(Set<String> identifiers);
+    @Override
+    public void addLevel(int levelIdentifier) {
+        levels.add(levelIdentifier);
+    }
+
+    @Override
+    public void assignLevel(int levelIdentifier, String leftIdentifier, String rightIdentifier) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public int doInsert(int level, String leftIdentifier, String rightIdentifier, String text) {
+        if (!levels.contains(level)) {
+            return -1;
+        }
         
-    public List<DocumentValue> getValues();
+        DocumentValue position;
+        if (valuesMap.containsKey(leftIdentifier)) {
+            position = valuesMap.get(leftIdentifier);                    
+        } else if (valuesMap.containsKey(rightIdentifier)) {
+            position = valuesMap.get(rightIdentifier).getPrev();
+        } else {
+            return -1;
+        }
+            
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            String identiifer = uid++ + "";
+            DocumentValue dv = new DocumentValue(identiifer, c + "", level);
+            valuesMap.put(identiifer, dv);
+            position.appendHere(dv);
+            position = dv;
+        }
+
+        return level;
+    }
     
+    @Override
+    public String getIdentifierAtIndex(int index) {
+        DocumentValue dv = getDocumentValueAtIndex(index);
+        return dv == null ? null : dv.getIdentifier();
+    }
+    
+    private DocumentValue getDocumentValueAtIndex(int index) {
+        DocumentValue dv = bofDV;
+        for (int i = 0; i <= index; i++) {
+            dv = dv.getNext();
+            if (dv == null) {
+                return null;
+            }
+        }
+            
+        return dv;
+    }
+    
+    @Override
+    public void doRemove(Set<String> identifiers) {
+        for (String i : identifiers) {
+            doRemove(i);
+        }
+    }
+    
+    @Override
+    public void doRemove(String identifier) {
+        DocumentValue dv = valuesMap.get(identifier);
+        if (dv == null) {
+            return;
+        }
+        
+        DocumentValue prev = dv.getPrev();
+        DocumentValue next = dv.getNext();
+
+        prev.setNext(next);
+        next.setPrev(prev);
+
+        valuesMap.remove(identifier);
+    }
+
+    @Override
+    public List<DocumentValue> getValues() {
+        List<DocumentValue> r = new LinkedList<>();
+        DocumentValue dv = bofDV.getNext();
+        while (!dv.getIdentifier().equals(EOF)) {
+            r.add(dv);
+            dv = dv.getNext();
+        }
+        return r;
+    }
+    
+    @Override
+    public int getLevelAtIndex(int index) {
+        DocumentValue dv = getDocumentValueAtIndex(index);
+        return dv == null ? null : dv.getLevel();
+    }
+    
+    @Override
+    public String getString() {
+        DocumentValue dv = bofDV;
+        String r = "";
+        while (dv != null) {
+            r += dv.getValue();
+            dv = dv.getNext();
+        }
+        return r;
+    }    
 }
