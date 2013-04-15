@@ -19,13 +19,18 @@ public class Document implements DocumentInterface {
     public static final String BOF = "bof";
     public static final String EOF = "eof";
     
-    private List<Integer> levels = new LinkedList<>();
-    private DocumentValue bofDV = new DocumentValue(BOF, "", -1);
-    private DocumentValue eofDV = new DocumentValue(EOF, "", -1);
-    private Map<String, DocumentValue> valuesMap = new HashMap<>();
+    protected List<Integer> levels = new LinkedList<>();
+    protected DocumentValue bofDV = new DocumentValue(BOF, "", -1);
+    protected DocumentValue eofDV = new DocumentValue(EOF, "", -1);
+    protected Map<String, DocumentValue> valuesMap = new HashMap<>();
     private long uid = 0L;
+    private String name;
     
     public Document() {
+        this("Document");
+    }
+    
+    public Document(String name) {
         bofDV.appendHere(eofDV);
         valuesMap.put(BOF, bofDV);
         valuesMap.put(EOF, eofDV);
@@ -134,6 +139,12 @@ public class Document implements DocumentInterface {
     }
     
     @Override
+    public int getLevelAtIdentifier(String id) {
+        DocumentValue dv = valuesMap.get(id);
+        return dv == null ? null : dv.getLevel();
+    }    
+    
+    @Override
     public String getString() {
         DocumentValue dv = bofDV;
         String r = "";
@@ -143,4 +154,14 @@ public class Document implements DocumentInterface {
         }
         return r;
     }    
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
 }

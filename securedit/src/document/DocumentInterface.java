@@ -35,6 +35,7 @@ public interface DocumentInterface {
     
     /* Return the level for the given index */
     public int getLevelAtIndex(int index);
+    public int getLevelAtIdentifier(String id);
     
     /* Remove the given identifiers from the document */
     public void doRemove(Set<String> identifiers);
@@ -44,4 +45,7 @@ public interface DocumentInterface {
     
     public String getString();
     
+    public String getName();
+
+    public void setName(String name);
 }
