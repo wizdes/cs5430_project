@@ -6,11 +6,8 @@ package document;
 
 import java.util.HashSet;
 import java.util.Set;
-import org.junit.After;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.junit.Before;
-import security_layer.Profile;
 
 /**
  *
@@ -19,17 +16,6 @@ import security_layer.Profile;
 public class DocumentTest {
     
     private Document document;
-        
-    @Before
-    public void setUp() throws Exception {
-//        document = new Document();
-//        document.addLevel(0);
-//        document.doInsert(0, Document.BOF, Document.EOF, "hello world");
-    }
-
-    @After
-    public void tearDown() throws Exception {
-    }
 
     @Test
     public void testAssignLevel() {
