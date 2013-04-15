@@ -17,7 +17,7 @@ public interface DocumentInterface {
     public void addLevel(int levelIdentifier);
     
     /* Assign an existing level to a section of text */
-    public void assignLevel(int levelIdentifier, String leftIdentifier, String rightIdentifier);
+    public boolean assignLevel(int levelIdentifier, String leftIdentifier, String rightIdentifier);
     
     /* 
      * Attempt to insert the given text at the requested level, at the requested location.
@@ -40,7 +40,7 @@ public interface DocumentInterface {
     public void doRemove(Set<String> identifiers);
     public void doRemove(String identifier);
         
-    public List<DocumentValue> getValues();
+    public DocumentValue getValues();
     
     public String getString();
     

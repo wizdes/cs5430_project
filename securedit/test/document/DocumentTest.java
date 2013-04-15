@@ -32,17 +32,36 @@ public class DocumentTest {
     }
 
     @Test
-    public void testAddLevel() {
-    }
-
-    @Test
     public void testAssignLevel() {
-        // it should return false if the level doesn't exist
+        boolean r;
+        document = new Document();
+        document.addLevel(0);
+        document.addLevel(1);
+        document.doInsert(0, Document.BOF, Document.EOF, "000111000");
+        String iLeft = document.getIdentifierAtIndex(3);
+        String iRight = document.getIdentifierAtIndex(5);
+        
         // it should return false if the left identifier doesn't exist
+        r = document.assignLevel(1, iLeft, "non-existant");
+        assertFalse(r);
+        
         // it should return false if the right identifier doesn't exist
+        r = document.assignLevel(1, "non-existant", iRight);
+        assertFalse(r);
+        
+        // it should return false if the level doesn't exist
+        r = document.assignLevel(15, iLeft, iRight);
+        assertFalse(r);
         
         // it should return true if both identifiers are present
-//        document.addLevel(0);
+        r = document.assignLevel(1, iLeft, iRight);
+        assertTrue(r);
+        
+        DocumentValue head = document.getValues().getNext();
+        while (!head.getIdentifier().equals(Document.EOF)) {
+            assertEquals(head.getValue(), head.getLevel() + "");
+            head = head.getNext();
+        }
     }
 
     @Test
@@ -99,9 +118,5 @@ public class DocumentTest {
         
         document.doRemove(toRemove);
         assertEquals("el", document.getString());
-    }
-
-    @Test
-    public void testGetValues() {
     }
 }

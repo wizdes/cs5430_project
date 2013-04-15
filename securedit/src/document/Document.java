@@ -38,8 +38,21 @@ public class Document implements DocumentInterface {
     }
 
     @Override
-    public void assignLevel(int levelIdentifier, String leftIdentifier, String rightIdentifier) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public boolean assignLevel(int level, String leftIdentifier, String rightIdentifier) {
+        if (!levels.contains(level)
+             || !valuesMap.containsKey(leftIdentifier)
+             || !valuesMap.containsKey(rightIdentifier)) {
+            return false;
+        }
+        
+        DocumentValue position = valuesMap.get(leftIdentifier);
+        position.setLevel(level);
+        do {
+            position = position.getNext();
+            position.setLevel(level);
+        } while (position != null && !position.getIdentifier().equals(rightIdentifier));
+        
+        return true;
     }
 
     @Override
@@ -111,14 +124,8 @@ public class Document implements DocumentInterface {
     }
 
     @Override
-    public List<DocumentValue> getValues() {
-        List<DocumentValue> r = new LinkedList<>();
-        DocumentValue dv = bofDV.getNext();
-        while (!dv.getIdentifier().equals(EOF)) {
-            r.add(dv);
-            dv = dv.getNext();
-        }
-        return r;
+    public DocumentValue getValues() {
+        return bofDV;
     }
     
     @Override
