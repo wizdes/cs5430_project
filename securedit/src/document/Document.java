@@ -149,7 +149,7 @@ public class Document implements DocumentInterface {
     @Override
     public int getLevelAtIdentifier(String id) {
         DocumentValue dv = valuesMap.get(id);
-        return dv == null ? null : dv.getLevel();
+        return dv == null ? -1 : dv.getLevel();
     }    
     
     @Override

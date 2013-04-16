@@ -24,6 +24,7 @@ public interface NetworkDocumentInterface extends AuthorizationDocumentInterface
     
     /* same as requestInsert, only for removing */
     void requestRemove(Set<String> identsToRemove);
+    void requestRemove(int left, int right);
     
     /* Called by EncryptionDemoFunctionality when a CommandMessage is received */
     void processMessage(CommandMessage m);

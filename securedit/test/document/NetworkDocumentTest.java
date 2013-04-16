@@ -132,6 +132,49 @@ public class NetworkDocumentTest {
         assertEquals("hello world", client2.getString());
         assertEquals("hello world", client3.getString());
         
+        // when the owner updates something at a higher level, the clients should see 'xxx'
+        owner.requestInsert(4, -1, 0, "owner ");
+        
+        pause(100);
+        
+        assertEquals("owner hello world", owner.getString());
+        assertEquals("XXXXXXhello world", client2.getString());
+        assertEquals("XXXXXXhello world", client3.getString());  
+        
+        // a clients request should be forward just to those who can see them
+        owner.addUserToLevel(p2Ident, 1);
+        client2.requestInsert(1, -1, 0, "client ");
+        pause(100);
+        
+        assertEquals("client owner hello world", owner.getString());
+        assertEquals("client XXXXXXhello world", client2.getString());
+        assertEquals("XXXXXXXXXXXXXhello world", client3.getString());
+
+        // when a client requests to remove items he can't see, the request is ignored
+        client3.requestRemove(0, 6);
+        pause(1000);
+
+        assertEquals("client owner hello world", owner.getString());
+        assertEquals("client XXXXXXhello world", client2.getString());
+        assertEquals("XXXXXXXXXXXXXhello world", client3.getString());
+
+        // an authorized client can remove the text and it is broadcast
+        client2.requestRemove(0, 6);
+        pause(100);
+
+        assertEquals("owner hello world", owner.getString());
+        assertEquals("XXXXXXhello world", client2.getString());
+        assertEquals("XXXXXXhello world", client3.getString());
+        
+        // when the owner removes items, they are broadcast to clients
+        owner.requestRemove(0, 5);
+        owner.requestRemove(5, 10);
+        pause(100);
+
+        assertEquals("hello", owner.getString());
+        assertEquals("hello", client2.getString());
+        assertEquals("hello", client3.getString());        
+        
         thread1.stopListening(); thread2.stopListening(); thread3.stopListening();
     }
     

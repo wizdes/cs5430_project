@@ -80,15 +80,19 @@ public class AuthorizationDocument extends Document implements AuthorizationDocu
         
         for (String id : identifiers) {
             int level = getLevelAtIdentifier(id);
-            if (canAccess(userId, level)) {
+            if (level > -1 && canAccess(userId, level)) {
                 doRemove(id);
                 toRemove.add(id);
             }
         }
         
+        if (toRemove.isEmpty()) {
+            return updates;
+        }
+        
         for(Entry<String, Integer> entry : peers.entrySet()) {
             String uid = entry.getKey();
-            if (uid.equals(userId)) {
+            if (uid.equals(this.getOwnerID())) {
                 continue;
             }
             DoRemove dr = new DoRemove(toRemove);

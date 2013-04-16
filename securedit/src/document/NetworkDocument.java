@@ -8,6 +8,7 @@ package document;
 import application.encryption_demo.CommunicationInterface;
 import application.encryption_demo.Messages.Message;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -39,7 +40,7 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
         } else {
             DoInsert di = new DoInsert(left, right, level, text);
             CommandMessage cm = new CommandMessage(this.getOwnerID(), this.collaboratorId, this.getName(), di);
-            System.out.println(this.collaboratorId + " : " + cm);
+//            System.out.println(this.collaboratorId + " : " + cm);
             communication.sendMessage(cm.to, cm);
         }
     }
@@ -48,7 +49,7 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
         Collection<CommandMessage> updates = this.applyInsert(userId, level, left, right, text);
         if (updates != null) {
             for (CommandMessage m : updates) {
-                System.out.println(this.collaboratorId + " : " + m);
+//                System.out.println(this.collaboratorId + " : " + m);
                 communication.sendMessage(m.to, m);
             }
         }
@@ -56,12 +57,36 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
     
     @Override
     public void requestRemove(Set<String> identsToRemove) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (isOwner()) {
+            requestRemoveFor(this.getOwnerID(), identsToRemove);
+        } else {
+            DoRemove dr = new DoRemove(identsToRemove);
+            CommandMessage cm = new CommandMessage(this.getOwnerID(), this.collaboratorId, this.getName(), dr);
+//            System.out.println(this.collaboratorId + " : " + cm);
+            communication.sendMessage(cm.to, cm);
+        }        
     }
-
+    
+    @Override
+    public void requestRemove(int left, int right) {
+        Set<String> toRemove = new HashSet<>();
+        for (int i = left; i <= right; i++) {
+            toRemove.add(getIdentifierAtIndex(i));
+        }
+        requestRemove(toRemove);
+    }    
+    
+    private void requestRemoveFor(String userId, Set<String> toRemove) {
+        Collection<CommandMessage> updates = this.applyRemove(userId, toRemove);
+        if (updates != null) {
+            for (CommandMessage m : updates) {
+                communication.sendMessage(m.to, m);
+            }
+        }        
+    }
+    
     @Override
     public void processMessage(CommandMessage m) {
-        System.out.println(this.collaboratorId + " : processMessage");
         if (isOwner()) {
             processMessageOwner(m);
         } else {
@@ -70,7 +95,6 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
     }
     
     private void processMessageOwner(CommandMessage m) {
-        System.out.println(this.collaboratorId + " : processMessageOwner");
         if (m.command instanceof DoInsert) {
             DoInsert di = (DoInsert)m.command;
             requestInsertFor(m.from,
@@ -78,6 +102,9 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
                              di.leftIdentifier, 
                              di.rightIdentifier, 
                              di.text);
+        } else if (m.command instanceof DoRemove) {
+            DoRemove dr = (DoRemove)m.command;
+            requestRemoveFor(m.from, dr.identifiers);
         }
     }
     
@@ -88,6 +115,9 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
                           di.leftIdentifier, 
                           di.rightIdentifier, 
                           di.text);
+        }  else if (m.command instanceof DoRemove) {
+            DoRemove dr = (DoRemove)m.command;
+            this.doRemove(dr.identifiers);
         }
     }    
 
