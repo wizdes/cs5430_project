@@ -9,6 +9,10 @@ import application.encryption_demo.Messages.RequestDocUpdateMessage;
 import application.encryption_demo.Messages.RequestJoinDocMessage;
 import application.encryption_demo.Messages.UpdateDocumentMessage;
 import application.encryption_demo.forms.ChatWindow;
+import document.CommandMessage;
+import document.Document;
+import document.DocumentInterface;
+import document.NetworkDocumentInterface;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,7 +32,7 @@ public class EncryptionDemoFunctionality {
     private String openedFilename;
     private CommunicationInterface communication;
     public PINFunctionality properPINInfo;
-    private ConcurrentMap<String, DocumentInstance> docInstances = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, NetworkDocumentInterface> docInstances = new ConcurrentHashMap<>();
     private Profile profile;
     
     public EncryptionDemoFunctionality(ChatWindow gui, Profile profile, String password){
@@ -93,20 +97,14 @@ public class EncryptionDemoFunctionality {
 //        return communication.sendMessage(ident, new StringMessage(plaintextMsg));
 //    }
     
-    public String createDocumentInstance(String ownerID, String newDocName){
-        for(DocumentInstance docInstance: docInstances.values()){
-            if(newDocName.equals(docInstance.docName)){
-                return null;
-            }
-        }
-        DocumentInstance instance = new DocumentInstance(ownerID, newDocName);
-        instance.addCollaborator(profile.ident);
-        docInstances.put(instance.getDocumentIdentifer(), instance);
-        return instance.getDocumentIdentifer();
+    public String createDocumentInstance(NetworkDocumentInterface instance) {
+        docInstances.put(instance.getName(), instance);
+        return instance.getName();
     }
+    
     public boolean sendRequestDocUpdate(String docID, String text){
-        DocumentInstance instance = docInstances.get(docID);
-        return communication.sendMessage(instance.ownerID, new RequestDocUpdateMessage(profile.ident, instance.docName, text));
+        NetworkDocumentInterface instance = docInstances.get(docID);
+        return communication.sendMessage(instance.getOwnerID(), new RequestDocUpdateMessage(profile.ident, instance.getName(), text));
     }
     
     public boolean sendJoinRequestMessage(String ownerIdent, String docName){
@@ -169,6 +167,7 @@ public class EncryptionDemoFunctionality {
         public void run() {
             while (true) {
                 Collection<Message> messages = communication.waitForMessages();
+                
                 for (Message m : messages) {
                     if (m instanceof StringMessage) {
 //                        String message = ((StringMessage)m).contents;
@@ -178,27 +177,9 @@ public class EncryptionDemoFunctionality {
                     else if(m instanceof RequestJoinDocMessage){
                         //Owner: Adds sourceID to collaborators for document instance
                         RequestJoinDocMessage joinMsg = (RequestJoinDocMessage)m;
-                        String docID = DocumentInstance.toDocumentIdentifier(profile.ident, joinMsg.docName);
                         
-                        DocumentInstance instance = docInstances.get(docID);
-                        instance.addCollaborator(joinMsg.sourceID);
-                    }
-                    else if(m instanceof RequestDocUpdateMessage){
-                        //Owner: Broadcast doc update to everyone(including self)
-                        RequestDocUpdateMessage docUpdate = (RequestDocUpdateMessage)m;
-                        String docID = DocumentInstance.toDocumentIdentifier(profile.ident, docUpdate.docName);
-                        
-                        //Broadcast all atomically
-                        DocumentInstance instance = docInstances.get(docID);
-                        atomicBroadcastLock.lock();
-                        try{
-                            for(String collaborator: instance.collaborators.keySet()){
-                                communication.sendMessage(collaborator, new UpdateDocumentMessage(instance.ownerID, instance.docName, docUpdate.text));
-                            }
-                        } finally{
-                            atomicBroadcastLock.unlock();
-                        }
-                        
+                        NetworkDocumentInterface instance = docInstances.get(joinMsg.docName);
+                        instance.addUserToLevel(joinMsg.docName, 0);
                     }
                     else if(m instanceof UpdateDocumentMessage){
                         //Collaborator: Add text to GUI
@@ -209,6 +190,10 @@ public class EncryptionDemoFunctionality {
                     }
                     else if (m instanceof DiscoveryMessage) {
 
+                    } else if (m instanceof CommandMessage) {
+                        CommandMessage cm = (CommandMessage)m;
+                        NetworkDocumentInterface instance = docInstances.get(cm.documentName);
+                        instance.processMessage(cm);
                     }
                 }
             }

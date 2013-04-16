@@ -48,4 +48,8 @@ public interface DocumentInterface {
     public String getName();
 
     public void setName(String name);
+    
+    public String getOwnerID();
+
+    public void setOwnerID(String name);    
 }

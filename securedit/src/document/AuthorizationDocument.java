@@ -20,6 +20,10 @@ public class AuthorizationDocument extends Document implements AuthorizationDocu
     
     private Map<String, Integer> peers = new HashMap<>();
     
+    public AuthorizationDocument(String ownerId, String name) {
+        super(ownerId, name);
+    }
+    
     @Override
     public void addUserToLevel(String userId, int level) {
         peers.put(userId, level);
