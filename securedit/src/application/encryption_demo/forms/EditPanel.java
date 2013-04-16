@@ -97,6 +97,10 @@ public class EditPanel extends javax.swing.JPanel {
         //send over the network
     }
     
+    public void displayMessages(String plaintext){
+        documentArea.setText(documentArea.getText() + plaintext + "\n");
+    }  
+    
     private CustomDocument cd;
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel PeersLabel;
