@@ -232,7 +232,7 @@ public class ChatWindow extends javax.swing.JFrame {
                 continue;
             }
             
-            docID = this.functionality.createDocumentInstance(profile.ident, docName);
+            //docID = this.functionality.createDocumentInstance(profile.ident, docName);
             if(docID == null){
                 showMessage("The document name: " + docName + " is already in use.");
             }
@@ -286,7 +286,7 @@ public class ChatWindow extends javax.swing.JFrame {
         }
         
         //Create document instance and send join request for doc
-        String docID = this.functionality.createDocumentInstance(ownerId, docName);
+        String docID = "YI TODO"; //this.functionality.createDocumentInstance(ownerId, docName);
         docIDs.put(this.tabbedPane.getTabCount(), docID);
         if(!this.functionality.sendJoinRequestMessage(ownerId, docName)){
             showMessage("Join chat request failed to send!");
