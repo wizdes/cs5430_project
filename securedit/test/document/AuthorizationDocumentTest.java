@@ -17,7 +17,7 @@ public class AuthorizationDocumentTest {
     @Test
     public void testApplyInsert() {
         boolean r;
-        AuthorizationDocument document = new AuthorizationDocument();
+        AuthorizationDocument document = new AuthorizationDocument("patrick", "document");
         document.addUserToLevel("matt", 0);
         document.addUserToLevel("yi", 1);
         document.addUserToLevel("patrick", 2);
