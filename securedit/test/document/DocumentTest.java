@@ -53,12 +53,7 @@ public class DocumentTest {
     @Test
     public void testDoInsert() {
         int r;
-        document = new Document();
-        
-        // it should return -1 if the level doesn't exist
-        r = document.doInsert(15, Document.BOF, Document.EOF, "Hello World");
-        assertEquals(-1, r);
-        
+        document = new Document();        
         document.addLevel(0);
         
         // it should return -1 if neither identifiers exist

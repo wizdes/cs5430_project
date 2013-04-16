@@ -20,6 +20,10 @@ public class AuthorizationDocument extends Document implements AuthorizationDocu
     
     private Map<String, Integer> peers = new HashMap<>();
     
+    public AuthorizationDocument() {
+        this("OwnerId", "Document");
+    }
+    
     public AuthorizationDocument(String ownerId, String name) {
         super(ownerId, name);
     }
@@ -47,7 +51,7 @@ public class AuthorizationDocument extends Document implements AuthorizationDocu
         
         for(Entry<String, Integer> entry : peers.entrySet()) {
             String uid = entry.getKey();
-            if (uid.equals(userId)) {
+            if (uid.equals(this.getOwnerID())) {
                 continue;
             }
             Integer l = entry.getValue();
@@ -58,7 +62,7 @@ public class AuthorizationDocument extends Document implements AuthorizationDocu
                 String hidden = new String(new char[text.length()]).replace('\0', 'X');
                 di = new DoInsert(leftIdentifier, rightIdentifier, level, hidden);
             }
-            updates.add(new CommandMessage(uid, getName(), di));
+            updates.add(new CommandMessage(uid, this.getOwnerID(), getName(), di));
         }
         
         return updates;
@@ -88,7 +92,7 @@ public class AuthorizationDocument extends Document implements AuthorizationDocu
                 continue;
             }
             DoRemove dr = new DoRemove(toRemove);
-            updates.add(new CommandMessage(uid, getName(), dr));
+            updates.add(new CommandMessage(uid, this.getOwnerID(), getName(), dr));
         }
         
         return updates;

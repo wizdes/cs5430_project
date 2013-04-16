@@ -35,6 +35,8 @@ public class Document implements DocumentInterface {
         bofDV.appendHere(eofDV);
         valuesMap.put(BOF, bofDV);
         valuesMap.put(EOF, eofDV);
+        this.name = name;
+        this.ownerId = ownerId;
     }
     
     @Override
@@ -63,7 +65,7 @@ public class Document implements DocumentInterface {
     @Override
     public int doInsert(int level, String leftIdentifier, String rightIdentifier, String text) {
         if (!levels.contains(level)) {
-            return -1;
+            levels.add(level);
         }
         
         DocumentValue position;
@@ -89,6 +91,11 @@ public class Document implements DocumentInterface {
     
     @Override
     public String getIdentifierAtIndex(int index) {
+        if (index == -1) {
+            return Document.BOF;
+        } else if (index >= valuesMap.size()) {
+            return Document.EOF;
+        }
         DocumentValue dv = getDocumentValueAtIndex(index);
         return dv == null ? null : dv.getIdentifier();
     }
