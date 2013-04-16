@@ -26,7 +26,7 @@ public class ChatWindow extends javax.swing.JFrame {
     EncryptionDemoFunctionality functionality;
     Profile profile;
     ConcurrentMap<Integer, String> docIDs = new ConcurrentHashMap<>();   //<tab index, docID>
-    ConcurrentMap<String, ChatPanel> chatPanels = new ConcurrentHashMap<>();    //<docID, chatPanel>
+    ConcurrentMap<String, EditPanel> chatPanels = new ConcurrentHashMap<>();    //<docID, chatPanel>
     public static void main(String[] args) {
         String password = "pass0000pass0000";
         
@@ -194,7 +194,7 @@ public class ChatWindow extends javax.swing.JFrame {
     }
     
     public void displayMessages(String docID, String plaintext){
-        ChatPanel panel = chatPanels.get(docID);
+        EditPanel panel = chatPanels.get(docID);
         if(panel != null){
             panel.displayMessages(plaintext);
         }
@@ -242,7 +242,7 @@ public class ChatWindow extends javax.swing.JFrame {
         docIDs.put(this.tabbedPane.getTabCount(), docID);
         this.profile.documentsOpenForDiscovery.add(docName);
         
-        ChatPanel panel = new ChatPanel();
+        EditPanel panel = new EditPanel();
         chatPanels.put(docID, panel);
         this.tabbedPane.add("Owner: " + profile.ident + ", Doc: " + docName, panel);
         this.tabbedPane.setSelectedComponent(panel);
@@ -294,7 +294,7 @@ public class ChatWindow extends javax.swing.JFrame {
         }
         //TODO FINAL PHASE: Authorization: Should wait here for authorization telling me chat request was accepted.
         this.functionality.updateHumanAuthStatus(ownerId, true);
-        ChatPanel panel = new ChatPanel();
+        EditPanel panel = new EditPanel();
         chatPanels.put(docID, panel);
         this.tabbedPane.add("Owner: " + ownerId + ", Doc: " + docName, panel);
         this.tabbedPane.setSelectedComponent(panel);
