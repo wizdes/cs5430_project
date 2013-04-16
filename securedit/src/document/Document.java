@@ -25,12 +25,13 @@ public class Document implements DocumentInterface {
     protected Map<String, DocumentValue> valuesMap = new HashMap<>();
     private long uid = 0L;
     private String name;
+    private String ownerId;
     
     public Document() {
-        this("Document");
+        this("OwnerId", "Document");
     }
     
-    public Document(String name) {
+    public Document(String ownerId, String name) {
         bofDV.appendHere(eofDV);
         valuesMap.put(BOF, bofDV);
         valuesMap.put(EOF, eofDV);
@@ -163,5 +164,15 @@ public class Document implements DocumentInterface {
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public String getOwnerID() {
+        return ownerId;
+    }
+
+    @Override
+    public void setOwnerID(String name) {
+        this.ownerId = ownerId;
     }
 }
