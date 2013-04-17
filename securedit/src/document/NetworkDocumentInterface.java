@@ -20,9 +20,11 @@ public interface NetworkDocumentInterface extends AuthorizationDocumentInterface
      *   it forwards the request to the owners machine
      */
     void requestInsert(int level, String left, String right, String text);
+    void requestInsert(int level, int left, int right, String text);
     
     /* same as requestInsert, only for removing */
     void requestRemove(Set<String> identsToRemove);
+    void requestRemove(int left, int right);
     
     /* Called by EncryptionDemoFunctionality when a CommandMessage is received */
     void processMessage(CommandMessage m);

@@ -17,4 +17,13 @@ public class DoRemove extends DocumentCommand {
     public DoRemove(Set<String> identifiers) {
         this.identifiers = identifiers;
     }
+    
+    @Override
+    public String toString() {
+        String s = "DoRemove(";
+        for (String s2 : identifiers) {
+            s += s2 + ", ";
+        }
+        return s + ")";
+    }    
 }

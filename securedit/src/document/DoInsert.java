@@ -22,4 +22,9 @@ public class DoInsert extends DocumentCommand {
         this.text = text;
     }
     
+    @Override
+    public String toString() {
+        return "DoInsert(" + leftIdentifier + ", " + rightIdentifier + ", " + levelIdentifier + ", " + text + ")";
+    }
+    
 }
