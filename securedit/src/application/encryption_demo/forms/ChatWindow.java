@@ -6,6 +6,7 @@ package application.encryption_demo.forms;
 
 import application.encryption_demo.EncryptionDemoFunctionality;
 import application.encryption_demo.DiscoveredPeers;
+import document.NetworkDocument;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -222,6 +223,7 @@ public class ChatWindow extends javax.swing.JFrame {
         //Prompt for document name - make sure it is unique
         String docName = "Chat";
         String docID = null;
+        NetworkDocument nd = null;
         while(docID == null){
             String enteredDocName = JOptionPane.showInputDialog("Enter document name", docName);
             if(enteredDocName == null){
@@ -233,6 +235,9 @@ public class ChatWindow extends javax.swing.JFrame {
             }
             
             //docID = this.functionality.createDocumentInstance(profile.ident, docName);
+            nd = new NetworkDocument(
+                functionality.getCommunicationInterface(), profile.ident, profile.ident, docName );
+            docID = this.functionality.createDocumentInstance(nd);
             if(docID == null){
                 showMessage("The document name: " + docName + " is already in use.");
             }
@@ -243,6 +248,8 @@ public class ChatWindow extends javax.swing.JFrame {
         this.profile.documentsOpenForDiscovery.add(docName);
         
         EditPanel panel = new EditPanel();
+        panel.giveDocument(nd);
+        nd.giveGUI(panel);
         chatPanels.put(docID, panel);
         this.tabbedPane.add("Owner: " + profile.ident + ", Doc: " + docName, panel);
         this.tabbedPane.setSelectedComponent(panel);
@@ -286,7 +293,9 @@ public class ChatWindow extends javax.swing.JFrame {
         }
         
         //Create document instance and send join request for doc
-        String docID = "YI TODO"; //this.functionality.createDocumentInstance(ownerId, docName);
+        NetworkDocument nd = new NetworkDocument(
+                functionality.getCommunicationInterface(), profile.ident, ownerId, docName );
+        String docID = this.functionality.createDocumentInstance(nd);
         docIDs.put(this.tabbedPane.getTabCount(), docID);
         if(!this.functionality.sendJoinRequestMessage(ownerId, docName)){
             showMessage("Join chat request failed to send!");
@@ -295,6 +304,8 @@ public class ChatWindow extends javax.swing.JFrame {
         //TODO FINAL PHASE: Authorization: Should wait here for authorization telling me chat request was accepted.
         this.functionality.updateHumanAuthStatus(ownerId, true);
         EditPanel panel = new EditPanel();
+        panel.giveDocument(nd);
+        nd.giveGUI(panel);
         chatPanels.put(docID, panel);
         this.tabbedPane.add("Owner: " + ownerId + ", Doc: " + docName, panel);
         this.tabbedPane.setSelectedComponent(panel);

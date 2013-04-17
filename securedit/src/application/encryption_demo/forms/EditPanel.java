@@ -5,8 +5,12 @@
 package application.encryption_demo.forms;
 
 import application.encryption_demo.CustomDocument;
+import document.NetworkDocument;
+import document.NetworkDocumentInterface;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -26,6 +30,10 @@ public class EditPanel extends javax.swing.JPanel {
         cd = new CustomDocument();
         documentArea.setDocument(cd);
         cd.setEditorReference(this);
+    }
+    
+    public void giveDocument(NetworkDocumentInterface nd){
+        cd.giveDocument(nd);
     }
 
     /**
@@ -82,19 +90,29 @@ public class EditPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     
-    public void manualInsert(int offset, String string, AttributeSet attributeSet)
-            throws BadLocationException {
-        // Do something here
-        System.out.println("Inserting: " + string);
-        cd.insertString(offset, string, attributeSet);
-    }    
+    public void manualInsert(int offset, String string, AttributeSet attributeSet){
+        try {
+            // Do something here
+            System.out.println("Inserting: " + string);
+            cd.manualInsert(offset, string, attributeSet);
+            if(offset <= documentArea.getCaretPosition()){
+                documentArea.setCaretPosition(documentArea.getCaretPosition() + 1);
+            }
+        } catch (BadLocationException ex) {
+            Logger.getLogger(EditPanel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public void update(String s){
+        //documentArea.setText(s);
+    }
     
     public void setColors(int offset, int length, AttributeSet as, boolean replace){
         cd.setColors(offset, length, as, true);
     }
     
     public void observedDelta(int offset, int length, String string){
-        //send over the network
+        //defunct, will use this later
     }
     
     public void displayMessages(String plaintext){
