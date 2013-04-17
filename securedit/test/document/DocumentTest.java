@@ -100,4 +100,20 @@ public class DocumentTest {
         document.doRemove(toRemove);
         assertEquals("el", document.getString());
     }
+    
+    @Test
+    public void testGetOffsetForIdentifier() {
+        document = new Document();
+        document.doInsert(0, Document.BOF, Document.EOF, "Hello");
+        
+        String ident;
+        int offset;
+        
+        for (int i = 0; i < 5; i++) {
+            ident = document.getIdentifierAtIndex(i);
+            offset = document.getOffsetForIdentifier(ident);
+            assertEquals(i, offset);
+        }
+
+    }    
 }

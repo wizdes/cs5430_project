@@ -182,4 +182,15 @@ public class Document implements DocumentInterface {
     public void setOwnerID(String name) {
         this.ownerId = ownerId;
     }
+
+    @Override
+    public int getOffsetForIdentifier(String ident) {
+        int offset = -1;
+        DocumentValue dv = bofDV;
+        while (dv != null && !dv.getIdentifier().equals(ident)) {
+            offset++;
+            dv = dv.getNext();
+        }
+        return offset;
+    }
 }

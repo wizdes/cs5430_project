@@ -33,6 +33,8 @@ public interface DocumentInterface {
     /* The string identifier for the character at the given index */
     public String getIdentifierAtIndex(int index);
     
+    public int getOffsetForIdentifier(String ident);
+    
     /* Return the level for the given index */
     public int getLevelAtIndex(int index);
     public int getLevelAtIdentifier(String id);
