@@ -96,11 +96,26 @@ public class EditPanel extends javax.swing.JPanel {
             System.out.println("Inserting: " + string);
             cd.manualInsert(offset, string, attributeSet);
             if(offset <= documentArea.getCaretPosition()){
-                documentArea.setCaretPosition(documentArea.getCaretPosition() + 1);
+                documentArea.setCaretPosition(documentArea.getCaretPosition() + string.length());
             }
         } catch (BadLocationException ex) {
             Logger.getLogger(EditPanel.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    public void manualRemove(int offset, int length){
+        try {
+            cd.manualRemove(offset, length);
+            if(offset <= documentArea.getCaretPosition()){
+                documentArea.setCaretPosition(documentArea.getCaretPosition() - length);
+            }
+        } catch (BadLocationException ex) {
+            Logger.getLogger(EditPanel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public void deltaCaretPosition(int delta){
+        documentArea.setCaretPosition(documentArea.getCaretPosition() + delta);
     }
     
     public void update(String s){

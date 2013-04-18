@@ -115,7 +115,17 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
             }
         } else if (m.command instanceof DoRemove) {
             DoRemove dr = (DoRemove)m.command;
+            int smallestOffset = -1;
+            for(String s:dr.identifiers){
+                int candidate = this.getOffsetForIdentifier(s);
+                if(smallestOffset == -1 || smallestOffset > candidate){
+                    smallestOffset = candidate;
+                }
+            }
             requestRemoveFor(m.from, dr.identifiers);
+            if(curDoc != null) {
+                curDoc.manualRemove(smallestOffset, dr.identifiers.size());
+            }
         }
     }
     
@@ -131,7 +141,17 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
             }
         }  else if (m.command instanceof DoRemove) {
             DoRemove dr = (DoRemove)m.command;
+            int smallestOffset = -1;
+            for(String s:dr.identifiers){
+                int candidate = this.getOffsetForIdentifier(s);
+                if(smallestOffset == -1 || smallestOffset > candidate){
+                    smallestOffset = candidate;
+                }
+            }
             this.doRemove(dr.identifiers);
+            if(curDoc != null) {
+                curDoc.manualRemove(smallestOffset, dr.identifiers.size());
+            }
         }
     }    
 
