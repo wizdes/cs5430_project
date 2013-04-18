@@ -61,8 +61,8 @@ public class CustomDocument extends DefaultStyledDocument {
         //curDoc.observedDelta(offset, string.length(), string);
         
         //get the IDs
-        int leftOffset = offset;
-        int rightOffset = offset + 1;
+        int leftOffset = offset - 1;
+        int rightOffset = offset;
         String lOffset = nd.getIdentifierAtIndex(leftOffset);
         String rOffset = nd.getIdentifierAtIndex(rightOffset);
         int levelStr = 0;
@@ -70,7 +70,7 @@ public class CustomDocument extends DefaultStyledDocument {
             levelStr = 0;
         }
         else{
-            levelStr = nd.getLevelAtIndex(offset);
+            levelStr = nd.getLevelAtIndex(offset - 1);
         }
         nd.requestInsert(levelStr, lOffset, rOffset, string);
         

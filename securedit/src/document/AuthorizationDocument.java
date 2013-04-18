@@ -80,7 +80,7 @@ public class AuthorizationDocument extends Document implements AuthorizationDocu
         
         for (String id : identifiers) {
             int level = getLevelAtIdentifier(id);
-            if (level > -1 && canAccess(userId, level)) {
+            if (level > -1 && (canAccess(userId, level) || this.getOwnerID().equals(userId))) {
                 doRemove(id);
                 toRemove.add(id);
             }
