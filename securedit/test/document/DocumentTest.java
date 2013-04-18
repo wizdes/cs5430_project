@@ -116,4 +116,13 @@ public class DocumentTest {
         }
 
     }    
+    
+    @Test
+    public void testIsEmpty() {
+        document = new Document();
+        
+        assertTrue(document.isEmpty());
+        document.doInsert(0, Document.BOF, Document.EOF, "Hello");
+        assertFalse(document.isEmpty());
+    }
 }
