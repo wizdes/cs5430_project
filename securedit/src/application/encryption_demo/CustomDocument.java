@@ -8,6 +8,12 @@ import application.encryption_demo.forms.EditPanel;
 import document.NetworkDocument;
 import document.NetworkDocumentInterface;
 import java.awt.Color;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JTextPane;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -44,6 +50,7 @@ public class CustomDocument extends DefaultStyledDocument {
     public void manualRemove(int offset, int length)
             throws BadLocationException {
         // Do something here
+        System.out.println("Removing: " + offset);      
         super.remove(offset, length);
     } 
     
@@ -74,12 +81,24 @@ public class CustomDocument extends DefaultStyledDocument {
     }
     
     @Override
-    public void remove(int offset, int length)
-            throws BadLocationException {
+    public void remove(int offset, int length) {
         //curDoc.observedDelta(offset, length, "");
         //take thsi out when you're done
+        int originalLength = length;
+        Set<String> remove = new HashSet<String>();
+        while(length > 0){
+            remove.add(nd.getIdentifierAtIndex(offset + length - 1));
+            length -= 1;
+        }
+        
+        nd.requestRemove(remove);
         if(isServer) {
-            manualRemove(offset, length);
+            try {
+                manualRemove(offset, originalLength);
+                //curDoc.deltaCaretPosition(-1 * originalLength);
+            } catch (BadLocationException ex) {
+                Logger.getLogger(CustomDocument.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
     
