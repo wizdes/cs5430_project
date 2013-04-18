@@ -7,6 +7,7 @@ package document;
 
 import application.encryption_demo.CommunicationInterface;
 import application.encryption_demo.Messages.Message;
+import application.encryption_demo.forms.EditPanel;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -18,6 +19,7 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
     
     private CommunicationInterface communication;
     private String collaboratorId;
+    private EditPanel curDoc;
     
     public NetworkDocument(CommunicationInterface ci, 
                            String collaboratorId, 
@@ -28,8 +30,14 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
         this.collaboratorId = collaboratorId;
     }
     
-    private boolean isOwner() {
+    @Override
+    public boolean isOwner() {
         return this.getOwnerID().equals(collaboratorId);
+    }
+    
+    @Override
+    public void giveGUI(EditPanel cd){
+        curDoc = cd;
     }
     
     @Override
@@ -102,6 +110,9 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
                              di.leftIdentifier, 
                              di.rightIdentifier, 
                              di.text);
+            if(curDoc != null) {
+                curDoc.manualInsert(this.getOffsetForIdentifier(di.leftIdentifier), di.text, null);
+            }
         } else if (m.command instanceof DoRemove) {
             DoRemove dr = (DoRemove)m.command;
             requestRemoveFor(m.from, dr.identifiers);
@@ -115,6 +126,9 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
                           di.leftIdentifier, 
                           di.rightIdentifier, 
                           di.text);
+            if(curDoc != null) {
+                curDoc.manualInsert(this.getOffsetForIdentifier(di.leftIdentifier), di.text, null);
+            }
         }  else if (m.command instanceof DoRemove) {
             DoRemove dr = (DoRemove)m.command;
             this.doRemove(dr.identifiers);

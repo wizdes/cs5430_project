@@ -54,4 +54,6 @@ public interface DocumentInterface {
     public String getOwnerID();
 
     public void setOwnerID(String name);    
+    
+    public boolean isEmpty();
 }

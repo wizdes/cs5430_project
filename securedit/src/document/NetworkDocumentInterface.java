@@ -4,6 +4,7 @@
  */
 package document;
 
+import application.encryption_demo.forms.EditPanel;
 import java.util.Set;
 
 /**
@@ -28,6 +29,10 @@ public interface NetworkDocumentInterface extends AuthorizationDocumentInterface
     
     /* Called by EncryptionDemoFunctionality when a CommandMessage is received */
     void processMessage(CommandMessage m);
+    
+    public boolean isOwner();
+    
+    public void giveGUI(EditPanel cd);
     
     
 }
