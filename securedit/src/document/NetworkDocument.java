@@ -110,7 +110,9 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
                              di.leftIdentifier, 
                              di.rightIdentifier, 
                              di.text);
-            curDoc.manualInsert(this.getOffsetForIdentifier(di.leftIdentifier), di.text, null);
+            if(curDoc != null) {
+                curDoc.manualInsert(this.getOffsetForIdentifier(di.leftIdentifier), di.text, null);
+            }
         } else if (m.command instanceof DoRemove) {
             DoRemove dr = (DoRemove)m.command;
             requestRemoveFor(m.from, dr.identifiers);
@@ -124,7 +126,9 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
                           di.leftIdentifier, 
                           di.rightIdentifier, 
                           di.text);
-            curDoc.manualInsert(this.getOffsetForIdentifier(di.leftIdentifier), di.text, null);
+            if(curDoc != null) {
+                curDoc.manualInsert(this.getOffsetForIdentifier(di.leftIdentifier), di.text, null);
+            }
         }  else if (m.command instanceof DoRemove) {
             DoRemove dr = (DoRemove)m.command;
             this.doRemove(dr.identifiers);
