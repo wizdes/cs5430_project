@@ -35,6 +35,10 @@ public class EncryptionDemoFunctionality {
     private ConcurrentMap<String, NetworkDocumentInterface> docInstances = new ConcurrentHashMap<>();
     private Profile profile;
     
+    public CommunicationInterface getCommunicationInterface(){
+        return communication;
+    }
+    
     public EncryptionDemoFunctionality(ChatWindow gui, Profile profile, String password){
         this.properPINInfo = new PINFunctionality();
         this.gui = gui;
@@ -179,7 +183,8 @@ public class EncryptionDemoFunctionality {
                         RequestJoinDocMessage joinMsg = (RequestJoinDocMessage)m;
                         
                         NetworkDocumentInterface instance = docInstances.get(joinMsg.docName);
-                        instance.addUserToLevel(joinMsg.docName, 0);
+                        instance.addUserToLevel(joinMsg.sourceID, 0);
+                        //instance.addUserToLevel(joinMsg.docName, 0);
                     }
                     else if(m instanceof UpdateDocumentMessage){
                         //Collaborator: Add text to GUI

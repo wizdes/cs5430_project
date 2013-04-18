@@ -143,7 +143,7 @@ public class Document implements DocumentInterface {
     @Override
     public int getLevelAtIndex(int index) {
         DocumentValue dv = getDocumentValueAtIndex(index);
-        return dv == null ? null : dv.getLevel();
+        return dv == null ? -1 : dv.getLevel();
     }
     
     @Override
@@ -192,5 +192,10 @@ public class Document implements DocumentInterface {
             dv = dv.getNext();
         }
         return offset;
+    }
+    
+    @Override
+    public boolean isEmpty() {
+        return bofDV.getNext().getIdentifier().equals(Document.EOF);
     }
 }
