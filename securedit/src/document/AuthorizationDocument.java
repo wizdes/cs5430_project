@@ -42,7 +42,7 @@ public class AuthorizationDocument extends Document implements AuthorizationDocu
                                                   String text) {
         
         if (!canAccess(userId, level)) {
-            //return null;
+            return null;
         }
         
         doInsert(level, leftIdentifier, rightIdentifier, text);

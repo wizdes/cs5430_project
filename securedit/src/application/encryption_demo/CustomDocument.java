@@ -58,7 +58,13 @@ public class CustomDocument extends DefaultStyledDocument {
         int rightOffset = offset + 1;
         String lOffset = nd.getIdentifierAtIndex(leftOffset);
         String rOffset = nd.getIdentifierAtIndex(rightOffset);
-        int levelStr = nd.getLevelAtIndex(offset);
+        int levelStr = 0;
+        if(nd.isEmpty()){
+            levelStr = 0;
+        }
+        else{
+            levelStr = nd.getLevelAtIndex(offset);
+        }
         nd.requestInsert(levelStr, lOffset, rOffset, string);
         
         //take thsi out when you're done
