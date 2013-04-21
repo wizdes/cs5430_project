@@ -9,6 +9,7 @@ import document.NetworkDocument;
 import document.NetworkDocumentInterface;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
@@ -27,6 +28,21 @@ public class EditPanel extends javax.swing.JPanel {
      */
     public EditPanel() {
         initComponents();
+
+        labels.add("NORMAL");
+        labels.add("PRIVILEGED");
+        labels.add("SECRET");
+        labels.add("TOP SECRET");
+        
+        LevelSelect.addItem(labels.get(0));
+        LevelSelect.addItem(labels.get(1));
+        LevelSelect.addItem(labels.get(2));
+        LevelSelect.addItem(labels.get(3));
+        
+        String[] elements = new String[labels.size()];
+        elements = labels.toArray(elements);
+        jList1.setListData(elements);
+
         cd = new CustomDocument();
         documentArea.setDocument(cd);
         cd.setEditorReference(this);
@@ -50,6 +66,15 @@ public class EditPanel extends javax.swing.JPanel {
         PeersLabel = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         documentArea = new javax.swing.JTextPane();
+        cursorInfo = new javax.swing.JLabel();
+        beginCursor = new javax.swing.JTextField();
+        jLabel1 = new javax.swing.JLabel();
+        endCursor = new javax.swing.JTextField();
+        LevelSelect = new javax.swing.JComboBox();
+        setLevelButton = new javax.swing.JToggleButton();
+        LevelList = new javax.swing.JScrollPane();
+        jList1 = new javax.swing.JList();
+        LevelLabel = new javax.swing.JLabel();
 
         setPreferredSize(new java.awt.Dimension(825, 428));
 
@@ -59,7 +84,34 @@ public class EditPanel extends javax.swing.JPanel {
         PeersLabel.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         PeersLabel.setText("Peers(not shown currently)");
 
+        documentArea.addCaretListener(new javax.swing.event.CaretListener() {
+            public void caretUpdate(javax.swing.event.CaretEvent evt) {
+                documentAreaCaretUpdate(evt);
+            }
+        });
         jScrollPane1.setViewportView(documentArea);
+
+        cursorInfo.setText("Cursor At: ");
+
+        beginCursor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                beginCursorActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setText("to");
+
+        LevelSelect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                LevelSelectActionPerformed(evt);
+            }
+        });
+
+        setLevelButton.setText("Set Level");
+
+        LevelList.setViewportView(jList1);
+
+        LevelLabel.setText("Levels");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -67,11 +119,30 @@ public class EditPanel extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 597, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 569, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(PeersLabel)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(beginCursor, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(endCursor, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(LevelSelect, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(setLevelButton)
+                                .addGap(0, 0, Short.MAX_VALUE))))
+                    .addComponent(LevelList, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(PeersLabel)
+                            .addComponent(cursorInfo)
+                            .addComponent(LevelLabel))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -84,10 +155,36 @@ public class EditPanel extends javax.swing.JPanel {
                         .addComponent(PeersLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 187, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 199, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cursorInfo)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(beginCursor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel1)
+                            .addComponent(endCursor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(LevelSelect, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(setLevelButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(LevelLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(LevelList, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
+
+    private void documentAreaCaretUpdate(javax.swing.event.CaretEvent evt) {//GEN-FIRST:event_documentAreaCaretUpdate
+        // TODO add your handling code here:
+        cursorInfo.setText("Cursor at: " + evt.getDot());
+    }//GEN-LAST:event_documentAreaCaretUpdate
+
+    private void beginCursorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_beginCursorActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_beginCursorActionPerformed
+
+    private void LevelSelectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LevelSelectActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_LevelSelectActionPerformed
 
     
     public void manualInsert(int offset, String string, AttributeSet attributeSet){
@@ -136,10 +233,20 @@ public class EditPanel extends javax.swing.JPanel {
     
     private CustomDocument cd;
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel LevelLabel;
+    private javax.swing.JScrollPane LevelList;
+    private javax.swing.JComboBox LevelSelect;
     private javax.swing.JLabel PeersLabel;
     private javax.swing.JList PeersList;
+    private javax.swing.JTextField beginCursor;
+    private javax.swing.JLabel cursorInfo;
     private javax.swing.JTextPane documentArea;
+    private javax.swing.JTextField endCursor;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JList jList1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JToggleButton setLevelButton;
     // End of variables declaration//GEN-END:variables
+    private ArrayList<String> labels;
 }
