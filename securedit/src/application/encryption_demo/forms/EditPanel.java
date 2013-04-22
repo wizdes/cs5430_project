@@ -106,7 +106,7 @@ public class EditPanel extends javax.swing.JPanel {
     public void manualRemove(int offset, int length){
         try {
             cd.manualRemove(offset, length);
-            if(offset <= documentArea.getCaretPosition()){
+            if(offset < documentArea.getCaretPosition() && documentArea.getCaretPosition() - length >= 0){
                 documentArea.setCaretPosition(documentArea.getCaretPosition() - length);
             }
         } catch (BadLocationException ex) {
