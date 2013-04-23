@@ -70,7 +70,7 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
         } else {
             DoRemove dr = new DoRemove(identsToRemove);
             CommandMessage cm = new CommandMessage(this.getOwnerID(), this.collaboratorId, this.getName(), dr);
-//            System.out.println(this.collaboratorId + " : " + cm);
+            System.out.println(this.collaboratorId + " : " + cm);
             communication.sendMessage(cm.to, cm);
         }        
     }
@@ -111,7 +111,7 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
                              di.rightIdentifier, 
                              di.text);
             if(curDoc != null) {
-                curDoc.manualInsert(this.getOffsetForIdentifier(di.leftIdentifier), di.text, null);
+                curDoc.manualInsert(this.getOffsetForIdentifier(di.leftIdentifier) + 1, di.text, null);
             }
         } else if (m.command instanceof DoRemove) {
             DoRemove dr = (DoRemove)m.command;
@@ -137,7 +137,7 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
                           di.rightIdentifier, 
                           di.text);
             if(curDoc != null) {
-                curDoc.manualInsert(this.getOffsetForIdentifier(di.leftIdentifier), di.text, null);
+                curDoc.manualInsert(this.getOffsetForIdentifier(di.leftIdentifier) + 1, di.text, null);
             }
         }  else if (m.command instanceof DoRemove) {
             DoRemove dr = (DoRemove)m.command;
