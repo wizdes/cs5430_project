@@ -31,6 +31,12 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
     }
     
     @Override
+    public void addUserToLevel(String userId, int levelIdentifier){
+        curDoc.addUser(userId, levelIdentifier);
+        super.addUserToLevel(userId, levelIdentifier);
+    }
+    
+    @Override
     public boolean isOwner() {
         return this.getOwnerID().equals(collaboratorId);
     }

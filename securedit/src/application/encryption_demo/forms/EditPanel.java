@@ -13,6 +13,8 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -41,6 +43,13 @@ public class EditPanel extends javax.swing.JPanel {
         addColor(Color.blue);
         addColor(Color.green);
         addColor(Color.red);
+        ArrayList<Color> colors = new ArrayList<Color>();
+        colors.add(Color.black);
+        colors.add(Color.blue);
+        colors.add(Color.green);
+        colors.add(Color.red);
+        cr.giveColorList(colors);
+
     }
     
     public EditPanel() {
@@ -48,6 +57,7 @@ public class EditPanel extends javax.swing.JPanel {
         labels = new ArrayList<String>();
         colors = new ArrayList<SimpleAttributeSet>();
         insertColors();
+        peerModel = new DefaultListModel();
 
         labels.add("NORMAL");
         labels.add("PRIVILEGED");
@@ -62,6 +72,11 @@ public class EditPanel extends javax.swing.JPanel {
         String[] elements = new String[labels.size()];
         elements = labels.toArray(elements);
         jList1.setListData(elements);
+        cr = new newCellRenderer();
+        
+        jList1.setCellRenderer(cr);
+        
+        PeersList.setModel(peerModel);
 
         cd = new CustomDocument();
         documentArea.setDocument(cd);
@@ -70,6 +85,13 @@ public class EditPanel extends javax.swing.JPanel {
     
     public void giveDocument(NetworkDocumentInterface nd){
         cd.giveDocument(nd);
+        peerModel.addElement(nd.getOwnerID() + " - Document Owner");
+        if(nd.isOwner() == false){
+            beginCursor.setEnabled(false);
+            endCursor.setEnabled(false);
+            LevelSelect.setEnabled(false);
+            setLevelButton.setEnabled(false);
+        }
     }
 
     /**
@@ -223,6 +245,9 @@ public class EditPanel extends javax.swing.JPanel {
         cd.setColors(beginCursorInt, endCursorInt - beginCursorInt, s, true);
     }//GEN-LAST:event_setLevelButtonMousePressed
 
+    public void setColors(int begin, int end, int colorLevel){
+        cd.setColors(begin, end, colors.get(colorLevel), true);
+    }
     
     public void manualInsert(int offset, String string, AttributeSet attributeSet){
         try {
@@ -266,7 +291,11 @@ public class EditPanel extends javax.swing.JPanel {
     
     public void displayMessages(String plaintext){
         documentArea.setText(documentArea.getText() + plaintext + "\n");
-    }  
+    }
+    
+    public void addUser(String username, int levelIdentifier){
+        peerModel.addElement(username +" - " + labels.get(levelIdentifier));        
+    }
     
     private CustomDocument cd;
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -287,4 +316,6 @@ public class EditPanel extends javax.swing.JPanel {
     // End of variables declaration//GEN-END:variables
     private ArrayList<String> labels;
     private ArrayList<SimpleAttributeSet> colors;
+    DefaultListModel peerModel;
+    newCellRenderer cr;
 }
