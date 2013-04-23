@@ -18,7 +18,7 @@ import java.util.Set;
  */
 public class AuthorizationDocument extends Document implements AuthorizationDocumentInterface {
     
-    private Map<String, Integer> peers = new HashMap<>();
+    protected Map<String, Integer> peers = new HashMap<>();
     
     public AuthorizationDocument() {
         this("OwnerId", "Document");

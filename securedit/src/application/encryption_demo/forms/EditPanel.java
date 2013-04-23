@@ -8,6 +8,8 @@ import application.encryption_demo.CustomDocument;
 import document.NetworkDocument;
 import document.NetworkDocumentInterface;
 import java.awt.Color;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -15,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -43,13 +46,15 @@ public class EditPanel extends javax.swing.JPanel {
         addColor(Color.blue);
         addColor(Color.green);
         addColor(Color.red);
+    }
+    
+    public void populateColorList(){
         ArrayList<Color> colors = new ArrayList<Color>();
         colors.add(Color.black);
         colors.add(Color.blue);
         colors.add(Color.green);
         colors.add(Color.red);
-        cr.giveColorList(colors);
-
+        cr.giveColorList(colors);        
     }
     
     public EditPanel() {
@@ -74,6 +79,8 @@ public class EditPanel extends javax.swing.JPanel {
         jList1.setListData(elements);
         cr = new newCellRenderer();
         
+        populateColorList();
+        
         jList1.setCellRenderer(cr);
         
         PeersList.setModel(peerModel);
@@ -81,11 +88,14 @@ public class EditPanel extends javax.swing.JPanel {
         cd = new CustomDocument();
         documentArea.setDocument(cd);
         cd.setEditorReference(this);
+        
+        displayedUsername = new ArrayList<String>();
     }
     
     public void giveDocument(NetworkDocumentInterface nd){
         cd.giveDocument(nd);
         peerModel.addElement(nd.getOwnerID() + " - Document Owner");
+        displayedUsername.add(nd.getOwnerID());
         if(nd.isOwner() == false){
             beginCursor.setEnabled(false);
             endCursor.setEnabled(false);
@@ -167,6 +177,16 @@ public class EditPanel extends javax.swing.JPanel {
         LevelLabel.setText("Levels");
 
         changeUserLevel.setText("Change User Level");
+        changeUserLevel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                changeUserLevelMousePressed(evt);
+            }
+        });
+        changeUserLevel.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                changeUserLevelKeyPressed(evt);
+            }
+        });
 
         openFile.setText("Open Encrypted File");
 
@@ -183,7 +203,7 @@ public class EditPanel extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 569, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 607, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(openFile)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -192,10 +212,10 @@ public class EditPanel extends javax.swing.JPanel {
                         .addComponent(saveRegFile)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(saveEncryptedFile)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 40, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 269, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(beginCursor, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -214,7 +234,7 @@ public class EditPanel extends javax.swing.JPanel {
                                 .addComponent(setLevelButton)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(changeUserLevel)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 25, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -270,6 +290,9 @@ public class EditPanel extends javax.swing.JPanel {
 
     private void setLevelButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_setLevelButtonMousePressed
         // TODO add your handling code here:
+        if(beginCursor.getText().equals("") || endCursor.getText().equals("")){
+            return;
+        }
         int beginCursorInt = Integer.parseInt(beginCursor.getText());
         int endCursorInt = Integer.parseInt(endCursor.getText());
         int colorPosition = LevelSelect.getSelectedIndex();
@@ -278,6 +301,19 @@ public class EditPanel extends javax.swing.JPanel {
         //send it to everyone else
         setColors(beginCursorInt, endCursorInt - beginCursorInt, colorPosition);
     }//GEN-LAST:event_setLevelButtonMousePressed
+
+    private void changeUserLevelKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_changeUserLevelKeyPressed
+        // TODO add your handling code here:
+
+        
+    }//GEN-LAST:event_changeUserLevelKeyPressed
+
+    private void changeUserLevelMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_changeUserLevelMousePressed
+        // TODO add your handling code here:
+        System.out.println("Pressed Button");
+        JFrame jf = new ChangeRequestAccess();
+        jf.setVisible(true);
+    }//GEN-LAST:event_changeUserLevelMousePressed
 
     public void setColors(int begin, int end, int colorLevel){
         cd.setColors(begin, end, colors.get(colorLevel), true);
@@ -328,7 +364,9 @@ public class EditPanel extends javax.swing.JPanel {
     }
     
     public void addUser(String username, int levelIdentifier){
-        peerModel.addElement(username +" - " + labels.get(levelIdentifier));        
+        if(displayedUsername.contains(username)) return;
+        peerModel.addElement(username +" - " + labels.get(levelIdentifier)); 
+        displayedUsername.add(username);
     }
     
     private CustomDocument cd;
@@ -357,4 +395,5 @@ public class EditPanel extends javax.swing.JPanel {
     private ArrayList<SimpleAttributeSet> colors;
     DefaultListModel peerModel;
     newCellRenderer cr;
+    private ArrayList<String> displayedUsername;
 }
