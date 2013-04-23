@@ -32,7 +32,9 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
     
     @Override
     public void addUserToLevel(String userId, int levelIdentifier){
-        curDoc.addUser(userId, levelIdentifier);
+        if (curDoc != null) {
+            curDoc.addUser(userId, levelIdentifier);
+        }
         super.addUserToLevel(userId, levelIdentifier);
     }
     
