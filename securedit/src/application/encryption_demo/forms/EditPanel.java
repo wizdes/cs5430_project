@@ -48,13 +48,21 @@ public class EditPanel extends javax.swing.JPanel {
         addColor(Color.red);
     }
     
-    public void populateColorList(){
+    public void stdPopulateColorList(){
         ArrayList<Color> colors = new ArrayList<Color>();
         colors.add(Color.black);
         colors.add(Color.blue);
         colors.add(Color.green);
         colors.add(Color.red);
         cr.giveColorList(colors);        
+    }
+    
+    public void populateColorsList(ArrayList<Color> colors, ArrayList<String> labels){
+        this.labels = labels;
+        cr.giveColorList(colors);
+        for(Color c:colors){
+            addColor(c);
+        }
     }
     
     public EditPanel() {
@@ -79,7 +87,7 @@ public class EditPanel extends javax.swing.JPanel {
         jList1.setListData(elements);
         cr = new newCellRenderer();
         
-        populateColorList();
+        stdPopulateColorList();
         
         jList1.setCellRenderer(cr);
         
@@ -93,6 +101,7 @@ public class EditPanel extends javax.swing.JPanel {
     }
     
     public void giveDocument(NetworkDocumentInterface nd){
+        this.nd = nd;
         cd.giveDocument(nd);
         peerModel.addElement(nd.getOwnerID() + " - Document Owner");
         displayedUsername.add(nd.getOwnerID());
@@ -300,6 +309,7 @@ public class EditPanel extends javax.swing.JPanel {
         AttributeSet s = colors.get(colorPosition);
         //send it to everyone else
         setColors(beginCursorInt, endCursorInt - beginCursorInt, colorPosition);
+        nd.assignLevel(colorPosition, beginCursorInt, endCursorInt);
     }//GEN-LAST:event_setLevelButtonMousePressed
 
     private void changeUserLevelKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_changeUserLevelKeyPressed
@@ -396,4 +406,5 @@ public class EditPanel extends javax.swing.JPanel {
     DefaultListModel peerModel;
     newCellRenderer cr;
     private ArrayList<String> displayedUsername;
+    NetworkDocumentInterface nd;
 }
