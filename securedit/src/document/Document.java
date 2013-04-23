@@ -61,7 +61,14 @@ public class Document implements DocumentInterface {
         
         return true;
     }
-
+    
+    @Override
+    public boolean assignLevel(int level, int leftOffset, int rightOffset) {
+        String leftIdent = this.getIdentifierAtIndex(leftOffset);
+        String rightIdent = this.getIdentifierAtIndex(rightOffset);
+        return assignLevel(level, leftIdent, rightIdent);
+    }
+    
     @Override
     public int doInsert(int level, String leftIdentifier, String rightIdentifier, String text) {
         if (!levels.contains(level)) {
@@ -180,7 +187,7 @@ public class Document implements DocumentInterface {
 
     @Override
     public void setOwnerID(String name) {
-        this.ownerId = ownerId;
+        this.ownerId = name;
     }
 
     @Override

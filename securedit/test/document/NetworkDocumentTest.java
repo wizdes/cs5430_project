@@ -178,6 +178,24 @@ public class NetworkDocumentTest {
         thread1.stopListening(); thread2.stopListening(); thread3.stopListening();
     }
     
+    
+    @Test
+    public void testLevelPropogation() {
+//        NetworkDocumentInterface owner = new NetworkDocument(p1Communicator, p1Ident, p1Ident, "document");
+//        NetworkDocumentInterface client2 = new NetworkDocument(p2Communicator, p2Ident, p1Ident, "document");
+//        NetworkDocumentInterface client3 = new NetworkDocument(p3Communicator, p3Ident, p1Ident, "document");
+//        
+//        owner.addUserToLevel(p2Ident, 0);
+//        owner.addUserToLevel(p3Ident, 0);
+//        
+//        DocumentCommListener thread1 = new DocumentCommListener(p1Communicator, owner);
+//        DocumentCommListener thread2 = new DocumentCommListener(p2Communicator, client2);
+//        DocumentCommListener thread3 = new DocumentCommListener(p3Communicator, client3);
+//        thread1.start(); thread2.start(); thread3.start();
+//        
+//        thread1.stopListening(); thread2.stopListening(); thread3.stopListening();
+    }
+    
     public class DocumentCommListener extends Thread {
         private CommunicationInterface comm;
         private NetworkDocumentInterface doc;

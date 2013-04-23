@@ -18,6 +18,7 @@ public interface DocumentInterface {
     
     /* Assign an existing level to a section of text */
     public boolean assignLevel(int levelIdentifier, String leftIdentifier, String rightIdentifier);
+    public boolean assignLevel(int levelIdentifier, int leftOffset, int rightOffset);
     
     /* 
      * Attempt to insert the given text at the requested level, at the requested location.

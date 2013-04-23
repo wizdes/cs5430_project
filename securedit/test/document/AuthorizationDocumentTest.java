@@ -41,7 +41,7 @@ public class AuthorizationDocumentTest {
         for (CommandMessage cm : messages) {
             DoInsert di = (DoInsert)cm.command;
             assertEquals("XXXXXXXXXXX", di.text);
-        }        
+        }
     }
 
     @Test
