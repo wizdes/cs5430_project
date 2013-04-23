@@ -28,6 +28,7 @@ public class EditPanel extends javax.swing.JPanel {
      */
     public EditPanel() {
         initComponents();
+        labels = new ArrayList<String>();
 
         labels.add("NORMAL");
         labels.add("PRIVILEGED");
@@ -108,6 +109,11 @@ public class EditPanel extends javax.swing.JPanel {
         });
 
         setLevelButton.setText("Set Level");
+        setLevelButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                setLevelButtonMousePressed(evt);
+            }
+        });
 
         LevelList.setViewportView(jList1);
 
@@ -168,7 +174,8 @@ public class EditPanel extends javax.swing.JPanel {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(LevelLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(LevelList, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(LevelList, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(17, 17, 17)))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -185,6 +192,11 @@ public class EditPanel extends javax.swing.JPanel {
     private void LevelSelectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LevelSelectActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_LevelSelectActionPerformed
+
+    private void setLevelButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_setLevelButtonMousePressed
+        // TODO add your handling code here:
+            
+    }//GEN-LAST:event_setLevelButtonMousePressed
 
     
     public void manualInsert(int offset, String string, AttributeSet attributeSet){

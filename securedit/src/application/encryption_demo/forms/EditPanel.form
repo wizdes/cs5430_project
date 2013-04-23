@@ -82,7 +82,8 @@
                       <EmptySpace max="32767" attributes="0"/>
                       <Component id="LevelLabel" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="LevelList" min="-2" pref="95" max="-2" attributes="0"/>
+                      <Component id="LevelList" min="-2" pref="78" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="17" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -158,6 +159,9 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="Set Level"/>
       </Properties>
+      <Events>
+        <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="setLevelButtonMousePressed"/>
+      </Events>
     </Component>
     <Container class="javax.swing.JScrollPane" name="LevelList">
       <AuxValues>
