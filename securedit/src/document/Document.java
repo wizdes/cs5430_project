@@ -107,7 +107,7 @@ public class Document implements DocumentInterface {
         return dv == null ? null : dv.getIdentifier();
     }
     
-    private DocumentValue getDocumentValueAtIndex(int index) {
+    protected DocumentValue getDocumentValueAtIndex(int index) {
         DocumentValue dv = bofDV;
         for (int i = 0; i <= index; i++) {
             dv = dv.getNext();
@@ -118,7 +118,7 @@ public class Document implements DocumentInterface {
             
         return dv;
     }
-    
+
     @Override
     public void doRemove(Set<String> identifiers) {
         for (String i : identifiers) {

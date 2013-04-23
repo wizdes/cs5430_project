@@ -181,19 +181,72 @@ public class NetworkDocumentTest {
     
     @Test
     public void testLevelPropogation() {
-//        NetworkDocumentInterface owner = new NetworkDocument(p1Communicator, p1Ident, p1Ident, "document");
-//        NetworkDocumentInterface client2 = new NetworkDocument(p2Communicator, p2Ident, p1Ident, "document");
-//        NetworkDocumentInterface client3 = new NetworkDocument(p3Communicator, p3Ident, p1Ident, "document");
-//        
-//        owner.addUserToLevel(p2Ident, 0);
-//        owner.addUserToLevel(p3Ident, 0);
-//        
-//        DocumentCommListener thread1 = new DocumentCommListener(p1Communicator, owner);
-//        DocumentCommListener thread2 = new DocumentCommListener(p2Communicator, client2);
-//        DocumentCommListener thread3 = new DocumentCommListener(p3Communicator, client3);
-//        thread1.start(); thread2.start(); thread3.start();
-//        
-//        thread1.stopListening(); thread2.stopListening(); thread3.stopListening();
+        NetworkDocumentInterface owner = new NetworkDocument(p1Communicator, p1Ident, p1Ident, "document");
+        NetworkDocumentInterface client2 = new NetworkDocument(p2Communicator, p2Ident, p1Ident, "document");
+        NetworkDocumentInterface client3 = new NetworkDocument(p3Communicator, p3Ident, p1Ident, "document");
+        
+        owner.addUserToLevel(p2Ident, 1);
+        owner.addUserToLevel(p3Ident, 2);
+        
+        DocumentCommListener thread1 = new DocumentCommListener(p1Communicator, owner);
+        DocumentCommListener thread2 = new DocumentCommListener(p2Communicator, client2);
+        DocumentCommListener thread3 = new DocumentCommListener(p3Communicator, client3);
+        thread1.start(); thread2.start(); thread3.start();
+        
+        // when the owner applies an update it should get broadcast to all of the other documents
+        owner.requestInsert(0, Document.BOF, Document.EOF, "000");
+        pause(100);
+        
+        assertEquals("000", owner.getString());
+        assertEquals("000", client2.getString());
+        assertEquals("000", client3.getString());
+        
+        owner.requestInsert(1, Document.BOF, Document.EOF, "111 ");
+        pause(100);
+        
+        assertEquals("111 000", owner.getString());
+        assertEquals("111 000", client2.getString());
+        assertEquals("111 000", client3.getString());
+
+        owner.requestInsert(2, Document.BOF, Document.EOF, "222 ");
+        pause(100);
+        
+        assertEquals("222 111 000", owner.getString());
+        assertEquals("XXXX111 000", client2.getString());
+        assertEquals("222 111 000", client3.getString());
+
+        owner.requestInsert(3, Document.BOF, Document.EOF, "333 ");
+        pause(100);
+        
+        assertEquals("333 222 111 000", owner.getString());
+        assertEquals("XXXXXXXX111 000", client2.getString());
+        assertEquals("XXXX222 111 000", client3.getString());
+        
+        // declassify 222
+        owner.assignLevel(1, 4, 7);
+        pause(200);
+
+        assertEquals("333 222 111 000", owner.getString());
+        assertEquals("XXXX222 111 000", client2.getString());
+        assertEquals("XXXX222 111 000", client3.getString());
+        
+        // classify 000
+        owner.assignLevel(3, 12, 14);
+        pause(200);
+
+        assertEquals("333 222 111 000", owner.getString());
+        assertEquals("XXXX222 111 XXX", client2.getString());
+        assertEquals("XXXX222 111 XXX", client3.getString());
+        
+        // set 111 to 2
+        owner.assignLevel(2, 8, 11);
+        pause(200);
+
+        assertEquals("333 222 111 000", owner.getString());
+        assertEquals("XXXX222 XXXXXXX", client2.getString());
+        assertEquals("XXXX222 111 XXX", client3.getString());        
+        
+        thread1.stopListening(); thread2.stopListening(); thread3.stopListening();
     }
     
     public class DocumentCommListener extends Thread {

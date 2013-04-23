@@ -38,6 +38,43 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
         super.addUserToLevel(userId, levelIdentifier);
     }
     
+    
+    @Override
+    public boolean assignLevel(int levelIdentifier, String leftIdentifier, String rightIdentifier) {
+        // remove the nodes and save up the values
+        DocumentValue v = this.valuesMap.get(leftIdentifier);
+        if (v == null) {
+            return false;
+        }
+        
+        Set<String> toRemove = new HashSet<>();
+        String removedText = "";
+        DocumentValue leftBoundary = v.getPrev();
+        boolean completed = false;
+        
+        while (v != null && !completed) {
+            toRemove.add(v.getIdentifier());
+            removedText += v.getValue();
+            completed = v.getIdentifier().equals(rightIdentifier);
+            v = v.getNext();
+        }
+        
+        DocumentValue rightBoundary = v != null ? v.getNext() : null;
+        String rightIdent = rightBoundary == null ? Document.EOF : rightBoundary.getIdentifier();
+        String leftIdent = leftBoundary == null ? Document.BOF : leftBoundary.getIdentifier();
+
+        requestRemove(toRemove);
+        requestInsert(levelIdentifier, leftIdent, rightIdent, removedText);
+        return true;
+    }
+    
+    @Override
+    public boolean assignLevel(int levelIdentifier, int leftOffset, int rightOffset) {
+        String leftIdent = this.getIdentifierAtIndex(leftOffset);
+        String rightIdent = this.getIdentifierAtIndex(rightOffset);        
+        return assignLevel(levelIdentifier, leftIdent, rightIdent);
+    }
+    
     @Override
     public boolean isOwner() {
         return this.getOwnerID().equals(collaboratorId);
@@ -91,7 +128,7 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
         }
         requestRemove(toRemove);
     }    
-    
+        
     private void requestRemoveFor(String userId, Set<String> toRemove) {
         Collection<CommandMessage> updates = this.applyRemove(userId, toRemove);
         if (updates != null) {
