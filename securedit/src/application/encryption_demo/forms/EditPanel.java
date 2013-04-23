@@ -7,6 +7,7 @@ package application.encryption_demo.forms;
 import application.encryption_demo.CustomDocument;
 import document.NetworkDocument;
 import document.NetworkDocumentInterface;
+import java.awt.Color;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -17,6 +18,8 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
 
 /**
  *
@@ -26,9 +29,25 @@ public class EditPanel extends javax.swing.JPanel {
     /**
      * Creates new form ChatPanel
      */
+    
+    public void addColor(Color c){
+        SimpleAttributeSet aset = new SimpleAttributeSet();
+        StyleConstants.setForeground(aset, c);
+        colors.add(aset);
+    }
+    
+    public void insertColors(){
+        addColor(Color.black);
+        addColor(Color.blue);
+        addColor(Color.green);
+        addColor(Color.red);
+    }
+    
     public EditPanel() {
         initComponents();
         labels = new ArrayList<String>();
+        colors = new ArrayList<SimpleAttributeSet>();
+        insertColors();
 
         labels.add("NORMAL");
         labels.add("PRIVILEGED");
@@ -195,7 +214,13 @@ public class EditPanel extends javax.swing.JPanel {
 
     private void setLevelButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_setLevelButtonMousePressed
         // TODO add your handling code here:
-            
+        int beginCursorInt = Integer.parseInt(beginCursor.getText());
+        int endCursorInt = Integer.parseInt(endCursor.getText());
+        int colorPosition = LevelSelect.getSelectedIndex();
+        System.out.println(colorPosition);
+        AttributeSet s = colors.get(colorPosition);
+        
+        cd.setColors(beginCursorInt, endCursorInt - beginCursorInt, s, true);
     }//GEN-LAST:event_setLevelButtonMousePressed
 
     
@@ -261,4 +286,5 @@ public class EditPanel extends javax.swing.JPanel {
     private javax.swing.JToggleButton setLevelButton;
     // End of variables declaration//GEN-END:variables
     private ArrayList<String> labels;
+    private ArrayList<SimpleAttributeSet> colors;
 }
