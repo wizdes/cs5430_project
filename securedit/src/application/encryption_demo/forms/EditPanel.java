@@ -5,22 +5,15 @@
 package application.encryption_demo.forms;
 
 import application.encryption_demo.CustomDocument;
-import document.NetworkDocument;
 import document.NetworkDocumentInterface;
 import java.awt.Color;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
@@ -40,23 +33,7 @@ public class EditPanel extends javax.swing.JPanel {
         StyleConstants.setForeground(aset, c);
         colors.add(aset);
     }
-    
-    public void insertColors(){
-        addColor(Color.black);
-        addColor(Color.blue);
-        addColor(Color.green);
-        addColor(Color.red);
-    }
-    
-    public void stdPopulateColorList(){
-        ArrayList<Color> colors = new ArrayList<Color>();
-        colors.add(Color.black);
-        colors.add(Color.blue);
-        colors.add(Color.green);
-        colors.add(Color.red);
-        cr.giveColorList(colors);        
-    }
-    
+        
     public void populateColorsList(ArrayList<Color> colors, ArrayList<String> labels){
         this.labels = labels;
         cr.giveColorList(colors);
@@ -65,30 +42,101 @@ public class EditPanel extends javax.swing.JPanel {
         }
     }
     
+    public void setDefaultColorsAndLabels() {
+        ArrayList<Color> defaultColors = new ArrayList<>();
+        defaultColors.add(Color.black);
+        defaultColors.add(Color.blue);
+        defaultColors.add(Color.green);
+        defaultColors.add(Color.red);
+        
+        ArrayList<String> defaultLabels = new ArrayList<>();
+        defaultLabels.add("NORMAL");
+        defaultLabels.add("PRIVILEGED");
+        defaultLabels.add("SECRET");
+        defaultLabels.add("TOP SECRET");
+        
+        populateColorsList(defaultColors, defaultLabels);
+    }
+    
+    private HashMap<String, Color> getColorChoices() {
+                
+        HashMap<String, Color> colorChoices = new HashMap<>();
+        colorChoices.put("black", Color.black);
+        colorChoices.put("blue", Color.blue);
+        colorChoices.put("green", Color.green);
+        colorChoices.put("red", Color.red);
+        colorChoices.put("gray", Color.GRAY);
+        colorChoices.put("white", Color.white);
+        colorChoices.put("cyan", Color.CYAN);
+        
+        return colorChoices;
+    }
+    
+    private String getColorChoicePrompt(HashMap<String, Color> colorChoices) {
+        String colorChoiceList = "(";
+        for (String c : colorChoices.keySet()) {
+            colorChoiceList += c + ", ";
+        }
+        colorChoiceList = colorChoiceList.substring(0, colorChoiceList.length() - 2) + ")";
+        String colorPrompt = "choose a color for this group '\n" + colorChoiceList + " : ";
+        
+        return colorPrompt;
+    }
+    
+    private void setupColorsAndLabels() {
+        ArrayList<Color> defaultColors = new ArrayList<>();
+        ArrayList<String> defaultLabels = new ArrayList<>();
+
+        HashMap<String, Color> colorChoices = getColorChoices();
+
+        String labelPrompt = "Enter a security group label (type 'done' when finished)";
+        String label = JOptionPane.showInputDialog(labelPrompt);
+        while (!label.equals("done")) {
+            defaultLabels.add(label);
+            label = JOptionPane.showInputDialog(labelPrompt);
+        }
+        
+        for (String l : defaultLabels) {
+            String colorPrompt = getColorChoicePrompt(colorChoices);
+            String colorName = JOptionPane.showInputDialog(l + " ~> " + colorPrompt);
+            Color color = colorChoices.get(colorName);
+            while (color == null) {
+                JOptionPane.showMessageDialog(this, "Invalid color selection");
+                colorName = JOptionPane.showInputDialog(l + " ~> " + colorPrompt);
+                color = colorChoices.get(colorName);                
+            }
+            colorChoices.remove(colorName);
+            defaultColors.add(color);
+        }
+        
+        populateColorsList(defaultColors, defaultLabels);
+    }
+    
+    public void promptForLevelsAndColors() {
+        int r = JOptionPane.showConfirmDialog(this, "Would you like to use the default levels?");
+        if (r == JOptionPane.OK_OPTION) {
+            setDefaultColorsAndLabels();
+        } else {
+            setupColorsAndLabels();
+        }
+    }    
+    
     public EditPanel() {
         initComponents();
+        peerModel = new DefaultListModel();
+        cr = new newCellRenderer();
         labels = new ArrayList<String>();
         colors = new ArrayList<SimpleAttributeSet>();
-        insertColors();
-        peerModel = new DefaultListModel();
-
-        labels.add("NORMAL");
-        labels.add("PRIVILEGED");
-        labels.add("SECRET");
-        labels.add("TOP SECRET");
         
-        LevelSelect.addItem(labels.get(0));
-        LevelSelect.addItem(labels.get(1));
-        LevelSelect.addItem(labels.get(2));
-        LevelSelect.addItem(labels.get(3));
+        promptForLevelsAndColors();
+        
+        for (String l : labels) {
+            LevelSelect.addItem(l);
+        }
         
         String[] elements = new String[labels.size()];
         elements = labels.toArray(elements);
         jList1.setListData(elements);
-        cr = new newCellRenderer();
-        
-        stdPopulateColorList();
-        
         jList1.setCellRenderer(cr);
         
         PeersList.setModel(peerModel);
@@ -97,7 +145,7 @@ public class EditPanel extends javax.swing.JPanel {
         documentArea.setDocument(cd);
         cd.setEditorReference(this);
         
-        displayedUsername = new ArrayList<String>();
+        displayedUsername = new ArrayList<>();
     }
     
     public void giveDocument(NetworkDocumentInterface nd){
