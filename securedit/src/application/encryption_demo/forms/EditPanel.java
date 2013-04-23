@@ -308,7 +308,7 @@ public class EditPanel extends javax.swing.JPanel {
         System.out.println(colorPosition);
         AttributeSet s = colors.get(colorPosition);
         //send it to everyone else
-        setColors(beginCursorInt, endCursorInt - beginCursorInt, colorPosition);
+        //setColors(beginCursorInt, endCursorInt - beginCursorInt, colorPosition);
         nd.assignLevel(colorPosition, beginCursorInt, endCursorInt);
     }//GEN-LAST:event_setLevelButtonMousePressed
 
