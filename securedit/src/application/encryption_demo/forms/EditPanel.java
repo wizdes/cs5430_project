@@ -91,6 +91,7 @@ public class EditPanel extends javax.swing.JPanel {
             endCursor.setEnabled(false);
             LevelSelect.setEnabled(false);
             setLevelButton.setEnabled(false);
+            changeUserLevel.setText("Request Change Level");
         }
     }
 
@@ -117,6 +118,11 @@ public class EditPanel extends javax.swing.JPanel {
         LevelList = new javax.swing.JScrollPane();
         jList1 = new javax.swing.JList();
         LevelLabel = new javax.swing.JLabel();
+        changeUserLevel = new javax.swing.JButton();
+        openFile = new javax.swing.JButton();
+        openNormalFile = new javax.swing.JButton();
+        saveRegFile = new javax.swing.JButton();
+        saveEncryptedFile = new javax.swing.JButton();
 
         setPreferredSize(new java.awt.Dimension(825, 428));
 
@@ -160,13 +166,33 @@ public class EditPanel extends javax.swing.JPanel {
 
         LevelLabel.setText("Levels");
 
+        changeUserLevel.setText("Change User Level");
+
+        openFile.setText("Open Encrypted File");
+
+        openNormalFile.setText("Open Normal File");
+
+        saveRegFile.setText("Save Unencrypted File");
+
+        saveEncryptedFile.setText("Save Encrypted File");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 569, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 569, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(openFile)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(openNormalFile)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(saveRegFile)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(saveEncryptedFile)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE)
@@ -175,20 +201,19 @@ public class EditPanel extends javax.swing.JPanel {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(endCursor, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(LevelSelect, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(setLevelButton)
-                                .addGap(0, 0, Short.MAX_VALUE))))
+                        .addComponent(endCursor, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(LevelSelect, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(LevelList, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(PeersLabel)
                             .addComponent(cursorInfo)
-                            .addComponent(LevelLabel))
+                            .addComponent(LevelLabel)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(setLevelButton)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(changeUserLevel)))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -197,7 +222,15 @@ public class EditPanel extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 392, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(openFile)
+                            .addComponent(openNormalFile)
+                            .addComponent(saveRegFile)
+                            .addComponent(saveEncryptedFile))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(PeersLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -210,13 +243,14 @@ public class EditPanel extends javax.swing.JPanel {
                             .addComponent(jLabel1)
                             .addComponent(endCursor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(LevelSelect, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(setLevelButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(setLevelButton)
+                            .addComponent(changeUserLevel))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(LevelLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(LevelList, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(17, 17, 17)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(LevelList, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -241,8 +275,8 @@ public class EditPanel extends javax.swing.JPanel {
         int colorPosition = LevelSelect.getSelectedIndex();
         System.out.println(colorPosition);
         AttributeSet s = colors.get(colorPosition);
-        
-        cd.setColors(beginCursorInt, endCursorInt - beginCursorInt, s, true);
+        //send it to everyone else
+        setColors(beginCursorInt, endCursorInt - beginCursorInt, colorPosition);
     }//GEN-LAST:event_setLevelButtonMousePressed
 
     public void setColors(int begin, int end, int colorLevel){
@@ -305,6 +339,7 @@ public class EditPanel extends javax.swing.JPanel {
     private javax.swing.JLabel PeersLabel;
     private javax.swing.JList PeersList;
     private javax.swing.JTextField beginCursor;
+    private javax.swing.JButton changeUserLevel;
     private javax.swing.JLabel cursorInfo;
     private javax.swing.JTextPane documentArea;
     private javax.swing.JTextField endCursor;
@@ -312,6 +347,10 @@ public class EditPanel extends javax.swing.JPanel {
     private javax.swing.JList jList1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JButton openFile;
+    private javax.swing.JButton openNormalFile;
+    private javax.swing.JButton saveEncryptedFile;
+    private javax.swing.JButton saveRegFile;
     private javax.swing.JToggleButton setLevelButton;
     // End of variables declaration//GEN-END:variables
     private ArrayList<String> labels;
