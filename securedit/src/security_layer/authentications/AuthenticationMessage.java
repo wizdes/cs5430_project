@@ -4,10 +4,12 @@
  */
 package security_layer.authentications;
 
+import application.encryption_demo.Messages.Message;
+
 /**
  *
  * @author Patrick
  */
-public interface AuthenticationMessage extends java.io.Serializable {
+public interface AuthenticationMessage extends Message {
     
 }

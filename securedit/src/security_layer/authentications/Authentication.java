@@ -4,7 +4,9 @@
  */
 package security_layer.authentications;
 
+import application.encryption_demo.Profile;
 import configuration.Constants;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.Key;
 import java.security.MessageDigest;
@@ -28,6 +30,7 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.security.auth.DestroyFailedException;
 import javax.security.auth.Destroyable;
 import security_layer.KeyFactory;
+import security_layer.SecureTransportInterface;
 import transport_layer.network.NetworkTransportInterface;
 
 /**
@@ -36,30 +39,60 @@ import transport_layer.network.NetworkTransportInterface;
  */
 public class Authentication {
     private NetworkTransportInterface transport;
-    private String ident;
+    private SecureTransportInterface secureTransport;
     private ConcurrentMap<String, AuthenticationSession> authSessions = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, String> pendingPINs = new ConcurrentHashMap<>();
     private ServerAuthenticationPersistantState persistantServerState;
     
     private static final BigInteger n = new BigInteger(MODPGroups.MODP_GROUP_3072, 16);
     private static final BigInteger g = new BigInteger(MODPGroups.GENERATOR + "");
-    public Authentication(NetworkTransportInterface transport, String ident) {
+    
+    public Authentication(NetworkTransportInterface transport, SecureTransportInterface secureTransport) {
         this.transport = transport;
+        this.secureTransport = secureTransport;
         this.transport.setAuthenticationTransport(this);
-        this.ident = ident;
+    }
+    
+    public String generatePIN(String userID, String docID) {
+        String PIN = KeyFactory.generatePIN();
+        pendingPINs.put(userID + "-" + docID, PIN);
+        return PIN;
+    }
+    
+    public String getPIN(String userID, String docID) {
+        return pendingPINs.get(userID + "-" + docID);
+    }    
+    
+    public boolean initializeSRPAuthentication(String serverID, String docID, String password, String PIN){
+        byte[] salt = KeyFactory.generateSalt();
+        BigInteger x;
+        try {
+            x = new BigInteger(H(salt, password.getBytes("UTF-8")));
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
+        }
+        
+        BigInteger v = g.modPow(x, n);
+        SecretKey pinKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN);
+        SecretKey HMACKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN + "HMAC");
+        
+        InitAuth_Msg initMsg = new InitAuth_Msg(v, salt);
+        return this.secureTransport.sendAESEncryptedMessage(serverID, docID, initMsg, pinKey, HMACKey);
     }
     
     public boolean authenticate(String serverID, String docID, String password){
         //Create new session state
         BigInteger a = generateEphemeralPrivateKey();     //a = ephemeral private key
         BigInteger A = g.modPow(a, n);                    //A = g^a = ephemeral public key
-        AuthenticationSession session = new AuthenticationSession(ident, serverID, docID);
+        AuthenticationSession session = new AuthenticationSession(Profile.username, serverID, docID);
         session.password = password;
         session.a = a;
         session.A = A;
         authSessions.put(serverID + ":::" + docID, session);
         
         //Send initial message
-        Auth_Msg1 initialMsg = new Auth_Msg1(ident, A, docID);
+        Auth_Msg1 initialMsg = new Auth_Msg1(Profile.username, A, docID);
         transport.send(serverID, initialMsg);
         
         //Wait for authentication to complete
@@ -70,7 +103,7 @@ public class Authentication {
             }
         } catch (InterruptedException ex) {
             if(Constants.DEBUG_ON){
-                Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, "[User: " + ident + "] authentication with " + serverID + ":" + docID, ex);
+                Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "] authentication with " + serverID + ":" + docID, ex);
             }
             return false;
         } finally{
@@ -79,7 +112,7 @@ public class Authentication {
         return true;
     }
     
-    public void processAuthenticationMessage(String sourceID, AuthenticationMessage receivedMsg){
+    public void processAuthenticationMessage(String sourceID, String docID, AuthenticationMessage receivedMsg){
         if(receivedMsg instanceof SRPSetupMessage){
             processSRPSetupMessage(sourceID, (SRPSetupMessage)receivedMsg);
         }
@@ -88,25 +121,29 @@ public class Authentication {
                 processSRPMessage(sourceID, (SRPAuthenticationMessage)receivedMsg);
             } catch (InvalidSRPMessageException ex) {
                 if(Constants.DEBUG_ON){
-                    Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, "[User: " + ident + "] processing authentication from " + sourceID, ex);
+                    Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "] processing authentication from " + sourceID, ex);
                 }
                 //TODO: Handle error here, may need to wake up client
             } catch(InconsistentSessionKeyException ex){
                 if(Constants.DEBUG_ON){
-                    Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, "[User: " + ident + "] processing authentication from " + sourceID, ex);
+                    Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "] processing authentication from " + sourceID, ex);
                 }
                 //TODO: Handle different error here, may need to wake up client
             }
         }
     }
+    
     private void processSRPSetupMessage(String sourceID, SRPSetupMessage receivedSetupMsg){
+        InitAuth_Msg initMsg = (InitAuth_Msg)receivedSetupMsg;
+        persistantServerState.addClientPasswordState(sourceID, initMsg.s, initMsg.v);
         
     }
+    
     private void processSRPMessage(String sourceID, SRPAuthenticationMessage receivedSRPMsg) throws InvalidSRPMessageException, InconsistentSessionKeyException{
         if(receivedSRPMsg instanceof Auth_Msg1){    //Server
             Auth_Msg1 msg1 = (Auth_Msg1)receivedSRPMsg;
             //Fetch Persistent state
-            String s = persistantServerState.getClientSalt(sourceID);           //s = salt
+            byte[] s = persistantServerState.getClientSalt(sourceID);           //s = salt
             BigInteger v = persistantServerState.getClientVerifier(sourceID);   //v = verifier = g^x
             if(s == null || v == null){
                 throw new InvalidSRPMessageException("Client: " + sourceID + " has no account[s,v pair] on record.");
@@ -116,7 +153,7 @@ public class Authentication {
             BigInteger b = generateEphemeralPrivateKey();           //b
             BigInteger B = g.modPow(b, n);                          //g^b
             B.add(v);                                               //B = v + g^b
-            AuthenticationSession session = new AuthenticationSession(sourceID, ident, msg1.docID);
+            AuthenticationSession session = new AuthenticationSession(sourceID, Profile.username, msg1.docID);
             session.b = b;
             session.B = B;
             session.A = msg1.A;
@@ -143,7 +180,7 @@ public class Authentication {
             session.B = msg2.B;
             
             //Compute S(on the client) which is the common exponential value
-            BigInteger x = new BigInteger(H(session.password.toCharArray(), msg2.salt.getBytes()));
+            BigInteger x = new BigInteger(H(session.password.toCharArray(), msg2.salt));
             BigInteger S = session.B.subtract(g.modPow(x, n));  //(B - g^x)
             BigInteger exp = session.a.add(msg2.u.multiply(x));                     //(a + u*x)
             S.modPow(exp, n);                                                       //S = (B - g^x)^(a + u*x)
@@ -201,10 +238,13 @@ public class Authentication {
             }
         }
     }
-    private byte[] H(byte[] input) {
+    private byte[] H(byte[]... input) {
         try {
             MessageDigest sha = MessageDigest.getInstance("SHA-256");
-            return sha.digest(input);
+            for (byte[] byteArray : input) {
+                sha.update(byteArray);
+            }
+            return sha.digest();
         } catch (NoSuchAlgorithmException ex) {
             if (Constants.DEBUG_ON) {
                 Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, null, ex);
@@ -227,17 +267,7 @@ public class Authentication {
         }
     }
     private byte[] MAC(byte[] A, byte[] B, byte[] K){
-        try {
-            MessageDigest sha = MessageDigest.getInstance("SHA-256");
-            sha.update(A);
-            sha.update(B);
-            return sha.digest(K);
-        } catch (NoSuchAlgorithmException ex) {
-            if(Constants.DEBUG_ON){
-                Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            return null;
-        }
+        return H(A, B, K);
     }
     private BigInteger generateEphemeralPrivateKey(){
         BigInteger key = null;

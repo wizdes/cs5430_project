@@ -11,11 +11,11 @@ import java.math.BigInteger;
  * @author Patrick
  */
 class Auth_Msg2 extends SRPAuthenticationMessage {
-    String salt;
+    byte[] salt;
     BigInteger B;
     BigInteger u;  //Random value, similar to nonce
 
-    Auth_Msg2(String salt, BigInteger B, BigInteger u, String docID) {
+    Auth_Msg2(byte[] salt, BigInteger B, BigInteger u, String docID) {
         super(docID);
         this.salt = salt;
         this.B = B;

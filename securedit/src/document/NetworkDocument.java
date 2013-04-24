@@ -118,7 +118,7 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
         Collection<CommandMessage> updates = this.applyInsert(userId, level, left, right, text);
         if (updates != null) {
             for (CommandMessage m : updates) {
-                communication.sendMessage(m.to, m);
+                communication.sendMessage(m.to, this.getName(), m);
             }
         }
     }
@@ -146,7 +146,7 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
         Collection<CommandMessage> updates = this.applyRemove(userId, toRemove);
         if (updates != null) {
             for (CommandMessage m : updates) {
-                communication.sendMessage(m.to, m);
+                communication.sendMessage(m.to, this.getName(), m);
             }
         }        
     }
@@ -239,7 +239,7 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
     private void sendCommandMessage(String userId, DocumentCommand dc) {
         CommandMessage cm = new CommandMessage(userId, this.collaboratorId, this.getName(), dc);
         System.out.println(cm);
-        this.communication.sendMessage(userId, cm);
+        this.communication.sendMessage(userId, this.getName(), cm);
     }
     
 }

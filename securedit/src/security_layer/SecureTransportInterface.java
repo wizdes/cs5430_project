@@ -17,13 +17,13 @@ import transport_layer.discovery.DiscoveryResponseMessage;
  */
 public interface SecureTransportInterface {
     public boolean sendAESEncryptedMessage(String destination, String docID, Message m);
-//    public boolean sendAESEncryptedMessage(String destination, Message m, SecretKey secretKey, SecretKey HMACKey);
+    public boolean sendAESEncryptedMessage(String destination, String docID, Message m, SecretKey secretKey, SecretKey HMACKey);
 //    public boolean sendRSAEncryptedMessage(String destination, Message m);
     public boolean sendPlainTextMessage(String destination, Message m);
 //    public boolean processPlaintextMessage(String sourceOfMessage, PlaintextMessage msg);
     public boolean processEncryptedMessage(String sourceOfMessage, String docID, EncryptedMessage encryptedMsg) throws InvalidHMACException;
-    public boolean writeEncryptedFile(String filename, Message contents);
-    public Message readEncryptedFile(String filename);
+    public boolean writeEncryptedFile(String filename, String password, Message contents);
+    public Message readEncryptedFile(String filename, String password);
     public String readUnencryptedFile(String filename);
 //    public boolean authenticate(String destination);
 
@@ -38,8 +38,9 @@ public interface SecureTransportInterface {
     public void broadcastDiscovery();
     public void processDiscoveryMessage(DiscoveryMessage dm);
     public void processDiscoveryResponse(DiscoveryResponseMessage msg);
-
-    public boolean addPIN(String ID, String PIN);
-    public String getPIN(String ID);
-    public void displayPIN(String ID, String PIN);
+    
+//    public boolean addPIN(String ID, String PIN);
+//    public String getPIN(String ID);
+//    public void displayPIN(String ID, String PIN);
+    
 }

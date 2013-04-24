@@ -8,6 +8,7 @@ import application.encryption_demo.DiscoveredPeers;
 import application.encryption_demo.EncryptionDemoFunctionality;
 import application.encryption_demo.Profile;
 import document.NetworkDocument;
+import java.awt.Component;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,11 +25,12 @@ public class ApplicationWindow extends javax.swing.JFrame {
     Profile profile;
     ConcurrentMap<Integer, String> docIDs = new ConcurrentHashMap<>();   //<tab index, docID>
     ConcurrentMap<String, EditPanel> chatPanels = new ConcurrentHashMap<>();    //<docID, chatPanel>
+    
     public static void main(String[] args) {
         String username = "0";
         String ip = "localhost";
         int port = 6000;
-        ApplicationWindow form = new ApplicationWindow(username, ip, port);
+          ApplicationWindow form = new ApplicationWindow(username, ip, port);
         form.setVisible(true); 
     }
     
@@ -62,6 +64,8 @@ public class ApplicationWindow extends javax.swing.JFrame {
         joinChatButton = new javax.swing.JButton();
         startChatButton = new javax.swing.JButton();
         addManualPeer = new javax.swing.JButton();
+        loginButton = new javax.swing.JButton();
+        createAccountButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -99,12 +103,25 @@ public class ApplicationWindow extends javax.swing.JFrame {
             }
         });
 
+        loginButton.setText("Login");
+        loginButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                loginButtonActionPerformed(evt);
+            }
+        });
+
+        createAccountButton.setText("Create Account");
+
         org.jdesktop.layout.GroupLayout peerPanelLayout = new org.jdesktop.layout.GroupLayout(peerPanel);
         peerPanel.setLayout(peerPanelLayout);
         peerPanelLayout.setHorizontalGroup(
             peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(peerPanelLayout.createSequentialGroup()
-                .addContainerGap(576, Short.MAX_VALUE)
+                .addContainerGap(386, Short.MAX_VALUE)
+                .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(org.jdesktop.layout.GroupLayout.TRAILING, loginButton)
+                    .add(org.jdesktop.layout.GroupLayout.TRAILING, createAccountButton))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(peerPanelLayout.createSequentialGroup()
                         .add(startChatButton)
@@ -118,26 +135,28 @@ public class ApplicationWindow extends javax.swing.JFrame {
             .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                 .add(peerPanelLayout.createSequentialGroup()
                     .add(11, 11, 11)
-                    .add(jScrollPane8, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 802, Short.MAX_VALUE)
+                    .add(jScrollPane8, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 786, Short.MAX_VALUE)
                     .add(12, 12, 12)))
         );
         peerPanelLayout.setVerticalGroup(
             peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(org.jdesktop.layout.GroupLayout.TRAILING, peerPanelLayout.createSequentialGroup()
-                .addContainerGap(356, Short.MAX_VALUE)
+                .addContainerGap(340, Short.MAX_VALUE)
                 .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(DiscoverPeersButton)
-                    .add(joinChatButton))
+                    .add(joinChatButton)
+                    .add(loginButton))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(startChatButton)
-                    .add(addManualPeer))
+                    .add(addManualPeer)
+                    .add(createAccountButton))
                 .addContainerGap())
             .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                 .add(peerPanelLayout.createSequentialGroup()
                     .add(22, 22, 22)
                     .add(jScrollPane8, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 300, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(104, Short.MAX_VALUE)))
+                    .addContainerGap(88, Short.MAX_VALUE)))
         );
 
         tabbedPane.addTab("Peers", peerPanel);
@@ -230,33 +249,33 @@ public class ApplicationWindow extends javax.swing.JFrame {
         boolean hasAuthenticated = (Boolean)this.DiscoveredPeersTable.getModel().getValueAt(selectedRow, 4);
         
         if (!hasAuthenticated) {
-            if (!this.functionality.authenticateHuman(ownerId)) {
-                showMessage("Human authentication failed to initialize.");
-                return;
-            }
-
-            String pin = JOptionPane.showInputDialog("Enter PIN for " + ownerId);
-            while (!this.functionality.addPIN(ownerId, pin)) {
-                int closed = JOptionPane.showOptionDialog(this,
-                        "Bad PIN! or message not received from server",
-                        "Bad PIN",
-                        JOptionPane.OK_CANCEL_OPTION,
-                        JOptionPane.ERROR_MESSAGE,
-                        null,
-                        null,
-                        null);
-                if (closed == JOptionPane.CLOSED_OPTION || closed == JOptionPane.CANCEL_OPTION) {
-                    return;
-                }
-                pin = JOptionPane.showInputDialog("Enter PIN for " + ownerId);
-            }
+//            if (!this.functionality.authenticateHuman(ownerId)) {
+//                showMessage("Human authentication failed to initialize.");
+//                return;
+//            }
+//
+//            String pin = JOptionPane.showInputDialog("Enter PIN for " + ownerId);
+//            while (!this.functionality.addPIN(ownerId, pin)) {
+//                int closed = JOptionPane.showOptionDialog(this,
+//                        "Bad PIN! or message not received from server",
+//                        "Bad PIN",
+//                        JOptionPane.OK_CANCEL_OPTION,
+//                        JOptionPane.ERROR_MESSAGE,
+//                        null,
+//                        null,
+//                        null);
+//                if (closed == JOptionPane.CLOSED_OPTION || closed == JOptionPane.CANCEL_OPTION) {
+//                    return;
+//                }
+//                pin = JOptionPane.showInputDialog("Enter PIN for " + ownerId);
+//            }
         } else{
             showMessage("Skipping human authentication since already authenticated");
         }
-        if (!this.functionality.authenticateMachine(ownerId)) {
-            showMessage("machine authentication failed");
-            return;
-        }
+//        if (!this.functionality.authenticateMachine(ownerId)) {
+//            showMessage("machine authentication failed");
+//            return;
+//        }
         
         //Create document instance and send join request for doc
         NetworkDocument nd = new NetworkDocument(
@@ -268,13 +287,13 @@ public class ApplicationWindow extends javax.swing.JFrame {
             return;
         }
         //TODO FINAL PHASE: Authorization: Should wait here for authorization telling me chat request was accepted.
-        this.functionality.updateHumanAuthStatus(ownerId, true);
-        EditPanel panel = new EditPanel();
-        panel.giveDocument(nd);
-        nd.giveGUI(panel);
-        chatPanels.put(docID, panel);
-        this.tabbedPane.add("Owner: " + ownerId + ", Doc: " + docName, panel);
-        this.tabbedPane.setSelectedComponent(panel);
+//        this.functionality.updateHumanAuthStatus(ownerId, true);
+//        EditPanel panel = new EditPanel();
+//        panel.giveDocument(nd);
+//        nd.giveGUI(panel);
+//        chatPanels.put(docID, panel);
+//        this.tabbedPane.add("Owner: " + ownerId + ", Doc: " + docName, panel);
+//        this.tabbedPane.setSelectedComponent(panel);
     }//GEN-LAST:event_joinChatButtonActionPerformed
 
     private void addManualPeerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addManualPeerActionPerformed
@@ -301,6 +320,27 @@ public class ApplicationWindow extends javax.swing.JFrame {
         functionality.manuallyAddPeer(id.trim(), host.trim(), port, documents);
     }//GEN-LAST:event_addManualPeerActionPerformed
 
+    private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginButtonActionPerformed
+        DocumentLoginPanel loginForm = new DocumentLoginPanel();
+//        int r = JOptionPane.showConfirmDialog(rootPane, loginForm);
+        Object[] options = {"Login"};
+        int r = JOptionPane.showOptionDialog(
+                this,
+                loginForm, 
+                "Login",
+                JOptionPane.OK_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                options,
+                options[0]);
+        if (r == JOptionPane.OK_OPTION) {
+            System.out.println(loginForm.passwordTextField.getPassword());
+            System.out.println(loginForm.usernameTextField.getText());
+        } else {
+            System.out.println("canceld");
+        }
+    }//GEN-LAST:event_loginButtonActionPerformed
+
     private void showMessage(String m) {
         JOptionPane.showMessageDialog(this, m);
     }
@@ -313,8 +353,10 @@ public class ApplicationWindow extends javax.swing.JFrame {
     private javax.swing.JButton DiscoverPeersButton;
     private javax.swing.JTable DiscoveredPeersTable;
     private javax.swing.JButton addManualPeer;
+    private javax.swing.JButton createAccountButton;
     private javax.swing.JScrollPane jScrollPane8;
     private javax.swing.JButton joinChatButton;
+    private javax.swing.JButton loginButton;
     private javax.swing.JPanel peerPanel;
     private javax.swing.JButton startChatButton;
     javax.swing.JTabbedPane tabbedPane;

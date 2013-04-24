@@ -15,20 +15,20 @@ import java.util.concurrent.ConcurrentMap;
 class ServerAuthenticationPersistantState {
     ConcurrentMap<String, SaltAndVerifier> state = new ConcurrentHashMap<>();
 
-    void addClientPasswordState(String clientID, String salt, BigInteger passwordVerifier){
+    void addClientPasswordState(String clientID, byte[] salt, BigInteger passwordVerifier){
         state.put(clientID, new SaltAndVerifier(salt, passwordVerifier));
     }
-    String getClientSalt(String clientID){
+    byte[] getClientSalt(String clientID){
         return state.get(clientID).salt;
     }
     BigInteger getClientVerifier(String clientID){
         return state.get(clientID).passwordVerifier;
     }
     private class SaltAndVerifier{
-        private String salt;
+        private byte[] salt;
         private BigInteger passwordVerifier;
 
-        private SaltAndVerifier(String salt, BigInteger passwordVerifier) {
+        private SaltAndVerifier(byte[] salt, BigInteger passwordVerifier) {
             this.salt = salt;
             this.passwordVerifier = passwordVerifier;
         }

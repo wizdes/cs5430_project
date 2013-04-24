@@ -109,6 +109,6 @@ public class NetworkTransport implements NetworkTransportInterface{
         }
     }
     void depositAuthenticationMessage(NetworkMessage msg){
-        authenticationTransport.processAuthenticationMessage(msg.source.id, (AuthenticationMessage)msg.content);
+        authenticationTransport.processAuthenticationMessage(msg.source.id, msg.docID, (AuthenticationMessage)msg.content);
     }
 }

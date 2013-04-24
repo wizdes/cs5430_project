@@ -4,7 +4,6 @@ import configuration.Constants;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.JOptionPane;
-import security_layer.Profile;
 
 /*
  * To change this template, choose Tools | Templates
@@ -352,19 +351,19 @@ public class LoginForm extends javax.swing.JFrame {
             handleException(ex);
             return;
         }
-        Profile profile = Profile.createProfile(username, password, appPort, appHost);
-        transitionToChatWindow(profile, password);
+//        Profile profile = Profile.createProfile(username, password, appPort, appHost);
+//        transitionToChatWindow(profile, password);
     }//GEN-LAST:event_createAccountButtonActionPerformed
         
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginButtonActionPerformed
         String username = loginUsernameTextField.getText().trim();
         String password = new String(loginPasswordTextField.getPassword()).trim();
-        Profile profile = Profile.readProfile(username, password);
-        if (profile != null) {
-            transitionToChatWindow(profile, password);           
-        } else {
-            JOptionPane.showMessageDialog(this, "Invalid credentials");
-        }
+//        Profile profile = Profile.readProfile(username, password);
+//        if (profile != null) {
+//            transitionToChatWindow(profile, password);           
+//        } else {
+//            JOptionPane.showMessageDialog(this, "Invalid credentials");
+//        }
     }//GEN-LAST:event_loginButtonActionPerformed
 
     private void changePasswordButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changePasswordButtonActionPerformed
@@ -374,37 +373,37 @@ public class LoginForm extends javax.swing.JFrame {
         String retypedPassword = new String(changePasswordRetypeField.getPassword()).trim();
         
         //Read profile, check that username/password are correct and new ones are valid.
-        Profile profile = Profile.readProfile(username, oldPassword);
-        if(profile == null) {
-            JOptionPane.showMessageDialog(this, "Invalid credentials: Your old password or username weren't valid.");
-            return;
-        }
-        if(!newPassword.equals(retypedPassword)) {
-            JOptionPane.showMessageDialog(this, "The two passwords you entered do not match.");
-            return;
-        }
-        if (!isValidPassword(newPassword)) {
-            String message = "Passwords must contain >= 1 non alphanumeric character, be 12 or more characters in length, and contain no spaces.";
-            JOptionPane.showMessageDialog(this, message);
-            return;
-        }
+//        Profile profile = Profile.readProfile(username, oldPassword);
+//        if(profile == null) {
+//            JOptionPane.showMessageDialog(this, "Invalid credentials: Your old password or username weren't valid.");
+//            return;
+//        }
+//        if(!newPassword.equals(retypedPassword)) {
+//            JOptionPane.showMessageDialog(this, "The two passwords you entered do not match.");
+//            return;
+//        }
+//        if (!isValidPassword(newPassword)) {
+//            String message = "Passwords must contain >= 1 non alphanumeric character, be 12 or more characters in length, and contain no spaces.";
+//            JOptionPane.showMessageDialog(this, message);
+//            return;
+//        }
         
         //Update profile asymmetric keys and encrypt with the new password
-        profile.updateProfilePassword(newPassword);
-        
-        transitionToChatWindow(profile, newPassword);
+//        profile.updateProfilePassword(newPassword);
+//        
+//        transitionToChatWindow(profile, newPassword);
     }//GEN-LAST:event_changePasswordButtonActionPerformed
 
     private void passwordTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_passwordTextFieldActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_passwordTextFieldActionPerformed
     
-    private void transitionToChatWindow(Profile profile, String password) {
-        this.dispose();
-        ApplicationWindow form = new ApplicationWindow(profile, password);
-        form.setVisible(true); 
-    }
-    
+//    private void transitionToChatWindow(Profile profile, String password) {
+//        this.dispose();
+//        ApplicationWindow form = new ApplicationWindow(profile, password);
+//        form.setVisible(true); 
+//    }
+//    
     private boolean isValidUserID(String id){
         for(int i = 0; i < id.length(); i++){
             if(!Character.isDigit(id.charAt(i))){

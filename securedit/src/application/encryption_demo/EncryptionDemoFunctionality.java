@@ -30,7 +30,7 @@ public class EncryptionDemoFunctionality {
     private ApplicationWindow gui;
     private String openedFilename;
     private CommunicationInterface communication;
-    public PINFunctionality properPINInfo;
+//    public PINFunctionality properPINInfo;
     private ConcurrentMap<String, NetworkDocumentInterface> docInstances = new ConcurrentHashMap<>();
     
     public CommunicationInterface getCommunicationInterface(){
@@ -38,7 +38,7 @@ public class EncryptionDemoFunctionality {
     }
     
     public EncryptionDemoFunctionality(ApplicationWindow gui){
-        this.properPINInfo = new PINFunctionality();
+//        this.properPINInfo = new PINFunctionality();
         this.gui = gui;
         
         this.communication = new Communication(this);
@@ -78,8 +78,8 @@ public class EncryptionDemoFunctionality {
      * @param plaintext String representation of file in plaintext
      * @return Encrypted version of the file.
      */
-    String encryptFile(String plaintext){
-        communication.writeEncryptedFile(openedFilename, plaintext);
+    String encryptFile(String plaintext, String password){
+        communication.writeEncryptedFile(openedFilename, password, plaintext);
         return "This file was encrypted. Open it to see the encrpted text\n";
     }
     
@@ -88,8 +88,8 @@ public class EncryptionDemoFunctionality {
      * @param ciphertext String representation of file in ciphertext
      * @return Plaintext of file after being decrypted.
      */
-    String decryptFile(String ciphertext){
-        String plaintext = (String)communication.readEncryptedFile(openedFilename);
+    String decryptFile(String ciphertext, String password){
+        String plaintext = (String)communication.readEncryptedFile(openedFilename, password);
         return plaintext;
     }
     
@@ -110,11 +110,11 @@ public class EncryptionDemoFunctionality {
     
     public boolean sendRequestDocUpdate(String docID, String text){
         NetworkDocumentInterface instance = docInstances.get(docID);
-        return communication.sendMessage(instance.getOwnerID(), new RequestDocUpdateMessage(Profile.username, instance.getName(), text));
+        return communication.sendMessage(instance.getOwnerID(), docID, new RequestDocUpdateMessage(Profile.username, instance.getName(), text));
     }
     
     public boolean sendJoinRequestMessage(String ownerIdent, String docName){
-        return communication.sendMessage(ownerIdent, new RequestJoinDocMessage(Profile.username, docName));
+        return communication.sendMessage(ownerIdent, docName, new RequestJoinDocMessage(Profile.username, docName));
     }
     
     
@@ -130,9 +130,10 @@ public class EncryptionDemoFunctionality {
 //        return communication.authenticateMachine(ident);
 //    }
     
-    public boolean addPIN(String ident, String pin) {
-        return this.communication.updatePin(ident, pin);
-    }
+//    public boolean addPIN(String ident, String pin) {
+//        return this.communication.updatePin(ident, pin);
+//    }
+    
 //    public void updateHumanAuthStatus(String id, boolean hasHumanAuthenticated){
 //        this.communication.updateHumanAuthStatus(id, hasHumanAuthenticated);
 //    }
@@ -158,9 +159,9 @@ public class EncryptionDemoFunctionality {
         gui.displayMessages(docID, plaintext);
     }
     private final ReentrantLock atomicBroadcastLock = new ReentrantLock();
-
-    public void displayPIN(String ID, String PIN) {
-        gui.displayPIN(ID, PIN);
+    
+    public String generatePIN(String userId, String docID) {
+        return this.communication.generatePIN(userId, docID);
     }
     
     private class GUIListenerThread extends Thread {

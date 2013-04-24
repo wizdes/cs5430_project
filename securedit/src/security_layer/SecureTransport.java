@@ -9,24 +9,15 @@ import configuration.Constants;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Signature;
 import java.security.SignatureException;
-import java.security.SignedObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
@@ -34,11 +25,11 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SealedObject;
 import javax.crypto.SecretKey;
+import security_layer.authentications.Authentication;
 import transport_layer.discovery.DiscoveryResponseMessage;
 import transport_layer.discovery.DiscoveryTransport;
 import transport_layer.files.FileHandler;
 import transport_layer.files.FileTransportInterface;
-import transport_layer.network.NetworkTransport;
 import transport_layer.network.NetworkTransportInterface;
 
 /**
@@ -55,12 +46,16 @@ public class SecureTransport implements SecureTransportInterface{
     private AtomicLong counter = new AtomicLong();
 //    private ConcurrentMap<String, EncryptedAESMessage> pendingHumanAuth = new ConcurrentHashMap<>();
     private SessionKeys keys = new SessionKeys();
+    private Authentication authentication;
     
-    public SecureTransport(NetworkTransportInterface networkTransport, CommunicationInterface communication) {               
+    public SecureTransport(NetworkTransportInterface networkTransport, 
+                           Authentication authentication, 
+                           CommunicationInterface communication) {               
         this.networkTransport = networkTransport;
         this.networkTransport.setSecureTransport(this);
         this.discoveryTransport = new DiscoveryTransport(networkTransport);
         this.communication = communication;
+        this.authentication = authentication;
     }
     
     @Override
@@ -106,7 +101,8 @@ public class SecureTransport implements SecureTransportInterface{
         return sendAESEncryptedMessage(destination, docID, m, keys.getSessionKey(destination, docID), keys.getHmacKey(destination, docID));
     }
     
-    private boolean sendAESEncryptedMessage(String destination, String docID, Message m, SecretKey secretKey, SecretKey HMACKey) {
+    @Override
+    public boolean sendAESEncryptedMessage(String destination, String docID, Message m, SecretKey secretKey, SecretKey HMACKey) {
         if(Constants.DEBUG_ON){
             Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + Profile.username + "] Sending " + EncryptedAESMessage.class.getName() + " to " + destination + ".");
         }
@@ -118,7 +114,14 @@ public class SecureTransport implements SecureTransportInterface{
         try {
             SealedObject encryptedObject = new SealedObject(sendingMessage, cipher);
             byte[] hmac = CipherFactory.HMAC(HMACKey, encryptedObject);
-            EncryptedAESMessage encryptedMessage = new EncryptedAESMessage(encryptedObject, iv, hmac);
+            
+            EncryptedAESMessage encryptedMessage;
+            if (m instanceof HumanAuthenticationMessage) {
+                encryptedMessage = new EncryptedAuthenticationMessage(encryptedObject, iv, hmac);
+            } else {
+                encryptedMessage = new EncryptedAESMessage(encryptedObject, iv, hmac);
+            }
+            
             return networkTransport.send(destination, docID, encryptedMessage);
         } catch (IOException | IllegalBlockSizeException ex) {
             if(Constants.DEBUG_ON){
@@ -172,12 +175,18 @@ public class SecureTransport implements SecureTransportInterface{
         Cipher cipher = null;
         try {
             Constants.log("AES");
-
+            
             EncryptedAESMessage aesMessage = (EncryptedAESMessage) encryptedMessage;
             encryptedObject = aesMessage.encryptedObject;
-
-            HMACKey = keys.getHmacKey(sourceOfMessage, docID);
-            secretKey = keys.getSessionKey(sourceOfMessage, docID);
+            
+            if (encryptedMessage instanceof EncryptedAuthenticationMessage) {
+                String PIN = this.authentication.getPIN(sourceOfMessage, docID);
+                secretKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN);
+                HMACKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN + "HMAC");
+            } else {
+                HMACKey = keys.getHmacKey(sourceOfMessage, docID);
+                secretKey = keys.getSessionKey(sourceOfMessage, docID);
+            }
 
             byte[] hmac = CipherFactory.HMAC(HMACKey, encryptedObject);
 
@@ -224,22 +233,10 @@ public class SecureTransport implements SecureTransportInterface{
         if(Constants.DEBUG_ON){
             Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + Profile.username + "] Processing " + DiscoveryResponseMessage.class.getName() + " from " + msg.owner + ".");
         }
-        PublicKey pk = Profile.keys.getPublicKey(msg.owner);
-        long myKeyVersion = Profile.keys.getAsymmetricKeyVersion(Profile.username);
-        long myOwnersKeyVersion = Profile.keys.getAsymmetricKeyVersion(msg.owner);
         
-        System.out.println(pk);
-        System.out.println(myOwnersKeyVersion);
-        System.out.println(msg.ownerAsymmetricKeyVersion);
-        System.out.println(myKeyVersion);
-        System.out.println(msg.clientsKeyVersionNumberHeldByOwner);
-        
-        if(pk != null && myOwnersKeyVersion == msg.ownerAsymmetricKeyVersion && myKeyVersion == msg.clientsKeyVersionNumberHeldByOwner){
-            communication.updatePeers(msg.owner, msg.ip, msg.port, msg.documents, true);
-        } else{
-            communication.updatePeers(msg.owner, msg.ip, msg.port, msg.documents, false);
-        }
+        communication.updatePeers(msg.owner, msg.ip, msg.port, msg.documents, false);
     }
+    
     @Override
     public  void processDiscoveryMessage(DiscoveryMessage dm) {
         if(Constants.DEBUG_ON){
@@ -247,10 +244,8 @@ public class SecureTransport implements SecureTransportInterface{
         }
         if(!dm.sourceID.equals(Profile.username) && Profile.documentsOpenForDiscovery.size() > 0){
             List<String> documentNames = new ArrayList<>(Profile.documentsOpenForDiscovery);   //must copy here, possibly due to transient flag
-            long myKeyVersion = Profile.getAsymmetricKeyVersionNumber(Profile.username);
-            long clientsKeyVersion = Profile.getAsymmetricKeyVersionNumber(dm.sourceID);
             DiscoveryResponseMessage responseMessage = new DiscoveryResponseMessage(Profile.username, 
-                    Profile.host, Profile.port, documentNames, myKeyVersion, clientsKeyVersion);
+                    Profile.host, Profile.port, documentNames);
             networkTransport.addPeer(dm.sourceID, dm.sourceIP, dm.sourcePort);
             networkTransport.send(dm.sourceID, responseMessage);
         }
@@ -268,18 +263,22 @@ public class SecureTransport implements SecureTransportInterface{
 //    }
     
     @Override
-    public boolean writeEncryptedFile(String filename, Message contents) {
+    public boolean writeEncryptedFile(String filename, String password, Message contents) {
         try {
             //Encrypt file with personal key
             byte[] iv = CipherFactory.generateRandomIV();
-            Cipher cipher = CipherFactory.constructAESEncryptionCipher(Profile.keys.personalKey, iv);
+            byte[] hmacSalt = KeyFactory.generateSalt();
+            byte[] salt = KeyFactory.generateSalt();
+            
+            SecretKey key = KeyFactory.generateSymmetricKey(password, salt);
+            Cipher cipher = CipherFactory.constructAESEncryptionCipher(key, iv);
             SealedObject encryptedObject = new SealedObject(contents, cipher);
             
-            String salt = KeyFactory.generateSalt();
-            Key hmacKey = KeyFactory.generateSymmetricKey(Profile.keys.password, salt);
+            
+            Key hmacKey = KeyFactory.generateSymmetricKey(password, hmacSalt);
             byte[] hmac = CipherFactory.HMAC(hmacKey, encryptedObject);
             
-            EncryptedAESFile file = new EncryptedAESFile(encryptedObject, iv, hmac, salt);
+            EncryptedAESFile file = new EncryptedAESFile(encryptedObject, iv, hmac, hmacSalt, salt);
             return fileTransport.writeFile(filename, file);
             
         } catch (IOException | IllegalBlockSizeException ex) {
@@ -291,7 +290,7 @@ public class SecureTransport implements SecureTransportInterface{
     }
 
     @Override
-    public Message readEncryptedFile(String filename) {
+    public Message readEncryptedFile(String filename, String password) {
         if (!new File(filename).exists()) {
             return null;
         }
@@ -299,13 +298,15 @@ public class SecureTransport implements SecureTransportInterface{
             EncryptedAESFile file = (EncryptedAESFile)fileTransport.readFile(filename);
             
             //Verify hmac
-            Key hmacKey = KeyFactory.generateSymmetricKey(Profile.keys.password, file.hmacSalt);
+            Key hmacKey = KeyFactory.generateSymmetricKey(password, file.hmacSalt);
+            SecretKey key = KeyFactory.generateSymmetricKey(password, file.salt);
+            
             byte[] hmac = CipherFactory.HMAC(hmacKey, file.encryptedObject);        
             if (!Arrays.equals(hmac, file.HMAC)) {
                 throw new SignatureException("[User: " + Profile.username + "] Invalid HMAC");
             }
             
-            Cipher cipher = CipherFactory.constructAESDecryptionCipher(Profile.keys.personalKey, file.iv);
+            Cipher cipher = CipherFactory.constructAESDecryptionCipher(key, file.iv);
             return (Message)file.encryptedObject.getObject(cipher);
         } catch (SignatureException ex) {
             if(Constants.DEBUG_ON){
@@ -368,43 +369,38 @@ public class SecureTransport implements SecureTransportInterface{
         discoveryTransport.broadcastDiscovery();
     }
     
-    @Override
-    public String getPIN(String ID){
-        return authInstance.getPIN(ID);
-    }
-
-    @Override
-    public boolean addPIN(String ownerID, String PIN) {
-        if (!this.pendingHumanAuth.containsKey(ownerID)) {
-            if(Constants.DEBUG_ON){
-                Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + Profile.username + "] Haven't yet received PIN message from owner: " + ownerID + ".");
-            }
-            return false;
-        }
-        
-        SecretKey pinKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN);
-        SecretKey HMACKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN + "HMAC");
-        Profile.keys.addSymmetricKey(ownerID, pinKey);
-        Profile.keys.addHMACKey(ownerID, HMACKey);
-        
-        EncryptedAESMessage m = this.pendingHumanAuth.get(ownerID);
-        try {
-            boolean success = processEncryptedMessage(ownerID, m);
-            if(success){
-                Profile.keys.removeSymmetricKey(ownerID);
-                Profile.keys.removeHMACKey(ownerID);
-                pendingHumanAuth.remove(ownerID);
-            }
-            return success;
-        } catch (InvalidHMACException ex) {
-            Profile.keys.removeSymmetricKey(ownerID);
-            Profile.keys.removeHMACKey(ownerID);
-            if(Constants.DEBUG_ON){
-                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "] Failed to decrypt PIN message from owner: " + ownerID + ".", ex);
-            }
-            return false;
-        }
-    }
+//    @Override
+//    public boolean addPIN(String ownerID, String PIN) {
+//        if (!this.pendingHumanAuth.containsKey(ownerID)) {
+//            if(Constants.DEBUG_ON){
+//                Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + Profile.username + "] Haven't yet received PIN message from owner: " + ownerID + ".");
+//            }
+//            return false;
+//        }
+//        
+//        SecretKey pinKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN);
+//        SecretKey HMACKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN + "HMAC");
+//        Profile.keys.addSymmetricKey(ownerID, pinKey);
+//        Profile.keys.addHMACKey(ownerID, HMACKey);
+//        
+//        EncryptedAESMessage m = this.pendingHumanAuth.get(ownerID);
+//        try {
+//            boolean success = processEncryptedMessage(ownerID, m);
+//            if(success){
+//                Profile.keys.removeSymmetricKey(ownerID);
+//                Profile.keys.removeHMACKey(ownerID);
+//                pendingHumanAuth.remove(ownerID);
+//            }
+//            return success;
+//        } catch (InvalidHMACException ex) {
+//            Profile.keys.removeSymmetricKey(ownerID);
+//            Profile.keys.removeHMACKey(ownerID);
+//            if(Constants.DEBUG_ON){
+//                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "] Failed to decrypt PIN message from owner: " + ownerID + ".", ex);
+//            }
+//            return false;
+//        }
+//    }
 
     @Override
     public boolean sendPlainTextMessage(String destination, Message m) {
@@ -416,8 +412,8 @@ public class SecureTransport implements SecureTransportInterface{
         return networkTransport.send(destination, sendMsg);
     }
 
-    @Override
-    public void displayPIN(String ID, String PIN) {
-        communication.displayPIN(ID, PIN);
-    }
+//    @Override
+//    public void displayPIN(String ID, String PIN) {
+//        communication.displayPIN(ID, PIN);
+//    }
 }

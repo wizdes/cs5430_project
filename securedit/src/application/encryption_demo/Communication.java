@@ -7,7 +7,6 @@ package application.encryption_demo;
 
 import application.encryption_demo.Messages.Message;
 import application.encryption_demo.Messages.StringMessage;
-import application.encryption_demo.DiscoveredPeers.Peer;
 import configuration.Constants;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
@@ -20,7 +19,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import application.encryption_demo.Profile;
 import security_layer.SecureTransport;
 import security_layer.SecureTransportInterface;
 import security_layer.authentications.Authentication;
@@ -34,26 +32,26 @@ public class Communication implements CommunicationInterface {
     private final Lock queueLock = new ReentrantLock(true);
     private Condition newMessageArrived = queueLock.newCondition();
     private BlockingQueue<Message> messageQueue = new LinkedBlockingDeque<>();
-    private SecureTransportInterface secureTransport;
-    private Authentication authenticationTransport;
+    private SecureTransportInterface secureTransport = null;
+    private Authentication authenticationTransport = null;
     private DiscoveredPeers discoveredPeers = new DiscoveredPeers();
     private EncryptionDemoFunctionality guiFunctionality;
     
-    public void displayPIN(String ID, String PIN){
-        if (guiFunctionality != null) {
-            guiFunctionality.displayPIN(ID, PIN);    
-        }
-    }
+//    public void displayPIN(String ID, String PIN){
+//        if (guiFunctionality != null) {
+//            guiFunctionality.displayPIN(ID, PIN);    
+//        }
+//    }
     
     public Communication() {
         //Only used for test packages
         NetworkTransportInterface networkTransport = new NetworkTransport(Profile.username, Profile.host, Profile.port);
-        this.secureTransport = new SecureTransport(networkTransport, this);
-        this.authenticationTransport = new Authentication(networkTransport, Profile.username);
+        
+        this.secureTransport = new SecureTransport(networkTransport, this.authenticationTransport, this);
+        this.authenticationTransport = new Authentication(networkTransport, this.secureTransport);
     }
     public Communication(EncryptionDemoFunctionality guiFunctionality) {
-        NetworkTransportInterface networkTransport = new NetworkTransport(Profile.username, Profile.host, Profile.port);
-        this.secureTransport = new SecureTransport(networkTransport, this);
+        this();
         this.guiFunctionality = guiFunctionality;
     }
     
@@ -92,8 +90,8 @@ public class Communication implements CommunicationInterface {
     }
 
     @Override
-    public boolean sendMessage(String destination, Message msg) {
-        return secureTransport.sendAESEncryptedMessage(destination, msg);
+    public boolean sendMessage(String destination, String docID, Message msg) {
+        return secureTransport.sendAESEncryptedMessage(destination, docID, msg);
     }
     
     @Override 
@@ -134,13 +132,13 @@ public class Communication implements CommunicationInterface {
 //    }
 
     @Override
-    public boolean writeEncryptedFile(String filename, String contents) {
-        return secureTransport.writeEncryptedFile(filename, new StringMessage(contents));
+    public boolean writeEncryptedFile(String filename, String contents, String password) {
+        return secureTransport.writeEncryptedFile(filename, password, new StringMessage(contents));
     }
 
     @Override
-    public String readEncryptedFile(String filename) {
-        return ((StringMessage)secureTransport.readEncryptedFile(filename)).contents;
+    public String readEncryptedFile(String filename, String password) {
+        return ((StringMessage)secureTransport.readEncryptedFile(filename, password)).contents;
     }
 
     @Override
@@ -176,18 +174,23 @@ public class Communication implements CommunicationInterface {
 //        this.Profile.save(password);
 //    }
 
-    @Override
-    public boolean updatePin(String ownerID, String PIN) {
-        return secureTransport.addPIN(ownerID, PIN);
-    }
-    
-    @Override
-    public String getPIN(String ID){
-        return secureTransport.getPIN(ID);
-    }
+//    @Override
+//    public boolean updatePin(String ownerID, String PIN) {
+//        return secureTransport.addPIN(ownerID, PIN);
+//    }
+//    
+//    @Override
+//    public String getPIN(String ID){
+//        return secureTransport.getPIN(ID);
+//    }
 
     @Override
     public boolean authenticate(String machineIdent, String docID, String password) {
         return this.authenticationTransport.authenticate(machineIdent, docID, password);
+    }
+    
+    @Override
+    public String generatePIN(String userID, String docID) {
+        return this.authenticationTransport.generatePIN(userID, docID);
     }
 }

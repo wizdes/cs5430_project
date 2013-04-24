@@ -59,11 +59,9 @@ class MulticastClient extends Thread {
                 DiscoveryPacket discoveryPacket = DiscoveryPacket.fromString(received);
                 if (discoveryPacket != null) {
                     //Process packet.
-                    if(!discoveryPacket.sourceID.equals(Profile.username) && Profile.documentsOpenForDiscovery.size() > 0){
+                    if(!discoveryPacket.sourceID.equals(Profile.username) && Profile.documentsOpenForDiscovery.size() > 0) {
                         List<String> documentNames = new ArrayList<>(Profile.documentsOpenForDiscovery);   //must copy here, possibly due to transient flag
-                        long myKeyVersion = Profile.getAsymmetricKeyVersionNumber(Profile.username);
-                        long clientsKeyVersion = Profile.getAsymmetricKeyVersionNumber(discoveryPacket.sourceID);
-                        DiscoveryResponseMessage responseMessage = new DiscoveryResponseMessage(Profile.username, Profile.host, Profile.port, documentNames, myKeyVersion, clientsKeyVersion);
+                        DiscoveryResponseMessage responseMessage = new DiscoveryResponseMessage(Profile.username, Profile.host, Profile.port, documentNames);
                         networkTransport.addPeer(discoveryPacket.sourceID, discoveryPacket.myIP, discoveryPacket.myPort);
                         networkTransport.send(discoveryPacket.sourceID, responseMessage);
                     }

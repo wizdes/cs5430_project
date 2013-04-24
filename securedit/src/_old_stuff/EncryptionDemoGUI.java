@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import security_layer.Profile;
+//import security_layer.Profile;
 
 /**
  *
@@ -59,7 +59,7 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
         PortTextField.setText(appPort + "");
         PasswordTextField.setText(password);
         
-        Profile profile = Profile.readProfile(appNodeId, password);
+//        Profile profile = Profile.readProfile(appNodeId, password);
 //        functionality = new EncryptionDemoFunctionality(this, profile, password);
         
         SendTextField.addKeyListener(new KeyAdapter() {
@@ -756,9 +756,9 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_SendChatButtonActionPerformed
 
     private void GeneratePINButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_GeneratePINButtonMouseClicked
-        String newPIN = functionality.properPINInfo.getPIN();
-        functionality.properPINInfo.storePIN(newPIN);
-        JOptionPane.showMessageDialog(this, newPIN);
+//        String newPIN = functionality.properPINInfo.getPIN();
+//        functionality.properPINInfo.storePIN(newPIN);
+//        JOptionPane.showMessageDialog(this, newPIN);
     }//GEN-LAST:event_GeneratePINButtonMouseClicked
 
     private void DiscoverPeersButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DiscoverPeersButtonActionPerformed
