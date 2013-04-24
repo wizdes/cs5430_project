@@ -20,6 +20,8 @@ public interface AuthorizationDocumentInterface extends DocumentInterface {
      */
     public void addUserToLevel(String userId, int levelIdentifier);
     
+    public int getLevelForUser(String userId);
+    
     /* 
      * Returns a collection of messages ready to be broadcast to all of the peers
      * collaborating on this document, containing the appropriate changes they should see 

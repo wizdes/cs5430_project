@@ -33,7 +33,12 @@ public class AuthorizationDocument extends Document implements AuthorizationDocu
         peers.put(userId, level);
         addLevel(level);
     }
-
+    
+    @Override
+    public int getLevelForUser(String userId) {
+        return peers.containsKey(userId) ? peers.get(userId) : -1;    
+    }
+    
     @Override
     public Collection<CommandMessage> applyInsert(String userId, 
                                                   int level, 

@@ -36,8 +36,10 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
             curDoc.addUser(userId, levelIdentifier);
         }
         super.addUserToLevel(userId, levelIdentifier);
+        UpdateLevel ul = new UpdateLevel(userId, levelIdentifier);
+        CommandMessage cm = new CommandMessage(userId, this.getOwnerID(), this.getName(), ul);
+        this.communication.sendMessage(userId, cm);
     }
-    
     
     @Override
     public boolean assignLevel(int levelIdentifier, String leftIdentifier, String rightIdentifier) {
@@ -158,7 +160,7 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
                              di.leftIdentifier, 
                              di.rightIdentifier, 
                              di.text);
-            if(curDoc != null) {
+            if (curDoc != null) {
                 curDoc.manualInsert(this.getOffsetForIdentifier(di.leftIdentifier) + 1, di.text, null);
             }
         } else if (m.command instanceof DoRemove) {
@@ -184,7 +186,7 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
                           di.leftIdentifier, 
                           di.rightIdentifier, 
                           di.text);
-            if(curDoc != null) {
+            if (curDoc != null) {
                 curDoc.manualInsert(this.getOffsetForIdentifier(di.leftIdentifier) + 1, di.text, null);
             }
         }  else if (m.command instanceof DoRemove) {
@@ -197,9 +199,15 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
                 }
             }
             this.doRemove(dr.identifiers);
-            if(curDoc != null) {
+            if (curDoc != null) {
                 curDoc.manualRemove(smallestOffset, dr.identifiers.size());
             }
+        } else if (m.command instanceof UpdateLevel) {
+            UpdateLevel update = (UpdateLevel)m.command;
+            super.addUserToLevel(update.getUserId(), update.getLevel());
+            if (curDoc != null) {
+                curDoc.addUser(update.getUserId(), update.getLevel());
+            }            
         }
     }    
 
@@ -209,5 +217,5 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
         String rightIdent = this.getIdentifierAtIndex(right);
         requestInsert(level, leftIdent, rightIdent, text);
     }
-
+    
 }
