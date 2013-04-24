@@ -23,6 +23,8 @@ public interface NetworkDocumentInterface extends AuthorizationDocumentInterface
     void requestInsert(int level, String left, String right, String text);
     void requestInsert(int level, int left, int right, String text);
     
+    void requestChangeLevel(int level);
+    
     /* same as requestInsert, only for removing */
     void requestRemove(Set<String> identsToRemove);
     void requestRemove(int left, int right);

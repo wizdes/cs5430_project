@@ -372,6 +372,11 @@ public class EditPanel extends javax.swing.JPanel {
         cd.setColors(begin, end, colors.get(colorLevel), true);
     }
     
+    public boolean approveUserForLevel(String userId, int level) { 
+        String msg = "Add " + userId + " to level " + level + "?";
+        return JOptionPane.showConfirmDialog(this, msg) == JOptionPane.OK_OPTION;
+    }
+    
     public void manualInsert(int offset, String string, AttributeSet attributeSet){
         try {
             // Do something here

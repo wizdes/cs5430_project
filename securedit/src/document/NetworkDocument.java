@@ -11,6 +11,7 @@ import application.encryption_demo.forms.EditPanel;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -20,6 +21,9 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
     private CommunicationInterface communication;
     private String collaboratorId;
     private EditPanel curDoc;
+    
+    public static boolean autoApprove = false;
+    public static boolean autoDeny = false;
     
     public NetworkDocument(CommunicationInterface ci, 
                            String collaboratorId, 
@@ -37,8 +41,17 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
         }
         super.addUserToLevel(userId, levelIdentifier);
         UpdateLevel ul = new UpdateLevel(userId, levelIdentifier);
-        CommandMessage cm = new CommandMessage(userId, this.getOwnerID(), this.getName(), ul);
-        this.communication.sendMessage(userId, cm);
+        this.sendCommandMessage(userId, ul);
+    }
+    
+    @Override
+    public void requestChangeLevel(int level) {
+        if (this.isOwner()) {
+            super.addUserToLevel(this.getOwnerID(), level);
+        } else {
+            RequestLevel rl = new RequestLevel(level);
+            sendCommandMessage(this.getOwnerID(), rl);
+        }
     }
     
     @Override
@@ -97,9 +110,7 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
             requestInsertFor(this.getOwnerID(), level, left, right, text);
         } else {
             DoInsert di = new DoInsert(left, right, level, text);
-            CommandMessage cm = new CommandMessage(this.getOwnerID(), this.collaboratorId, this.getName(), di);
-//            System.out.println(this.collaboratorId + " : " + cm);
-            communication.sendMessage(cm.to, cm);
+            this.sendCommandMessage(this.getOwnerID(), di);
         }
     }
 
@@ -107,7 +118,6 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
         Collection<CommandMessage> updates = this.applyInsert(userId, level, left, right, text);
         if (updates != null) {
             for (CommandMessage m : updates) {
-//                System.out.println(this.collaboratorId + " : " + m);
                 communication.sendMessage(m.to, m);
             }
         }
@@ -119,9 +129,7 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
             requestRemoveFor(this.getOwnerID(), identsToRemove);
         } else {
             DoRemove dr = new DoRemove(identsToRemove);
-            CommandMessage cm = new CommandMessage(this.getOwnerID(), this.collaboratorId, this.getName(), dr);
-            System.out.println(this.collaboratorId + " : " + cm);
-            communication.sendMessage(cm.to, cm);
+            this.sendCommandMessage(this.getOwnerID(), dr);
         }        
     }
     
@@ -176,6 +184,16 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
             if(curDoc != null) {
                 curDoc.manualRemove(smallestOffset, dr.identifiers.size());
             }
+        } else if (m.command instanceof RequestLevel) {
+            RequestLevel rl = (RequestLevel)m.command;
+            boolean approved = autoApprove || 
+                               (!autoDeny
+                                &&
+                                curDoc.approveUserForLevel(m.from, rl.getLevel()));
+            
+            if (approved) {
+                this.addUserToLevel(m.from, rl.getLevel());
+            }
         }
     }
     
@@ -216,6 +234,12 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
         String leftIdent = this.getIdentifierAtIndex(left);
         String rightIdent = this.getIdentifierAtIndex(right);
         requestInsert(level, leftIdent, rightIdent, text);
+    }
+    
+    private void sendCommandMessage(String userId, DocumentCommand dc) {
+        CommandMessage cm = new CommandMessage(userId, this.collaboratorId, this.getName(), dc);
+        System.out.println(cm);
+        this.communication.sendMessage(userId, cm);
     }
     
 }

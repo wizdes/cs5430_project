@@ -42,6 +42,14 @@ public class NetworkDocumentTest {
     private Profile p2;
     private Profile p3;
     
+    NetworkDocumentInterface owner;
+    NetworkDocumentInterface client2;
+    NetworkDocumentInterface client3;
+    
+    DocumentCommListener thread1;
+    DocumentCommListener thread2;
+    DocumentCommListener thread3;
+    
     @Before
     public void setUp() throws Exception {
         Profile.deleteProfile(p1Ident);
@@ -73,11 +81,23 @@ public class NetworkDocumentTest {
         p3Communicator.updatePeers(p2Ident, "localhost", p2Port, documents, false);    
         
         assertTrue(p1Communicator.authenticateMachine(p2Ident));
-        assertTrue(p1Communicator.authenticateMachine(p3Ident));        
+        assertTrue(p1Communicator.authenticateMachine(p3Ident));  
+        
+        owner = new NetworkDocument(p1Communicator, p1Ident, p1Ident, "document");
+        client2 = new NetworkDocument(p2Communicator, p2Ident, p1Ident, "document");
+        client3 = new NetworkDocument(p3Communicator, p3Ident, p1Ident, "document");   
+        
+        thread1 = new DocumentCommListener(p1Communicator, owner);
+        thread2 = new DocumentCommListener(p2Communicator, client2);
+        thread3 = new DocumentCommListener(p3Communicator, client3);
+        thread1.start(); thread2.start(); thread3.start();        
     }
 
     @After
     public void tearDown() throws Exception {
+        thread1.stopListening(); 
+        thread2.stopListening(); 
+        thread3.stopListening();
         p1Communicator.shutdown();
         p2Communicator.shutdown();
         p3Communicator.shutdown();
@@ -97,17 +117,9 @@ public class NetworkDocumentTest {
 
     @Test   
     public void testRequestInsert() {
-        NetworkDocumentInterface owner = new NetworkDocument(p1Communicator, p1Ident, p1Ident, "document");
-        NetworkDocumentInterface client2 = new NetworkDocument(p2Communicator, p2Ident, p1Ident, "document");
-        NetworkDocumentInterface client3 = new NetworkDocument(p3Communicator, p3Ident, p1Ident, "document");
         
         owner.addUserToLevel(p2Ident, 0);
         owner.addUserToLevel(p3Ident, 0);
-        
-        DocumentCommListener thread1 = new DocumentCommListener(p1Communicator, owner);
-        DocumentCommListener thread2 = new DocumentCommListener(p2Communicator, client2);
-        DocumentCommListener thread3 = new DocumentCommListener(p3Communicator, client3);
-        thread1.start(); thread2.start(); thread3.start();
         
         // when the owner applies an update it should get broadcast to all of the other documents
         owner.requestInsert(0, Document.BOF, Document.EOF, "hello");
@@ -174,24 +186,14 @@ public class NetworkDocumentTest {
         assertEquals("hello", owner.getString());
         assertEquals("hello", client2.getString());
         assertEquals("hello", client3.getString());        
-        
-        thread1.stopListening(); thread2.stopListening(); thread3.stopListening();
     }
     
     
     @Test
     public void testLevelPropogation() {
-        NetworkDocumentInterface owner = new NetworkDocument(p1Communicator, p1Ident, p1Ident, "document");
-        NetworkDocumentInterface client2 = new NetworkDocument(p2Communicator, p2Ident, p1Ident, "document");
-        NetworkDocumentInterface client3 = new NetworkDocument(p3Communicator, p3Ident, p1Ident, "document");
         
         owner.addUserToLevel(p2Ident, 1);
         owner.addUserToLevel(p3Ident, 2);
-        
-        DocumentCommListener thread1 = new DocumentCommListener(p1Communicator, owner);
-        DocumentCommListener thread2 = new DocumentCommListener(p2Communicator, client2);
-        DocumentCommListener thread3 = new DocumentCommListener(p3Communicator, client3);
-        thread1.start(); thread2.start(); thread3.start();
         
         // when the owner applies an update it should get broadcast to all of the other documents
         owner.requestInsert(0, Document.BOF, Document.EOF, "000");
@@ -245,21 +247,10 @@ public class NetworkDocumentTest {
         assertEquals("333 222 111 000", owner.getString());
         assertEquals("XXXX222 XXXXXXX", client2.getString());
         assertEquals("XXXX222 111 XXX", client3.getString());        
-        
-        thread1.stopListening(); thread2.stopListening(); thread3.stopListening();
     }
     
     @Test
-    public void testUserLevelPropogation() {
-        NetworkDocumentInterface owner = new NetworkDocument(p1Communicator, p1Ident, p1Ident, "document");
-        NetworkDocumentInterface client2 = new NetworkDocument(p2Communicator, p2Ident, p1Ident, "document");
-        NetworkDocumentInterface client3 = new NetworkDocument(p3Communicator, p3Ident, p1Ident, "document");
-                
-        DocumentCommListener thread1 = new DocumentCommListener(p1Communicator, owner);
-        DocumentCommListener thread2 = new DocumentCommListener(p2Communicator, client2);
-        DocumentCommListener thread3 = new DocumentCommListener(p3Communicator, client3);
-        thread1.start(); thread2.start(); thread3.start();
-        
+    public void testUserLevelPropogation() {        
         owner.addUserToLevel(p2Ident, 1);
         owner.addUserToLevel(p3Ident, 2);
         pause(100);
@@ -272,10 +263,36 @@ public class NetworkDocumentTest {
 
         assertEquals(2, client2.getLevelForUser(p2Ident));
         assertEquals(2, client3.getLevelForUser(p3Ident));
-        
-        thread1.stopListening(); thread2.stopListening(); thread3.stopListening();
-    }    
+    } 
     
+    @Test
+    public void testRequestLevelChange() {
+        owner.addUserToLevel(p2Ident, 1);
+        owner.addUserToLevel(p3Ident, 2);
+        pause(100);
+        
+        assertEquals(1, client2.getLevelForUser(p2Ident));
+        assertEquals(2, client3.getLevelForUser(p3Ident));
+        
+        NetworkDocument.autoApprove = true;
+        client2.requestChangeLevel(3);
+        client3.requestChangeLevel(4);
+        pause(100);
+
+        assertEquals(3, client2.getLevelForUser(p2Ident));
+        assertEquals(4, client3.getLevelForUser(p3Ident));
+        
+        NetworkDocument.autoApprove = false;
+        NetworkDocument.autoDeny = true;
+        client2.requestChangeLevel(5);
+        client3.requestChangeLevel(6);
+        pause(100);
+
+        assertEquals(3, client2.getLevelForUser(p2Ident));
+        assertEquals(4, client3.getLevelForUser(p3Ident));
+    }
+
+
     public class DocumentCommListener extends Thread {
         private CommunicationInterface comm;
         private NetworkDocumentInterface doc;
