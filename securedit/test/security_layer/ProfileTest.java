@@ -27,7 +27,7 @@ public class ProfileTest {
     
     @Test
     public void testReadAndWriteProfileSuccess() {
-        Profile.writeProfile(username, password, port, host); 
+        Profile.createProfile(username, password, port, host); 
         Profile obj = Profile.readProfile(username, password);
         assertEquals(obj.ident, username);
         assertEquals(obj.port, port);
@@ -42,7 +42,7 @@ public class ProfileTest {
     
     @Test
     public void testReadAndWriteProfileBadPassword() {
-        Profile.writeProfile(username, password, port, host); 
+        Profile.createProfile(username, password, port, host); 
         Profile obj = Profile.readProfile(username, "bad password");
         assertEquals(null, obj);
     }    

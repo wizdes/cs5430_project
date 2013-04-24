@@ -35,20 +35,25 @@ public class Communication implements CommunicationInterface {
     private DiscoveredPeers discoveredPeers = new DiscoveredPeers();
     private EncryptionDemoFunctionality guiFunctionality;
     private Profile profile;
+    private String password;
     
     public void displayPIN(String ID, String PIN){
-        guiFunctionality.displayPIN(ID, PIN);
+        if (guiFunctionality != null) {
+            guiFunctionality.displayPIN(ID, PIN);    
+        }
     }
     
     public Communication(Profile profile, String password) {
         //Only used for test packages
         this.profile = profile;
+        this.password = password;
         this.secureTransport = new SecureTransport(profile, password, this);
     }
     public Communication(Profile profile, String password, EncryptionDemoFunctionality guiFunctionality) {
         this.profile = profile;
         this.secureTransport = new SecureTransport(profile, password, this);
         this.guiFunctionality = guiFunctionality;
+        this.password = password;
     }
     
     @Override
@@ -89,6 +94,13 @@ public class Communication implements CommunicationInterface {
     public boolean sendMessage(String destination, Message msg) {
         return secureTransport.sendAESEncryptedMessage(destination, msg);
     }
+    
+    @Override 
+    public boolean sendManualDiscoverMessage(String destination, String ip, int port, Message msg) {
+        secureTransport.addPeer(destination, ip, port);
+        return secureTransport.sendPlainTextMessage(destination, msg);
+    }
+    
     
 //    @Override
 //    public boolean broadcastMessage(Message msg){
@@ -157,7 +169,10 @@ public class Communication implements CommunicationInterface {
     @Override
     public void updateHumanAuthStatus(String ident, boolean hasHumanAuthenticated){
         discoveredPeers.updateHumanAuthStatus(ident, hasHumanAuthenticated);
-        guiFunctionality.updatePeersInGUI(discoveredPeers);
+        if (guiFunctionality != null) {
+            guiFunctionality.updatePeersInGUI(discoveredPeers);
+        }
+        this.profile.save(password);
     }
 
     @Override

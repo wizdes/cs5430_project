@@ -2,6 +2,51 @@ Patrick Berens(pcb73)
 Matt Goggin(mg343)
 Yi Li(yl2326)
 
-FUNCTIONALITY.txt, which should discuss the interface that your system implements. What operations does it export? What is the effect of each operation? Diagram or give high-level psuedocode for the cryptographic protocol being used within each operation or within collection of operations.
-
 Table of Contents
+1) Overview
+2) Functionality
+  a) Human Authentication
+    i) Protocol
+	b) Hosting a chat
+	c) Joining a chat
+	d) Chatting
+
+
+1) Overview
+
+In this phase, we are demonstrating the human authentication portion of our application.  The result of human authentication is an exchange of public keys which are paired to a human via use of a 1 time PIN.
+
+
+2) Functionality
+
+2.a) Human Authentication
+
+In human authentication, one user wishes to join the chat session being hosted by another user (the owner).  In order to do so, they initiate by sending a clear text message indicating their desire to join.  The owner responds with a message encrypted with a one time PIN, which the owner is responsible for transferring to the user securely outside of our application (e.g. by telling them in person, or writing on a piece of paper.). Once the user has the PIN, they can input it in order to decrypt the message from the owner.
+
+2.a.i) Protocol
+
+A wishes to join a chat session with B
+A -> B : r    ( where r is fresh and unpredictable at A )
+B -> A : {PK_B, VK_B, r + 1}K_PIN
+  B generates a 1 time pin PIN, and uses that to generate an 
+  AES key, K_PIN, which B uses to encrypt the message.  At this
+  point person B also verbally transfers the PIN to person A
+A -> B : {PK_A, VK_A, r + 2}K_PIN
+  After A inputs the PIN into their GUI, they can decrypt the 
+  message from B and sends a reply
+
+At this point, A and B have one another's public keys and verifying keys, and they can proceed with machine authentication as detailed in the previous phase
+
+Assurance.txt discusses the details of PIN generation.
+
+2.b) Hosting a chat
+
+When a user logs into our application, they may choose to host as many chats as they like.  New chat windows are each given a name (by the user), and added to a list of open chats the user is hosting.  Other users of our application may 'discover' chats being hosted on their network using a UDP broadcast, or they may manually add chat sessions by inputting another user's id, host, port, and chat name.
+  
+2.c) Joining a chat
+
+Once a user has discovered, or manually added, available chat sessions, they can use the GUI to join in those chat sessions.  If they have not already performed human authentication (or that authentication is not up to date), then this is the point that human authentication must be performed.  If they have an up to date public key for the owner of the chat they wish to join, then they may proceed directly into machine authentication.
+
+2.d) Chatting
+
+Once a user has joined a chat, and performed machine authentication with the owner, they may exchange messages back and forth with the owner using the symmetric AES key exchanged during machine authentication.

@@ -26,10 +26,9 @@ class EncryptionKeys implements Serializable {
     String ident;
     transient String password;
     Key personalKey;    //Generated from password for AES files
-    Key personalHMACKey;
     
-    ConcurrentMap<String, SecretKey> secretKeys = new ConcurrentHashMap<>();      //Generated randomly for AES communication
-    ConcurrentMap<String, SecretKey> HMACKeys = new ConcurrentHashMap<>();
+    transient ConcurrentMap<String, SecretKey> secretKeys = new ConcurrentHashMap<>();      //Generated randomly for AES communication
+    transient ConcurrentMap<String, SecretKey> HMACKeys = new ConcurrentHashMap<>();
     ConcurrentMap<String, PublicKey> publicKeys = new ConcurrentHashMap<>();      
     ConcurrentMap<String, PublicKey> verifyingKeys = new ConcurrentHashMap<>();
     ConcurrentHashMap<String, Long> asymmetricKeyVersions = new ConcurrentHashMap<>();
@@ -37,61 +36,86 @@ class EncryptionKeys implements Serializable {
     Key privateKey;     //RSA
     Key signingKey;     //RSA
     
-    EncryptionKeys(){}
     EncryptionKeys(Key personalKey, String password){
         this.personalKey = personalKey;
         this.password = password;
+        this.secretKeys = new ConcurrentHashMap<>();
+        this.HMACKeys = new ConcurrentHashMap<>();
     }
-    EncryptionKeys(Key personalKey, String ident, String password){
-        this.ident = ident;
-        this.password = password;
-        this.personalKey = personalKey;
-    }
+//    EncryptionKeys(Key personalKey, String ident, String password){
+//        this.ident = ident;
+//        this.password = password;
+//        this.personalKey = personalKey;
+//    }
 
-    EncryptionKeys(Key personalKey, PublicKey publicKey, PrivateKey privateKey, long asymmetricKeyVersionNumber, String ident, String password){
-        this.ident = ident;
-        this.password = password;
-        this.personalKey = personalKey;
-        addPublicKey(ident, publicKey, asymmetricKeyVersionNumber);
-        this.privateKey = privateKey;
-    }
-    
+//    EncryptionKeys(Key personalKey, PublicKey publicKey, PrivateKey privateKey, long asymmetricKeyVersionNumber, String ident, String password){
+//        this.ident = ident;
+//        this.password = password;
+//        this.personalKey = personalKey;
+//        addPublicKey(ident, publicKey, asymmetricKeyVersionNumber);
+//        this.privateKey = privateKey;
+//    }
+        
     void addSymmetricKey(String ident, SecretKey secretKey) {
-        secretKeys.putIfAbsent(ident, secretKey);
+        if (secretKeys == null) {
+            secretKeys = new ConcurrentHashMap<>();
+        }
+        secretKeys.put(ident, secretKey);
     }
     void removeSymmetricKey(String ident) {
+        if (secretKeys == null) {
+            secretKeys = new ConcurrentHashMap<>();
+        }        
         secretKeys.remove(ident);
     }
     void addVerifyingKey(String ident, PublicKey publicKey) {
-        verifyingKeys.putIfAbsent(ident, publicKey);
+        verifyingKeys.put(ident, publicKey);
     }    
     void addHMACKey(String ident, SecretKey secretKey) {
-        HMACKeys.putIfAbsent(ident, secretKey);
+        if (HMACKeys == null) {
+            HMACKeys = new ConcurrentHashMap<>();
+        }        
+        HMACKeys.put(ident, secretKey);
     }
     void removeHMACKey(String ident) {
+        if (HMACKeys == null) {
+            HMACKeys = new ConcurrentHashMap<>();
+        }           
         HMACKeys.remove(ident);
     }
     boolean hasSymmetricKey(String ident){
+        if (secretKeys == null) {
+            secretKeys = new ConcurrentHashMap<>();
+        }         
         return secretKeys.containsKey(ident);
     }
     boolean hasVerifyingKey(String ident){
         return verifyingKeys.containsKey(ident);
     }    
     boolean hasHMACKey(String ident){
+        if (HMACKeys == null) {
+            HMACKeys = new ConcurrentHashMap<>();
+        }           
         return HMACKeys.containsKey(ident);
     }    
     SecretKey getSymmetricKey(String ident) {
+        if (secretKeys == null) {
+            secretKeys = new ConcurrentHashMap<>();
+        }           
         return secretKeys.get(ident);
     }   
     PublicKey getVerifyingKey(String ident) {
         return verifyingKeys.get(ident);
     }     
     SecretKey getHMACKey(String ident) {
+        if (HMACKeys == null) {
+            HMACKeys = new ConcurrentHashMap<>();
+        }           
         return HMACKeys.get(ident);
     }      
     
     void addPublicKey(String ident, PublicKey publicKey, long keyVersionNumber) {
-        publicKeys.putIfAbsent(ident, publicKey);
+        publicKeys.put(ident, publicKey);
         asymmetricKeyVersions.put(ident, keyVersionNumber);
     }
     

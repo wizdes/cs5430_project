@@ -5,12 +5,15 @@ Matt Goggin (mg343)
 
 Yi Li
 
+Yi helped the design of human authentication, allowing two strangers to authenticate each other. He also implemented human authentication. Furthermore, YI implemented the PIN functionality; this allows a PIN to be distributed. Yi also helped implement parts of the GUI; he also wrote some integration tests. Lastly, he helped test the system and write the documentation.
 Time : 30 hours
 
 Matt Goggin
 
+Matt implemented a major portion of the new GUI code. Furthermore, Matt helped design and implement human authentication. He wrote both integration tests and the unit tests, increasing the assurance in our system. Matt also tested the system and wrote documentation.
 Time : 30 hours
 
 Patrick Berens
 
+Patrick helped design and implement human authentication. Patrick also implemented the majority of the functionality of the applications that demonstrated the security of our system. He also helped research and implement the PIN functionality. Patrick also wrote numerous unit tests. Lastly, he helped test the system and write the documentation.
 Time : 30 hours

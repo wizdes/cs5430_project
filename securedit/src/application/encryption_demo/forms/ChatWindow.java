@@ -4,15 +4,13 @@
  */
 package application.encryption_demo.forms;
 
-import application.encryption_demo.EncryptionDemoFunctionality;
 import application.encryption_demo.DiscoveredPeers;
+import application.encryption_demo.EncryptionDemoFunctionality;
+import document.NetworkDocument;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import security_layer.Profile;
@@ -25,7 +23,7 @@ public class ChatWindow extends javax.swing.JFrame {
     EncryptionDemoFunctionality functionality;
     Profile profile;
     ConcurrentMap<Integer, String> docIDs = new ConcurrentHashMap<>();   //<tab index, docID>
-    ConcurrentMap<String, ChatPanel> chatPanels = new ConcurrentHashMap<>();    //<docID, chatPanel>
+    ConcurrentMap<String, EditPanel> chatPanels = new ConcurrentHashMap<>();    //<docID, chatPanel>
     public static void main(String[] args) {
         String password = "pass0000pass0000";
         
@@ -33,7 +31,7 @@ public class ChatWindow extends javax.swing.JFrame {
         if (new File("0.profile").exists()) {
             profile = Profile.readProfile("0", password);
         } else {
-            profile = Profile.writeProfile("0", password, 4000, "localhost");
+            profile = Profile.createProfile("0", password, 4000, "localhost");
         }
         
         ChatWindow form = new ChatWindow(profile, password);
@@ -193,7 +191,7 @@ public class ChatWindow extends javax.swing.JFrame {
     }
     
     public void displayMessages(String docID, String plaintext){
-        ChatPanel panel = chatPanels.get(docID);
+        EditPanel panel = chatPanels.get(docID);
         if(panel != null){
             panel.displayMessages(plaintext);
         }
@@ -221,6 +219,7 @@ public class ChatWindow extends javax.swing.JFrame {
         //Prompt for document name - make sure it is unique
         String docName = "Chat";
         String docID = null;
+        NetworkDocument nd = null;
         while(docID == null){
             String enteredDocName = JOptionPane.showInputDialog("Enter document name", docName);
             if(enteredDocName == null){
@@ -231,7 +230,10 @@ public class ChatWindow extends javax.swing.JFrame {
                 continue;
             }
             
-            docID = this.functionality.createDocumentInstance(profile.ident, docName);
+            //docID = this.functionality.createDocumentInstance(profile.ident, docName);
+            nd = new NetworkDocument(
+                functionality.getCommunicationInterface(), profile.ident, profile.ident, docName );
+            docID = this.functionality.createDocumentInstance(nd);
             if(docID == null){
                 showMessage("The document name: " + docName + " is already in use.");
             }
@@ -241,7 +243,9 @@ public class ChatWindow extends javax.swing.JFrame {
         docIDs.put(this.tabbedPane.getTabCount(), docID);
         this.profile.documentsOpenForDiscovery.add(docName);
         
-        ChatPanel panel = new ChatPanel();
+        EditPanel panel = new EditPanel();
+        panel.giveDocument(nd);
+        nd.giveGUI(panel);
         chatPanels.put(docID, panel);
         this.tabbedPane.add("Owner: " + profile.ident + ", Doc: " + docName, panel);
         this.tabbedPane.setSelectedComponent(panel);
@@ -250,6 +254,7 @@ public class ChatWindow extends javax.swing.JFrame {
     private void joinChatButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_joinChatButtonActionPerformed
         //TODO: This needs to be protected with a mutex I think, what if row changes in the middle
         int selectedRow = this.DiscoveredPeersTable.getSelectedRow();
+        if(selectedRow < 0) return;
         String ownerId = (String)this.DiscoveredPeersTable.getModel().getValueAt(selectedRow, 0);
         String docName = (String)this.DiscoveredPeersTable.getModel().getValueAt(selectedRow, 3);
         boolean hasAuthenticated = (Boolean)this.DiscoveredPeersTable.getModel().getValueAt(selectedRow, 4);
@@ -284,19 +289,19 @@ public class ChatWindow extends javax.swing.JFrame {
         }
         
         //Create document instance and send join request for doc
-        String docID = this.functionality.createDocumentInstance(ownerId, docName);
-        
+        NetworkDocument nd = new NetworkDocument(
+                functionality.getCommunicationInterface(), profile.ident, ownerId, docName );
+        String docID = this.functionality.createDocumentInstance(nd);
         docIDs.put(this.tabbedPane.getTabCount(), docID);
-        
         if(!this.functionality.sendJoinRequestMessage(ownerId, docName)){
             showMessage("Join chat request failed to send!");
             return;
         }
-        
         //TODO FINAL PHASE: Authorization: Should wait here for authorization telling me chat request was accepted.
-        
         this.functionality.updateHumanAuthStatus(ownerId, true);
-        ChatPanel panel = new ChatPanel();
+        EditPanel panel = new EditPanel();
+        panel.giveDocument(nd);
+        nd.giveGUI(panel);
         chatPanels.put(docID, panel);
         this.tabbedPane.add("Owner: " + ownerId + ", Doc: " + docName, panel);
         this.tabbedPane.setSelectedComponent(panel);
@@ -347,11 +352,6 @@ public class ChatWindow extends javax.swing.JFrame {
     // End of variables declaration//GEN-END:variables
 
     public void displayPIN(final String ID, final String PIN){
-        JDialog dialog;
-        dialog = new JDialog(this,ID + ": " + PIN);
-        dialog.setSize(250,80);
-        JLabel dialogLabel = new JLabel("PIN for :" + ID + ": " + PIN);
-        dialog.add(dialogLabel);
-        dialog.setVisible(true);
+        new PINDisplayDialog(ID, PIN).setVisible(true);
     }
 }

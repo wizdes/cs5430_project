@@ -1,6 +1,5 @@
 package application.encryption_demo.forms;
 
-import application.encryption_demo.EncryptionDemoFunctionality;
 import configuration.Constants;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -42,7 +41,6 @@ public class LoginForm extends javax.swing.JFrame {
                 }
             }
         });
-        
         hostTextField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
@@ -94,10 +92,11 @@ public class LoginForm extends javax.swing.JFrame {
 
         jPanel1.setName("Login"); // NOI18N
 
-        jLabel1.setText("Username:");
+        jLabel1.setText("UserID:");
 
         jLabel2.setText("Password:");
 
+        loginUsernameTextField.setText("0");
         loginUsernameTextField.setName("usernameInput"); // NOI18N
         loginUsernameTextField.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -111,6 +110,8 @@ public class LoginForm extends javax.swing.JFrame {
                 loginButtonActionPerformed(evt);
             }
         });
+
+        loginPasswordTextField.setText("pass0000pass000!");
 
         org.jdesktop.layout.GroupLayout jPanel1Layout = new org.jdesktop.layout.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -127,7 +128,7 @@ public class LoginForm extends javax.swing.JFrame {
                     .add(jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
                         .add(loginUsernameTextField, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE)
                         .add(loginPasswordTextField)))
-                .addContainerGap(110, Short.MAX_VALUE))
+                .addContainerGap(127, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -142,7 +143,7 @@ public class LoginForm extends javax.swing.JFrame {
                     .add(loginPasswordTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
                 .add(loginButton)
-                .addContainerGap(128, Short.MAX_VALUE))
+                .addContainerGap(98, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Login", jPanel1);
@@ -150,7 +151,7 @@ public class LoginForm extends javax.swing.JFrame {
         usernameTextField.setText("0");
         usernameTextField.setName("usernameInput"); // NOI18N
 
-        jLabel3.setText("Username:");
+        jLabel3.setText("UserID(#):");
 
         jLabel4.setText("Password:");
 
@@ -171,7 +172,12 @@ public class LoginForm extends javax.swing.JFrame {
             }
         });
 
-        passwordTextField.setText("jPasswordField1");
+        passwordTextField.setText("pass0000pass000!");
+        passwordTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                passwordTextFieldActionPerformed(evt);
+            }
+        });
 
         org.jdesktop.layout.GroupLayout jPanel2Layout = new org.jdesktop.layout.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -198,7 +204,7 @@ public class LoginForm extends javax.swing.JFrame {
                             .add(jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
                                 .add(portTextField)
                                 .add(hostTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 150, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))))
-                .addContainerGap(110, Short.MAX_VALUE))
+                .addContainerGap(127, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -221,20 +227,27 @@ public class LoginForm extends javax.swing.JFrame {
                     .add(hostTextField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(createAccountButton)
-                .addContainerGap(81, Short.MAX_VALUE))
+                .addContainerGap(38, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("New Account", jPanel2);
 
         UsernameLabel.setText("Username:");
 
+        changePasswordUsernameField.setText("0");
         changePasswordUsernameField.setName("usernameInput"); // NOI18N
 
         OldPasswordLabel.setText("Old Password:");
 
+        changePasswordOldField.setText("pass0000pass000!");
+
         NewPasswordLabel.setText("New Password:");
 
+        changePasswordNewField.setText("pass0000pass000!");
+
         RetypePasswordLabel.setText("Retype Password:");
+
+        changePasswordRetypeField.setText("pass0000pass000!");
 
         changePasswordButton.setText("Change Password");
         changePasswordButton.addActionListener(new java.awt.event.ActionListener() {
@@ -285,7 +298,7 @@ public class LoginForm extends javax.swing.JFrame {
                     .add(changePasswordRetypeField, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                 .add(18, 18, 18)
                 .add(changePasswordButton)
-                .addContainerGap(54, Short.MAX_VALUE))
+                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Change Password", ChangePasswordPanel);
@@ -323,6 +336,13 @@ public class LoginForm extends javax.swing.JFrame {
         }   
         
         String username = usernameTextField.getText().trim();
+        
+        if(!isValidUserID(username)){
+            String message = "Usernames must be numeric";
+            JOptionPane.showMessageDialog(this, message);
+            return;            
+        }
+        
         String appHost = hostTextField.getText().trim();
         
         int appPort;
@@ -332,7 +352,7 @@ public class LoginForm extends javax.swing.JFrame {
             handleException(ex);
             return;
         }
-        Profile profile = Profile.writeProfile(username, password, appPort, appHost);
+        Profile profile = Profile.createProfile(username, password, appPort, appHost);
         transitionToChatWindow(profile, password);
     }//GEN-LAST:event_createAccountButtonActionPerformed
         
@@ -374,6 +394,10 @@ public class LoginForm extends javax.swing.JFrame {
         
         transitionToChatWindow(profile, newPassword);
     }//GEN-LAST:event_changePasswordButtonActionPerformed
+
+    private void passwordTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_passwordTextFieldActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_passwordTextFieldActionPerformed
     
     private void transitionToChatWindow(Profile profile, String password) {
         this.dispose();
@@ -381,8 +405,17 @@ public class LoginForm extends javax.swing.JFrame {
         form.setVisible(true); 
     }
     
+    private boolean isValidUserID(String id){
+        for(int i = 0; i < id.length(); i++){
+            if(!Character.isDigit(id.charAt(i))){
+                return false;
+            }
+        }
+        return true;
+    }
+    
     private boolean isValidPassword(String pass) {
-        return pass.length() >= 12 && pass.matches(Constants.passwordCharacterRegex) && !pass.contains(" ");
+        return pass.length() >= Constants.MIN_PASSWORD_LENGTH && pass.matches(Constants.passwordCharacterRegex) && !pass.contains(" ");
     }
     
     private void handleException(Exception ex) {
