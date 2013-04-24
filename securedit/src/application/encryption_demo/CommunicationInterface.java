@@ -19,9 +19,9 @@ public interface CommunicationInterface {
     public boolean sendManualDiscoverMessage(String destination, String ip, int port, Message m);
     
 //    public boolean broadcastMessage(Message m);
-    public boolean authenticateMachine(String machineIdent);
-    public boolean authenticateHuman(String machineIdent);
-    
+//    public boolean authenticateMachine(String machineIdent);
+//    public boolean authenticateHuman(String machineIdent);
+    public boolean authenticate(String machineIdent, String docID, String password);
     public Collection<Message> waitForMessages();
     
     public void depositMessage(Message m) throws NoSuchAlgorithmException;
@@ -33,7 +33,7 @@ public interface CommunicationInterface {
     public void shutdown();
     
     public void updatePeers(String ident, String ip, int port, List<String> docs, boolean needsHumanAuth);
-    public void updateHumanAuthStatus(String ident, boolean hasHumanAuthenticated);
+//    public void updateHumanAuthStatus(String ident, boolean hasHumanAuthenticated);
     
     public boolean updatePin(String ID, String PIN);
     public String getPIN(String ID);

@@ -20,9 +20,12 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import security_layer.Profile;
+import application.encryption_demo.Profile;
 import security_layer.SecureTransport;
 import security_layer.SecureTransportInterface;
+import security_layer.authentications.Authentication;
+import transport_layer.network.NetworkTransport;
+import transport_layer.network.NetworkTransportInterface;
 
 /**
  *
@@ -32,10 +35,9 @@ public class Communication implements CommunicationInterface {
     private Condition newMessageArrived = queueLock.newCondition();
     private BlockingQueue<Message> messageQueue = new LinkedBlockingDeque<>();
     private SecureTransportInterface secureTransport;
+    private Authentication authenticationTransport;
     private DiscoveredPeers discoveredPeers = new DiscoveredPeers();
     private EncryptionDemoFunctionality guiFunctionality;
-    private Profile profile;
-    private String password;
     
     public void displayPIN(String ID, String PIN){
         if (guiFunctionality != null) {
@@ -43,17 +45,16 @@ public class Communication implements CommunicationInterface {
         }
     }
     
-    public Communication(Profile profile, String password) {
+    public Communication() {
         //Only used for test packages
-        this.profile = profile;
-        this.password = password;
-        this.secureTransport = new SecureTransport(profile, password, this);
+        NetworkTransportInterface networkTransport = new NetworkTransport(Profile.username, Profile.host, Profile.port);
+        this.secureTransport = new SecureTransport(networkTransport, this);
+        this.authenticationTransport = new Authentication(networkTransport, Profile.username);
     }
-    public Communication(Profile profile, String password, EncryptionDemoFunctionality guiFunctionality) {
-        this.profile = profile;
-        this.secureTransport = new SecureTransport(profile, password, this);
+    public Communication(EncryptionDemoFunctionality guiFunctionality) {
+        NetworkTransportInterface networkTransport = new NetworkTransport(Profile.username, Profile.host, Profile.port);
+        this.secureTransport = new SecureTransport(networkTransport, this);
         this.guiFunctionality = guiFunctionality;
-        this.password = password;
     }
     
     @Override
@@ -67,7 +68,7 @@ public class Communication implements CommunicationInterface {
             this.newMessageArrived.await();
           } catch (InterruptedException ex) {
               if(Constants.DEBUG_ON){
-                  Logger.getLogger(Communication.class.getName()).log(Level.SEVERE, "[User: " + profile.ident + "] Messages Queue interrupted exception.", ex);
+                  Logger.getLogger(Communication.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "] Messages Queue interrupted exception.", ex);
               }
           }
         }
@@ -117,20 +118,20 @@ public class Communication implements CommunicationInterface {
 //            return true;
 //        }
 //    }
-
-    @Override
-    public boolean authenticateMachine(String machineIdent) {
-        return secureTransport.authenticate(machineIdent);
-    }
-    
-    @Override
-    public boolean authenticateHuman(String machineIdent) {
-        if (!discoveredPeers.getPeer(machineIdent).hasHumanAuthenticated) {
-            return secureTransport.initializeHumanAuthenticate(machineIdent);
-        } else {
-            return true;
-        }
-    }
+//
+//    @Override
+//    public boolean authenticateMachine(String machineIdent) {
+//        return secureTransport.authenticate(machineIdent);
+//    }
+//    
+//    @Override
+//    public boolean authenticateHuman(String machineIdent) {
+//        if (!discoveredPeers.getPeer(machineIdent).hasHumanAuthenticated) {
+//            return secureTransport.initializeHumanAuthenticate(machineIdent);
+//        } else {
+//            return true;
+//        }
+//    }
 
     @Override
     public boolean writeEncryptedFile(String filename, String contents) {
@@ -166,14 +167,14 @@ public class Communication implements CommunicationInterface {
             guiFunctionality.updatePeersInGUI(discoveredPeers);
         }
     }
-    @Override
-    public void updateHumanAuthStatus(String ident, boolean hasHumanAuthenticated){
-        discoveredPeers.updateHumanAuthStatus(ident, hasHumanAuthenticated);
-        if (guiFunctionality != null) {
-            guiFunctionality.updatePeersInGUI(discoveredPeers);
-        }
-        this.profile.save(password);
-    }
+//    @Override
+//    public void updateHumanAuthStatus(String ident, boolean hasHumanAuthenticated){
+//        discoveredPeers.updateHumanAuthStatus(ident, hasHumanAuthenticated);
+//        if (guiFunctionality != null) {
+//            guiFunctionality.updatePeersInGUI(discoveredPeers);
+//        }
+//        this.Profile.save(password);
+//    }
 
     @Override
     public boolean updatePin(String ownerID, String PIN) {
@@ -183,5 +184,10 @@ public class Communication implements CommunicationInterface {
     @Override
     public String getPIN(String ID){
         return secureTransport.getPIN(ID);
+    }
+
+    @Override
+    public boolean authenticate(String machineIdent, String docID, String password) {
+        return this.authenticationTransport.authenticate(machineIdent, docID, password);
     }
 }

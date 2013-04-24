@@ -12,10 +12,18 @@ import java.io.Serializable;
  */
 class NetworkMessage implements Serializable{
     Node destination;
+    String docID;
     Node source;
     Serializable content;
     NetworkMessage(Node source, Node destination, Serializable content) {
         this.destination = destination;
+        this.source = source;
+        this.content = content;
+    }
+
+    public NetworkMessage(Node destination, String docID, Node source, Serializable content) {
+        this.destination = destination;
+        this.docID = docID;
         this.source = source;
         this.content = content;
     }

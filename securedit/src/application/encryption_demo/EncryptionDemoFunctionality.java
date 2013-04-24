@@ -4,11 +4,11 @@ package application.encryption_demo;
 import application.encryption_demo.Messages.Message;
 import application.encryption_demo.Messages.StringMessage;
 import application.encryption_demo.DiscoveredPeers.Peer;
-import application.encryption_demo.Messages.DiscoveryMessage;
+import transport_layer.discovery.DiscoveryMessage;
 import application.encryption_demo.Messages.RequestDocUpdateMessage;
 import application.encryption_demo.Messages.RequestJoinDocMessage;
 import application.encryption_demo.Messages.UpdateDocumentMessage;
-import application.encryption_demo.forms.ChatWindow;
+import application.encryption_demo.forms.ApplicationWindow;
 import document.CommandMessage;
 import document.Document;
 import document.DocumentInterface;
@@ -21,29 +21,27 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantLock;
 import security_layer.PINFunctionality;
-import security_layer.Profile;
 
 /**
  *
  * @author Patrick C. Berens
  */
 public class EncryptionDemoFunctionality {
-    private ChatWindow gui;
+    private ApplicationWindow gui;
     private String openedFilename;
     private CommunicationInterface communication;
     public PINFunctionality properPINInfo;
     private ConcurrentMap<String, NetworkDocumentInterface> docInstances = new ConcurrentHashMap<>();
-    private Profile profile;
     
     public CommunicationInterface getCommunicationInterface(){
         return communication;
     }
     
-    public EncryptionDemoFunctionality(ChatWindow gui, Profile profile, String password){
+    public EncryptionDemoFunctionality(ApplicationWindow gui){
         this.properPINInfo = new PINFunctionality();
         this.gui = gui;
-        this.profile = profile;
-        this.communication = new Communication(profile, password, this);
+        
+        this.communication = new Communication(this);
         listenForMessages();
     }
     
@@ -56,8 +54,12 @@ public class EncryptionDemoFunctionality {
     
     public void manuallyAddPeer(String id, String host, int port, ArrayList<String> docs) {
 //        communication.updatePeers(id, host, port, docs, false);
-        DiscoveryMessage dm = new DiscoveryMessage(profile.ident, profile.host, profile.port);
+        DiscoveryMessage dm = new DiscoveryMessage(Profile.username, Profile.host, Profile.port);
         communication.sendManualDiscoverMessage(id, host, port, dm);
+    }
+    
+    public boolean login(String machineId, String docID, String password){
+        return communication.authenticate(machineId, docID, password);
     }
     
     /**
@@ -108,11 +110,11 @@ public class EncryptionDemoFunctionality {
     
     public boolean sendRequestDocUpdate(String docID, String text){
         NetworkDocumentInterface instance = docInstances.get(docID);
-        return communication.sendMessage(instance.getOwnerID(), new RequestDocUpdateMessage(profile.ident, instance.getName(), text));
+        return communication.sendMessage(instance.getOwnerID(), new RequestDocUpdateMessage(Profile.username, instance.getName(), text));
     }
     
     public boolean sendJoinRequestMessage(String ownerIdent, String docName){
-        return communication.sendMessage(ownerIdent, new RequestJoinDocMessage(profile.ident, docName));
+        return communication.sendMessage(ownerIdent, new RequestJoinDocMessage(Profile.username, docName));
     }
     
     
@@ -120,20 +122,20 @@ public class EncryptionDemoFunctionality {
 //        return communication.broadcastMessage(new StringMessage(plaintextMsg));
 //    }
     
-    public boolean authenticateHuman(String ident) {
-        return this.communication.authenticateHuman(ident);
-    }
-    
-    public boolean authenticateMachine(String ident){
-        return communication.authenticateMachine(ident);
-    }
+//    public boolean authenticateHuman(String ident) {
+//        return this.communication.authenticateHuman(ident);
+//    }
+//    
+//    public boolean authenticateMachine(String ident){
+//        return communication.authenticateMachine(ident);
+//    }
     
     public boolean addPIN(String ident, String pin) {
         return this.communication.updatePin(ident, pin);
     }
-    public void updateHumanAuthStatus(String id, boolean hasHumanAuthenticated){
-        this.communication.updateHumanAuthStatus(id, hasHumanAuthenticated);
-    }
+//    public void updateHumanAuthStatus(String id, boolean hasHumanAuthenticated){
+//        this.communication.updateHumanAuthStatus(id, hasHumanAuthenticated);
+//    }
     
 //    public void addPeerToGUI(Peer peer){
 //        gui.addDiscoveredPeer(peer);

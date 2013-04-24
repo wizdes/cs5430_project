@@ -11,8 +11,8 @@ class Topology {
     private Node host;
     private ConcurrentMap<String, Node> nodes = new ConcurrentHashMap<>();
 
-    Topology(Node host) {
-        this.host = host;
+    Topology(String ident, String ip, int port) {
+        this.host = new Node(ident, ip, port);
     }
     Node getNode(String ident){
         if(ident.equals(host.id)){

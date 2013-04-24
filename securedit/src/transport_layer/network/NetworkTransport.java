@@ -13,6 +13,9 @@ import security_layer.EncryptedMessage;
 import security_layer.InvalidHMACException;
 import security_layer.PlaintextMessage;
 import security_layer.SecureTransportInterface;
+import security_layer.authentications.Authentication;
+import security_layer.authentications.AuthenticationMessage;
+import transport_layer.discovery.DiscoveryMessage;
 import transport_layer.discovery.DiscoveryResponseMessage;
 
 /**
@@ -27,13 +30,22 @@ public class NetworkTransport implements NetworkTransportInterface{
     
     private Topology topology;
     private SecureTransportInterface secureTransport;
+    private Authentication authenticationTransport;
     
-    public NetworkTransport(String ident, String host, int port, SecureTransportInterface secureTransport) {
-        this.topology = new Topology(new Node(ident, host, port));
-        this.secureTransport = secureTransport;
+    public NetworkTransport(String ident, String host, int port) {
+        this.topology = new Topology(ident, host, port);
         client = new Client();
         server = new Server(port, this);
         server.listen();
+    }
+    
+    @Override
+    public void setSecureTransport(SecureTransportInterface secureTransport){
+        this.secureTransport = secureTransport;
+    }
+    @Override
+    public void setAuthenticationTransport(Authentication authenticationTransport){
+        this.authenticationTransport = authenticationTransport;
     }
     
     @Override
@@ -52,6 +64,22 @@ public class NetworkTransport implements NetworkTransportInterface{
         client.send(destNode, netMsg);
         return true;
     }
+    @Override
+    public boolean send(String destination, String docID, Serializable msg){
+        Node destNode = topology.getNode(destination);
+        if(Constants.DEBUG_ON){
+            Logger.getLogger(NetworkTransport.class.getName()).log(Level.INFO, "[User: " + topology.getMyId() + "] Sending " + NetworkMessage.class.getName() + " to " + destination + ".");
+        }
+        if(destNode == null){
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(NetworkTransport.class.getName()).log(Level.SEVERE, "[User: " + topology.getMyId() + "] Desintation: " + destination + " isn't in topology file.");
+            }
+            return false;
+        }
+        NetworkMessage netMsg = new NetworkMessage(topology.getMyNode(), docID, destNode, msg);
+        client.send(destNode, netMsg);
+        return true;
+    }
         
     @Override
     public void shutdown() {
@@ -63,14 +91,10 @@ public class NetworkTransport implements NetworkTransportInterface{
     public void addPeer(String peerIdent, String host, int port) {
         topology.addNode(peerIdent, host, port);
     }
-    
-    void depositPlainTextMessage(NetworkMessage msg){
-        secureTransport.processPlaintextMessage(msg.source.id, (PlaintextMessage)msg.content);
-    }
 
     void depositEncryptedMessage(NetworkMessage msg) {
         try {
-            secureTransport.processEncryptedMessage(msg.source.id, (EncryptedMessage)msg.content);
+            secureTransport.processEncryptedMessage(msg.source.id, msg.docID, (EncryptedMessage)msg.content);
         } catch (InvalidHMACException ex) {
             if(Constants.DEBUG_ON){
                 Logger.getLogger(NetworkTransport.class.getName()).log(Level.SEVERE, "[User: " + topology.getMyId() + "] Couldn't verify message integrity with HMAC when processing " + EncryptedMessage.class.getName() + ".", ex);
@@ -78,6 +102,13 @@ public class NetworkTransport implements NetworkTransportInterface{
         }
     }
     void depositDiscoveryMessage(NetworkMessage msg) {
-        secureTransport.processDiscoveryResponse((DiscoveryResponseMessage)msg.content);
+        if(msg.content instanceof DiscoveryMessage){
+            secureTransport.processDiscoveryMessage((DiscoveryMessage)msg.content);
+        } else if(msg.content instanceof DiscoveryResponseMessage){
+            secureTransport.processDiscoveryResponse((DiscoveryResponseMessage)msg.content);
+        }
+    }
+    void depositAuthenticationMessage(NetworkMessage msg){
+        authenticationTransport.processAuthenticationMessage(msg.source.id, (AuthenticationMessage)msg.content);
     }
 }

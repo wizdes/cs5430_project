@@ -14,9 +14,9 @@ import java.io.Serializable;
 class ApplicationMessage implements Serializable {
     
     Message message;
-    int counter;
+    long counter;
     
-    ApplicationMessage(Message m, int c) {
+    ApplicationMessage(Message m, long c) {
         this.message = m;
         this.counter = c;
     }

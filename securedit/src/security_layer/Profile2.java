@@ -19,13 +19,11 @@ import javax.crypto.SecretKey;
 /**
  *
  */
-public class Profile implements Message {
+public class Profile2 implements Message {
     public String ident;
     public String host;
     public int port;
     EncryptionKeys keys;
-    
-    public Profile() {}
     
     //These documents will be returned when a discovery broadcast is received.
     public transient ArrayList<String> documentsOpenForDiscovery = new ArrayList<>();

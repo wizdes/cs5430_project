@@ -7,7 +7,6 @@ package security_layer.authentications;
 import configuration.Constants;
 import java.math.BigInteger;
 import java.security.Key;
-import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -35,7 +34,7 @@ import transport_layer.network.NetworkTransportInterface;
  *
  * @author Patrick
  */
-class Authentication {
+public class Authentication {
     private NetworkTransportInterface transport;
     private String ident;
     private ConcurrentMap<String, AuthenticationSession> authSessions = new ConcurrentHashMap<>();
@@ -45,21 +44,22 @@ class Authentication {
     private static final BigInteger g = new BigInteger(MODPGroups.GENERATOR + "");
     public Authentication(NetworkTransportInterface transport, String ident) {
         this.transport = transport;
+        this.transport.setAuthenticationTransport(this);
         this.ident = ident;
     }
     
-    boolean authenticate(String clientID, String serverID, String docID, String password){
+    public boolean authenticate(String serverID, String docID, String password){
         //Create new session state
         BigInteger a = generateEphemeralPrivateKey();     //a = ephemeral private key
         BigInteger A = g.modPow(a, n);                    //A = g^a = ephemeral public key
-        AuthenticationSession session = new AuthenticationSession(clientID, serverID, docID);
+        AuthenticationSession session = new AuthenticationSession(ident, serverID, docID);
         session.password = password;
         session.a = a;
         session.A = A;
         authSessions.put(serverID + ":::" + docID, session);
         
         //Send initial message
-        Auth_Msg1 initialMsg = new Auth_Msg1(clientID, A, docID);
+        Auth_Msg1 initialMsg = new Auth_Msg1(ident, A, docID);
         transport.send(serverID, initialMsg);
         
         //Wait for authentication to complete
@@ -70,7 +70,7 @@ class Authentication {
             }
         } catch (InterruptedException ex) {
             if(Constants.DEBUG_ON){
-                Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, "[User: " + clientID + "] authentication with " + serverID + ":" + docID, ex);
+                Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, "[User: " + ident + "] authentication with " + serverID + ":" + docID, ex);
             }
             return false;
         } finally{
@@ -79,7 +79,7 @@ class Authentication {
         return true;
     }
     
-    void processAuthenticationMessage(String sourceID, AuthenticationMessage receivedMsg){
+    public void processAuthenticationMessage(String sourceID, AuthenticationMessage receivedMsg){
         if(receivedMsg instanceof SRPSetupMessage){
             processSRPSetupMessage(sourceID, (SRPSetupMessage)receivedMsg);
         }

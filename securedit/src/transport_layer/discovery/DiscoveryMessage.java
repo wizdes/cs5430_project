@@ -3,7 +3,9 @@
  * and open the template in the editor.
  */
 
-package application.encryption_demo.Messages;
+package transport_layer.discovery;
+
+import application.encryption_demo.Messages.Message;
 
 /**
  *

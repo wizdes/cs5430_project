@@ -4,10 +4,10 @@
  */
 package application.encryption_demo;
 
-import application.encryption_demo.forms.ChatWindow;
+import application.encryption_demo.forms.ApplicationWindow;
+import application.encryption_demo.forms.ConfigurationPanel;
 import application.encryption_demo.forms.LoginForm;
 import configuration.Constants;
-import security_layer.Profile;
 
 /**
  *
@@ -46,8 +46,8 @@ public class MultiGUIDemoDriver {
 //        p1.save("pass0000pass000!");
 //        p2.save("pass0000pass000!");
         
-        new LoginForm().setVisible(true);
-        new LoginForm().setVisible(true);
+        new ConfigurationPanel().setVisible(true);
+        new ConfigurationPanel().setVisible(true);
 
 //        Profile.deleteProfile("0");
 //        Profile p1 = Profile.writeProfile("0", "pass0000pass0000", 4000, "localhost");

@@ -6,6 +6,7 @@ package application.encryption_demo.forms;
 
 import application.encryption_demo.DiscoveredPeers;
 import application.encryption_demo.EncryptionDemoFunctionality;
+import application.encryption_demo.Profile;
 import document.NetworkDocument;
 import java.io.File;
 import java.util.ArrayList;
@@ -13,39 +14,32 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import security_layer.Profile;
 
 /**
  *
  * @author goggin
  */
-public class ChatWindow extends javax.swing.JFrame {
+public class ApplicationWindow extends javax.swing.JFrame {
     EncryptionDemoFunctionality functionality;
     Profile profile;
     ConcurrentMap<Integer, String> docIDs = new ConcurrentHashMap<>();   //<tab index, docID>
     ConcurrentMap<String, EditPanel> chatPanels = new ConcurrentHashMap<>();    //<docID, chatPanel>
     public static void main(String[] args) {
-        String password = "pass0000pass0000";
-        
-        Profile profile;
-        if (new File("0.profile").exists()) {
-            profile = Profile.readProfile("0", password);
-        } else {
-            profile = Profile.createProfile("0", password, 4000, "localhost");
-        }
-        
-        ChatWindow form = new ChatWindow(profile, password);
+        String username = "0";
+        String ip = "localhost";
+        int port = 6000;
+        ApplicationWindow form = new ApplicationWindow(username, ip, port);
         form.setVisible(true); 
     }
     
     /**
      * Creates new form ChatWindow
      */
-    public ChatWindow(Profile profile, String password) {
-        this.profile = profile;
-        this.functionality =  new EncryptionDemoFunctionality(this, profile, password);
+    public ApplicationWindow(String username, String ip, int port) {
+        profile = new Profile(username, ip, port);
+        this.functionality =  new EncryptionDemoFunctionality(this);
         initComponents();
-        this.setTitle("Chat Window - User: " + profile.ident);
+        this.setTitle("Secure Document Viewer - User: " + Profile.username);
     }
 
     /**
@@ -65,7 +59,6 @@ public class ChatWindow extends javax.swing.JFrame {
             }
         };
         DiscoverPeersButton = new javax.swing.JButton();
-        addDefaultPeersButton = new javax.swing.JButton();
         joinChatButton = new javax.swing.JButton();
         startChatButton = new javax.swing.JButton();
         addManualPeer = new javax.swing.JButton();
@@ -82,13 +75,6 @@ public class ChatWindow extends javax.swing.JFrame {
         DiscoverPeersButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 DiscoverPeersButtonActionPerformed(evt);
-            }
-        });
-
-        addDefaultPeersButton.setText("Add Default Peers");
-        addDefaultPeersButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                addDefaultPeersButtonActionPerformed(evt);
             }
         });
 
@@ -118,9 +104,7 @@ public class ChatWindow extends javax.swing.JFrame {
         peerPanelLayout.setHorizontalGroup(
             peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(peerPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .add(addDefaultPeersButton)
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 476, Short.MAX_VALUE)
+                .addContainerGap(576, Short.MAX_VALUE)
                 .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(peerPanelLayout.createSequentialGroup()
                         .add(startChatButton)
@@ -140,21 +124,20 @@ public class ChatWindow extends javax.swing.JFrame {
         peerPanelLayout.setVerticalGroup(
             peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(org.jdesktop.layout.GroupLayout.TRAILING, peerPanelLayout.createSequentialGroup()
-                .addContainerGap(365, Short.MAX_VALUE)
+                .addContainerGap(356, Short.MAX_VALUE)
                 .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(DiscoverPeersButton)
                     .add(joinChatButton))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(startChatButton)
-                    .add(addDefaultPeersButton)
                     .add(addManualPeer))
                 .addContainerGap())
             .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                 .add(peerPanelLayout.createSequentialGroup()
                     .add(22, 22, 22)
                     .add(jScrollPane8, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 300, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(106, Short.MAX_VALUE)))
+                    .addContainerGap(104, Short.MAX_VALUE)))
         );
 
         tabbedPane.addTab("Peers", peerPanel);
@@ -201,19 +184,6 @@ public class ChatWindow extends javax.swing.JFrame {
         functionality.broadcastDiscovery();
     }//GEN-LAST:event_DiscoverPeersButtonActionPerformed
 
-    private void addDefaultPeersButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addDefaultPeersButtonActionPerformed
-        for (int i = 0; i < 3; i++) {
-            if (!(i + "").equals(profile.ident)) {
-                String id = i + "";
-                String host = "localhost";
-                int port = 4000 + i;
-                ArrayList<String> documents = new ArrayList<>();
-                documents.add("Chat");
-                functionality.manuallyAddPeer(id, host, port, documents);
-            }
-        }
-    }//GEN-LAST:event_addDefaultPeersButtonActionPerformed
-
     private void startChatButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startChatButtonActionPerformed
         
         //Prompt for document name - make sure it is unique
@@ -230,9 +200,9 @@ public class ChatWindow extends javax.swing.JFrame {
                 continue;
             }
             
-            //docID = this.functionality.createDocumentInstance(profile.ident, docName);
+            //docID = this.functionality.createDocumentInstance(Profile.ident, docName);
             nd = new NetworkDocument(
-                functionality.getCommunicationInterface(), profile.ident, profile.ident, docName );
+                functionality.getCommunicationInterface(), Profile.username, Profile.username, docName );
             docID = this.functionality.createDocumentInstance(nd);
             if(docID == null){
                 showMessage("The document name: " + docName + " is already in use.");
@@ -241,13 +211,13 @@ public class ChatWindow extends javax.swing.JFrame {
         
         //Create a new chat panel
         docIDs.put(this.tabbedPane.getTabCount(), docID);
-        this.profile.documentsOpenForDiscovery.add(docName);
+        Profile.documentsOpenForDiscovery.add(docName);
         
         EditPanel panel = new EditPanel();
         panel.giveDocument(nd);
         nd.giveGUI(panel);
         chatPanels.put(docID, panel);
-        this.tabbedPane.add("Owner: " + profile.ident + ", Doc: " + docName, panel);
+        this.tabbedPane.add("Owner: " + Profile.username + ", Doc: " + docName, panel);
         this.tabbedPane.setSelectedComponent(panel);
     }//GEN-LAST:event_startChatButtonActionPerformed
 
@@ -290,7 +260,7 @@ public class ChatWindow extends javax.swing.JFrame {
         
         //Create document instance and send join request for doc
         NetworkDocument nd = new NetworkDocument(
-                functionality.getCommunicationInterface(), profile.ident, ownerId, docName );
+                functionality.getCommunicationInterface(), Profile.username, ownerId, docName );
         String docID = this.functionality.createDocumentInstance(nd);
         docIDs.put(this.tabbedPane.getTabCount(), docID);
         if(!this.functionality.sendJoinRequestMessage(ownerId, docName)){
@@ -342,7 +312,6 @@ public class ChatWindow extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton DiscoverPeersButton;
     private javax.swing.JTable DiscoveredPeersTable;
-    private javax.swing.JButton addDefaultPeersButton;
     private javax.swing.JButton addManualPeer;
     private javax.swing.JScrollPane jScrollPane8;
     private javax.swing.JButton joinChatButton;

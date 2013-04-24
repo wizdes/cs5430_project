@@ -401,7 +401,7 @@ public class LoginForm extends javax.swing.JFrame {
     
     private void transitionToChatWindow(Profile profile, String password) {
         this.dispose();
-        ChatWindow form = new ChatWindow(profile, password);
+        ApplicationWindow form = new ApplicationWindow(profile, password);
         form.setVisible(true); 
     }
     

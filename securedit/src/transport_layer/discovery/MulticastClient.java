@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import security_layer.Profile;
+import application.encryption_demo.Profile;
 import transport_layer.network.NetworkTransportInterface;
 
 /**
@@ -27,11 +27,9 @@ class MulticastClient extends Thread {
     private static final int discoveryPort = 5446;      //All "clients" use this port.
     private static final String ENCODING = "UTF-8";
     
-    private Profile profile;
     private NetworkTransportInterface networkTransport;
     
-    MulticastClient(Profile profile, NetworkTransportInterface networkTransport){
-        this.profile = profile;
+    MulticastClient(NetworkTransportInterface networkTransport){
         this.networkTransport = networkTransport;
     }
     
@@ -46,7 +44,7 @@ class MulticastClient extends Thread {
             socket.joinGroup(address);
             
             if(Constants.DEBUG_ON){
-                Logger.getLogger(MulticastClient.class.getName()).log(Level.INFO, "[User: " + profile.ident + "] Owner waiting for discovery packets.");
+                Logger.getLogger(MulticastClient.class.getName()).log(Level.INFO, "[User: " + Profile.username + "] Owner waiting for discovery packets.");
             }
          
             do{
@@ -61,11 +59,11 @@ class MulticastClient extends Thread {
                 DiscoveryPacket discoveryPacket = DiscoveryPacket.fromString(received);
                 if (discoveryPacket != null) {
                     //Process packet.
-                    if(!discoveryPacket.sourceID.equals(profile.ident) && this.profile.documentsOpenForDiscovery.size() > 0){
-                        List<String> documentNames = new ArrayList<>(this.profile.documentsOpenForDiscovery);   //must copy here, possibly due to transient flag
-                        long myKeyVersion = profile.getAsymmetricKeyVersionNumber(this.profile.ident);
-                        long clientsKeyVersion = profile.getAsymmetricKeyVersionNumber(discoveryPacket.sourceID);
-                        DiscoveryResponseMessage responseMessage = new DiscoveryResponseMessage(profile.ident, profile.host, profile.port, documentNames, myKeyVersion, clientsKeyVersion);
+                    if(!discoveryPacket.sourceID.equals(Profile.username) && Profile.documentsOpenForDiscovery.size() > 0){
+                        List<String> documentNames = new ArrayList<>(Profile.documentsOpenForDiscovery);   //must copy here, possibly due to transient flag
+                        long myKeyVersion = Profile.getAsymmetricKeyVersionNumber(Profile.username);
+                        long clientsKeyVersion = Profile.getAsymmetricKeyVersionNumber(discoveryPacket.sourceID);
+                        DiscoveryResponseMessage responseMessage = new DiscoveryResponseMessage(Profile.username, Profile.host, Profile.port, documentNames, myKeyVersion, clientsKeyVersion);
                         networkTransport.addPeer(discoveryPacket.sourceID, discoveryPacket.myIP, discoveryPacket.myPort);
                         networkTransport.send(discoveryPacket.sourceID, responseMessage);
                     }
@@ -73,7 +71,7 @@ class MulticastClient extends Thread {
             } while (true);
         } catch (IOException ex) {
             if(Constants.DEBUG_ON){
-                Logger.getLogger(MulticastClient.class.getName()).log(Level.SEVERE, "[User: " + profile.ident + "]", ex);
+                Logger.getLogger(MulticastClient.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "]", ex);
             }
         }
         
@@ -85,7 +83,7 @@ class MulticastClient extends Thread {
             }
         } catch (IOException ex) {
             if(Constants.DEBUG_ON){
-                Logger.getLogger(MulticastClient.class.getName()).log(Level.SEVERE, "[User: " + profile.ident + "]", ex);
+                Logger.getLogger(MulticastClient.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "]", ex);
             }
         }
     } 
