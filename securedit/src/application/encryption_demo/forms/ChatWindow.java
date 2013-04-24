@@ -4,18 +4,14 @@
  */
 package application.encryption_demo.forms;
 
-import application.encryption_demo.EncryptionDemoFunctionality;
 import application.encryption_demo.DiscoveredPeers;
+import application.encryption_demo.EncryptionDemoFunctionality;
 import document.NetworkDocument;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import security_layer.Profile;
 

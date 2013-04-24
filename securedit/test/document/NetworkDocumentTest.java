@@ -12,9 +12,9 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.After;
-import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
+import org.junit.Test;
 import security_layer.Profile;
 
 /**
@@ -95,7 +95,7 @@ public class NetworkDocumentTest {
         
     }
 
-    @Test
+    @Test   
     public void testRequestInsert() {
         NetworkDocumentInterface owner = new NetworkDocument(p1Communicator, p1Ident, p1Ident, "document");
         NetworkDocumentInterface client2 = new NetworkDocument(p2Communicator, p2Ident, p1Ident, "document");
@@ -271,7 +271,7 @@ public class NetworkDocumentTest {
         pause(100);
 
         assertEquals(2, client2.getLevelForUser(p2Ident));
-        assertEquals(2, client3.getLevelForUser(p3Ident));        
+        assertEquals(2, client3.getLevelForUser(p3Ident));
         
         thread1.stopListening(); thread2.stopListening(); thread3.stopListening();
     }    
@@ -300,7 +300,5 @@ public class NetworkDocumentTest {
                 }
             }
         }
-        
     }
-
 }
