@@ -72,7 +72,9 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
     public boolean assignLevel(int levelIdentifier, int leftOffset, int rightOffset) {
         String leftIdent = this.getIdentifierAtIndex(leftOffset);
         String rightIdent = this.getIdentifierAtIndex(rightOffset);
-        curDoc.setColors(leftOffset, rightOffset, levelIdentifier);
+        if (curDoc != null) {
+            curDoc.setColors(leftOffset, rightOffset, levelIdentifier);
+        }
         return assignLevel(levelIdentifier, leftIdent, rightIdent);
     }
     
