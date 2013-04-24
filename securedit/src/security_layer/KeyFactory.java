@@ -22,7 +22,7 @@ import javax.crypto.spec.SecretKeySpec;
  *
  * @author Patrick C. Berens
  */
-class KeyFactory {
+public class KeyFactory {
     
     
     /**********************************************
@@ -43,7 +43,7 @@ class KeyFactory {
         }
     }
     
-    static Key generateSymmetricKey(String password){
+    public static Key generateSymmetricKey(String password){
         try {
             byte[] passBytes = password.getBytes("UTF-8");
             return new SecretKeySpec(fix_bad_length_key(passBytes), "AES");
@@ -71,7 +71,7 @@ class KeyFactory {
         }
     }
 
-    static int generateNonce() {
+    public static int generateNonce() {
         SecureRandom rand;
         try {
             rand = SecureRandom.getInstance("SHA1PRNG", "SUN");
