@@ -3,7 +3,7 @@
 <Form version="1.3" maxVersion="1.8" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
   <Properties>
     <Property name="preferredSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
-      <Dimension value="[825, 428]"/>
+      <Dimension value="[825, 450]"/>
     </Property>
   </Properties>
   <AuxValues>
@@ -23,8 +23,8 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jScrollPane1" pref="607" max="32767" attributes="0"/>
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                  <Component id="jScrollPane1" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="openFile" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
@@ -33,12 +33,11 @@
                       <Component id="saveRegFile" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="saveEncryptedFile" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="0" pref="40" max="32767" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace max="32767" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jScrollPane2" pref="269" max="32767" attributes="0"/>
+                  <Component id="jScrollPane2" pref="0" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="beginCursor" min="-2" pref="30" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
@@ -48,19 +47,14 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="LevelSelect" max="32767" attributes="0"/>
                   </Group>
+                  <Component id="PeersLabel" min="-2" max="-2" attributes="0"/>
+                  <Component id="cursorInfo" alignment="0" min="-2" max="-2" attributes="0"/>
                   <Component id="LevelList" pref="0" max="32767" attributes="0"/>
-                  <Group type="102" attributes="0">
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="PeersLabel" min="-2" max="-2" attributes="0"/>
-                          <Component id="cursorInfo" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="LevelLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Group type="102" alignment="0" attributes="0">
-                              <Component id="setLevelButton" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="changeUserLevel" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                      </Group>
-                      <EmptySpace min="0" pref="25" max="32767" attributes="0"/>
+                  <Component id="LevelLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="changeUserLevel" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="setLevelButton" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -72,17 +66,6 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" attributes="0">
-                      <Component id="jScrollPane1" min="-2" pref="392" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="openFile" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="openNormalFile" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="saveRegFile" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="saveEncryptedFile" alignment="3" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                  </Group>
                   <Group type="102" attributes="0">
                       <Component id="PeersLabel" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
@@ -96,7 +79,7 @@
                           <Component id="endCursor" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="LevelSelect" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace max="32767" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="setLevelButton" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="changeUserLevel" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -104,10 +87,20 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="LevelLabel" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="LevelList" min="-2" pref="100" max="-2" attributes="0"/>
+                      <Component id="LevelList" min="-2" pref="91" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="102" attributes="0">
+                      <Component id="jScrollPane1" min="-2" pref="392" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="openFile" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="openNormalFile" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="saveRegFile" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="saveEncryptedFile" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
                   </Group>
               </Group>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace pref="56" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>

@@ -4,6 +4,10 @@
  */
 package application.encryption_demo.forms;
 
+import java.util.ArrayList;
+import javax.swing.DefaultListModel;
+import javax.swing.text.SimpleAttributeSet;
+
 /**
  *
  * @author yjli_000
@@ -28,9 +32,9 @@ public class ChangeRequestAccess extends javax.swing.JFrame {
 
         jLabel1 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList();
+        userLists = new javax.swing.JList();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jList2 = new javax.swing.JList();
+        accessLists = new javax.swing.JList();
         jLabel2 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         jLabel3 = new javax.swing.JLabel();
@@ -39,9 +43,9 @@ public class ChangeRequestAccess extends javax.swing.JFrame {
 
         jLabel1.setText("User");
 
-        jScrollPane1.setViewportView(jList1);
+        jScrollPane1.setViewportView(userLists);
 
-        jScrollPane2.setViewportView(jList2);
+        jScrollPane2.setViewportView(accessLists);
 
         jLabel2.setText("Access");
 
@@ -99,7 +103,23 @@ public class ChangeRequestAccess extends javax.swing.JFrame {
         // TODO add your handling code here:
         this.setVisible(false);
     }//GEN-LAST:event_jButton1MousePressed
+    
+    public void setLabelsandUsername(ArrayList<String> labels, ArrayList<String> displayedUsername){
+        //this.labels = labels;
+        //this.displayedUsername = displayedUsername;
+        DefaultListModel labelsModel = new DefaultListModel();
+        for(int i = 0; i < labels.size(); i++){
+            labelsModel.addElement(labels.get(i));
+        }
+        accessLists.setModel(labelsModel);
+        DefaultListModel usersModel = new DefaultListModel();
+        for(int i = 0; i < displayedUsername.size(); i++){
+            usersModel.addElement(displayedUsername.get(i));
+        }
 
+        userLists.setModel(usersModel);
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -135,13 +155,15 @@ public class ChangeRequestAccess extends javax.swing.JFrame {
         });
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JList accessLists;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JList jList1;
-    private javax.swing.JList jList2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JList userLists;
     // End of variables declaration//GEN-END:variables
+    //private ArrayList<String> labels;
+    //private ArrayList<String> displayedUsername;
 }
