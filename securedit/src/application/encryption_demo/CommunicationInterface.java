@@ -22,6 +22,7 @@ public interface CommunicationInterface {
 //    public boolean authenticateMachine(String machineIdent);
 //    public boolean authenticateHuman(String machineIdent);
     public boolean authenticate(String machineIdent, String docID, String password);
+    public boolean initializeSRPAuthentication(String serverID, String docID, String password, String PIN);    
     public Collection<Message> waitForMessages();
     
     public void depositMessage(Message m) throws NoSuchAlgorithmException;

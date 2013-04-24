@@ -23,7 +23,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
-import security_layer.authentications.Authentication;
+import security_layer.authentications.AuthenticationTransport;
 
 /**
  *
@@ -75,7 +75,7 @@ public class KeyFactory {
             return k;
         } catch (InvalidKeySpecException | NoSuchAlgorithmException ex) {
             if(Constants.DEBUG_ON){
-                Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
             }
             return null;
         }

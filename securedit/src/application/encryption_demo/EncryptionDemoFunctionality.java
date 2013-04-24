@@ -32,16 +32,18 @@ public class EncryptionDemoFunctionality {
     private CommunicationInterface communication;
 //    public PINFunctionality properPINInfo;
     private ConcurrentMap<String, NetworkDocumentInterface> docInstances = new ConcurrentHashMap<>();
+    private Profile profile;
     
     public CommunicationInterface getCommunicationInterface(){
         return communication;
     }
     
-    public EncryptionDemoFunctionality(ApplicationWindow gui){
+    public EncryptionDemoFunctionality(ApplicationWindow gui, Profile profile){
 //        this.properPINInfo = new PINFunctionality();
+        this.profile = profile;
         this.gui = gui;
         
-        this.communication = new Communication(this);
+        this.communication = new Communication(this, profile);
         listenForMessages();
     }
     
@@ -54,7 +56,7 @@ public class EncryptionDemoFunctionality {
     
     public void manuallyAddPeer(String id, String host, int port, ArrayList<String> docs) {
 //        communication.updatePeers(id, host, port, docs, false);
-        DiscoveryMessage dm = new DiscoveryMessage(Profile.username, Profile.host, Profile.port);
+        DiscoveryMessage dm = new DiscoveryMessage(profile.username, profile.host, profile.port);
         communication.sendManualDiscoverMessage(id, host, port, dm);
     }
     
@@ -110,11 +112,11 @@ public class EncryptionDemoFunctionality {
     
     public boolean sendRequestDocUpdate(String docID, String text){
         NetworkDocumentInterface instance = docInstances.get(docID);
-        return communication.sendMessage(instance.getOwnerID(), docID, new RequestDocUpdateMessage(Profile.username, instance.getName(), text));
+        return communication.sendMessage(instance.getOwnerID(), docID, new RequestDocUpdateMessage(profile.username, instance.getName(), text));
     }
     
     public boolean sendJoinRequestMessage(String ownerIdent, String docName){
-        return communication.sendMessage(ownerIdent, docName, new RequestJoinDocMessage(Profile.username, docName));
+        return communication.sendMessage(ownerIdent, docName, new RequestJoinDocMessage(profile.username, docName));
     }
     
     

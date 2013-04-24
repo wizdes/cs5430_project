@@ -21,7 +21,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import security_layer.SecureTransport;
 import security_layer.SecureTransportInterface;
-import security_layer.authentications.Authentication;
+import security_layer.authentications.AuthenticationTransport;
 import transport_layer.network.NetworkTransport;
 import transport_layer.network.NetworkTransportInterface;
 
@@ -33,9 +33,10 @@ public class Communication implements CommunicationInterface {
     private Condition newMessageArrived = queueLock.newCondition();
     private BlockingQueue<Message> messageQueue = new LinkedBlockingDeque<>();
     private SecureTransportInterface secureTransport = null;
-    private Authentication authenticationTransport = null;
+    private AuthenticationTransport authenticationTransport = null;
     private DiscoveredPeers discoveredPeers = new DiscoveredPeers();
     private EncryptionDemoFunctionality guiFunctionality;
+    private Profile profile;
     
 //    public void displayPIN(String ID, String PIN){
 //        if (guiFunctionality != null) {
@@ -43,15 +44,17 @@ public class Communication implements CommunicationInterface {
 //        }
 //    }
     
-    public Communication() {
+    public Communication(Profile profile) {
+        this.profile = profile;
         //Only used for test packages
-        NetworkTransportInterface networkTransport = new NetworkTransport(Profile.username, Profile.host, Profile.port);
+        NetworkTransportInterface networkTransport = new NetworkTransport(profile.username, profile.host, profile.port);
         
-        this.secureTransport = new SecureTransport(networkTransport, this.authenticationTransport, this);
-        this.authenticationTransport = new Authentication(networkTransport, this.secureTransport);
+        this.secureTransport = new SecureTransport(networkTransport, null, this, profile);
+        this.authenticationTransport = new AuthenticationTransport(networkTransport, this.secureTransport, profile);
+        this.secureTransport.setAuthenticationTransport(this.authenticationTransport);
     }
-    public Communication(EncryptionDemoFunctionality guiFunctionality) {
-        this();
+    public Communication(EncryptionDemoFunctionality guiFunctionality, Profile profile) {
+        this(profile);
         this.guiFunctionality = guiFunctionality;
     }
     
@@ -66,7 +69,7 @@ public class Communication implements CommunicationInterface {
             this.newMessageArrived.await();
           } catch (InterruptedException ex) {
               if(Constants.DEBUG_ON){
-                  Logger.getLogger(Communication.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "] Messages Queue interrupted exception.", ex);
+                  Logger.getLogger(Communication.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "] Messages Queue interrupted exception.", ex);
               }
           }
         }
@@ -187,6 +190,11 @@ public class Communication implements CommunicationInterface {
     @Override
     public boolean authenticate(String machineIdent, String docID, String password) {
         return this.authenticationTransport.authenticate(machineIdent, docID, password);
+    }
+    
+    @Override
+    public boolean initializeSRPAuthentication(String serverID, String docID, String password, String PIN) {
+        return this.authenticationTransport.initializeSRPAuthentication(serverID, docID, password, PIN);
     }
     
     @Override

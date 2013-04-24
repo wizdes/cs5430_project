@@ -8,6 +8,7 @@ import application.encryption_demo.Messages.Message;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import javax.crypto.SecretKey;
+import security_layer.authentications.AuthenticationTransport;
 import transport_layer.discovery.DiscoveryMessage;
 import transport_layer.discovery.DiscoveryResponseMessage;
 
@@ -39,6 +40,7 @@ public interface SecureTransportInterface {
     public void processDiscoveryMessage(DiscoveryMessage dm);
     public void processDiscoveryResponse(DiscoveryResponseMessage msg);
     
+    public void setAuthenticationTransport(AuthenticationTransport a);
 //    public boolean addPIN(String ID, String PIN);
 //    public String getPIN(String ID);
 //    public void displayPIN(String ID, String PIN);

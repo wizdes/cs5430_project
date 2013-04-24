@@ -25,7 +25,8 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SealedObject;
 import javax.crypto.SecretKey;
-import security_layer.authentications.Authentication;
+import security_layer.authentications.AuthenticationTransport;
+import security_layer.authentications.AuthenticationMessage;
 import transport_layer.discovery.DiscoveryResponseMessage;
 import transport_layer.discovery.DiscoveryTransport;
 import transport_layer.files.FileHandler;
@@ -46,14 +47,17 @@ public class SecureTransport implements SecureTransportInterface{
     private AtomicLong counter = new AtomicLong();
 //    private ConcurrentMap<String, EncryptedAESMessage> pendingHumanAuth = new ConcurrentHashMap<>();
     private SessionKeys keys = new SessionKeys();
-    private Authentication authentication;
+    private AuthenticationTransport authentication;
+    private Profile profile;
     
     public SecureTransport(NetworkTransportInterface networkTransport, 
-                           Authentication authentication, 
-                           CommunicationInterface communication) {               
+                           AuthenticationTransport authentication, 
+                           CommunicationInterface communication,
+                           Profile profile) {               
+        this.profile = profile;
         this.networkTransport = networkTransport;
         this.networkTransport.setSecureTransport(this);
-        this.discoveryTransport = new DiscoveryTransport(networkTransport);
+        this.discoveryTransport = new DiscoveryTransport(networkTransport, profile);
         this.communication = communication;
         this.authentication = authentication;
     }
@@ -66,11 +70,11 @@ public class SecureTransport implements SecureTransportInterface{
 //    @Override
 //    public boolean authenticate(String machineIdent) {
 //        
-//        Constants.log(Profile.username + " : authenticating");
+//        Constants.log(profile.username + " : authenticating");
 //        
 //        //If machine has been authenticated or trying to authenticate with itself, return
-//        if (authInstance.hasAuthenticated(machineIdent) || machineIdent.equals(Profile.username)) {
-//            Constants.log(Profile.username + " : has already authenticated with " + machineIdent);
+//        if (authInstance.hasAuthenticated(machineIdent) || machineIdent.equals(profile.username)) {
+//            Constants.log(profile.username + " : has already authenticated with " + machineIdent);
 //            return true;
 //        }
 //        final Lock authenticateLock = new ReentrantLock(true);
@@ -86,7 +90,7 @@ public class SecureTransport implements SecureTransportInterface{
 //            authInstance.removeAuthentication(machineIdent);
 //        } catch (InterruptedException ex) {
 //            if(Constants.DEBUG_ON){
-//                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "]", ex);
+//                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "]", ex);
 //            }
 //            return false;
 //        }
@@ -104,7 +108,7 @@ public class SecureTransport implements SecureTransportInterface{
     @Override
     public boolean sendAESEncryptedMessage(String destination, String docID, Message m, SecretKey secretKey, SecretKey HMACKey) {
         if(Constants.DEBUG_ON){
-            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + Profile.username + "] Sending " + EncryptedAESMessage.class.getName() + " to " + destination + ".");
+            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + profile.username + "] Sending " + EncryptedAESMessage.class.getName() + " to " + destination + ".");
         }
         byte[] iv = CipherFactory.generateRandomIV();
         
@@ -116,16 +120,18 @@ public class SecureTransport implements SecureTransportInterface{
             byte[] hmac = CipherFactory.HMAC(HMACKey, encryptedObject);
             
             EncryptedAESMessage encryptedMessage;
-            if (m instanceof HumanAuthenticationMessage) {
+            if (m instanceof AuthenticationMessage) {
+                Constants.log("sending EncryptedAuthenticationMessage");
                 encryptedMessage = new EncryptedAuthenticationMessage(encryptedObject, iv, hmac);
             } else {
+                Constants.log("sending EncryptedAESMessage");
                 encryptedMessage = new EncryptedAESMessage(encryptedObject, iv, hmac);
             }
             
             return networkTransport.send(destination, docID, encryptedMessage);
         } catch (IOException | IllegalBlockSizeException ex) {
             if(Constants.DEBUG_ON){
-                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "]", ex);
+                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "]", ex);
             }
             return false;
         }
@@ -134,13 +140,13 @@ public class SecureTransport implements SecureTransportInterface{
 //    @Override
 //    public boolean sendRSAEncryptedMessage(String destination, Message m) {
 //        if(Constants.DEBUG_ON){
-//            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + Profile.username + "] Sending " + EncryptedRSAMessage.class.getName() + " to " + destination + ".");
+//            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + profile.username + "] Sending " + EncryptedRSAMessage.class.getName() + " to " + destination + ".");
 //        }
 //        byte[] iv = new byte[16];
 //        PublicKey publicKey = Profile.keys.getPublicKey(destination);
 //        if (publicKey == null) {
 //            if(Constants.DEBUG_ON){
-//                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "] No public key found for " + destination + ".");
+//                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "] No public key found for " + destination + ".");
 //            }
 //            return false;
 //        }
@@ -156,7 +162,7 @@ public class SecureTransport implements SecureTransportInterface{
 //            return wasSuccessful;
 //        } catch (IOException | IllegalBlockSizeException | NoSuchAlgorithmException | InvalidKeyException | SignatureException ex) {
 //            if(Constants.DEBUG_ON){
-//                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "]", ex);
+//                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "]", ex);
 //            }
 //            return false;
 //        }
@@ -168,37 +174,40 @@ public class SecureTransport implements SecureTransportInterface{
         SecretKey secretKey = null;
         SecretKey HMACKey = null;
         if (Constants.DEBUG_ON) {
-            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + Profile.username + "] Processing " + EncryptedMessage.class.getName() + " from " + sourceOfMessage + ".");
+            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + profile.username + "] Processing " + EncryptedMessage.class.getName() + " from " + sourceOfMessage + ".");
         }
         SealedObject encryptedObject;
 
         Cipher cipher = null;
         try {
-            Constants.log("AES");
+            Constants.log("Received AES message");
             
             EncryptedAESMessage aesMessage = (EncryptedAESMessage) encryptedMessage;
             encryptedObject = aesMessage.encryptedObject;
             
             if (encryptedMessage instanceof EncryptedAuthenticationMessage) {
+                Constants.log("Received EncryptedAuthenticationMessage");
                 String PIN = this.authentication.getPIN(sourceOfMessage, docID);
                 secretKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN);
                 HMACKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN + "HMAC");
             } else {
+                Constants.log("Received other");
                 HMACKey = keys.getHmacKey(sourceOfMessage, docID);
                 secretKey = keys.getSessionKey(sourceOfMessage, docID);
             }
 
             byte[] hmac = CipherFactory.HMAC(HMACKey, encryptedObject);
 
-            if (secretKey == null || HMACKey == null) {    //Never enters because of null check above, but leave since someone might remove that
+            if (secretKey == null || HMACKey == null) {
                 if (Constants.DEBUG_ON) {
-                    Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "] No symemetric key found for " + sourceOfMessage + ".");
+                    Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "] No symemetric key found for " + sourceOfMessage + ".");
                 }
+                Constants.log("returning false");
                 return false;
             }
             
             if (!Arrays.equals(hmac, aesMessage.HMAC)) {
-                throw new InvalidHMACException("[User: " + Profile.username + "] Invalid HMAC from " + sourceOfMessage + ".");
+                throw new InvalidHMACException("[User: " + profile.username + "] Invalid HMAC from " + sourceOfMessage + ".");
             }
 
             
@@ -206,22 +215,30 @@ public class SecureTransport implements SecureTransportInterface{
 
             Object decryptedObj = encryptedObject.getObject(cipher);
             if (Constants.DEBUG_ON) {
-                Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + Profile.username + "] Processing decrypted " + ApplicationMessage.class.getName() + " from " + sourceOfMessage + ".");
+                Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + profile.username + "] Processing decrypted " + ApplicationMessage.class.getName() + " from " + sourceOfMessage + ".");
             }
-            ApplicationMessage appMessage = (ApplicationMessage) decryptedObj;
-            Long currentCounter = lastReceived.get(sourceOfMessage);
-            if (currentCounter == null || appMessage.counter > currentCounter) {
-                communication.depositMessage(appMessage.message);
-                success = true;
-                lastReceived.put(sourceOfMessage, appMessage.counter);
+            
+            if (decryptedObj instanceof AuthenticationMessage) {
+                Constants.log("instanceof AuthenticationMessage");
+                AuthenticationMessage msg = (AuthenticationMessage)decryptedObj;
+                this.authentication.processAuthenticationMessage(sourceOfMessage, docID, msg);
             } else {
-                if (Constants.DEBUG_ON) {
-                    Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "] Invalid counter on " + ApplicationMessage.class.getName() + " from " + sourceOfMessage + ".");
-                }
+                Constants.log("instanceof ApplicationMessage");
+                ApplicationMessage appMessage = (ApplicationMessage) decryptedObj;
+                Long currentCounter = lastReceived.get(sourceOfMessage);
+                if (currentCounter == null || appMessage.counter > currentCounter) {
+                    communication.depositMessage(appMessage.message);
+                    success = true;
+                    lastReceived.put(sourceOfMessage, appMessage.counter);
+                } else {
+                    if (Constants.DEBUG_ON) {
+                        Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "] Invalid counter on " + ApplicationMessage.class.getName() + " from " + sourceOfMessage + ".");
+                    }
+                }   
             }
         } catch (IOException | ClassNotFoundException | NoSuchAlgorithmException | IllegalBlockSizeException | BadPaddingException ex) {
             if (Constants.DEBUG_ON) {
-                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "]", ex);
+                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "]", ex);
             }
         }
         
@@ -231,7 +248,7 @@ public class SecureTransport implements SecureTransportInterface{
     @Override
     public void processDiscoveryResponse(DiscoveryResponseMessage msg){
         if(Constants.DEBUG_ON){
-            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + Profile.username + "] Processing " + DiscoveryResponseMessage.class.getName() + " from " + msg.owner + ".");
+            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + profile.username + "] Processing " + DiscoveryResponseMessage.class.getName() + " from " + msg.owner + ".");
         }
         
         communication.updatePeers(msg.owner, msg.ip, msg.port, msg.documents, false);
@@ -240,12 +257,12 @@ public class SecureTransport implements SecureTransportInterface{
     @Override
     public  void processDiscoveryMessage(DiscoveryMessage dm) {
         if(Constants.DEBUG_ON){
-            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + Profile.username + "] Processing " + DiscoveryMessage.class.getName() + " from " + dm.sourceID + ".");
+            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + profile.username + "] Processing " + DiscoveryMessage.class.getName() + " from " + dm.sourceID + ".");
         }
-        if(!dm.sourceID.equals(Profile.username) && Profile.documentsOpenForDiscovery.size() > 0){
-            List<String> documentNames = new ArrayList<>(Profile.documentsOpenForDiscovery);   //must copy here, possibly due to transient flag
-            DiscoveryResponseMessage responseMessage = new DiscoveryResponseMessage(Profile.username, 
-                    Profile.host, Profile.port, documentNames);
+        if(!dm.sourceID.equals(profile.username) && profile.documentsOpenForDiscovery.size() > 0){
+            List<String> documentNames = new ArrayList<>(profile.documentsOpenForDiscovery);   //must copy here, possibly due to transient flag
+            DiscoveryResponseMessage responseMessage = new DiscoveryResponseMessage(profile.username, 
+                    profile.host, profile.port, documentNames);
             networkTransport.addPeer(dm.sourceID, dm.sourceIP, dm.sourcePort);
             networkTransport.send(dm.sourceID, responseMessage);
         }
@@ -254,7 +271,7 @@ public class SecureTransport implements SecureTransportInterface{
 //    @Override
 //    public boolean processPlaintextMessage(String sourceOfMessage, PlaintextMessage msg) {
 //        if(Constants.DEBUG_ON){
-//            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + Profile.username + "] Processing " + PlaintextMessage.class.getName() + " from " + sourceOfMessage + ".");
+//            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + profile.username + "] Processing " + PlaintextMessage.class.getName() + " from " + sourceOfMessage + ".");
 //        }
 //        if (msg.m instanceof DiscoveryMessage) {
 //            processDiscoveryMessage((DiscoveryMessage)msg.m);
@@ -283,7 +300,7 @@ public class SecureTransport implements SecureTransportInterface{
             
         } catch (IOException | IllegalBlockSizeException ex) {
             if(Constants.DEBUG_ON){
-                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "]", ex);
+                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "]", ex);
             }
             return false;
         }   
@@ -303,19 +320,19 @@ public class SecureTransport implements SecureTransportInterface{
             
             byte[] hmac = CipherFactory.HMAC(hmacKey, file.encryptedObject);        
             if (!Arrays.equals(hmac, file.HMAC)) {
-                throw new SignatureException("[User: " + Profile.username + "] Invalid HMAC");
+                throw new SignatureException("[User: " + profile.username + "] Invalid HMAC");
             }
             
             Cipher cipher = CipherFactory.constructAESDecryptionCipher(key, file.iv);
             return (Message)file.encryptedObject.getObject(cipher);
         } catch (SignatureException ex) {
             if(Constants.DEBUG_ON){
-                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "] Bad signature reading " + filename + ".");
+                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "] Bad signature reading " + filename + ".");
             }
             return null;
         } catch (IOException | ClassNotFoundException | IllegalBlockSizeException | BadPaddingException ex) {
             if(Constants.DEBUG_ON){
-                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "]", ex);
+                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "]", ex);
             }
             return null;
         }
@@ -344,7 +361,7 @@ public class SecureTransport implements SecureTransportInterface{
 //    @Override
 //    public boolean initializeHumanAuthenticate(String destination) {
 //        if(Constants.DEBUG_ON){
-//            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + Profile.username + "] Starting initial human authentication with " + destination + ".");
+//            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + profile.username + "] Starting initial human authentication with " + destination + ".");
 //        }
 //
 //        final Lock authenticateLock = new ReentrantLock(true);
@@ -373,7 +390,7 @@ public class SecureTransport implements SecureTransportInterface{
 //    public boolean addPIN(String ownerID, String PIN) {
 //        if (!this.pendingHumanAuth.containsKey(ownerID)) {
 //            if(Constants.DEBUG_ON){
-//                Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + Profile.username + "] Haven't yet received PIN message from owner: " + ownerID + ".");
+//                Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + profile.username + "] Haven't yet received PIN message from owner: " + ownerID + ".");
 //            }
 //            return false;
 //        }
@@ -396,7 +413,7 @@ public class SecureTransport implements SecureTransportInterface{
 //            Profile.keys.removeSymmetricKey(ownerID);
 //            Profile.keys.removeHMACKey(ownerID);
 //            if(Constants.DEBUG_ON){
-//                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "] Failed to decrypt PIN message from owner: " + ownerID + ".", ex);
+//                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "] Failed to decrypt PIN message from owner: " + ownerID + ".", ex);
 //            }
 //            return false;
 //        }
@@ -405,7 +422,7 @@ public class SecureTransport implements SecureTransportInterface{
     @Override
     public boolean sendPlainTextMessage(String destination, Message m) {
         if(Constants.DEBUG_ON){
-            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + Profile.username + "] Sending " + PlaintextMessage.class.getName() + " to " + destination + ".");
+            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + profile.username + "] Sending " + PlaintextMessage.class.getName() + " to " + destination + ".");
         }
         PlaintextMessage sendMsg = new PlaintextMessage();
         sendMsg.m = m;
@@ -416,4 +433,9 @@ public class SecureTransport implements SecureTransportInterface{
 //    public void displayPIN(String ID, String PIN) {
 //        communication.displayPIN(ID, PIN);
 //    }
+
+    @Override
+    public void setAuthenticationTransport(AuthenticationTransport a) {
+        this.authentication = a;
+    }
 }

@@ -39,9 +39,9 @@ public class ApplicationWindow extends javax.swing.JFrame {
      */
     public ApplicationWindow(String username, String ip, int port) {
         profile = new Profile(username, ip, port);
-        this.functionality =  new EncryptionDemoFunctionality(this);
+        this.functionality =  new EncryptionDemoFunctionality(this, profile);
         initComponents();
-        this.setTitle("Secure Document Viewer - User: " + Profile.username);
+        this.setTitle("Secure Document Viewer - User: " + profile.username);
     }
 
     /**
@@ -221,7 +221,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
             
             //docID = this.functionality.createDocumentInstance(Profile.ident, docName);
             nd = new NetworkDocument(
-                functionality.getCommunicationInterface(), Profile.username, Profile.username, docName );
+                functionality.getCommunicationInterface(), profile.username, profile.username, docName );
             docID = this.functionality.createDocumentInstance(nd);
             if(docID == null){
                 showMessage("The document name: " + docName + " is already in use.");
@@ -230,13 +230,13 @@ public class ApplicationWindow extends javax.swing.JFrame {
         
         //Create a new chat panel
         docIDs.put(this.tabbedPane.getTabCount(), docID);
-        Profile.documentsOpenForDiscovery.add(docName);
+        profile.documentsOpenForDiscovery.add(docName);
         
         EditPanel panel = new EditPanel();
         panel.giveDocument(nd);
         nd.giveGUI(panel);
         chatPanels.put(docID, panel);
-        this.tabbedPane.add("Owner: " + Profile.username + ", Doc: " + docName, panel);
+        this.tabbedPane.add("Owner: " + profile.username + ", Doc: " + docName, panel);
         this.tabbedPane.setSelectedComponent(panel);
     }//GEN-LAST:event_startChatButtonActionPerformed
 
@@ -279,7 +279,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
         
         //Create document instance and send join request for doc
         NetworkDocument nd = new NetworkDocument(
-                functionality.getCommunicationInterface(), Profile.username, ownerId, docName );
+                functionality.getCommunicationInterface(), profile.username, ownerId, docName );
         String docID = this.functionality.createDocumentInstance(nd);
         docIDs.put(this.tabbedPane.getTabCount(), docID);
         if(!this.functionality.sendJoinRequestMessage(ownerId, docName)){

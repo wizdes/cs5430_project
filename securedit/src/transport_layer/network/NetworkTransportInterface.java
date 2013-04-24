@@ -7,7 +7,7 @@ package transport_layer.network;
 import java.io.Serializable;
 import security_layer.EncryptedMessage;
 import security_layer.SecureTransportInterface;
-import security_layer.authentications.Authentication;
+import security_layer.authentications.AuthenticationTransport;
 
 
 /**
@@ -23,5 +23,5 @@ public interface NetworkTransportInterface {
     public void addPeer(String peerIdent, String host, int port);
     public void shutdown();
     public void setSecureTransport(SecureTransportInterface secureTransport);
-    public void setAuthenticationTransport(Authentication authenticationTransport);
+    public void setAuthenticationTransport(AuthenticationTransport authenticationTransport);
 }

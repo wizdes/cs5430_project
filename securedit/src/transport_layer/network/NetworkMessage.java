@@ -21,7 +21,7 @@ class NetworkMessage implements Serializable{
         this.content = content;
     }
 
-    public NetworkMessage(Node destination, String docID, Node source, Serializable content) {
+    public NetworkMessage(Node source, String docID, Node destination, Serializable content) {
         this.destination = destination;
         this.docID = docID;
         this.source = source;

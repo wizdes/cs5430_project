@@ -37,29 +37,35 @@ import transport_layer.network.NetworkTransportInterface;
  *
  * @author Patrick
  */
-public class Authentication {
+public class AuthenticationTransport {
     private NetworkTransportInterface transport;
     private SecureTransportInterface secureTransport;
     private ConcurrentMap<String, AuthenticationSession> authSessions = new ConcurrentHashMap<>();
     private ConcurrentMap<String, String> pendingPINs = new ConcurrentHashMap<>();
     private ServerAuthenticationPersistantState persistantServerState;
     
+    private Profile profile;
+    
     private static final BigInteger n = new BigInteger(MODPGroups.MODP_GROUP_3072, 16);
     private static final BigInteger g = new BigInteger(MODPGroups.GENERATOR + "");
     
-    public Authentication(NetworkTransportInterface transport, SecureTransportInterface secureTransport) {
+    public AuthenticationTransport(NetworkTransportInterface transport, SecureTransportInterface secureTransport, Profile profile) {
+        this.profile = profile;
         this.transport = transport;
         this.secureTransport = secureTransport;
         this.transport.setAuthenticationTransport(this);
+        this.persistantServerState = new ServerAuthenticationPersistantState();
     }
     
     public String generatePIN(String userID, String docID) {
         String PIN = KeyFactory.generatePIN();
         pendingPINs.put(userID + "-" + docID, PIN);
+        Constants.log("generated pin for " + userID + "-" + docID + " -> " + this.getPIN(userID, docID));
         return PIN;
     }
     
     public String getPIN(String userID, String docID) {
+        Constants.log("retrieve pin for " + userID + "-" + docID + " -> " + pendingPINs.get(userID + "-" + docID));
         return pendingPINs.get(userID + "-" + docID);
     }    
     
@@ -69,7 +75,7 @@ public class Authentication {
         try {
             x = new BigInteger(H(salt, password.getBytes("UTF-8")));
         } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
         
@@ -85,14 +91,14 @@ public class Authentication {
         //Create new session state
         BigInteger a = generateEphemeralPrivateKey();     //a = ephemeral private key
         BigInteger A = g.modPow(a, n);                    //A = g^a = ephemeral public key
-        AuthenticationSession session = new AuthenticationSession(Profile.username, serverID, docID);
+        AuthenticationSession session = new AuthenticationSession(profile.username, serverID, docID);
         session.password = password;
         session.a = a;
         session.A = A;
         authSessions.put(serverID + ":::" + docID, session);
         
         //Send initial message
-        Auth_Msg1 initialMsg = new Auth_Msg1(Profile.username, A, docID);
+        Auth_Msg1 initialMsg = new Auth_Msg1(profile.username, A, docID);
         transport.send(serverID, initialMsg);
         
         //Wait for authentication to complete
@@ -103,7 +109,7 @@ public class Authentication {
             }
         } catch (InterruptedException ex) {
             if(Constants.DEBUG_ON){
-                Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "] authentication with " + serverID + ":" + docID, ex);
+                Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "] authentication with " + serverID + ":" + docID, ex);
             }
             return false;
         } finally{
@@ -121,12 +127,12 @@ public class Authentication {
                 processSRPMessage(sourceID, (SRPAuthenticationMessage)receivedMsg);
             } catch (InvalidSRPMessageException ex) {
                 if(Constants.DEBUG_ON){
-                    Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "] processing authentication from " + sourceID, ex);
+                    Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "] processing authentication from " + sourceID, ex);
                 }
                 //TODO: Handle error here, may need to wake up client
             } catch(InconsistentSessionKeyException ex){
                 if(Constants.DEBUG_ON){
-                    Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "] processing authentication from " + sourceID, ex);
+                    Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "] processing authentication from " + sourceID, ex);
                 }
                 //TODO: Handle different error here, may need to wake up client
             }
@@ -135,11 +141,12 @@ public class Authentication {
     
     private void processSRPSetupMessage(String sourceID, SRPSetupMessage receivedSetupMsg){
         InitAuth_Msg initMsg = (InitAuth_Msg)receivedSetupMsg;
+        System.out.println("RAN");
         persistantServerState.addClientPasswordState(sourceID, initMsg.s, initMsg.v);
-        
     }
     
     private void processSRPMessage(String sourceID, SRPAuthenticationMessage receivedSRPMsg) throws InvalidSRPMessageException, InconsistentSessionKeyException{
+        System.out.println("processSRPMessage from " + sourceID);
         if(receivedSRPMsg instanceof Auth_Msg1){    //Server
             Auth_Msg1 msg1 = (Auth_Msg1)receivedSRPMsg;
             //Fetch Persistent state
@@ -153,7 +160,7 @@ public class Authentication {
             BigInteger b = generateEphemeralPrivateKey();           //b
             BigInteger B = g.modPow(b, n);                          //g^b
             B.add(v);                                               //B = v + g^b
-            AuthenticationSession session = new AuthenticationSession(sourceID, Profile.username, msg1.docID);
+            AuthenticationSession session = new AuthenticationSession(sourceID, profile.username, msg1.docID);
             session.b = b;
             session.B = B;
             session.A = msg1.A;
@@ -247,7 +254,7 @@ public class Authentication {
             return sha.digest();
         } catch (NoSuchAlgorithmException ex) {
             if (Constants.DEBUG_ON) {
-                Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
             }
             return null;
         }
@@ -261,7 +268,7 @@ public class Authentication {
             return k.getEncoded();
         } catch (InvalidKeySpecException | NoSuchAlgorithmException ex) {
             if(Constants.DEBUG_ON){
-                Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
             }
             return null;
         }
@@ -292,7 +299,7 @@ public class Authentication {
                 val = new BigInteger(max.bitLength(), rand);
             } while(val.compareTo(max) >= 0 || val.compareTo(min) <= 0);
         } catch (NoSuchAlgorithmException | NoSuchProviderException ex) {
-            Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
         }
         return val;
     }
@@ -343,7 +350,7 @@ public class Authentication {
                 destroyableA.destroy();    //Or: ephemeralPublicKey.and(BigInteger.ZERO);
                 
             } catch (DestroyFailedException ex) {
-                Logger.getLogger(Authentication.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
                 return false;
             }
             return true;

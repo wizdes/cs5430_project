@@ -13,7 +13,7 @@ import security_layer.EncryptedMessage;
 import security_layer.InvalidHMACException;
 import security_layer.PlaintextMessage;
 import security_layer.SecureTransportInterface;
-import security_layer.authentications.Authentication;
+import security_layer.authentications.AuthenticationTransport;
 import security_layer.authentications.AuthenticationMessage;
 import transport_layer.discovery.DiscoveryMessage;
 import transport_layer.discovery.DiscoveryResponseMessage;
@@ -30,7 +30,7 @@ public class NetworkTransport implements NetworkTransportInterface{
     
     private Topology topology;
     private SecureTransportInterface secureTransport;
-    private Authentication authenticationTransport;
+    private AuthenticationTransport authenticationTransport;
     
     public NetworkTransport(String ident, String host, int port) {
         this.topology = new Topology(ident, host, port);
@@ -44,7 +44,7 @@ public class NetworkTransport implements NetworkTransportInterface{
         this.secureTransport = secureTransport;
     }
     @Override
-    public void setAuthenticationTransport(Authentication authenticationTransport){
+    public void setAuthenticationTransport(AuthenticationTransport authenticationTransport){
         this.authenticationTransport = authenticationTransport;
     }
     
@@ -77,6 +77,9 @@ public class NetworkTransport implements NetworkTransportInterface{
             return false;
         }
         NetworkMessage netMsg = new NetworkMessage(topology.getMyNode(), docID, destNode, msg);
+        Constants.log("SEND");
+        Constants.log(topology.getMyNode().id);
+        Constants.log(netMsg.source.id);
         client.send(destNode, netMsg);
         return true;
     }

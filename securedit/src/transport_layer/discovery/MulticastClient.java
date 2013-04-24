@@ -26,10 +26,11 @@ class MulticastClient extends Thread {
     private static final String groupAddress = "230.0.0.1";    //All "clients"(owners of documents) listen on this.
     private static final int discoveryPort = 5446;      //All "clients" use this port.
     private static final String ENCODING = "UTF-8";
-    
+    private Profile profile;
     private NetworkTransportInterface networkTransport;
     
-    MulticastClient(NetworkTransportInterface networkTransport){
+    MulticastClient(NetworkTransportInterface networkTransport, Profile profile){
+        this.profile = profile;
         this.networkTransport = networkTransport;
     }
     
@@ -44,7 +45,7 @@ class MulticastClient extends Thread {
             socket.joinGroup(address);
             
             if(Constants.DEBUG_ON){
-                Logger.getLogger(MulticastClient.class.getName()).log(Level.INFO, "[User: " + Profile.username + "] Owner waiting for discovery packets.");
+                Logger.getLogger(MulticastClient.class.getName()).log(Level.INFO, "[User: " + profile.username + "] Owner waiting for discovery packets.");
             }
          
             do{
@@ -59,9 +60,9 @@ class MulticastClient extends Thread {
                 DiscoveryPacket discoveryPacket = DiscoveryPacket.fromString(received);
                 if (discoveryPacket != null) {
                     //Process packet.
-                    if(!discoveryPacket.sourceID.equals(Profile.username) && Profile.documentsOpenForDiscovery.size() > 0) {
-                        List<String> documentNames = new ArrayList<>(Profile.documentsOpenForDiscovery);   //must copy here, possibly due to transient flag
-                        DiscoveryResponseMessage responseMessage = new DiscoveryResponseMessage(Profile.username, Profile.host, Profile.port, documentNames);
+                    if(!discoveryPacket.sourceID.equals(profile.username) && profile.documentsOpenForDiscovery.size() > 0) {
+                        List<String> documentNames = new ArrayList<>(profile.documentsOpenForDiscovery);   //must copy here, possibly due to transient flag
+                        DiscoveryResponseMessage responseMessage = new DiscoveryResponseMessage(profile.username, profile.host, profile.port, documentNames);
                         networkTransport.addPeer(discoveryPacket.sourceID, discoveryPacket.myIP, discoveryPacket.myPort);
                         networkTransport.send(discoveryPacket.sourceID, responseMessage);
                     }
@@ -69,7 +70,7 @@ class MulticastClient extends Thread {
             } while (true);
         } catch (IOException ex) {
             if(Constants.DEBUG_ON){
-                Logger.getLogger(MulticastClient.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "]", ex);
+                Logger.getLogger(MulticastClient.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "]", ex);
             }
         }
         
@@ -81,7 +82,7 @@ class MulticastClient extends Thread {
             }
         } catch (IOException ex) {
             if(Constants.DEBUG_ON){
-                Logger.getLogger(MulticastClient.class.getName()).log(Level.SEVERE, "[User: " + Profile.username + "]", ex);
+                Logger.getLogger(MulticastClient.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "]", ex);
             }
         }
     } 

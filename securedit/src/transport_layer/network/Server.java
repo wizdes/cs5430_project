@@ -50,6 +50,8 @@ public class Server {
     }    
     
     void shutdown() {
-        this.clientListener.stopListening();
+        if (this.clientListener != null) {
+            this.clientListener.stopListening();
+        }
     }
 }
