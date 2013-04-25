@@ -294,11 +294,11 @@ public class SecureTransport implements SecureTransportInterface{
             byte[] salt = KeyFactory.generateSalt();
             
             SecretKey key = KeyFactory.generateSymmetricKey(password, salt);
+            SecretKey hmacKey = KeyFactory.generateSymmetricKey(password, hmacSalt);
+            cleanupPassword(password);
+            
             Cipher cipher = CipherFactory.constructAESEncryptionCipher(key, iv);
             SealedObject encryptedObject = new SealedObject(contents, cipher);
-            
-            
-            Key hmacKey = KeyFactory.generateSymmetricKey(password, hmacSalt);
             byte[] hmac = CipherFactory.HMAC(hmacKey, encryptedObject);
             
             EncryptedAESFile file = new EncryptedAESFile(encryptedObject, iv, hmac, hmacSalt, salt);
@@ -321,8 +321,9 @@ public class SecureTransport implements SecureTransportInterface{
             EncryptedAESFile file = (EncryptedAESFile)fileTransport.readFile(filename);
             
             //Verify hmac
-            Key hmacKey = KeyFactory.generateSymmetricKey(password, file.hmacSalt);
+            SecretKey hmacKey = KeyFactory.generateSymmetricKey(password, file.hmacSalt);
             SecretKey key = KeyFactory.generateSymmetricKey(password, file.salt);
+            cleanupPassword(password);
             
             byte[] hmac = CipherFactory.HMAC(hmacKey, file.encryptedObject);        
             if (!Arrays.equals(hmac, file.HMAC)) {
@@ -443,5 +444,10 @@ public class SecureTransport implements SecureTransportInterface{
     @Override
     public void setAuthenticationTransport(AuthenticationTransport a) {
         this.authentication = a;
+    }
+    private void cleanupPassword(char[] password){
+        if(password != null){
+            Arrays.fill(password, '0');
+        }
     }
 }
