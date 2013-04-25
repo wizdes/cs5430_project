@@ -36,5 +36,7 @@ public interface NetworkDocumentInterface extends AuthorizationDocumentInterface
     
     public void giveGUI(EditPanel cd);
     
+    public String getUserID();
+    
     
 }

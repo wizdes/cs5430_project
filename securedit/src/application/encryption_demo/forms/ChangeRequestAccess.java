@@ -4,6 +4,7 @@
  */
 package application.encryption_demo.forms;
 
+import document.NetworkDocumentInterface;
 import java.util.ArrayList;
 import javax.swing.DefaultListModel;
 import javax.swing.text.SimpleAttributeSet;
@@ -102,9 +103,15 @@ public class ChangeRequestAccess extends javax.swing.JFrame {
     private void jButton1MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MousePressed
         // TODO add your handling code here:
         this.setVisible(false);
+        if(this.nd.isOwner() == false){
+            this.nd.requestChangeLevel(accessLists.getSelectedIndex());
+        }
+        this.nd.addUserToLevel(Integer.toString(userLists.getSelectedIndex()), accessLists.getSelectedIndex());
     }//GEN-LAST:event_jButton1MousePressed
     
-    public void setLabelsandUsername(ArrayList<String> labels, ArrayList<String> displayedUsername){
+    public void setLabelsandUsername(ArrayList<String> labels, ArrayList<String> displayedUsername,NetworkDocumentInterface nd){
+        this.nd = nd;
+
         //this.labels = labels;
         //this.displayedUsername = displayedUsername;
         DefaultListModel labelsModel = new DefaultListModel();
@@ -118,6 +125,11 @@ public class ChangeRequestAccess extends javax.swing.JFrame {
         }
 
         userLists.setModel(usersModel);
+        
+        if(nd.isOwner() == false){
+            userLists.setEnabled(false);
+            userLists.setSelectedIndex(Integer.parseInt(this.nd.getUserID()));
+        }
     }
     
     /**
@@ -164,6 +176,7 @@ public class ChangeRequestAccess extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JList userLists;
     // End of variables declaration//GEN-END:variables
+    NetworkDocumentInterface nd;
     //private ArrayList<String> labels;
     //private ArrayList<String> displayedUsername;
 }

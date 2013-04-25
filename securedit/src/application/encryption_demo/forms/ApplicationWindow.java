@@ -6,42 +6,50 @@ package application.encryption_demo.forms;
 
 import application.encryption_demo.DiscoveredPeers;
 import application.encryption_demo.EncryptionDemoFunctionality;
-import security_layer.Profile;
 import document.NetworkDocument;
-import java.awt.Component;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.swing.JOptionPane;
+import javax.swing.JRootPane;
+import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
+import security_layer.Profile;
 
 /**
  *
  * @author goggin
  */
-public class ApplicationWindow extends javax.swing.JFrame {
+public class ChatWindow extends javax.swing.JFrame {
     EncryptionDemoFunctionality functionality;
     Profile profile;
     ConcurrentMap<Integer, String> docIDs = new ConcurrentHashMap<>();   //<tab index, docID>
     ConcurrentMap<String, EditPanel> chatPanels = new ConcurrentHashMap<>();    //<docID, chatPanel>
-    
     public static void main(String[] args) {
-        String username = "0";
-        String ip = "localhost";
-        int port = 6000;
-          ApplicationWindow form = new ApplicationWindow(username, ip, port);
-        form.setVisible(true); 
+        String password = "pass0000pass0000";
+        
+        Profile profile;
+        if (new File("0.profile").exists()) {
+            profile = Profile.readProfile("0", password);
+        } else {
+            profile = Profile.createProfile("0", password, 4000, "localhost");
+        }
+
+        ChatWindow form = new ChatWindow(profile, password);
+        form.setVisible(true);
     }
     
     /**
      * Creates new form ChatWindow
      */
-    public ApplicationWindow(String username, String ip, int port) {
-        profile = new Profile(username, ip, port);
-        this.functionality =  new EncryptionDemoFunctionality(this, profile);
+    public ChatWindow(Profile profile, String password) {
+        this.profile = profile;
+        this.functionality =  new EncryptionDemoFunctionality(this, profile, password);
         initComponents();
-        this.setTitle("Secure Document Viewer - User: " + profile.username);
+        this.setTitle("Chat Window - User: " + profile.ident);
     }
 
     /**
@@ -61,13 +69,15 @@ public class ApplicationWindow extends javax.swing.JFrame {
             }
         };
         DiscoverPeersButton = new javax.swing.JButton();
+        addDefaultPeersButton = new javax.swing.JButton();
         joinChatButton = new javax.swing.JButton();
         startChatButton = new javax.swing.JButton();
         addManualPeer = new javax.swing.JButton();
-        loginButton = new javax.swing.JButton();
-        createAccountButton = new javax.swing.JButton();
+        Close = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        tabbedPane.setPreferredSize(new java.awt.Dimension(900, 500));
 
         peerPanel.setToolTipText("");
 
@@ -79,6 +89,13 @@ public class ApplicationWindow extends javax.swing.JFrame {
         DiscoverPeersButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 DiscoverPeersButtonActionPerformed(evt);
+            }
+        });
+
+        addDefaultPeersButton.setText("Add Default Peers");
+        addDefaultPeersButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                addDefaultPeersButtonActionPerformed(evt);
             }
         });
 
@@ -103,25 +120,18 @@ public class ApplicationWindow extends javax.swing.JFrame {
             }
         });
 
-        loginButton.setText("Login");
-        loginButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                loginButtonActionPerformed(evt);
-            }
-        });
-
-        createAccountButton.setText("Create Account");
+        Close.setText("Close Program");
 
         org.jdesktop.layout.GroupLayout peerPanelLayout = new org.jdesktop.layout.GroupLayout(peerPanel);
         peerPanel.setLayout(peerPanelLayout);
         peerPanelLayout.setHorizontalGroup(
             peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(peerPanelLayout.createSequentialGroup()
-                .addContainerGap(386, Short.MAX_VALUE)
+                .addContainerGap()
                 .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(org.jdesktop.layout.GroupLayout.TRAILING, loginButton)
-                    .add(org.jdesktop.layout.GroupLayout.TRAILING, createAccountButton))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
+                    .add(addDefaultPeersButton)
+                    .add(Close))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 546, Short.MAX_VALUE)
                 .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(peerPanelLayout.createSequentialGroup()
                         .add(startChatButton)
@@ -135,28 +145,28 @@ public class ApplicationWindow extends javax.swing.JFrame {
             .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                 .add(peerPanelLayout.createSequentialGroup()
                     .add(11, 11, 11)
-                    .add(jScrollPane8, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 786, Short.MAX_VALUE)
+                    .add(jScrollPane8, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 872, Short.MAX_VALUE)
                     .add(12, 12, 12)))
         );
         peerPanelLayout.setVerticalGroup(
             peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(org.jdesktop.layout.GroupLayout.TRAILING, peerPanelLayout.createSequentialGroup()
-                .addContainerGap(340, Short.MAX_VALUE)
+                .addContainerGap(409, Short.MAX_VALUE)
                 .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(DiscoverPeersButton)
                     .add(joinChatButton)
-                    .add(loginButton))
+                    .add(Close))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(startChatButton)
-                    .add(addManualPeer)
-                    .add(createAccountButton))
+                    .add(addDefaultPeersButton)
+                    .add(addManualPeer))
                 .addContainerGap())
             .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                 .add(peerPanelLayout.createSequentialGroup()
                     .add(22, 22, 22)
                     .add(jScrollPane8, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 300, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(88, Short.MAX_VALUE)))
+                    .addContainerGap(150, Short.MAX_VALUE)))
         );
 
         tabbedPane.addTab("Peers", peerPanel);
@@ -167,14 +177,14 @@ public class ApplicationWindow extends javax.swing.JFrame {
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
                 .addContainerGap()
-                .add(tabbedPane, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 830, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .add(tabbedPane, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(15, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(layout.createSequentialGroup()
                 .addContainerGap()
-                .add(tabbedPane, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 456, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                .add(tabbedPane, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -203,6 +213,19 @@ public class ApplicationWindow extends javax.swing.JFrame {
         functionality.broadcastDiscovery();
     }//GEN-LAST:event_DiscoverPeersButtonActionPerformed
 
+    private void addDefaultPeersButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addDefaultPeersButtonActionPerformed
+        for (int i = 0; i < 3; i++) {
+            if (!(i + "").equals(profile.ident)) {
+                String id = i + "";
+                String host = "localhost";
+                int port = 4000 + i;
+                ArrayList<String> documents = new ArrayList<>();
+                documents.add("Chat");
+                functionality.manuallyAddPeer(id, host, port, documents);
+            }
+        }
+    }//GEN-LAST:event_addDefaultPeersButtonActionPerformed
+
     private void startChatButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startChatButtonActionPerformed
         
         //Prompt for document name - make sure it is unique
@@ -219,9 +242,9 @@ public class ApplicationWindow extends javax.swing.JFrame {
                 continue;
             }
             
-            //docID = this.functionality.createDocumentInstance(Profile.ident, docName);
+            //docID = this.functionality.createDocumentInstance(profile.ident, docName);
             nd = new NetworkDocument(
-                functionality.getCommunicationInterface(), profile.username, profile.username, docName );
+                functionality.getCommunicationInterface(), profile.ident, profile.ident, docName );
             docID = this.functionality.createDocumentInstance(nd);
             if(docID == null){
                 showMessage("The document name: " + docName + " is already in use.");
@@ -230,13 +253,13 @@ public class ApplicationWindow extends javax.swing.JFrame {
         
         //Create a new chat panel
         docIDs.put(this.tabbedPane.getTabCount(), docID);
-        profile.documentsOpenForDiscovery.add(docName);
+        this.profile.documentsOpenForDiscovery.add(docName);
         
         EditPanel panel = new EditPanel();
         panel.giveDocument(nd);
         nd.giveGUI(panel);
         chatPanels.put(docID, panel);
-        this.tabbedPane.add("Owner: " + profile.username + ", Doc: " + docName, panel);
+        this.tabbedPane.add("Owner: " + profile.ident + ", Doc: " + docName, panel);
         this.tabbedPane.setSelectedComponent(panel);
     }//GEN-LAST:event_startChatButtonActionPerformed
 
@@ -249,37 +272,37 @@ public class ApplicationWindow extends javax.swing.JFrame {
         boolean hasAuthenticated = (Boolean)this.DiscoveredPeersTable.getModel().getValueAt(selectedRow, 4);
         
         if (!hasAuthenticated) {
-//            if (!this.functionality.authenticateHuman(ownerId)) {
-//                showMessage("Human authentication failed to initialize.");
-//                return;
-//            }
-//
-//            String pin = JOptionPane.showInputDialog("Enter PIN for " + ownerId);
-//            while (!this.functionality.addPIN(ownerId, pin)) {
-//                int closed = JOptionPane.showOptionDialog(this,
-//                        "Bad PIN! or message not received from server",
-//                        "Bad PIN",
-//                        JOptionPane.OK_CANCEL_OPTION,
-//                        JOptionPane.ERROR_MESSAGE,
-//                        null,
-//                        null,
-//                        null);
-//                if (closed == JOptionPane.CLOSED_OPTION || closed == JOptionPane.CANCEL_OPTION) {
-//                    return;
-//                }
-//                pin = JOptionPane.showInputDialog("Enter PIN for " + ownerId);
-//            }
+            if (!this.functionality.authenticateHuman(ownerId)) {
+                showMessage("Human authentication failed to initialize.");
+                return;
+            }
+
+            String pin = JOptionPane.showInputDialog("Enter PIN for " + ownerId);
+            while (!this.functionality.addPIN(ownerId, pin)) {
+                int closed = JOptionPane.showOptionDialog(this,
+                        "Bad PIN! or message not received from server",
+                        "Bad PIN",
+                        JOptionPane.OK_CANCEL_OPTION,
+                        JOptionPane.ERROR_MESSAGE,
+                        null,
+                        null,
+                        null);
+                if (closed == JOptionPane.CLOSED_OPTION || closed == JOptionPane.CANCEL_OPTION) {
+                    return;
+                }
+                pin = JOptionPane.showInputDialog("Enter PIN for " + ownerId);
+            }
         } else{
             showMessage("Skipping human authentication since already authenticated");
         }
-//        if (!this.functionality.authenticateMachine(ownerId)) {
-//            showMessage("machine authentication failed");
-//            return;
-//        }
+        if (!this.functionality.authenticateMachine(ownerId)) {
+            showMessage("machine authentication failed");
+            return;
+        }
         
         //Create document instance and send join request for doc
         NetworkDocument nd = new NetworkDocument(
-                functionality.getCommunicationInterface(), profile.username, ownerId, docName );
+                functionality.getCommunicationInterface(), profile.ident, ownerId, docName );
         String docID = this.functionality.createDocumentInstance(nd);
         docIDs.put(this.tabbedPane.getTabCount(), docID);
         if(!this.functionality.sendJoinRequestMessage(ownerId, docName)){
@@ -287,13 +310,13 @@ public class ApplicationWindow extends javax.swing.JFrame {
             return;
         }
         //TODO FINAL PHASE: Authorization: Should wait here for authorization telling me chat request was accepted.
-//        this.functionality.updateHumanAuthStatus(ownerId, true);
-//        EditPanel panel = new EditPanel();
-//        panel.giveDocument(nd);
-//        nd.giveGUI(panel);
-//        chatPanels.put(docID, panel);
-//        this.tabbedPane.add("Owner: " + ownerId + ", Doc: " + docName, panel);
-//        this.tabbedPane.setSelectedComponent(panel);
+        this.functionality.updateHumanAuthStatus(ownerId, true);
+        EditPanel panel = new EditPanel();
+        panel.giveDocument(nd);
+        nd.giveGUI(panel);
+        chatPanels.put(docID, panel);
+        this.tabbedPane.add("Owner: " + ownerId + ", Doc: " + docName, panel);
+        this.tabbedPane.setSelectedComponent(panel);
     }//GEN-LAST:event_joinChatButtonActionPerformed
 
     private void addManualPeerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addManualPeerActionPerformed
@@ -320,27 +343,6 @@ public class ApplicationWindow extends javax.swing.JFrame {
         functionality.manuallyAddPeer(id.trim(), host.trim(), port, documents);
     }//GEN-LAST:event_addManualPeerActionPerformed
 
-    private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginButtonActionPerformed
-        DocumentLoginPanel loginForm = new DocumentLoginPanel();
-//        int r = JOptionPane.showConfirmDialog(rootPane, loginForm);
-        Object[] options = {"Login"};
-        int r = JOptionPane.showOptionDialog(
-                this,
-                loginForm, 
-                "Login",
-                JOptionPane.OK_OPTION,
-                JOptionPane.INFORMATION_MESSAGE,
-                null,
-                options,
-                options[0]);
-        if (r == JOptionPane.OK_OPTION) {
-            System.out.println(loginForm.passwordTextField.getPassword());
-            System.out.println(loginForm.usernameTextField.getText());
-        } else {
-            System.out.println("canceld");
-        }
-    }//GEN-LAST:event_loginButtonActionPerformed
-
     private void showMessage(String m) {
         JOptionPane.showMessageDialog(this, m);
     }
@@ -350,13 +352,13 @@ public class ApplicationWindow extends javax.swing.JFrame {
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton Close;
     private javax.swing.JButton DiscoverPeersButton;
     private javax.swing.JTable DiscoveredPeersTable;
+    private javax.swing.JButton addDefaultPeersButton;
     private javax.swing.JButton addManualPeer;
-    private javax.swing.JButton createAccountButton;
     private javax.swing.JScrollPane jScrollPane8;
     private javax.swing.JButton joinChatButton;
-    private javax.swing.JButton loginButton;
     private javax.swing.JPanel peerPanel;
     private javax.swing.JButton startChatButton;
     javax.swing.JTabbedPane tabbedPane;
