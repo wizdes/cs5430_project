@@ -30,9 +30,11 @@ public class CustomDocument extends DefaultStyledDocument {
     boolean isServer;
     private EditPanel curDoc;
     NetworkDocumentInterface nd;
+    public int insertLevel;
     
     public CustomDocument(){
         isServer = false;
+        insertLevel = 0;
     }
 
     public void giveDocument(NetworkDocumentInterface nd){
@@ -43,7 +45,8 @@ public class CustomDocument extends DefaultStyledDocument {
     public void manualInsert(int offset, String string, AttributeSet attributeSet)
             throws BadLocationException {
         // Do something here
-        System.out.println("Inserting: " + string);        
+        System.out.println("Inserting: " + string);  
+        attributeSet = curDoc.colors.get(insertLevel);
         super.insertString(offset, string, attributeSet);
     }    
     
@@ -72,10 +75,11 @@ public class CustomDocument extends DefaultStyledDocument {
         else{
             levelStr = nd.getLevelAtIndex(offset - 1);
         }
-        nd.requestInsert(levelStr, lOffset, rOffset, string);
+        nd.requestInsert(insertLevel, lOffset, rOffset, string);
         
         //take thsi out when you're done
         if(isServer) {
+            attributeSet = curDoc.colors.get(insertLevel);
             manualInsert(offset, string, attributeSet);
         }
     }

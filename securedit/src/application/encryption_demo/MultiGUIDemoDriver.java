@@ -45,6 +45,12 @@ public class MultiGUIDemoDriver {
 //        
 //        p1.save("pass0000pass000!");
 //        p2.save("pass0000pass000!");
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            public void run() {
+                System.out.println("In shutdown hook");
+                //call stuff here
+            }
+        }, "Shutdown-thread"));
         
         new LoginForm().setVisible(true);
         new LoginForm().setVisible(true);
