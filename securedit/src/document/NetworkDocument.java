@@ -6,12 +6,10 @@
 package document;
 
 import application.encryption_demo.CommunicationInterface;
-import application.encryption_demo.Messages.Message;
 import application.encryption_demo.forms.EditPanel;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import javax.swing.JOptionPane;
 
 /**
  *
@@ -39,10 +37,15 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
         if (curDoc != null && !peers.containsKey(userId)) {
             curDoc.addUser(userId, levelIdentifier);
         }
-        curDoc.reviseUser(userId, levelIdentifier);
+        if (curDoc != null) {
+            curDoc.reviseUser(userId, levelIdentifier);
+        }
         super.addUserToLevel(userId, levelIdentifier);
-        UpdateLevel ul = new UpdateLevel(userId, levelIdentifier);
-        this.sendCommandMessage(userId, ul);
+        
+        if (!userId.equals(this.collaboratorId)) {
+            UpdateLevel ul = new UpdateLevel(userId, levelIdentifier);
+            this.sendCommandMessage(userId, ul);            
+        }
     }
     
     @Override

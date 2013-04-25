@@ -52,15 +52,8 @@ public class NetworkDocumentTest {
     
     @Before
     public void setUp() throws Exception {
-        Profile.deleteProfile(p1Ident);
         p1 = Profile.createProfile(p1Ident, password_1, p1Port, "localhost");
-//        p1 = Profile.readProfile(p1Ident, password_1);
-        
-        Profile.deleteProfile(p2Ident);
         p2 = Profile.createProfile(p2Ident, password_2, p2Port, "localhost");
-//        p2 = Profile.readProfile(p2Ident, password_2);
-        
-        Profile.deleteProfile(p3Ident);
         p3 = Profile.createProfile(p3Ident, password_3, p3Port, "localhost");
 //        p3 = Profile.readProfile(p3Ident, password_3);
         
