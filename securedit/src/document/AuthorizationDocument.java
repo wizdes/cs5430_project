@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import security_layer.authentications.ServerAuthenticationPersistantState;
 
 /**
  *
@@ -20,6 +21,7 @@ public class AuthorizationDocument implements AuthorizationDocumentInterface {
     
     protected Map<String, Integer> peers = new HashMap<>();
     private Document document;
+    private ServerAuthenticationPersistantState serverAuthenticationPersistantState;
     
     public AuthorizationDocument() {
         this("OwnerId", "Document");
@@ -27,7 +29,13 @@ public class AuthorizationDocument implements AuthorizationDocumentInterface {
     
     public AuthorizationDocument(String ownerId, String name) {
         this.document = new Document(ownerId, name);
+        this.serverAuthenticationPersistantState = new ServerAuthenticationPersistantState();
     }
+    
+    @Override
+    public ServerAuthenticationPersistantState getServerAuthenticationPersistantState() {
+        return this.serverAuthenticationPersistantState;
+    }       
     
     @Override
     public void addUserToLevel(String userId, int level) {

@@ -294,7 +294,7 @@ public class NetworkDocument implements NetworkDocumentInterface {
 
     @Override
     public ServerAuthenticationPersistantState getServerAuthenticationPersistantState() {
-        return this.document.getServerAuthenticationPersistantState();
+        return this.authDocument.getServerAuthenticationPersistantState();
     }
 
     @Override

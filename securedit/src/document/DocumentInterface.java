@@ -14,8 +14,6 @@ import security_layer.authentications.ServerAuthenticationPersistantState;
  */
 public interface DocumentInterface {
     
-    public ServerAuthenticationPersistantState getServerAuthenticationPersistantState();
-    
     /* Create a new level, with no sections assigned to it */
     public void addLevel(int levelIdentifier);
     

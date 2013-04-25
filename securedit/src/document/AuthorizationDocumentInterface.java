@@ -6,6 +6,7 @@ package document;
 
 import java.util.Collection;
 import java.util.Set;
+import security_layer.authentications.ServerAuthenticationPersistantState;
 
 /**
  *
@@ -46,4 +47,6 @@ public interface AuthorizationDocumentInterface {
     public Collection<CommandMessage> applyRemove(String userId, Set<String> identifiers);
     
     public Document getDocument();
+        
+    public ServerAuthenticationPersistantState getServerAuthenticationPersistantState();
 }
