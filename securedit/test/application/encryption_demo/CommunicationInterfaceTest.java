@@ -13,7 +13,7 @@ import org.junit.After;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-import application.encryption_demo.Profile;
+import security_layer.Profile;
 
 /**
  *
@@ -28,9 +28,9 @@ public class CommunicationInterfaceTest {
     CommunicationInterface p2Communicator;
     CommunicationInterface p3Communicator;
     
-    static String password_1 = "pass0000pass0000";
-    static String password_2 = "pass1111pass1111";
-    static String password_3 = "pass2222pass2222";
+    static char[] password_1 = "pass00a000".toCharArray();          //less than 16
+    static char[] password_2 = "pass1111passsfdasfa1111".toCharArray(); //more than 16
+    static char[] password_3 = "pass2222pass2222".toCharArray();        //exactly 16
     
     static int p1Port = 4000;
     static int p2Port = 4001;
@@ -65,23 +65,24 @@ public class CommunicationInterfaceTest {
     public void testSendMessagesFrom(CommunicationInterface c1, 
                                      CommunicationInterface c2, 
                                      String c2Ident,
+                                     String docID,
                                      int iterations) {
-//        int received = 0;
-//        for (int i = 0; i < iterations; i++) {
-//            StringMessage dm = new StringMessage("hello world " + i);
-//            c1.sendMessage(c2Ident, dm);
-//        }
-//
-//        while (received < iterations) {
-//            for (Message m : c2.waitForMessages()) {
-//                if (m instanceof StringMessage) {
-//                    StringMessage dm2 = (StringMessage)m;
-//                    System.out.println(dm2.contents);
-//                    assertEquals("hello world " + received++, dm2.contents);
-//                }
-//            }
-//        }
-//        assertTrue(received == iterations);    
+        int received = 0;
+        for (int i = 0; i < iterations; i++) {
+            StringMessage dm = new StringMessage("hello world " + i);
+            c1.sendMessage(c2Ident, docID, dm);
+        }
+
+        while (received < iterations) {
+            for (Message m : c2.waitForMessages()) {
+                if (m instanceof StringMessage) {
+                    StringMessage dm2 = (StringMessage)m;
+                    System.out.println(dm2.contents);
+                    assertEquals("hello world " + received++, dm2.contents);
+                }
+            }
+        }
+        assertTrue(received == iterations);    
     }
     
     
@@ -96,14 +97,13 @@ public class CommunicationInterfaceTest {
         p2Communicator = new Communication(p2);
         p3Communicator = new Communication(p3);
         
-        p1Communicator.updatePeers(p2Ident, "localhost", p2Port, documents, false);
+//        p1Communicator.updatePeers(p2Ident, "localhost", p2Port, documents, false);
         p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents, false);
         
-        String PIN = p1Communicator.generatePIN(p2Ident, documents.get(0));
-        pause(100);
+        char[] PIN = p1Communicator.generatePIN(p2Ident, documents.get(0));
+        //SRP
         p2Communicator.initializeSRPAuthentication(p1Ident, documents.get(0), password_2, PIN);
-        
-//        assertTrue(p2Communicator.authenticate(p1Ident, documents.get(0), password_2));
+        assertTrue(p2Communicator.authenticate(p1Ident, documents.get(0), password_2));
         
 //        p1Communicator.authenticateHuman(p2Ident);
 //        pause(250);
@@ -112,7 +112,8 @@ public class CommunicationInterfaceTest {
 //        p1Communicator.updateHumanAuthStatus(p2Ident, true);
 //        assertTrue(p1Communicator.authenticateMachine(p2Ident));
 //
-//        testSendMessagesFrom(p1Communicator, p2Communicator, p2Ident, iterations);
+        testSendMessagesFrom(p1Communicator, p2Communicator, p2Ident, documents.get(0), iterations);    //BOOOOMMMMMMMM
+        
 //        testSendMessagesFrom(p2Communicator, p1Communicator, p1Ident, iterations);
 //        
 //        // Now start with fresh communicators, and we should be able to start

@@ -23,8 +23,8 @@ public interface SecureTransportInterface {
     public boolean sendPlainTextMessage(String destination, Message m);
 //    public boolean processPlaintextMessage(String sourceOfMessage, PlaintextMessage msg);
     public boolean processEncryptedMessage(String sourceOfMessage, String docID, EncryptedMessage encryptedMsg) throws InvalidHMACException;
-    public boolean writeEncryptedFile(String filename, String password, Message contents);
-    public Message readEncryptedFile(String filename, String password);
+    public boolean writeEncryptedFile(String filename, char[] password, Message contents);
+    public Message readEncryptedFile(String filename, char[] password);
     public String readUnencryptedFile(String filename);
 //    public boolean authenticate(String destination);
 

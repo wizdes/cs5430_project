@@ -7,7 +7,7 @@ package transport_layer.discovery;
 import configuration.Constants;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import application.encryption_demo.Profile;
+import security_layer.Profile;
 import transport_layer.network.NetworkTransportInterface;
 
 

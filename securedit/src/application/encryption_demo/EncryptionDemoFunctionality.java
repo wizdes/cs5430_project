@@ -1,6 +1,7 @@
 package application.encryption_demo;
 
 
+import security_layer.Profile;
 import application.encryption_demo.Messages.Message;
 import application.encryption_demo.Messages.StringMessage;
 import application.encryption_demo.DiscoveredPeers.Peer;
@@ -60,7 +61,7 @@ public class EncryptionDemoFunctionality {
         communication.sendManualDiscoverMessage(id, host, port, dm);
     }
     
-    public boolean login(String machineId, String docID, String password){
+    public boolean login(String machineId, String docID, char[] password){
         return communication.authenticate(machineId, docID, password);
     }
     
@@ -80,7 +81,7 @@ public class EncryptionDemoFunctionality {
      * @param plaintext String representation of file in plaintext
      * @return Encrypted version of the file.
      */
-    String encryptFile(String plaintext, String password){
+    String encryptFile(String plaintext, char[] password){
         communication.writeEncryptedFile(openedFilename, password, plaintext);
         return "This file was encrypted. Open it to see the encrpted text\n";
     }
@@ -90,7 +91,7 @@ public class EncryptionDemoFunctionality {
      * @param ciphertext String representation of file in ciphertext
      * @return Plaintext of file after being decrypted.
      */
-    String decryptFile(String ciphertext, String password){
+    String decryptFile(String ciphertext, char[] password){
         String plaintext = (String)communication.readEncryptedFile(openedFilename, password);
         return plaintext;
     }
@@ -162,7 +163,7 @@ public class EncryptionDemoFunctionality {
     }
     private final ReentrantLock atomicBroadcastLock = new ReentrantLock();
     
-    public String generatePIN(String userId, String docID) {
+    public char[] generatePIN(String userId, String docID) {
         return this.communication.generatePIN(userId, docID);
     }
     

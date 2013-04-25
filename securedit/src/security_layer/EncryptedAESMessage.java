@@ -27,6 +27,5 @@ class EncryptedAESMessage implements EncryptedMessage {
     public String getAlgorithm() {
         return encryptedObject.getAlgorithm();
     }
-    
 }
 

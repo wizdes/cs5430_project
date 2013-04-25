@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import application.encryption_demo.Profile;
+import security_layer.Profile;
 import transport_layer.network.NetworkTransportInterface;
 
 /**

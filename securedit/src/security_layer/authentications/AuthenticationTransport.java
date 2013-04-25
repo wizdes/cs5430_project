@@ -4,7 +4,7 @@
  */
 package security_layer.authentications;
 
-import application.encryption_demo.Profile;
+import security_layer.Profile;
 import configuration.Constants;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -41,7 +41,7 @@ public class AuthenticationTransport {
     private NetworkTransportInterface transport;
     private SecureTransportInterface secureTransport;
     private ConcurrentMap<String, AuthenticationSession> authSessions = new ConcurrentHashMap<>();
-    private ConcurrentMap<String, String> pendingPINs = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, char[]> pendingPINs = new ConcurrentHashMap<>();
     private ServerAuthenticationPersistantState persistantServerState;
     
     private Profile profile;
@@ -57,37 +57,35 @@ public class AuthenticationTransport {
         this.persistantServerState = new ServerAuthenticationPersistantState();
     }
     
-    public String generatePIN(String userID, String docID) {
-        String PIN = KeyFactory.generatePIN();
+    public char[] generatePIN(String userID, String docID) {
+        char[] PIN = KeyFactory.generatePIN();
         pendingPINs.put(userID + "-" + docID, PIN);
         Constants.log("generated pin for " + userID + "-" + docID + " -> " + this.getPIN(userID, docID));
         return PIN;
     }
     
-    public String getPIN(String userID, String docID) {
+    public char[] getPIN(String userID, String docID) {
         Constants.log("retrieve pin for " + userID + "-" + docID + " -> " + pendingPINs.get(userID + "-" + docID));
         return pendingPINs.get(userID + "-" + docID);
     }    
     
-    public boolean initializeSRPAuthentication(String serverID, String docID, String password, String PIN){
+    public boolean initializeSRPAuthentication(String serverID, String docID, char[] password, char[] PIN){
         byte[] salt = KeyFactory.generateSalt();
-        BigInteger x;
-        try {
-            x = new BigInteger(H(salt, password.getBytes("UTF-8")));
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
-        }
-        
+        BigInteger x = new BigInteger(KeyFactory.generateSymmetricKey(password, salt).getEncoded());
         BigInteger v = g.modPow(x, n);
+        System.out.println("v: " + Arrays.toString(v.toByteArray()));
+
         SecretKey pinKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN);
-        SecretKey HMACKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN + "HMAC");
+        char[] hmacPIN = new char[PIN.length + 4];
+        System.arraycopy(PIN, 0, hmacPIN, 0, PIN.length);
+        System.arraycopy(new char[]{'H', 'M', 'A', 'C'}, 0, hmacPIN, PIN.length, 4);
+        SecretKey HMACKey = (SecretKey) KeyFactory.generateSymmetricKey(hmacPIN);
         
         InitAuth_Msg initMsg = new InitAuth_Msg(v, salt);
         return this.secureTransport.sendAESEncryptedMessage(serverID, docID, initMsg, pinKey, HMACKey);
     }
     
-    public boolean authenticate(String serverID, String docID, String password){
+    public boolean authenticate(String serverID, String docID, char[] password){
         //Create new session state
         BigInteger a = generateEphemeralPrivateKey();     //a = ephemeral private key
         BigInteger A = g.modPow(a, n);                    //A = g^a = ephemeral public key
@@ -141,7 +139,7 @@ public class AuthenticationTransport {
     
     private void processSRPSetupMessage(String sourceID, SRPSetupMessage receivedSetupMsg){
         InitAuth_Msg initMsg = (InitAuth_Msg)receivedSetupMsg;
-        System.out.println("RAN");
+        System.out.println("Added client s,v to persistant state");
         persistantServerState.addClientPasswordState(sourceID, initMsg.s, initMsg.v);
     }
     
@@ -159,7 +157,7 @@ public class AuthenticationTransport {
             //Create new session
             BigInteger b = generateEphemeralPrivateKey();           //b
             BigInteger B = g.modPow(b, n);                          //g^b
-            B.add(v);                                               //B = v + g^b
+            B = B.add(v);                                               //B = v + g^b
             AuthenticationSession session = new AuthenticationSession(sourceID, profile.username, msg1.docID);
             session.b = b;
             session.B = B;
@@ -168,9 +166,16 @@ public class AuthenticationTransport {
             
             //Compute S(on the server) which is the common exponential value
             BigInteger u = new BigInteger(KeyFactory.generateNonce() + "");
+            System.out.println("A: " + Arrays.toString(session.A.toByteArray()));
+            System.out.println("B: " + Arrays.toString(session.B.toByteArray()));
+            System.out.println("u: " + Arrays.toString(u.toByteArray()));
+            System.out.println("v: " + Arrays.toString(v.toByteArray()));
+            System.out.println("n: " + Arrays.toString(n.toByteArray()));
+            System.out.println("g: " + Arrays.toString(g.toByteArray()));
             BigInteger S = v.modPow(u, n);                      //v^u
-            S.multiply(session.A);                                 //A * v^u
-            S.modPow(b, n);                                     //S = (A * v^u)^b mod n
+            S = session.A.multiply(S);                                 //A * v^u
+            S = S.modPow(b, n);                                     //S = (A * v^u)^b mod n
+            System.out.println("S: " + Arrays.toString(S.toByteArray()));
             
             //Generate key from S
             session.K = H(S.toByteArray());                     //K = H(S)
@@ -186,17 +191,26 @@ public class AuthenticationTransport {
             }
             session.B = msg2.B;
             
+            System.out.println("A: " + Arrays.toString(session.A.toByteArray()));
+            System.out.println("B: " + Arrays.toString(session.B.toByteArray()));
+            System.out.println("u: " + Arrays.toString(msg2.u.toByteArray()));
+            //System.out.println("v: " + Arrays.toString(.toByteArray()));
+            System.out.println("n: " + Arrays.toString(n.toByteArray()));
+            System.out.println("g: " + Arrays.toString(g.toByteArray()));
             //Compute S(on the client) which is the common exponential value
-            BigInteger x = new BigInteger(H(session.password.toCharArray(), msg2.salt));
+            BigInteger x = new BigInteger(KeyFactory.generateSymmetricKey(session.password, msg2.salt).getEncoded());
             BigInteger S = session.B.subtract(g.modPow(x, n));  //(B - g^x)
             BigInteger exp = session.a.add(msg2.u.multiply(x));                     //(a + u*x)
-            S.modPow(exp, n);                                                       //S = (B - g^x)^(a + u*x)
+            S = S.modPow(exp, n);                                                       //S = (B - g^x)^(a + u*x)
+            System.out.println("S: " + Arrays.toString(S.toByteArray()));
             
             //Generate key from S
             session.K = H(S.toByteArray());                                         //K = H(S)
             
             //Send Auth_Msg3
-            byte[] M1 = MAC(session.A.toByteArray(), session.B.toByteArray(), session.K);
+            System.out.println("K: " + Arrays.toString(session.K));
+            byte[] M1 = H(session.A.toByteArray(), session.B.toByteArray(), session.K);
+            System.out.println("Client's M1: " + Arrays.toString(M1));
             Auth_Msg3 msg3 = new Auth_Msg3(M1, msg2.docID);
             transport.send(sourceID, msg3);
         } else if(receivedSRPMsg instanceof Auth_Msg3){ //Server
@@ -205,35 +219,45 @@ public class AuthenticationTransport {
             if(session == null){
                 throw new InvalidSRPMessageException("Client: " + sourceID + " has no session data stored on the server.");
             }
-            if(!Arrays.equals(msg3.M1, MAC(session.A.toByteArray(), session.B.toByteArray(), session.K))){
+            //System.out.println("Client's M1: " + Arrays.toString(msg3.M1));
+            System.out.println("K: " + Arrays.toString(session.K));
+            byte[] serversM1 = H(session.A.toByteArray(), session.B.toByteArray(), session.K);
+            System.out.println("Server's M1: " + Arrays.toString(serversM1));
+            
+            if(!Arrays.equals(msg3.M1, serversM1)){
                 throw new InconsistentSessionKeyException("Client's M1 doesn't match servers");
             }
             //Postcondition: Keys match according to the server
             
-            byte[] M2 = MAC(session.A.toByteArray(), msg3.M1, session.K);
+            //Place session key K inside data structure.
+            //   ASK ELENANOR ABOUT THIS
+            produceAndSaveSessionKeys(sourceID, msg3.docID, session.K);
+            
+            byte[] M2 = H(session.A.toByteArray(), msg3.M1, session.K);
             Auth_Msg4 msg4 = new Auth_Msg4(M2, msg3.docID);
             transport.send(sourceID, msg4);
             
-            //TODO: Ensure memory is zero'ed out and session is cleaned up
-            session.cleanup();
+            //Zero memory for session
+            cleanupSession(sourceID, msg3.docID);
             
-            //TODO: Place session key K inside data structure.
         } else if(receivedSRPMsg instanceof Auth_Msg4){ //Client
             Auth_Msg4 msg4 = (Auth_Msg4)receivedSRPMsg;
             AuthenticationSession session = authSessions.get(sourceID + ":::" + msg4.docID);
             if(session == null){
                 throw new InvalidSRPMessageException("Server: " + sourceID + " has no session data stored on the client.");
             }
-            byte[] M1 = MAC(session.A.toByteArray(), session.B.toByteArray(), session.K);   //recompute M1 since didn't save it
-            if(!Arrays.equals(msg4.M2, MAC(session.A.toByteArray(), M1, session.K))){
+            byte[] M1 = H(session.A.toByteArray(), session.B.toByteArray(), session.K);   //recompute M1 since didn't save it
+            if(!Arrays.equals(msg4.M2, H(session.A.toByteArray(), M1, session.K))){
                 throw new InconsistentSessionKeyException("Server's M2 doesn't match clients");
             }
             //Postcondition: Keys match according to the client
             
-            //TODO: Ensure memory is zero'ed out and session is cleaned up
-            cleanupSession(sourceID, msg4.docID);
+            //Place session key K inside data structure.
+            //   ASK ELENANOR ABOUT THIS
+            produceAndSaveSessionKeys(sourceID, msg4.docID, session.K);
             
-            //TODO: Place session key K inside data structure.
+            //Zero memory for session
+            cleanupSession(sourceID, msg4.docID);
             
             //Wake up client
             session.authenticateLock.lock();
@@ -244,6 +268,17 @@ public class AuthenticationTransport {
                 session.authenticateLock.unlock();
             }
         }
+    }
+    private void produceAndSaveSessionKeys(String sourceID, String docID, byte[] key) {
+        SecretKey sessionKey = KeyFactory.generateSymmetricKey(key);
+        profile.keys.addSessionKey(sourceID, docID, sessionKey);
+        char[] K_chars = new String(key).toCharArray();
+        char[] hmac = new char[K_chars.length + 4];
+        System.arraycopy(K_chars, 0, hmac, 0, K_chars.length);
+        System.arraycopy(new char[]{'H', 'M', 'A', 'C'}, 0, hmac, K_chars.length, 4);
+        SecretKey hmacKey = KeyFactory.generateSymmetricKey(hmac);
+        profile.keys.addHmacKey(sourceID, docID, hmacKey);
+        System.out.println("Saved session keys for " + sourceID + "/" + docID);
     }
     private byte[] H(byte[]... input) {
         try {
@@ -259,23 +294,23 @@ public class AuthenticationTransport {
             return null;
         }
     }
-    private byte[] H(char[] pass, byte[] salt){
-        try {
-            SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-            KeySpec ks = new PBEKeySpec(pass, salt, 36359, 128);
-            SecretKey s = f.generateSecret(ks);
-            Key k = new SecretKeySpec(s.getEncoded(),"AES");
-            return k.getEncoded();
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException ex) {
-            if(Constants.DEBUG_ON){
-                Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            return null;
-        }
-    }
-    private byte[] MAC(byte[] A, byte[] B, byte[] K){
-        return H(A, B, K);
-    }
+//    private byte[] H(char[] pass, byte[] salt){
+//        try {
+//            SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+//            KeySpec ks = new PBEKeySpec(pass, salt, 36359, 128);
+//            SecretKey s = f.generateSecret(ks);
+//            Key k = new SecretKeySpec(s.getEncoded(),"AES");
+//            return k.getEncoded();
+//        } catch (InvalidKeySpecException | NoSuchAlgorithmException ex) {
+//            if(Constants.DEBUG_ON){
+//                Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//            return null;
+//        }
+//    }
+//    private byte[] MAC(byte[] A, byte[] B, byte[] K){
+//        return H(A, B, K);
+//    }
     private BigInteger generateEphemeralPrivateKey(){
         BigInteger key = null;
         do{
@@ -326,8 +361,9 @@ public class AuthenticationTransport {
         private String docID;
         private BigInteger a, b;
         private BigInteger A, B;
-        private byte[] K = null;
-        private String password;
+//        private SecretKey K = null;
+        private byte[] K;
+        private char[] password;
         private final Condition authenticationComplete;
         private boolean authenticationCompleted = false;
         private final Lock authenticateLock;
@@ -344,16 +380,26 @@ public class AuthenticationTransport {
          * -Specifically destroys keys securely.
          * @return Whether or not session cleanup was successful
          */
-        private boolean cleanup(){   //Is this enough?!?!?!?
-            Destroyable destroyableA = (Destroyable)A;
-            try {
-                destroyableA.destroy();    //Or: ephemeralPublicKey.and(BigInteger.ZERO);
-                
-            } catch (DestroyFailedException ex) {
-                Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
-                return false;
+        private boolean cleanup() {
+            if(a != null)   a.and(BigInteger.ZERO);
+            if(b != null)   b.and(BigInteger.ZERO);
+            if(A != null)   A.and(BigInteger.ZERO);
+            if(B != null)   B.and(BigInteger.ZERO);
+            
+            if(K != null){
+                Arrays.fill(K, (byte)0);
+//                Destroyable destroyableK = (Destroyable)K;
+//                try {
+//                    destroyableK.destroy();
+//                } catch (DestroyFailedException ex) {
+//                    Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
+//                }
             }
+            if(password != null)   Arrays.fill(password, '0');
+            
+            a = null; b = null; A = null; B = null; K = null; password = null;
             return true;
+            
         }
     }
 }

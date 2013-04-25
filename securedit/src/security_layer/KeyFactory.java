@@ -50,26 +50,46 @@ public class KeyFactory {
         }
     }
     
-    public static Key generateSymmetricKey(String password){
+    /**
+     * Generate symmetric key, just from password.
+     * -Uses default salt, just so it can use PBEKeySpec which increases key
+     *    computation time. This is helpful to make generation of keys from PIN
+     *    and K(from SRP) even more infeasible.
+     * @param password Char array password
+     * @return 
+     */
+    public static SecretKey generateSymmetricKey(char[] password){
+        byte[] salt = null;
         try {
-            //System.out.println("generateSymmetricKey " + password);
-            if (password == null || password.contains("null")) {
-                throw new NumberFormatException();
-            }
-            byte[] passBytes = password.getBytes("UTF-8");
-            return new SecretKeySpec(fix_bad_length_key(passBytes), "AES");
-        } catch (UnsupportedEncodingException | NumberFormatException ex) {
-            if(Constants.DEBUG_ON){
-                Logger.getLogger(KeyFactory.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            return null;
+            salt = "IAmADefaultSalt".getBytes("UTF-16");
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(KeyFactory.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return generateSymmetricKey(password, salt);
+    }
+        /**
+     * Generate symmetric key, just from password.
+     * -Uses default salt, just so it can use PBEKeySpec which increases key
+     *    computation time. This is helpful to make generation of keys from PIN
+     *    and K(from SRP) even more infeasible.
+     * @param password Password in bytes.
+     * @return 
+     */
+    public static SecretKey generateSymmetricKey(byte[] password){
+        byte[] salt = null;
+        try {
+            salt = "IAmADefaultSalt".getBytes("UTF-16");
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(KeyFactory.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return generateSymmetricKey(new String(password).toCharArray(), salt);
     }
     
-    static SecretKey generateSymmetricKey(String password, byte[] salt){
-                try {
+    public static SecretKey generateSymmetricKey(char[] password, byte[] salt){
+        try {
+            char[] pass16 = fix_pass_length_16(password);
             SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-            KeySpec ks = new PBEKeySpec(password.toCharArray(), salt, 36359, 128);
+            KeySpec ks = new PBEKeySpec(pass16, salt, 61398, 128);
             SecretKey temp = f.generateSecret(ks);
             SecretKey k = new SecretKeySpec(temp.getEncoded(),"AES");
             return k;
@@ -122,12 +142,13 @@ public class KeyFactory {
         }
     }
        
-    private static byte[] fix_bad_length_key(byte[] passBytes){
+    private static char[] fix_pass_length_16(char[] pass){
         try {
             MessageDigest sha = MessageDigest.getInstance("SHA-256");
-            byte[] key = sha.digest(passBytes);
-            return Arrays.copyOf(key, 16); // use only first 128 bit
-        } catch (NoSuchAlgorithmException ex) {
+            byte[] key = sha.digest(new String(pass).getBytes("UTF-16"));
+            return new BigInteger(1, key).toString().substring(0, 16).toCharArray();
+            //return Arrays.copyOf(key, 16); // use only first 128 bit
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException ex) {
             if(Constants.DEBUG_ON){
                 Logger.getLogger(KeyFactory.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -135,7 +156,7 @@ public class KeyFactory {
         return null;        
     }
     
-    public static String generatePIN() {
+    public static char[] generatePIN() {
         SecureRandom seededSecureRandom = null;
         try {
             seededSecureRandom = SecureRandom.getInstance("SHA1PRNG", "SUN");
@@ -145,19 +166,21 @@ public class KeyFactory {
             return null;
         }
         
-        String randomPIN = "";
-        while(randomPIN.length() < Constants.PIN_LENGTH){
-            randomPIN = new BigInteger(Constants.numBytesPIN, seededSecureRandom).toString(Character.MAX_RADIX);
+        //String randomPIN = "";
+        char[] randomPIN = new char[Constants.PIN_LENGTH];
+        for(int i = 0; i < randomPIN.length; i++){
+            randomPIN[i] = (char)new BigInteger(Constants.numBytesPIN, seededSecureRandom).intValue();
         }
-        String retPIN = "";
+        
+        char[] retPIN = new char[Constants.PIN_LENGTH];
         //this makes capital letters
         for(int i = 0; i < Constants.PIN_LENGTH; i++){
-            char insertPIN = randomPIN.charAt(i);
+            char insertPIN = randomPIN[i];
             int upper = seededSecureRandom.nextInt(2);
             if(upper == 1 && !Character.isDigit(insertPIN)){
                 insertPIN = Character.toUpperCase(insertPIN);
             }
-            retPIN += insertPIN;
+            retPIN[i] = insertPIN;
         }
         return retPIN;
     }

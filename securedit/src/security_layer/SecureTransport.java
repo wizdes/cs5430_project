@@ -4,7 +4,6 @@ package security_layer;
 import application.encryption_demo.CommunicationInterface;
 import transport_layer.discovery.DiscoveryMessage;
 import application.encryption_demo.Messages.Message;
-import application.encryption_demo.Profile;
 import configuration.Constants;
 import java.io.File;
 import java.io.IOException;
@@ -25,8 +24,10 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SealedObject;
 import javax.crypto.SecretKey;
+import javax.swing.JComboBox;
 import security_layer.authentications.AuthenticationTransport;
 import security_layer.authentications.AuthenticationMessage;
+import security_layer.authentications.SRPSetupMessage;
 import transport_layer.discovery.DiscoveryResponseMessage;
 import transport_layer.discovery.DiscoveryTransport;
 import transport_layer.files.FileHandler;
@@ -55,6 +56,7 @@ public class SecureTransport implements SecureTransportInterface{
                            CommunicationInterface communication,
                            Profile profile) {               
         this.profile = profile;
+        this.profile.setSessionKeys(keys);
         this.networkTransport = networkTransport;
         this.networkTransport.setSecureTransport(this);
         this.discoveryTransport = new DiscoveryTransport(networkTransport, profile);
@@ -121,13 +123,12 @@ public class SecureTransport implements SecureTransportInterface{
             
             EncryptedAESMessage encryptedMessage;
             if (m instanceof AuthenticationMessage) {
-                Constants.log("sending EncryptedAuthenticationMessage");
+                Constants.log("sending AuthenticationMessage");
                 encryptedMessage = new EncryptedAuthenticationMessage(encryptedObject, iv, hmac);
             } else {
                 Constants.log("sending EncryptedAESMessage");
                 encryptedMessage = new EncryptedAESMessage(encryptedObject, iv, hmac);
             }
-            
             return networkTransport.send(destination, docID, encryptedMessage);
         } catch (IOException | IllegalBlockSizeException ex) {
             if(Constants.DEBUG_ON){
@@ -187,9 +188,12 @@ public class SecureTransport implements SecureTransportInterface{
             
             if (encryptedMessage instanceof EncryptedAuthenticationMessage) {
                 Constants.log("Received EncryptedAuthenticationMessage");
-                String PIN = this.authentication.getPIN(sourceOfMessage, docID);
-                secretKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN);
-                HMACKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN + "HMAC");
+                char[] PIN = this.authentication.getPIN(sourceOfMessage, docID);
+                secretKey = KeyFactory.generateSymmetricKey(PIN);
+                char[] hmacPIN = new char[PIN.length + 4];
+                System.arraycopy(PIN, 0, hmacPIN, 0, PIN.length);
+                System.arraycopy(new char[]{'H', 'M', 'A', 'C'}, 0, hmacPIN, PIN.length, 4);
+                HMACKey = KeyFactory.generateSymmetricKey(hmacPIN);
             } else {
                 Constants.log("Received other");
                 HMACKey = keys.getHmacKey(sourceOfMessage, docID);
@@ -218,24 +222,26 @@ public class SecureTransport implements SecureTransportInterface{
                 Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + profile.username + "] Processing decrypted " + ApplicationMessage.class.getName() + " from " + sourceOfMessage + ".");
             }
             
-            if (decryptedObj instanceof AuthenticationMessage) {
-                Constants.log("instanceof AuthenticationMessage");
-                AuthenticationMessage msg = (AuthenticationMessage)decryptedObj;
-                this.authentication.processAuthenticationMessage(sourceOfMessage, docID, msg);
-            } else {
-                Constants.log("instanceof ApplicationMessage");
-                ApplicationMessage appMessage = (ApplicationMessage) decryptedObj;
-                Long currentCounter = lastReceived.get(sourceOfMessage);
-                if (currentCounter == null || appMessage.counter > currentCounter) {
+            ApplicationMessage appMessage = (ApplicationMessage) decryptedObj;
+            Long currentCounter = lastReceived.get(sourceOfMessage);
+            if (currentCounter == null || appMessage.counter > currentCounter) {
+                if (appMessage.message instanceof AuthenticationMessage) {
+                    Constants.log("instanceof AuthenticationMessage");
+                    AuthenticationMessage msg = (AuthenticationMessage) appMessage.message;
+                    this.authentication.processAuthenticationMessage(sourceOfMessage, docID, msg);
+                    success = true;
+                } else if (appMessage.message instanceof Message) {
+                    Constants.log("instanceof ApplicationMessage");
                     communication.depositMessage(appMessage.message);
                     success = true;
-                    lastReceived.put(sourceOfMessage, appMessage.counter);
-                } else {
-                    if (Constants.DEBUG_ON) {
-                        Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "] Invalid counter on " + ApplicationMessage.class.getName() + " from " + sourceOfMessage + ".");
-                    }
-                }   
+                }
+                lastReceived.put(sourceOfMessage, appMessage.counter);
+            } else {
+                if (Constants.DEBUG_ON) {
+                    Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "] Invalid counter on " + ApplicationMessage.class.getName() + " from " + sourceOfMessage + ".");
+                }
             }
+            
         } catch (IOException | ClassNotFoundException | NoSuchAlgorithmException | IllegalBlockSizeException | BadPaddingException ex) {
             if (Constants.DEBUG_ON) {
                 Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "]", ex);
@@ -280,7 +286,7 @@ public class SecureTransport implements SecureTransportInterface{
 //    }
     
     @Override
-    public boolean writeEncryptedFile(String filename, String password, Message contents) {
+    public boolean writeEncryptedFile(String filename, char[] password, Message contents) {
         try {
             //Encrypt file with personal key
             byte[] iv = CipherFactory.generateRandomIV();
@@ -307,7 +313,7 @@ public class SecureTransport implements SecureTransportInterface{
     }
 
     @Override
-    public Message readEncryptedFile(String filename, String password) {
+    public Message readEncryptedFile(String filename, char[] password) {
         if (!new File(filename).exists()) {
             return null;
         }
@@ -395,8 +401,8 @@ public class SecureTransport implements SecureTransportInterface{
 //            return false;
 //        }
 //        
-//        SecretKey pinKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN);
-//        SecretKey HMACKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN + "HMAC");
+//        SecretKey pinKey = KeyFactory.generateSymmetricKey(PIN);
+//        SecretKey HMACKey = KeyFactory.generateSymmetricKey(PIN + "HMAC");
 //        Profile.keys.addSymmetricKey(ownerID, pinKey);
 //        Profile.keys.addHMACKey(ownerID, HMACKey);
 //        
@@ -418,7 +424,7 @@ public class SecureTransport implements SecureTransportInterface{
 //            return false;
 //        }
 //    }
-
+    
     @Override
     public boolean sendPlainTextMessage(String destination, Message m) {
         if(Constants.DEBUG_ON){

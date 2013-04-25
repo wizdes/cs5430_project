@@ -6,7 +6,7 @@ package application.encryption_demo.forms;
 
 import application.encryption_demo.DiscoveredPeers;
 import application.encryption_demo.EncryptionDemoFunctionality;
-import application.encryption_demo.Profile;
+import security_layer.Profile;
 import document.NetworkDocument;
 import java.awt.Component;
 import java.io.File;

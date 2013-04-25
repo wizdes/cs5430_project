@@ -21,14 +21,14 @@ public interface CommunicationInterface {
 //    public boolean broadcastMessage(Message m);
 //    public boolean authenticateMachine(String machineIdent);
 //    public boolean authenticateHuman(String machineIdent);
-    public boolean authenticate(String machineIdent, String docID, String password);
-    public boolean initializeSRPAuthentication(String serverID, String docID, String password, String PIN);    
+    public boolean authenticate(String machineIdent, String docID, char[] password);
+    public boolean initializeSRPAuthentication(String serverID, String docID, char[] password, char[] PIN);    
     public Collection<Message> waitForMessages();
     
     public void depositMessage(Message m) throws NoSuchAlgorithmException;
     
-    public boolean writeEncryptedFile(String filename, String password, String contents);
-    public String readEncryptedFile(String filename, String password);
+    public boolean writeEncryptedFile(String filename, char[] password, String contents);
+    public String readEncryptedFile(String filename, char[] password);
     public String readFile(String filename);
     
     public void shutdown();
@@ -39,5 +39,5 @@ public interface CommunicationInterface {
 //    public boolean updatePin(String ID, String PIN);
 //    public String getPIN(String ID);
 //    public void displayPIN(String ID, String PIN);
-    public String generatePIN(String userID, String docID);
+    public char[] generatePIN(String userID, String docID);
 }

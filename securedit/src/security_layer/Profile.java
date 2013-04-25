@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package application.encryption_demo;
+package security_layer;
 
 import java.util.ArrayList;
 
@@ -15,10 +15,13 @@ public class Profile {
     public String host;
     public int port;
     public transient ArrayList<String> documentsOpenForDiscovery = new ArrayList<>();
-    
+    public SessionKeys keys;
     public Profile(String username, String host, int port) {
         this.username = username;
         this.host = host;
         this.port = port;
+    }
+    public void setSessionKeys(SessionKeys keys){
+        this.keys = keys;
     }
 }

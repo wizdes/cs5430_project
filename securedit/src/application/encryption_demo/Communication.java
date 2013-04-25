@@ -5,6 +5,7 @@
 
 package application.encryption_demo;
 
+import security_layer.Profile;
 import application.encryption_demo.Messages.Message;
 import application.encryption_demo.Messages.StringMessage;
 import configuration.Constants;
@@ -135,12 +136,12 @@ public class Communication implements CommunicationInterface {
 //    }
 
     @Override
-    public boolean writeEncryptedFile(String filename, String contents, String password) {
+    public boolean writeEncryptedFile(String filename, char[] password, String contents) {
         return secureTransport.writeEncryptedFile(filename, password, new StringMessage(contents));
     }
 
     @Override
-    public String readEncryptedFile(String filename, String password) {
+    public String readEncryptedFile(String filename, char[] password) {
         return ((StringMessage)secureTransport.readEncryptedFile(filename, password)).contents;
     }
 
@@ -188,17 +189,17 @@ public class Communication implements CommunicationInterface {
 //    }
 
     @Override
-    public boolean authenticate(String machineIdent, String docID, String password) {
+    public boolean authenticate(String machineIdent, String docID, char[] password) {
         return this.authenticationTransport.authenticate(machineIdent, docID, password);
     }
     
     @Override
-    public boolean initializeSRPAuthentication(String serverID, String docID, String password, String PIN) {
+    public boolean initializeSRPAuthentication(String serverID, String docID, char[] password, char[] PIN) {
         return this.authenticationTransport.initializeSRPAuthentication(serverID, docID, password, PIN);
     }
     
     @Override
-    public String generatePIN(String userID, String docID) {
+    public char[] generatePIN(String userID, String docID) {
         return this.authenticationTransport.generatePIN(userID, docID);
     }
 }
