@@ -9,12 +9,16 @@ import application.encryption_demo.CustomDocument;
 import application.encryption_demo.EncryptionDemoFunctionality;
 import document.NetworkDocumentInterface;
 import java.awt.Color;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -181,6 +185,7 @@ public class EditPanel extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jFileChooser1 = new javax.swing.JFileChooser();
         jScrollPane2 = new javax.swing.JScrollPane();
         PeersList = new javax.swing.JList();
         PeersLabel = new javax.swing.JLabel();
@@ -202,6 +207,12 @@ public class EditPanel extends javax.swing.JPanel {
         DisconnectButton = new javax.swing.JButton();
         ownerWriteLevel = new javax.swing.JComboBox();
         generatePINButton = new javax.swing.JButton();
+
+        jFileChooser1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jFileChooser1ActionPerformed(evt);
+            }
+        });
 
         setPreferredSize(new java.awt.Dimension(825, 450));
 
@@ -329,7 +340,7 @@ public class EditPanel extends javax.swing.JPanel {
                                 .addComponent(changeUserLevel)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(setLevelButton)))
-                        .addGap(0, 20, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -429,7 +440,19 @@ public class EditPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_openNormalFileActionPerformed
 
     private void openNormalFileMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_openNormalFileMousePressed
-        // TODO add your handling code here:
+        jFileChooser1.setVisible(true);
+        int returnVal = jFileChooser1.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            try {
+                File file = jFileChooser1.getSelectedFile();
+                documentArea.removeAll();
+                documentArea.read(new FileReader( file.getAbsolutePath() ), null);
+            } catch (IOException ex) {
+                Logger.getLogger(EditPanel.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else {
+            System.out.println("File access cancelled by user.");
+        }
     }//GEN-LAST:event_openNormalFileMousePressed
 
     private void generatePINButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_generatePINButtonActionPerformed
@@ -441,6 +464,11 @@ public class EditPanel extends javax.swing.JPanel {
         System.out.println("PIN: " + new String(pin));
         new PINDisplayDialog(username, pin).setVisible(true);
     }//GEN-LAST:event_generatePINButtonActionPerformed
+
+    private void jFileChooser1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFileChooser1ActionPerformed
+        // TODO add your handling code here:
+        System.out.println("File Selected");
+    }//GEN-LAST:event_jFileChooser1ActionPerformed
 
     public void setColors(int begin, int end, int colorLevel){
         cd.setColors(begin, end, colors.get(colorLevel), true);
@@ -540,6 +568,7 @@ public class EditPanel extends javax.swing.JPanel {
     private javax.swing.JTextPane documentArea;
     private javax.swing.JTextField endCursor;
     private javax.swing.JButton generatePINButton;
+    private javax.swing.JFileChooser jFileChooser1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JList jList1;
     private javax.swing.JScrollPane jScrollPane1;
