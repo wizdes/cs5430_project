@@ -10,15 +10,19 @@ import application.encryption_demo.forms.EditPanel;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import security_layer.authentications.ServerAuthenticationPersistantState;
 
 /**
  *
  */
-public class NetworkDocument extends AuthorizationDocument implements NetworkDocumentInterface {
+public class NetworkDocument implements NetworkDocumentInterface {
     
     private CommunicationInterface communication;
     private String collaboratorId;
     private EditPanel curDoc;
+    private AuthorizationDocument authDocument;
+    private Document document;
+    private String ownerId;
     
     public static boolean autoApprove = false;
     public static boolean autoDeny = false;
@@ -27,20 +31,22 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
                            String collaboratorId, 
                            String documentOwnerId, 
                            String documentName) {
-        super(documentOwnerId, documentName);
+        this.authDocument = new AuthorizationDocument(documentOwnerId, documentName);
+        this.document = this.authDocument.getDocument();
         communication = ci;
+        this.ownerId = documentOwnerId;
         this.collaboratorId = collaboratorId;
     }
     
     @Override
     public void addUserToLevel(String userId, int levelIdentifier){
-        if (curDoc != null && !peers.containsKey(userId)) {
+        if (curDoc != null && !authDocument.peers.containsKey(userId)) {
             curDoc.addUser(userId, levelIdentifier);
         }
         if (curDoc != null) {
             curDoc.reviseUser(userId, levelIdentifier);
         }
-        super.addUserToLevel(userId, levelIdentifier);
+        authDocument.addUserToLevel(userId, levelIdentifier);
         
         if (!userId.equals(this.collaboratorId)) {
             UpdateLevel ul = new UpdateLevel(userId, levelIdentifier);
@@ -51,17 +57,17 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
     @Override
     public void requestChangeLevel(int level) {
         if (this.isOwner()) {
-            super.addUserToLevel(this.getOwnerID(), level);
+            authDocument.addUserToLevel(ownerId, level);
         } else {
             RequestLevel rl = new RequestLevel(level);
-            sendCommandMessage(this.getOwnerID(), rl);
+            sendCommandMessage(ownerId, rl);
         }
     }
     
     @Override
     public boolean assignLevel(int levelIdentifier, String leftIdentifier, String rightIdentifier) {
         // remove the nodes and save up the values
-        DocumentValue v = this.valuesMap.get(leftIdentifier);
+        DocumentValue v = document.valuesMap.get(leftIdentifier);
         if (v == null) {
             return false;
         }
@@ -89,8 +95,8 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
     
     @Override
     public boolean assignLevel(int levelIdentifier, int leftOffset, int rightOffset) {
-        String leftIdent = this.getIdentifierAtIndex(leftOffset);
-        String rightIdent = this.getIdentifierAtIndex(rightOffset);
+        String leftIdent = document.getIdentifierAtIndex(leftOffset);
+        String rightIdent = document.getIdentifierAtIndex(rightOffset);
         if (curDoc != null) {
             curDoc.setColors(leftOffset, rightOffset, levelIdentifier);
         }
@@ -99,7 +105,7 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
     
     @Override
     public boolean isOwner() {
-        return this.getOwnerID().equals(collaboratorId);
+        return document.getOwnerID().equals(collaboratorId);
     }
     
     @Override
@@ -110,19 +116,19 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
     @Override
     public void requestInsert(int level, String left, String right, String text) {
         if (isOwner()) {
-            this.addUserToLevel(this.getOwnerID(), level);
-            requestInsertFor(this.getOwnerID(), level, left, right, text);
+            authDocument.addUserToLevel(document.getOwnerID(), level);
+            requestInsertFor(document.getOwnerID(), level, left, right, text);
         } else {
             DoInsert di = new DoInsert(left, right, level, text);
-            this.sendCommandMessage(this.getOwnerID(), di);
+            this.sendCommandMessage(document.getOwnerID(), di);
         }
     }
 
     private void requestInsertFor(String userId, int level, String left, String right, String text) {
-        Collection<CommandMessage> updates = this.applyInsert(userId, level, left, right, text);
+        Collection<CommandMessage> updates = authDocument.applyInsert(userId, level, left, right, text);
         if (updates != null) {
             for (CommandMessage m : updates) {
-                communication.sendMessage(m.to, this.getName(), m);
+                communication.sendMessage(m.to, document.getName(), m);
             }
         }
     }
@@ -130,10 +136,10 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
     @Override
     public void requestRemove(Set<String> identsToRemove) {
         if (isOwner()) {
-            requestRemoveFor(this.getOwnerID(), identsToRemove);
+            requestRemoveFor(document.getOwnerID(), identsToRemove);
         } else {
             DoRemove dr = new DoRemove(identsToRemove);
-            this.sendCommandMessage(this.getOwnerID(), dr);
+            this.sendCommandMessage(document.getOwnerID(), dr);
         }        
     }
     
@@ -141,16 +147,16 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
     public void requestRemove(int left, int right) {
         Set<String> toRemove = new HashSet<>();
         for (int i = left; i <= right; i++) {
-            toRemove.add(getIdentifierAtIndex(i));
+            toRemove.add(document.getIdentifierAtIndex(i));
         }
         requestRemove(toRemove);
     }    
         
     private void requestRemoveFor(String userId, Set<String> toRemove) {
-        Collection<CommandMessage> updates = this.applyRemove(userId, toRemove);
+        Collection<CommandMessage> updates = authDocument.applyRemove(userId, toRemove);
         if (updates != null) {
             for (CommandMessage m : updates) {
-                communication.sendMessage(m.to, this.getName(), m);
+                communication.sendMessage(m.to, document.getName(), m);
             }
         }        
     }
@@ -173,13 +179,13 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
                              di.rightIdentifier, 
                              di.text);
             if (curDoc != null) {
-                curDoc.manualInsert(this.getOffsetForIdentifier(di.leftIdentifier) + 1, di.text, null);
+                curDoc.manualInsert(document.getOffsetForIdentifier(di.leftIdentifier) + 1, di.text, null);
             }
         } else if (m.command instanceof DoRemove) {
             DoRemove dr = (DoRemove)m.command;
             int smallestOffset = -1;
             for(String s:dr.identifiers){
-                int candidate = this.getOffsetForIdentifier(s);
+                int candidate = document.getOffsetForIdentifier(s);
                 if(smallestOffset == -1 || smallestOffset > candidate){
                     smallestOffset = candidate;
                 }
@@ -204,29 +210,29 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
     private void processMessageClient(CommandMessage m) {
         if (m.command instanceof DoInsert) {
             DoInsert di = (DoInsert)m.command;
-            this.doInsert(di.levelIdentifier, 
-                          di.leftIdentifier, 
-                          di.rightIdentifier, 
-                          di.text);
+            document.doInsert(di.levelIdentifier, 
+                              di.leftIdentifier, 
+                              di.rightIdentifier, 
+                              di.text);
             if (curDoc != null) {
-                curDoc.manualInsert(this.getOffsetForIdentifier(di.leftIdentifier) + 1, di.text, null);
+                curDoc.manualInsert(document.getOffsetForIdentifier(di.leftIdentifier) + 1, di.text, null);
             }
         }  else if (m.command instanceof DoRemove) {
             DoRemove dr = (DoRemove)m.command;
             int smallestOffset = -1;
             for(String s:dr.identifiers){
-                int candidate = this.getOffsetForIdentifier(s);
+                int candidate = document.getOffsetForIdentifier(s);
                 if(smallestOffset == -1 || smallestOffset > candidate){
                     smallestOffset = candidate;
                 }
             }
-            this.doRemove(dr.identifiers);
+            document.doRemove(dr.identifiers);
             if (curDoc != null) {
                 curDoc.manualRemove(smallestOffset, dr.identifiers.size());
             }
         } else if (m.command instanceof UpdateLevel) {
             UpdateLevel update = (UpdateLevel)m.command;
-            super.addUserToLevel(update.getUserId(), update.getLevel());
+            authDocument.addUserToLevel(update.getUserId(), update.getLevel());
             if (curDoc != null) {
                 curDoc.addUser(update.getUserId(), update.getLevel());
             }            
@@ -235,20 +241,65 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
 
     @Override
     public void requestInsert(int level, int left, int right, String text) {
-        String leftIdent = this.getIdentifierAtIndex(left);
-        String rightIdent = this.getIdentifierAtIndex(right);
+        String leftIdent = document.getIdentifierAtIndex(left);
+        String rightIdent = document.getIdentifierAtIndex(right);
         requestInsert(level, leftIdent, rightIdent, text);
     }
     
     private void sendCommandMessage(String userId, DocumentCommand dc) {
-        CommandMessage cm = new CommandMessage(userId, this.collaboratorId, this.getName(), dc);
+        CommandMessage cm = new CommandMessage(userId, this.collaboratorId, document.getName(), dc);
         System.out.println(cm);
-        this.communication.sendMessage(userId, this.getName(), cm);
+        this.communication.sendMessage(userId, document.getName(), cm);
     }
 
     @Override
     public String getUserID() {
         return collaboratorId;
+    }
+
+    @Override
+    public String getIdentifierAtIndex(int index) {
+        return this.document.getIdentifierAtIndex(index);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return this.document.isEmpty();
+    }
+
+    @Override
+    public int getLevelAtIndex(int index) {
+        return this.document.getLevelAtIndex(index);
+    }
+
+    @Override
+    public String getName() {
+        return this.document.getName();
+    }
+
+    @Override
+    public String getOwnerID() {
+        return this.document.getOwnerID();
+    }
+
+    @Override
+    public String getString() {
+        return this.document.getString();
+    }
+    
+    @Override
+    public AuthorizationDocumentInterface getAuthDocument() {
+        return this.authDocument;
+    }
+
+    @Override
+    public ServerAuthenticationPersistantState getServerAuthenticationPersistantState() {
+        return this.document.getServerAuthenticationPersistantState();
+    }
+
+    @Override
+    public int getLevelForUser(String userId) {
+        return this.authDocument.getLevelForUser(userId);
     }
     
 }

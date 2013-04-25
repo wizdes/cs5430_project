@@ -6,12 +6,13 @@ package document;
 
 import application.encryption_demo.forms.EditPanel;
 import java.util.Set;
+import security_layer.authentications.ServerAuthenticationPersistantState;
 
 /**
  *
  * @author goggin
  */
-public interface NetworkDocumentInterface extends AuthorizationDocumentInterface {
+public interface NetworkDocumentInterface {
     
     /* Called by the GUI when the user inserts.
      * If this document is owned by the current GUI
@@ -37,6 +38,21 @@ public interface NetworkDocumentInterface extends AuthorizationDocumentInterface
     public void giveGUI(EditPanel cd);
     
     public String getUserID();
+    
+    public void addUserToLevel(String userId, int levelIdentifier);
+    public boolean assignLevel(int levelIdentifier, String leftIdentifier, String rightIdentifier);
+    public boolean assignLevel(int levelIdentifier, int leftOffset, int rightOffset);
+    
+    /* Document proxies */
+    public String getIdentifierAtIndex(int index);
+    public boolean isEmpty();
+    public int getLevelAtIndex(int index);
+    public String getName();
+    public String getOwnerID();
+    public String getString();
+    public int getLevelForUser(String userId);
+    public ServerAuthenticationPersistantState getServerAuthenticationPersistantState();
+    public AuthorizationDocumentInterface getAuthDocument();
     
     
 }

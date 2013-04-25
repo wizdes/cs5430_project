@@ -293,7 +293,8 @@ public class NetworkDocumentTest {
         assertEquals(3, client2.getLevelForUser(p2Ident));
         assertEquals(4, client3.getLevelForUser(p3Ident));
     }
-
+    
+    
 
     public class DocumentCommListener extends Thread {
         private CommunicationInterface comm;

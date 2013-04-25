@@ -11,7 +11,7 @@ import java.util.Set;
  *
  * @author goggin
  */
-public interface AuthorizationDocumentInterface extends DocumentInterface {
+public interface AuthorizationDocumentInterface {
     
     /* 
      * If the user doesn't exist yet, add them to the collection of peers coll
@@ -45,4 +45,5 @@ public interface AuthorizationDocumentInterface extends DocumentInterface {
      */
     public Collection<CommandMessage> applyRemove(String userId, Set<String> identifiers);
     
+    public Document getDocument();
 }

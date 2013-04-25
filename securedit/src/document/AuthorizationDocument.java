@@ -16,22 +16,23 @@ import java.util.Set;
 /**
  *
  */
-public class AuthorizationDocument extends Document implements AuthorizationDocumentInterface {
+public class AuthorizationDocument implements AuthorizationDocumentInterface {
     
     protected Map<String, Integer> peers = new HashMap<>();
+    private Document document;
     
     public AuthorizationDocument() {
         this("OwnerId", "Document");
     }
     
     public AuthorizationDocument(String ownerId, String name) {
-        super(ownerId, name);
+        this.document = new Document(ownerId, name);
     }
     
     @Override
     public void addUserToLevel(String userId, int level) {
         peers.put(userId, level);
-        addLevel(level);
+        this.document.addLevel(level);
     }
     
     @Override
@@ -50,13 +51,13 @@ public class AuthorizationDocument extends Document implements AuthorizationDocu
             return null;
         }
         
-        doInsert(level, leftIdentifier, rightIdentifier, text);
+        this.document.doInsert(level, leftIdentifier, rightIdentifier, text);
         
         Collection<CommandMessage> updates = new LinkedList<>();
         
         for(Entry<String, Integer> entry : peers.entrySet()) {
             String uid = entry.getKey();
-            if (uid.equals(this.getOwnerID())) {
+            if (uid.equals(this.document.getOwnerID())) {
                 continue;
             }
             Integer l = entry.getValue();
@@ -67,7 +68,7 @@ public class AuthorizationDocument extends Document implements AuthorizationDocu
                 String hidden = new String(new char[text.length()]).replace('\0', 'X');
                 di = new DoInsert(leftIdentifier, rightIdentifier, level, hidden);
             }
-            updates.add(new CommandMessage(uid, this.getOwnerID(), getName(), di));
+            updates.add(new CommandMessage(uid, this.document.getOwnerID(), this.document.getName(), di));
         }
         
         return updates;
@@ -84,9 +85,9 @@ public class AuthorizationDocument extends Document implements AuthorizationDocu
         Set<String> toRemove = new HashSet<>();
         
         for (String id : identifiers) {
-            int level = getLevelAtIdentifier(id);
-            if (level > -1 && (canAccess(userId, level) || this.getOwnerID().equals(userId))) {
-                doRemove(id);
+            int level = this.document.getLevelAtIdentifier(id);
+            if (level > -1 && (canAccess(userId, level) || this.document.getOwnerID().equals(userId))) {
+                this.document.doRemove(id);
                 toRemove.add(id);
             }
         }
@@ -97,13 +98,17 @@ public class AuthorizationDocument extends Document implements AuthorizationDocu
         
         for(Entry<String, Integer> entry : peers.entrySet()) {
             String uid = entry.getKey();
-            if (uid.equals(this.getOwnerID())) {
+            if (uid.equals(this.document.getOwnerID())) {
                 continue;
             }
             DoRemove dr = new DoRemove(toRemove);
-            updates.add(new CommandMessage(uid, this.getOwnerID(), getName(), dr));
+            updates.add(new CommandMessage(uid, this.document.getOwnerID(), this.document.getName(), dr));
         }
         
         return updates;
+    }
+    
+    public Document getDocument() {
+        return document;
     }
 }

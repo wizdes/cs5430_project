@@ -24,7 +24,7 @@ public class Document implements DocumentInterface, Message {
     protected List<Integer> levels = new LinkedList<>();
     protected DocumentValue bofDV = new DocumentValue(BOF, "", -1);
     protected DocumentValue eofDV = new DocumentValue(EOF, "", -1);
-    protected Map<String, DocumentValue> valuesMap = new HashMap<>();
+    Map<String, DocumentValue> valuesMap = new HashMap<>();
     private long uid = 0L;
     private String name;
     private String ownerId;

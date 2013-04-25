@@ -14,7 +14,7 @@ import security_layer.SecureTransport;
  * @author Patrick
  */
 public class Constants {
-    public static final boolean DEBUG_ON = true;
+    public static final boolean DEBUG_ON = false;
     public static final String passwordCharacterRegex = ".*[^a-zA-Z\\s0-9].*";
     public static final int MIN_PASSWORD_LENGTH = 12;
     
