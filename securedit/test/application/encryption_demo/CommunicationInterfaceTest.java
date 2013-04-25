@@ -53,9 +53,9 @@ public class CommunicationInterfaceTest {
 
     @After
     public void tearDown() throws Exception {
-//        p1Communicator.shutdown();
-//        p2Communicator.shutdown();
-//        p3Communicator.shutdown();
+        p1Communicator.shutdown();
+        p2Communicator.shutdown();
+        p3Communicator.shutdown();
     }
     
     private void pause(int millis) {
@@ -97,12 +97,10 @@ public class CommunicationInterfaceTest {
         int iterations = 100;
         ConcurrentMap <String, NetworkDocumentInterface> documentMap = new ConcurrentHashMap<>();
         
-        
         p1Communicator = new Communication(p1, documentMap);
         p2Communicator = new Communication(p2, null);
         p3Communicator = new Communication(p3, null);
-        
-        
+                
         NetworkDocument nd = new NetworkDocument(p1Communicator, p1Ident, p1Ident, "document");
         documentMap.put("document", nd);
         
@@ -115,15 +113,7 @@ public class CommunicationInterfaceTest {
         p2Communicator.initializeSRPAuthentication(p1Ident, documents.get(0), password_2, PIN);
         assertTrue(p2Communicator.authenticate(p1Ident, documents.get(0), password_2));
         
-//        p1Communicator.authenticateHuman(p2Ident);
-//        pause(250);
-//        String pin = p2Communicator.getPIN(p1Ident);
-//        assertTrue(p1Communicator.updatePin(p2Ident, pin));
-//        p1Communicator.updateHumanAuthStatus(p2Ident, true);
-//        assertTrue(p1Communicator.authenticateMachine(p2Ident));
-//
         testSendMessagesFrom(p1Communicator, p2Communicator, p2Ident, documents.get(0), iterations);    //BOOOOMMMMMMMM
-        
         testSendMessagesFrom(p2Communicator, p1Communicator, p1Ident, documents.get(0), iterations);
 //        
 //        // Now start with fresh communicators, and we should be able to start
@@ -172,8 +162,8 @@ public class CommunicationInterfaceTest {
 //        assertTrue(p1Communicator.authenticateMachine(p2Ident));
     }
     
-    @Test
-    public void testMachineAuthentication() {
+//    @Test
+//    public void testMachineAuthentication() {
 //        p1.addPublicKeysFrom(p2); p1.addPublicKeysFrom(p3); p1.save(password_1);
 //        p2.addPublicKeysFrom(p1); p2.addPublicKeysFrom(p3); p2.save(password_2);
 //        p3.addPublicKeysFrom(p1); p3.addPublicKeysFrom(p2); p3.save(password_3);
@@ -258,6 +248,6 @@ public class CommunicationInterfaceTest {
 //            }
 //        }        
 //        assertTrue(received == iterations);        
-    }
+//    }
     
 }

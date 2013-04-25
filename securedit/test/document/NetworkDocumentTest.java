@@ -9,6 +9,8 @@ import application.encryption_demo.CommunicationInterface;
 import application.encryption_demo.CommunicationInterfaceTest;
 import application.encryption_demo.Messages.Message;
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.After;
@@ -30,9 +32,9 @@ public class NetworkDocumentTest {
     CommunicationInterface p2Communicator;
     CommunicationInterface p3Communicator;
     
-    static String password_1 = "pass0000pass0000";
-    static String password_2 = "pass1111pass1111";
-    static String password_3 = "pass2222pass2222";
+    static char[] password_1 = "pass00a000".toCharArray();          //less than 16
+    static char[] password_2 = "pass1111passsfdasfa1111".toCharArray(); //more than 16
+    static char[] password_3 = "pass2222pass2222".toCharArray();        //exactly 16
     
     static int p1Port = 4000;
     static int p2Port = 4001;
@@ -52,29 +54,40 @@ public class NetworkDocumentTest {
     
     @Before
     public void setUp() throws Exception {
-        p1 = Profile.createProfile(p1Ident, password_1, p1Port, "localhost");
-        p2 = Profile.createProfile(p2Ident, password_2, p2Port, "localhost");
-        p3 = Profile.createProfile(p3Ident, password_3, p3Port, "localhost");
-//        p3 = Profile.readProfile(p3Ident, password_3);
+        p1 = new Profile(p1Ident, "localhost", p1Port);
+        p2 = new Profile(p2Ident, "localhost", p2Port);
+        p3 = new Profile(p3Ident, "localhost", p3Port);
         
-        p1.addPublicKeysFrom(p2); p1.addPublicKeysFrom(p3); p1.save(password_1);
-        p2.addPublicKeysFrom(p1); p2.addPublicKeysFrom(p3); p2.save(password_2);
-        p3.addPublicKeysFrom(p1); p3.addPublicKeysFrom(p2); p3.save(password_3);
+        ConcurrentMap <String, NetworkDocumentInterface> documentMap1 = new ConcurrentHashMap<>();
+        ConcurrentMap <String, NetworkDocumentInterface> documentMap2 = new ConcurrentHashMap<>();
+        ConcurrentMap <String, NetworkDocumentInterface> documentMap3 = new ConcurrentHashMap<>();
         
-        p1Communicator = new Communication(p1, password_1);
-        p2Communicator = new Communication(p2, password_2);
-        p3Communicator = new Communication(p3, password_3);  
+        p1Communicator = new Communication(p1, documentMap1);
+        p2Communicator = new Communication(p2, documentMap2);
+        p3Communicator = new Communication(p3, documentMap3);
+                
+        NetworkDocument nd1 = new NetworkDocument(p1Communicator, p1Ident, p1Ident, "document");
+        documentMap1.put("document", nd1);
+        NetworkDocument nd2 = new NetworkDocument(p1Communicator, p2Ident, p1Ident, "document");
+        documentMap2.put("document", nd2);
+        NetworkDocument nd3 = new NetworkDocument(p1Communicator, p3Ident, p1Ident, "document");
+        documentMap3.put("document", nd3);
         
-        ArrayList<String> documents = new ArrayList<>();
-        p1Communicator.updatePeers(p2Ident, "localhost", p2Port, documents, false);
-        p1Communicator.updatePeers(p3Ident, "localhost", p3Port, documents, false);
+        ArrayList<String> documents = new ArrayList(documentMap1.keySet());
+        p1Communicator.updatePeers(p2Ident, "localhost", p2Port, new ArrayList<String>(), false);
+        p1Communicator.updatePeers(p3Ident, "localhost", p3Port, new ArrayList<String>(), false);
         p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents, false);
-        p2Communicator.updatePeers(p3Ident, "localhost", p3Port, documents, false);
+        p2Communicator.updatePeers(p3Ident, "localhost", p3Port, new ArrayList<String>(), false);
         p3Communicator.updatePeers(p1Ident, "localhost", p1Port, documents, false);
-        p3Communicator.updatePeers(p2Ident, "localhost", p2Port, documents, false);    
+        p3Communicator.updatePeers(p2Ident, "localhost", p2Port, new ArrayList<String>(), false);    
         
-        assertTrue(p1Communicator.authenticateMachine(p2Ident));
-        assertTrue(p1Communicator.authenticateMachine(p3Ident));  
+        char[] PIN2 = p1Communicator.generatePIN(p2Ident, documents.get(0));
+        p2Communicator.initializeSRPAuthentication(p1Ident, documents.get(0), password_2, PIN2);
+        assertTrue(p2Communicator.authenticate(p1Ident, documents.get(0), password_2));
+
+        char[] PIN3 = p1Communicator.generatePIN(p3Ident, documents.get(0));
+        p3Communicator.initializeSRPAuthentication(p1Ident, documents.get(0), password_3, PIN3);
+        assertTrue(p3Communicator.authenticate(p1Ident, documents.get(0), password_3));
         
         owner = new NetworkDocument(p1Communicator, p1Ident, p1Ident, "document");
         client2 = new NetworkDocument(p2Communicator, p2Ident, p1Ident, "document");
@@ -102,10 +115,6 @@ public class NetworkDocumentTest {
         } catch (InterruptedException ex) {
             Logger.getLogger(CommunicationInterfaceTest.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-    
-    public NetworkDocumentTest() {
-        
     }
 
     @Test   
@@ -280,7 +289,7 @@ public class NetworkDocumentTest {
         client2.requestChangeLevel(5);
         client3.requestChangeLevel(6);
         pause(100);
-
+  
         assertEquals(3, client2.getLevelForUser(p2Ident));
         assertEquals(4, client3.getLevelForUser(p3Ident));
     }
