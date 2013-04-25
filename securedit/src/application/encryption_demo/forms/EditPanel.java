@@ -132,6 +132,7 @@ public class EditPanel extends javax.swing.JPanel {
         
         for (String l : labels) {
             LevelSelect.addItem(l);
+            ownerWriteLevel.addItem(l);
         }
         
         String[] elements = new String[labels.size()];
@@ -154,6 +155,8 @@ public class EditPanel extends javax.swing.JPanel {
         peerModel.addElement(nd.getOwnerID() + " - Document Owner");
         displayedUsername.add(nd.getOwnerID());
         if(nd.isOwner() == false){
+            peerModel.addElement(nd.getUserID() + " - " + labels.get(cd.insertLevel));
+            displayedUsername.add(nd.getUserID());
             beginCursor.setEnabled(false);
             endCursor.setEnabled(false);
             LevelSelect.setEnabled(false);
@@ -188,8 +191,9 @@ public class EditPanel extends javax.swing.JPanel {
         changeUserLevel = new javax.swing.JButton();
         openFile = new javax.swing.JButton();
         openNormalFile = new javax.swing.JButton();
-        saveRegFile = new javax.swing.JButton();
         saveEncryptedFile = new javax.swing.JButton();
+        DisconnectButton = new javax.swing.JButton();
+        ownerWriteLevel = new javax.swing.JComboBox();
 
         setPreferredSize(new java.awt.Dimension(825, 450));
 
@@ -248,10 +252,26 @@ public class EditPanel extends javax.swing.JPanel {
         openFile.setText("Open Encrypted File");
 
         openNormalFile.setText("Open Normal File");
-
-        saveRegFile.setText("Save Unencrypted File");
+        openNormalFile.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                openNormalFileMousePressed(evt);
+            }
+        });
+        openNormalFile.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                openNormalFileActionPerformed(evt);
+            }
+        });
 
         saveEncryptedFile.setText("Save Encrypted File");
+
+        DisconnectButton.setText("Disconnect");
+
+        ownerWriteLevel.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                ownerWriteLevelItemStateChanged(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -265,13 +285,15 @@ public class EditPanel extends javax.swing.JPanel {
                         .addComponent(openFile)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(openNormalFile)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(saveRegFile)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(153, 153, 153)
                         .addComponent(saveEncryptedFile)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(39, 39, 39)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(ownerWriteLevel, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(DisconnectButton))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(beginCursor, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -280,14 +302,17 @@ public class EditPanel extends javax.swing.JPanel {
                         .addComponent(endCursor, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(LevelSelect, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(PeersLabel)
-                    .addComponent(cursorInfo)
                     .addComponent(LevelList, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(LevelLabel)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(changeUserLevel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(setLevelButton)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(PeersLabel)
+                            .addComponent(cursorInfo)
+                            .addComponent(LevelLabel)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(changeUserLevel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(setLevelButton)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -314,16 +339,20 @@ public class EditPanel extends javax.swing.JPanel {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(LevelLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(LevelList, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(LevelList, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(DisconnectButton)
+                            .addComponent(ownerWriteLevel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 392, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(openFile)
                             .addComponent(openNormalFile)
-                            .addComponent(saveRegFile)
-                            .addComponent(saveEncryptedFile))))
-                .addContainerGap(56, Short.MAX_VALUE))
+                            .addComponent(saveEncryptedFile))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -364,9 +393,26 @@ public class EditPanel extends javax.swing.JPanel {
         // TODO add your handling code here:
         System.out.println("Pressed Button");
         ChangeRequestAccess jf = new ChangeRequestAccess();
-        jf.setLabelsandUsername(labels, displayedUsername);
+        jf.setLabelsandUsername(labels, displayedUsername, nd);
         jf.setVisible(true);
     }//GEN-LAST:event_changeUserLevelMousePressed
+
+    private void ownerWriteLevelItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_ownerWriteLevelItemStateChanged
+        // TODO add your handling code here:
+        if (nd != null && nd.isOwner()){
+            cd.insertLevel = ownerWriteLevel.getSelectedIndex();
+            System.out.println("Selected: " + ownerWriteLevel.getSelectedIndex());
+            System.out.println("Level: " + cd.insertLevel);
+        }
+    }//GEN-LAST:event_ownerWriteLevelItemStateChanged
+
+    private void openNormalFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openNormalFileActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_openNormalFileActionPerformed
+
+    private void openNormalFileMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_openNormalFileMousePressed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_openNormalFileMousePressed
 
     public void setColors(int begin, int end, int colorLevel){
         cd.setColors(begin, end, colors.get(colorLevel), true);
@@ -413,22 +459,48 @@ public class EditPanel extends javax.swing.JPanel {
         cd.setColors(offset, length, as, true);
     }
     
-    public void observedDelta(int offset, int length, String string){
-        //defunct, will use this later
-    }
-    
     public void displayMessages(String plaintext){
         documentArea.setText(documentArea.getText() + plaintext + "\n");
     }
     
     public void addUser(String username, int levelIdentifier){
-        if(displayedUsername.contains(username)) return;
+        if(displayedUsername.contains(username)){
+                for(int i = 0; i < peerModel.size(); i++){
+                String x = peerModel.get(i).toString().split(" - ")[0];
+                if(peerModel.get(i).toString().split(" - ")[1].equals("Document Owner")){
+                    continue;
+                }
+                if(x.equals(username)){
+                    peerModel.remove(i);
+                    peerModel.addElement(username +" - " + labels.get(levelIdentifier));
+                    cd.insertLevel = levelIdentifier;
+                    return;
+                }
+            }
+            return;
+        }
         peerModel.addElement(username +" - " + labels.get(levelIdentifier)); 
         displayedUsername.add(username);
     }
     
+    public void reviseUser(String username, int levelIdentifier){
+        for(int i = 0; i < peerModel.size(); i++){
+            String x = peerModel.get(i).toString().split(" - ")[0];
+            if(peerModel.get(i).toString().split(" - ")[1].equals("Document Owner")){
+                continue;
+            }
+            if(x.equals(username)){
+                peerModel.remove(i);
+                peerModel.addElement(username +" - " + labels.get(levelIdentifier));
+                cd.insertLevel = levelIdentifier;
+                return;
+            }
+        }
+    }
+    
     private CustomDocument cd;
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton DisconnectButton;
     private javax.swing.JLabel LevelLabel;
     private javax.swing.JScrollPane LevelList;
     private javax.swing.JComboBox LevelSelect;
@@ -445,12 +517,12 @@ public class EditPanel extends javax.swing.JPanel {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JButton openFile;
     private javax.swing.JButton openNormalFile;
+    private javax.swing.JComboBox ownerWriteLevel;
     private javax.swing.JButton saveEncryptedFile;
-    private javax.swing.JButton saveRegFile;
     private javax.swing.JToggleButton setLevelButton;
     // End of variables declaration//GEN-END:variables
     private ArrayList<String> labels;
-    private ArrayList<SimpleAttributeSet> colors;
+    public ArrayList<SimpleAttributeSet> colors;
     DefaultListModel peerModel;
     newCellRenderer cr;
     private ArrayList<String> displayedUsername;
