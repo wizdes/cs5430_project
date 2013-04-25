@@ -65,7 +65,7 @@ public class AuthenticationTransport {
     }
     
     public char[] getPIN(String userID, String docID) {
-        Constants.log("retrieve pin for " + userID + "-" + docID + " -> " + pendingPINs.get(userID + "-" + docID));
+        Constants.log("retreive pin for " + userID + "-" + docID + " -> " + Arrays.toString(pendingPINs.get(userID + "-" + docID)));
         return pendingPINs.get(userID + "-" + docID);
     }    
     

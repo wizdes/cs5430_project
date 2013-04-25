@@ -5,9 +5,8 @@
 package application.encryption_demo;
 
 import application.encryption_demo.forms.ApplicationWindow;
-import application.encryption_demo.forms.ConfigurationPanel;
+import application.encryption_demo.forms.ConfigurationForm;
 import application.encryption_demo.forms.LoginForm;
-import configuration.Constants;
 
 /**
  *
@@ -52,8 +51,10 @@ public class MultiGUIDemoDriver {
             }
         }, "Shutdown-thread"));
         
-        new ConfigurationPanel().setVisible(true);
-        new ConfigurationPanel().setVisible(true);
+        new ApplicationWindow("0", "localhost", 6000).setVisible(true);
+        new ApplicationWindow("1", "localhost", 6001).setVisible(true);
+//        new ConfigurationForm().setVisible(true);
+//        new ConfigurationForm().setVisible(true);
 
 //        Profile.deleteProfile("0");
 //        Profile p1 = Profile.writeProfile("0", "pass0000pass0000", 4000, "localhost");

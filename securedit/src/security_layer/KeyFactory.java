@@ -166,21 +166,23 @@ public class KeyFactory {
         }
         
         //String randomPIN = "";
+        
         char[] randomPIN = new char[Constants.PIN_LENGTH];
         for(int i = 0; i < randomPIN.length; i++){
-            randomPIN[i] = (char)new BigInteger(Constants.numBytesPIN, seededSecureRandom).intValue();
+            //randomPIN[i] = new BigInteger(Constants.numBytesPIN, seededSecureRandom);
+            randomPIN[i] = Constants.PIN_ALPHABET.charAt(seededSecureRandom.nextInt(Constants.PIN_ALPHABET.length()));
         }
         
-        char[] retPIN = new char[Constants.PIN_LENGTH];
-        //this makes capital letters
-        for(int i = 0; i < Constants.PIN_LENGTH; i++){
-            char insertPIN = randomPIN[i];
-            int upper = seededSecureRandom.nextInt(2);
-            if(upper == 1 && !Character.isDigit(insertPIN)){
-                insertPIN = Character.toUpperCase(insertPIN);
-            }
-            retPIN[i] = insertPIN;
-        }
-        return retPIN;
+//        char[] retPIN = new char[Constants.PIN_LENGTH];
+//        //this makes capital letters
+//        for(int i = 0; i < Constants.PIN_LENGTH; i++){
+//            char insertPIN = randomPIN[i];
+//            int upper = seededSecureRandom.nextInt(2);
+//            if(upper == 1 && !Character.isDigit(insertPIN)){
+//                insertPIN = Character.toUpperCase(insertPIN);
+//            }
+//            retPIN[i] = insertPIN;
+//        }
+        return randomPIN;
     }
 }

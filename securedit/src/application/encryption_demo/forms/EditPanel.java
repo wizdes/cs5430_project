@@ -4,16 +4,20 @@
  */
 package application.encryption_demo.forms;
 
+import _old_stuff.EncryptionDemoGUI;
 import application.encryption_demo.CustomDocument;
+import application.encryption_demo.EncryptionDemoFunctionality;
 import document.NetworkDocumentInterface;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
@@ -27,7 +31,7 @@ public class EditPanel extends javax.swing.JPanel {
     /**
      * Creates new form ChatPanel
      */
-    
+    private EncryptionDemoFunctionality functionality = null;
     public void addColor(Color c){
         SimpleAttributeSet aset = new SimpleAttributeSet();
         StyleConstants.setForeground(aset, c);
@@ -121,7 +125,8 @@ public class EditPanel extends javax.swing.JPanel {
         }
     }    
     
-    public EditPanel() {
+    public EditPanel(EncryptionDemoFunctionality functionality) {
+        this.functionality = functionality;
         initComponents();
         peerModel = new DefaultListModel();
         cr = new newCellRenderer();
@@ -147,6 +152,7 @@ public class EditPanel extends javax.swing.JPanel {
         cd.setEditorReference(this);
         
         displayedUsername = new ArrayList<>();
+        
     }
     
     public void giveDocument(NetworkDocumentInterface nd){
@@ -161,6 +167,7 @@ public class EditPanel extends javax.swing.JPanel {
             endCursor.setEnabled(false);
             LevelSelect.setEnabled(false);
             setLevelButton.setEnabled(false);
+            generatePINButton.setEnabled(false);
             changeUserLevel.setText("Request Change Level");
         }
     }
@@ -194,6 +201,7 @@ public class EditPanel extends javax.swing.JPanel {
         saveEncryptedFile = new javax.swing.JButton();
         DisconnectButton = new javax.swing.JButton();
         ownerWriteLevel = new javax.swing.JComboBox();
+        generatePINButton = new javax.swing.JButton();
 
         setPreferredSize(new java.awt.Dimension(825, 450));
 
@@ -273,27 +281,36 @@ public class EditPanel extends javax.swing.JPanel {
             }
         });
 
+        generatePINButton.setText("Generate PIN");
+        generatePINButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                generatePINButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 583, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(openFile)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(openNormalFile)
-                        .addGap(153, 153, 153)
-                        .addComponent(saveEncryptedFile)))
+                        .addGap(18, 18, 18)
+                        .addComponent(saveEncryptedFile)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(generatePINButton)))
                 .addGap(39, 39, 39)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(ownerWriteLevel, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(DisconnectButton))
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 238, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(beginCursor, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -312,7 +329,7 @@ public class EditPanel extends javax.swing.JPanel {
                                 .addComponent(changeUserLevel)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(setLevelButton)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 20, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -350,7 +367,8 @@ public class EditPanel extends javax.swing.JPanel {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(openFile)
                             .addComponent(openNormalFile)
-                            .addComponent(saveEncryptedFile))
+                            .addComponent(saveEncryptedFile)
+                            .addComponent(generatePINButton))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -413,6 +431,16 @@ public class EditPanel extends javax.swing.JPanel {
     private void openNormalFileMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_openNormalFileMousePressed
         // TODO add your handling code here:
     }//GEN-LAST:event_openNormalFileMousePressed
+
+    private void generatePINButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_generatePINButtonActionPerformed
+        String username = JOptionPane.showInputDialog("Enter the username:").trim();
+        if (username.isEmpty()) {
+            return;
+        }
+        char[] pin = this.functionality.generatePIN(username, nd.getName());
+        System.out.println("PIN: " + new String(pin));
+        new PINDisplayDialog(username, pin).setVisible(true);
+    }//GEN-LAST:event_generatePINButtonActionPerformed
 
     public void setColors(int begin, int end, int colorLevel){
         cd.setColors(begin, end, colors.get(colorLevel), true);
@@ -511,6 +539,7 @@ public class EditPanel extends javax.swing.JPanel {
     private javax.swing.JLabel cursorInfo;
     private javax.swing.JTextPane documentArea;
     private javax.swing.JTextField endCursor;
+    private javax.swing.JButton generatePINButton;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JList jList1;
     private javax.swing.JScrollPane jScrollPane1;

@@ -4,6 +4,8 @@
  */
 package application.encryption_demo.forms;
 
+import java.util.Arrays;
+
 /**
  *
  * @author goggin
@@ -13,10 +15,11 @@ public class PINDisplayDialog extends javax.swing.JFrame {
     /**
      * Creates new form PINDisplayDialog
      */
-    public PINDisplayDialog(String ident, String pin) {
+    public PINDisplayDialog(String ident, char[] pin) {
         initComponents();
         this.pinLabel.setText("PIN for " + ident);
-        this.pinTextField.setText(pin);
+        //This is valid since one time pin. If server shuts down, doesn't matter if still in memory since can't be used again.
+        this.pinTextField.setText(new String(pin));
     }
 
     /**
@@ -105,7 +108,7 @@ public class PINDisplayDialog extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new PINDisplayDialog("1", "APIN").setVisible(true);
+                new PINDisplayDialog("1", "APIN".toCharArray()).setVisible(true);
             }
         });
     }

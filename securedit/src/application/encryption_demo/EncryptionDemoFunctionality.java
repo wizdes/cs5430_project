@@ -47,7 +47,12 @@ public class EncryptionDemoFunctionality {
         this.communication = new Communication(this, profile);
         listenForMessages();
     }
-    
+    public boolean authenticate(String machineIdent, String docID, char[] password){
+        return communication.authenticate(machineIdent, docID, password);
+    }
+    public boolean initializeSRPAuthentication(String serverID, String docID, char[] password, char[] PIN){
+        return communication.initializeSRPAuthentication(serverID, docID, password, PIN);
+    }
     private void listenForMessages() {
         new GUIListenerThread().start();
     }
