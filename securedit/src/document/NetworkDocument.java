@@ -39,6 +39,7 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
         if (curDoc != null && !peers.containsKey(userId)) {
             curDoc.addUser(userId, levelIdentifier);
         }
+        curDoc.reviseUser(userId, levelIdentifier);
         super.addUserToLevel(userId, levelIdentifier);
         UpdateLevel ul = new UpdateLevel(userId, levelIdentifier);
         this.sendCommandMessage(userId, ul);
@@ -240,6 +241,11 @@ public class NetworkDocument extends AuthorizationDocument implements NetworkDoc
         CommandMessage cm = new CommandMessage(userId, this.collaboratorId, this.getName(), dc);
         System.out.println(cm);
         this.communication.sendMessage(userId, cm);
+    }
+
+    @Override
+    public String getUserID() {
+        return collaboratorId;
     }
     
 }

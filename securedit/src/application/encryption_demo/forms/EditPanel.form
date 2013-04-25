@@ -29,15 +29,18 @@
                       <Component id="openFile" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="openNormalFile" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="saveRegFile" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="153" max="-2" attributes="0"/>
                       <Component id="saveEncryptedFile" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace min="-2" pref="39" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jScrollPane2" pref="0" max="32767" attributes="0"/>
+                  <Group type="102" alignment="1" attributes="0">
+                      <Component id="ownerWriteLevel" max="32767" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Component id="DisconnectButton" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Component id="jScrollPane2" pref="238" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="beginCursor" min="-2" pref="30" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
@@ -47,14 +50,19 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="LevelSelect" max="32767" attributes="0"/>
                   </Group>
-                  <Component id="PeersLabel" min="-2" max="-2" attributes="0"/>
-                  <Component id="cursorInfo" alignment="0" min="-2" max="-2" attributes="0"/>
                   <Component id="LevelList" pref="0" max="32767" attributes="0"/>
-                  <Component id="LevelLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                  <Group type="102" alignment="0" attributes="0">
-                      <Component id="changeUserLevel" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="setLevelButton" min="-2" max="-2" attributes="0"/>
+                  <Group type="102" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="PeersLabel" min="-2" max="-2" attributes="0"/>
+                          <Component id="cursorInfo" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="LevelLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="changeUserLevel" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="setLevelButton" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -88,6 +96,11 @@
                       <Component id="LevelLabel" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="LevelList" min="-2" pref="91" max="-2" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="DisconnectButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="ownerWriteLevel" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
                   </Group>
                   <Group type="102" attributes="0">
                       <Component id="jScrollPane1" min="-2" pref="392" max="-2" attributes="0"/>
@@ -95,12 +108,12 @@
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="openFile" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="openNormalFile" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="saveRegFile" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="saveEncryptedFile" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace pref="56" max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -216,16 +229,30 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="Open Normal File"/>
       </Properties>
-    </Component>
-    <Component class="javax.swing.JButton" name="saveRegFile">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Save Unencrypted File"/>
-      </Properties>
+      <Events>
+        <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="openNormalFileMousePressed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="openNormalFileActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JButton" name="saveEncryptedFile">
       <Properties>
         <Property name="text" type="java.lang.String" value="Save Encrypted File"/>
       </Properties>
+    </Component>
+    <Component class="javax.swing.JButton" name="DisconnectButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Disconnect"/>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JComboBox" name="ownerWriteLevel">
+      <Properties>
+        <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
+          <StringArray count="0"/>
+        </Property>
+      </Properties>
+      <Events>
+        <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="ownerWriteLevelItemStateChanged"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>
