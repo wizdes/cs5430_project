@@ -8,6 +8,7 @@ import configuration.Constants;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
@@ -189,11 +190,14 @@ public class SecureTransport implements SecureTransportInterface{
             if (encryptedMessage instanceof EncryptedAuthenticationMessage) {
                 Constants.log("Received EncryptedAuthenticationMessage");
                 char[] PIN = this.authentication.getPIN(sourceOfMessage, docID);
-                secretKey = KeyFactory.generateSymmetricKey(PIN);
-                char[] hmacPIN = new char[PIN.length + 4];
-                System.arraycopy(PIN, 0, hmacPIN, 0, PIN.length);
-                System.arraycopy(new char[]{'H', 'M', 'A', 'C'}, 0, hmacPIN, PIN.length, 4);
-                HMACKey = KeyFactory.generateSymmetricKey(hmacPIN);
+                try {
+                    secretKey = KeyFactory.generateSymmetricKey(PIN, "PIN".getBytes("UTF-16"));
+                    HMACKey = KeyFactory.generateSymmetricKey(PIN, "HMAC".getBytes("UTF-16"));
+                } catch (UnsupportedEncodingException ex) {
+                    if(Constants.DEBUG_ON){
+                        Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
             } else {
                 Constants.log("Received other");
                 HMACKey = keys.getHmacKey(sourceOfMessage, docID);

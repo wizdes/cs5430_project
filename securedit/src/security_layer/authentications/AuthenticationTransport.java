@@ -75,12 +75,16 @@ public class AuthenticationTransport {
         BigInteger v = g.modPow(x, n);
         System.out.println("v: " + Arrays.toString(v.toByteArray()));
 
-        SecretKey pinKey = (SecretKey) KeyFactory.generateSymmetricKey(PIN);
-        char[] hmacPIN = new char[PIN.length + 4];
-        System.arraycopy(PIN, 0, hmacPIN, 0, PIN.length);
-        System.arraycopy(new char[]{'H', 'M', 'A', 'C'}, 0, hmacPIN, PIN.length, 4);
-        SecretKey HMACKey = (SecretKey) KeyFactory.generateSymmetricKey(hmacPIN);
-        
+        SecretKey pinKey = null;
+        SecretKey HMACKey = null;
+        try {
+            pinKey = KeyFactory.generateSymmetricKey(PIN, "PIN".getBytes("UTF-16"));
+            HMACKey = KeyFactory.generateSymmetricKey(PIN, "HMAC".getBytes("UTF-16"));
+        } catch (UnsupportedEncodingException ex) {
+            if(Constants.DEBUG_ON){
+                Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         InitAuth_Msg initMsg = new InitAuth_Msg(v, salt);
         return this.secureTransport.sendAESEncryptedMessage(serverID, docID, initMsg, pinKey, HMACKey);
     }
@@ -270,15 +274,15 @@ public class AuthenticationTransport {
         }
     }
     private void produceAndSaveSessionKeys(String sourceID, String docID, byte[] key) {
-        SecretKey sessionKey = KeyFactory.generateSymmetricKey(key);
-        profile.keys.addSessionKey(sourceID, docID, sessionKey);
-        char[] K_chars = new String(key).toCharArray();
-        char[] hmac = new char[K_chars.length + 4];
-        System.arraycopy(K_chars, 0, hmac, 0, K_chars.length);
-        System.arraycopy(new char[]{'H', 'M', 'A', 'C'}, 0, hmac, K_chars.length, 4);
-        SecretKey hmacKey = KeyFactory.generateSymmetricKey(hmac);
-        profile.keys.addHmacKey(sourceID, docID, hmacKey);
-        System.out.println("Saved session keys for " + sourceID + "/" + docID);
+        try {
+            SecretKey sessionKey = KeyFactory.generateSymmetricKey(new String(key).toCharArray(), "SESSION_KEY".getBytes("UTF-16"));
+            SecretKey hmacKey = KeyFactory.generateSymmetricKey(new String(key).toCharArray(), "HMAC".getBytes("UTF-16"));
+            profile.keys.addSessionKey(sourceID, docID, sessionKey);
+            profile.keys.addHmacKey(sourceID, docID, hmacKey);
+            System.out.println("Saved session keys for " + sourceID + "/" + docID);
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     private byte[] H(byte[]... input) {
         try {

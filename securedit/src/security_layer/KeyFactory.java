@@ -67,7 +67,7 @@ public class KeyFactory {
         }
         return generateSymmetricKey(password, salt);
     }
-        /**
+    /**
      * Generate symmetric key, just from password.
      * -Uses default salt, just so it can use PBEKeySpec which increases key
      *    computation time. This is helpful to make generation of keys from PIN
@@ -84,7 +84,6 @@ public class KeyFactory {
         }
         return generateSymmetricKey(new String(password).toCharArray(), salt);
     }
-    
     public static SecretKey generateSymmetricKey(char[] password, byte[] salt){
         try {
             char[] pass16 = fix_pass_length_16(password);
