@@ -114,7 +114,7 @@ public class CommunicationInterfaceTest {
 //
         testSendMessagesFrom(p1Communicator, p2Communicator, p2Ident, documents.get(0), iterations);    //BOOOOMMMMMMMM
         
-//        testSendMessagesFrom(p2Communicator, p1Communicator, p1Ident, iterations);
+        testSendMessagesFrom(p2Communicator, p1Communicator, p1Ident, documents.get(0), iterations);
 //        
 //        // Now start with fresh communicators, and we should be able to start
 //        // right from machineAuth
