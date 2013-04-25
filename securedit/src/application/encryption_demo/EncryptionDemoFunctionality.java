@@ -1,27 +1,21 @@
 package application.encryption_demo;
 
 
-import security_layer.Profile;
 import application.encryption_demo.Messages.Message;
-import application.encryption_demo.Messages.StringMessage;
-import application.encryption_demo.DiscoveredPeers.Peer;
-import transport_layer.discovery.DiscoveryMessage;
 import application.encryption_demo.Messages.RequestDocUpdateMessage;
 import application.encryption_demo.Messages.RequestJoinDocMessage;
+import application.encryption_demo.Messages.StringMessage;
 import application.encryption_demo.Messages.UpdateDocumentMessage;
 import application.encryption_demo.forms.ApplicationWindow;
 import document.CommandMessage;
-import document.Document;
-import document.DocumentInterface;
 import document.NetworkDocumentInterface;
-import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantLock;
-import security_layer.PINFunctionality;
+import security_layer.Profile;
+import transport_layer.discovery.DiscoveryMessage;
 
 /**
  *
@@ -44,7 +38,7 @@ public class EncryptionDemoFunctionality {
         this.profile = profile;
         this.gui = gui;
         
-        this.communication = new Communication(this, profile);
+        this.communication = new Communication(this, profile, docInstances);
         listenForMessages();
     }
     public boolean authenticate(String machineIdent, String docID, char[] password){
@@ -83,21 +77,21 @@ public class EncryptionDemoFunctionality {
     
     /**
      * Encrypts a string and writes it out to a file.
-     * @param plaintext String representation of file in plaintext
+     * @param filename name of the file to encrypt to
      * @return Encrypted version of the file.
      */
-    String encryptFile(String plaintext, char[] password){
-        communication.writeEncryptedFile(openedFilename, password, plaintext);
+    String encryptFile(String filename, Message m, char[] password){
+        communication.writeEncryptedFile(filename, password, m);
         return "This file was encrypted. Open it to see the encrpted text\n";
     }
     
     /**
      * Decrypts a file.
-     * @param ciphertext String representation of file in ciphertext
+     * @param filename name of the file to decrypt
      * @return Plaintext of file after being decrypted.
      */
-    String decryptFile(String ciphertext, char[] password){
-        String plaintext = (String)communication.readEncryptedFile(openedFilename, password);
+    String decryptFile(String filename, char[] password){
+        String plaintext = (String)communication.readEncryptedFile(filename, password);
         return plaintext;
     }
     

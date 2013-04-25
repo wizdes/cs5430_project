@@ -5,16 +5,18 @@
 
 package document;
 
+import application.encryption_demo.Messages.Message;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import security_layer.authentications.ServerAuthenticationPersistantState;
 
 /**
  *
  */
-public class Document implements DocumentInterface {
+public class Document implements DocumentInterface, Message {
     
     public static final String BOF = "bof";
     public static final String EOF = "eof";
@@ -26,6 +28,7 @@ public class Document implements DocumentInterface {
     private long uid = 0L;
     private String name;
     private String ownerId;
+    private ServerAuthenticationPersistantState serverAuthenticationPersistantState;
     
     public Document() {
         this("OwnerId", "Document");
@@ -37,7 +40,13 @@ public class Document implements DocumentInterface {
         valuesMap.put(EOF, eofDV);
         this.name = name;
         this.ownerId = ownerId;
+        this.serverAuthenticationPersistantState = new ServerAuthenticationPersistantState();
     }
+    
+    @Override
+    public ServerAuthenticationPersistantState getServerAuthenticationPersistantState() {
+        return this.serverAuthenticationPersistantState;
+    }    
     
     @Override
     public void addLevel(int levelIdentifier) {

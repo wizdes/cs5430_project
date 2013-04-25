@@ -394,13 +394,13 @@ public class ApplicationWindow extends javax.swing.JFrame {
             showMessage("Failed to login. Authentication wasn't successful.");
             return;
         }
-        System.out.println("blah");
         
          //Create document instance and send join request for doc
         NetworkDocument nd = new NetworkDocument(
-        functionality.getCommunicationInterface(), profile.username, ownerId, docName );
+            functionality.getCommunicationInterface(), profile.username, ownerId, docName );
         String docID = this.functionality.createDocumentInstance(nd);
         docIDs.put(this.tabbedPane.getTabCount(), docID);
+        
         if(!this.functionality.sendJoinRequestMessage(ownerId, docName)){
             showMessage("Join chat request failed to send!");
             return;

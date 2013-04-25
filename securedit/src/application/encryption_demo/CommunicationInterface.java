@@ -27,7 +27,7 @@ public interface CommunicationInterface {
     
     public void depositMessage(Message m) throws NoSuchAlgorithmException;
     
-    public boolean writeEncryptedFile(String filename, char[] password, String contents);
+    public boolean writeEncryptedFile(String filename, char[] password, Message contents);
     public String readEncryptedFile(String filename, char[] password);
     public String readFile(String filename);
     

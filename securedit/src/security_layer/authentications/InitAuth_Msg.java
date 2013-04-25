@@ -15,7 +15,8 @@ public class InitAuth_Msg extends SRPSetupMessage {
     BigInteger v;
     byte[] s;
 
-    public InitAuth_Msg(BigInteger v, byte[] s) {
+    public InitAuth_Msg(BigInteger v, byte[] s, String docID) {
+        super(docID);
         this.v = v;
         this.s = s;
     }

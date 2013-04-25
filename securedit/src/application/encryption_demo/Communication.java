@@ -9,11 +9,14 @@ import security_layer.Profile;
 import application.encryption_demo.Messages.Message;
 import application.encryption_demo.Messages.StringMessage;
 import configuration.Constants;
+import document.NetworkDocumentInterface;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -44,18 +47,20 @@ public class Communication implements CommunicationInterface {
 //            guiFunctionality.displayPIN(ID, PIN);    
 //        }
 //    }
-    
-    public Communication(Profile profile) {
+        
+    public Communication(Profile profile, ConcurrentMap<String, NetworkDocumentInterface> docInstances) {
         this.profile = profile;
         //Only used for test packages
         NetworkTransportInterface networkTransport = new NetworkTransport(profile.username, profile.host, profile.port);
         
         this.secureTransport = new SecureTransport(networkTransport, null, this, profile);
-        this.authenticationTransport = new AuthenticationTransport(networkTransport, this.secureTransport, profile);
+        this.authenticationTransport = new AuthenticationTransport(networkTransport, this.secureTransport, profile, docInstances);
         this.secureTransport.setAuthenticationTransport(this.authenticationTransport);
     }
-    public Communication(EncryptionDemoFunctionality guiFunctionality, Profile profile) {
-        this(profile);
+    public Communication(EncryptionDemoFunctionality guiFunctionality, 
+                         Profile profile, 
+                         ConcurrentMap<String, NetworkDocumentInterface> docInstances) {
+        this(profile, docInstances);
         this.guiFunctionality = guiFunctionality;
     }
     
@@ -136,8 +141,8 @@ public class Communication implements CommunicationInterface {
 //    }
 
     @Override
-    public boolean writeEncryptedFile(String filename, char[] password, String contents) {
-        return secureTransport.writeEncryptedFile(filename, password, new StringMessage(contents));
+    public boolean writeEncryptedFile(String filename, char[] password, Message contents) {
+        return secureTransport.writeEncryptedFile(filename, password, contents);
     }
 
     @Override

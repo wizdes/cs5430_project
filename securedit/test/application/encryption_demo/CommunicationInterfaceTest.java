@@ -6,7 +6,11 @@ package application.encryption_demo;
 
 import application.encryption_demo.Messages.Message;
 import application.encryption_demo.Messages.StringMessage;
+import document.NetworkDocument;
+import document.NetworkDocumentInterface;
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.After;
@@ -91,12 +95,18 @@ public class CommunicationInterfaceTest {
     public void testHumanAuthentication() {
         // Connect once from scratch
         int iterations = 100;
-        ArrayList<String> documents = new ArrayList<>();
-        documents.add("document");
-        p1Communicator = new Communication(p1);
-        p2Communicator = new Communication(p2);
-        p3Communicator = new Communication(p3);
+        ConcurrentMap <String, NetworkDocumentInterface> documentMap = new ConcurrentHashMap<>();
         
+        
+        p1Communicator = new Communication(p1, documentMap);
+        p2Communicator = new Communication(p2, null);
+        p3Communicator = new Communication(p3, null);
+        
+        
+        NetworkDocument nd = new NetworkDocument(p1Communicator, p1Ident, p1Ident, "document");
+        documentMap.put("document", nd);
+        
+        ArrayList<String> documents = new ArrayList(documentMap.keySet());
 //        p1Communicator.updatePeers(p2Ident, "localhost", p2Port, documents, false);
         p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents, false);
         

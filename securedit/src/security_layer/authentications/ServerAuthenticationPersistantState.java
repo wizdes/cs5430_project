@@ -4,6 +4,7 @@
  */
 package security_layer.authentications;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -12,7 +13,7 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author Patrick
  */
-class ServerAuthenticationPersistantState {
+public class ServerAuthenticationPersistantState implements Serializable {
     ConcurrentMap<String, SaltAndVerifier> state = new ConcurrentHashMap<>();
 
     void addClientPasswordState(String clientID, byte[] salt, BigInteger passwordVerifier){
@@ -24,7 +25,7 @@ class ServerAuthenticationPersistantState {
     BigInteger getClientVerifier(String clientID){
         return state.get(clientID).passwordVerifier;
     }
-    private class SaltAndVerifier{
+    private class SaltAndVerifier implements Serializable { 
         private byte[] salt;
         private BigInteger passwordVerifier;
 

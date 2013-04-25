@@ -9,5 +9,9 @@ package security_layer.authentications;
  * @author Patrick
  */
 public class SRPSetupMessage implements AuthenticationMessage {
-    
+    String docID;
+
+    SRPSetupMessage(String docID) {
+        this.docID = docID;
+    }   
 }

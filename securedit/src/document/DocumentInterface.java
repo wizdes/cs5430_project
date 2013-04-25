@@ -6,12 +6,15 @@ package document;
 
 import java.util.List;
 import java.util.Set;
+import security_layer.authentications.ServerAuthenticationPersistantState;
 
 /**
  *
  * @author goggin
  */
 public interface DocumentInterface {
+    
+    public ServerAuthenticationPersistantState getServerAuthenticationPersistantState();
     
     /* Create a new level, with no sections assigned to it */
     public void addLevel(int levelIdentifier);

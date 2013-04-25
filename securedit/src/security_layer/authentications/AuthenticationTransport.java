@@ -6,6 +6,7 @@ package security_layer.authentications;
 
 import security_layer.Profile;
 import configuration.Constants;
+import document.NetworkDocumentInterface;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.Key;
@@ -42,19 +43,21 @@ public class AuthenticationTransport {
     private SecureTransportInterface secureTransport;
     private ConcurrentMap<String, AuthenticationSession> authSessions = new ConcurrentHashMap<>();
     private ConcurrentMap<String, char[]> pendingPINs = new ConcurrentHashMap<>();
-    private ServerAuthenticationPersistantState persistantServerState;
-    
+    private ConcurrentMap<String, NetworkDocumentInterface> docInstances;
     private Profile profile;
     
     private static final BigInteger n = new BigInteger(MODPGroups.MODP_GROUP_3072, 16);
     private static final BigInteger g = new BigInteger(MODPGroups.GENERATOR + "");
     
-    public AuthenticationTransport(NetworkTransportInterface transport, SecureTransportInterface secureTransport, Profile profile) {
+    public AuthenticationTransport(NetworkTransportInterface transport, 
+                                   SecureTransportInterface secureTransport, 
+                                   Profile profile,
+                                   ConcurrentMap<String, NetworkDocumentInterface> docInstances) {
         this.profile = profile;
         this.transport = transport;
         this.secureTransport = secureTransport;
+        this.docInstances = docInstances;
         this.transport.setAuthenticationTransport(this);
-        this.persistantServerState = new ServerAuthenticationPersistantState();
     }
     
     public char[] generatePIN(String userID, String docID) {
@@ -85,7 +88,7 @@ public class AuthenticationTransport {
                 Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        InitAuth_Msg initMsg = new InitAuth_Msg(v, salt);
+        InitAuth_Msg initMsg = new InitAuth_Msg(v, salt, docID);
         return this.secureTransport.sendAESEncryptedMessage(serverID, docID, initMsg, pinKey, HMACKey);
     }
     
@@ -143,15 +146,18 @@ public class AuthenticationTransport {
     
     private void processSRPSetupMessage(String sourceID, SRPSetupMessage receivedSetupMsg){
         InitAuth_Msg initMsg = (InitAuth_Msg)receivedSetupMsg;
-        System.out.println("Added client s,v to persistant state");
-        persistantServerState.addClientPasswordState(sourceID, initMsg.s, initMsg.v);
+        docInstances.get(initMsg.docID).getServerAuthenticationPersistantState()
+                                       .addClientPasswordState(sourceID, initMsg.s, initMsg.v);
     }
     
     private void processSRPMessage(String sourceID, SRPAuthenticationMessage receivedSRPMsg) throws InvalidSRPMessageException, InconsistentSessionKeyException{
         System.out.println("processSRPMessage from " + sourceID);
+        ServerAuthenticationPersistantState persistantServerState;
+        
         if(receivedSRPMsg instanceof Auth_Msg1){    //Server
             Auth_Msg1 msg1 = (Auth_Msg1)receivedSRPMsg;
             //Fetch Persistent state
+            persistantServerState = docInstances.get(msg1.docID).getServerAuthenticationPersistantState();
             byte[] s = persistantServerState.getClientSalt(sourceID);           //s = salt
             BigInteger v = persistantServerState.getClientVerifier(sourceID);   //v = verifier = g^x
             if(s == null || v == null){
