@@ -7,6 +7,8 @@ package document;
 
 import application.encryption_demo.CommunicationInterface;
 import application.encryption_demo.forms.EditPanel;
+import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -325,5 +327,21 @@ public class NetworkDocument implements NetworkDocumentInterface {
     @Override
     public void bootstrap() {
         this.sendCommandMessage(ownerId, new BootstrapRequest());
+    }
+
+    public void addColor(Color c) {
+        this.authDocument.colors.add(c);
+    }
+    
+    public void addLabel(String l){
+        this.authDocument.labels.add(l);
+    }
+    
+    public ArrayList<String> getLabels(){
+        return this.authDocument.labels;
+    }
+
+    public ArrayList<Color> getColors() {
+        return this.authDocument.colors;
     }
 }

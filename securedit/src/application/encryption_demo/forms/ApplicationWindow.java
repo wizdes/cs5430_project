@@ -378,7 +378,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
                 options[0]);
         
         if (r != JOptionPane.OK_OPTION) {
-            System.out.println("canceld");
+            System.out.println("cancelled");
             return;
         }
         char[] password = loginForm.passwordTextField.getPassword();
