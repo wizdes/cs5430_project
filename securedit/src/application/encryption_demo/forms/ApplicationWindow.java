@@ -399,6 +399,8 @@ public class ApplicationWindow extends javax.swing.JFrame {
             return;
         }
         
+//        TODO uncomment this when we can handle bootstrapping in GUI
+//        nd.bootstrap();
         EditPanel panel = new EditPanel(functionality);
         panel.giveDocument(nd);
         nd.giveGUI(panel);
