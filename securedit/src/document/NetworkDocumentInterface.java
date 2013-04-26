@@ -53,6 +53,6 @@ public interface NetworkDocumentInterface {
     public int getLevelForUser(String userId);
     public ServerAuthenticationPersistantState getServerAuthenticationPersistantState();
     public AuthorizationDocumentInterface getAuthDocument();
-    
+    public void setAuthDocument(AuthorizationDocument ad);
     
 }

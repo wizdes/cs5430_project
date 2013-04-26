@@ -5,6 +5,8 @@
 
 package document;
 
+import application.encryption_demo.Messages.Message;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,7 +19,7 @@ import security_layer.authentications.ServerAuthenticationPersistantState;
 /**
  *
  */
-public class AuthorizationDocument implements AuthorizationDocumentInterface {
+public class AuthorizationDocument implements AuthorizationDocumentInterface, Message {
     
     protected Map<String, Integer> peers = new HashMap<>();
     private Document document;

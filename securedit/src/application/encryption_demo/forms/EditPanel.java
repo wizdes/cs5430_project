@@ -7,6 +7,8 @@ package application.encryption_demo.forms;
 import _old_stuff.EncryptionDemoGUI;
 import application.encryption_demo.CustomDocument;
 import application.encryption_demo.EncryptionDemoFunctionality;
+import document.AuthorizationDocument;
+import document.DocumentValue;
 import document.NetworkDocument;
 import document.NetworkDocumentInterface;
 import java.awt.Color;
@@ -275,6 +277,11 @@ public class EditPanel extends javax.swing.JPanel {
         });
 
         openFile.setText("Open Encrypted File");
+        openFile.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                openFileMousePressed(evt);
+            }
+        });
 
         openNormalFile.setText("Open Normal File");
         openNormalFile.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -478,7 +485,7 @@ public class EditPanel extends javax.swing.JPanel {
 
     private void jFileChooser1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFileChooser1ActionPerformed
         // TODO add your handling code here:
-        System.out.println("File Selected");
+        //System.out.println("File Selected");
     }//GEN-LAST:event_jFileChooser1ActionPerformed
 
     private void saveEncryptedFileMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_saveEncryptedFileMousePressed
@@ -487,11 +494,7 @@ public class EditPanel extends javax.swing.JPanel {
         JPanel userPanel = new JPanel();
         userPanel.setLayout(new GridLayout(2,2));
 
-        //Labels for the textfield components        
-        JLabel usernameLbl = new JLabel("Username:");
         JLabel passwordLbl = new JLabel("Password:");
-
-        JTextField username = new JTextField();
         JPasswordField passwordFld = new JPasswordField();
         char[] password = passwordFld.getPassword();
 
@@ -508,13 +511,58 @@ public class EditPanel extends javax.swing.JPanel {
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = jFileChooser1.getSelectedFile();
             String fileName = file.getAbsolutePath();
-            functionality.encryptFile(fileName, nd, password);
+            functionality.encryptFile(fileName, nd.getAuthDocument(), password);
+        } else {
+            System.out.println("File access cancelled by user.");
+        }        
+    }//GEN-LAST:event_saveEncryptedFileMousePressed
+
+    private void openFileMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_openFileMousePressed
+        // TODO add your handling code here:
+        // TODO add your handling code here:
+        //Using a JPanel as the message for the JOptionPane
+
+        JPanel userPanel = new JPanel();
+        userPanel.setLayout(new GridLayout(2,2));
+
+        JLabel passwordLbl = new JLabel("Password:");
+        JPasswordField passwordFld = new JPasswordField();
+        char[] password = passwordFld.getPassword();
+
+        userPanel.add(passwordLbl);
+        userPanel.add(passwordFld);
+
+        //As the JOptionPane accepts an object as the message
+        //it allows us to use any component we like - in this case 
+        //a JPanel containing the dialog components we want
+        int input = JOptionPane.showConfirmDialog(null, userPanel, "Enter your password:"
+                      ,JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        jFileChooser1.setVisible(true);
+        int returnVal = jFileChooser1.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = jFileChooser1.getSelectedFile();
+            String fileName = file.getAbsolutePath();
+            AuthorizationDocument ad = (AuthorizationDocument) functionality.decryptObjFile(fileName, password);
+            nd.setAuthDocument(ad);
+            this.manualRemove(0, documentArea.getText().length());
+            repaint(ad);
         } else {
             System.out.println("File access cancelled by user.");
         }
-        
-    }//GEN-LAST:event_saveEncryptedFileMousePressed
+    }//GEN-LAST:event_openFileMousePressed
 
+    public void repaint(AuthorizationDocument ad){
+        String text = ad.getDocument().getString();
+        int length = text.length();
+        DocumentValue dv = ad.getDocument().getValues().getNext();
+        for(int i = 0; i < length; i++){
+            System.out.println(dv.getLevel());
+            this.manualInsert(i, String.valueOf(text.charAt(i)) , colors.get(dv.getLevel()));
+            dv = dv.getNext();
+        }
+        
+    }
+    
     public void setColors(int begin, int end, int colorLevel){
         cd.setColors(begin, end, colors.get(colorLevel), true);
     }
@@ -529,7 +577,8 @@ public class EditPanel extends javax.swing.JPanel {
             // Do something here
             System.out.println("Inserting: " + string);
             cd.manualInsert(offset, string, attributeSet);
-            if(offset <= documentArea.getCaretPosition()){
+            if(offset <= documentArea.getCaretPosition() 
+                    && documentArea.getCaretPosition() + string.length() < documentArea.getText().length()){
                 documentArea.setCaretPosition(documentArea.getCaretPosition() + string.length());
             }
         } catch (BadLocationException ex) {

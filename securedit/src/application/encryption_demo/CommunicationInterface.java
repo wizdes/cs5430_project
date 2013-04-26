@@ -29,6 +29,7 @@ public interface CommunicationInterface {
     
     public boolean writeEncryptedFile(String filename, char[] password, Message contents);
     public String readEncryptedFile(String filename, char[] password);
+    public Message readEncryptedObjectFile(String filename, char[] password);
     public String readFile(String filename);
     
     public void shutdown();

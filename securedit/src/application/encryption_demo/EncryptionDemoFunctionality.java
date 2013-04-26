@@ -95,6 +95,10 @@ public class EncryptionDemoFunctionality {
         return plaintext;
     }
     
+    public Message decryptObjFile(String filename, char[] password){
+        return communication.readEncryptedObjectFile(filename, password);
+    }
+    
 //    /**
 //     * Sends encrypted message.
 //     * @param plaintextMsg Message in plaintext

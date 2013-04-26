@@ -151,6 +151,11 @@ public class Communication implements CommunicationInterface {
     }
 
     @Override
+    public Message readEncryptedObjectFile(String filename, char[] password) {
+        return secureTransport.readEncryptedFile(filename, password);
+    }    
+    
+    @Override
     public String readFile(String filename) {
         return secureTransport.readUnencryptedFile(filename);
     }

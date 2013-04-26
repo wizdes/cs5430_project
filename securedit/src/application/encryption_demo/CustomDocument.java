@@ -46,7 +46,7 @@ public class CustomDocument extends DefaultStyledDocument {
             throws BadLocationException {
         // Do something here
         System.out.println("Inserting: " + string);  
-        attributeSet = curDoc.colors.get(insertLevel);
+        if(attributeSet == null) attributeSet = curDoc.colors.get(insertLevel);
         super.insertString(offset, string, attributeSet);
     }    
     

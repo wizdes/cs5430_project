@@ -234,6 +234,9 @@
       <Properties>
         <Property name="text" type="java.lang.String" value="Open Encrypted File"/>
       </Properties>
+      <Events>
+        <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="openFileMousePressed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JButton" name="openNormalFile">
       <Properties>
