@@ -508,7 +508,7 @@ public class EditPanel extends javax.swing.JPanel {
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = jFileChooser1.getSelectedFile();
             String fileName = file.getAbsolutePath();
-            functionality.encryptFile(fileName, nd, password);
+//            functionality.encryptFile(fileName, nd, password);
         } else {
             System.out.println("File access cancelled by user.");
         }

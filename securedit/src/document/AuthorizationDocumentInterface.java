@@ -47,6 +47,7 @@ public interface AuthorizationDocumentInterface {
     public Collection<CommandMessage> applyRemove(String userId, Set<String> identifiers);
     
     public Document getDocument();
+    public void setDocument(Document d);
         
     public ServerAuthenticationPersistantState getServerAuthenticationPersistantState();
 }
