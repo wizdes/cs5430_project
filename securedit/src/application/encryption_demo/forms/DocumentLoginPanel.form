@@ -90,7 +90,8 @@
     </Component>
     <Component class="javax.swing.JPasswordField" name="passwordTextField">
       <Properties>
-        <Property name="text" type="java.lang.String" value="pass0000pass0000"/>
+        <Property name="text" type="java.lang.String" value="PASS0000pass0000"/>
+        <Property name="toolTipText" type="java.lang.String" value=""/>
       </Properties>
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_VariableModifier" type="java.lang.Integer" value="1"/>

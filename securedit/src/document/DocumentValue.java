@@ -38,6 +38,14 @@ public class DocumentValue implements Serializable{
         return value;
     }
 
+    public void obscure() {
+        String newString = "";
+        for (int i = 0; i < value.length(); i++) {
+            newString += "X";
+        }
+        this.value = newString;
+    }
+    
     public DocumentValue getNext() {
         return next;
     }
@@ -69,6 +77,11 @@ public class DocumentValue implements Serializable{
 
     public void setLevel(int level) {
         this.level = level;
+    }
+    
+    @Override
+    public DocumentValue clone() {
+        return new DocumentValue(identifier, value, level, next, prev);
     }
     
 }

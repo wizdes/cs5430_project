@@ -45,7 +45,8 @@ public class DocumentLoginPanel extends javax.swing.JPanel {
         jLabel3.setFont(new java.awt.Font("Lucida Grande", 1, 14)); // NOI18N
         jLabel3.setText("Login to Document");
 
-        passwordTextField.setText("pass0000pass0000");
+        passwordTextField.setText("PASS0000pass0000");
+        passwordTextField.setToolTipText("");
 
         org.jdesktop.layout.GroupLayout layout = new org.jdesktop.layout.GroupLayout(this);
         this.setLayout(layout);

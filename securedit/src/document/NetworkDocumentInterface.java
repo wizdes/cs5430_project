@@ -54,5 +54,6 @@ public interface NetworkDocumentInterface {
     public ServerAuthenticationPersistantState getServerAuthenticationPersistantState();
     public AuthorizationDocumentInterface getAuthDocument();
     public void setAuthDocument(AuthorizationDocument ad);
+    public void bootstrap();
     
 }

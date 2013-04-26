@@ -206,4 +206,33 @@ public class Document implements DocumentInterface, Message {
     public boolean isEmpty() {
         return bofDV.getNext().getIdentifier().equals(Document.EOF);
     }
+
+    @Override
+    public Document formatFor(int level) {
+        Document d = new Document(this.ownerId, this.name);
+        
+        d.bofDV = null;
+        DocumentValue dv = this.bofDV;
+        DocumentValue prev = null;
+        
+        while (dv != null) {
+            DocumentValue copy = dv.clone();
+            if (copy.getLevel() > level) {
+                copy.obscure();
+            }
+            
+            if (d.bofDV == null) {
+                d.bofDV = copy;
+            } else {
+                prev.setNext(copy);
+            }
+            
+            copy.setPrev(dv);
+            d.valuesMap.put(copy.getIdentifier(), copy);
+            prev = copy;
+            dv = dv.getNext();
+        }
+        
+        return d;
+    }
 }

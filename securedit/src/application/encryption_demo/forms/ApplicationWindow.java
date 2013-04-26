@@ -7,18 +7,14 @@ package application.encryption_demo.forms;
 import application.encryption_demo.DiscoveredPeers;
 import application.encryption_demo.EncryptionDemoFunctionality;
 import configuration.Constants;
-import security_layer.Profile;
 import document.NetworkDocument;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
-import javax.swing.JRootPane;
-import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
 import security_layer.Profile;
 
@@ -238,7 +234,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
             if (!(i + "").equals(profile.username)) {
                 String id = i + "";
                 String host = "localhost";
-                int port = 4000 + i;
+                int port = 6000 + i;
                 ArrayList<String> documents = new ArrayList<>();
                 documents.add("Chat");
                 functionality.manuallyAddPeer(id, host, port, documents);
@@ -382,10 +378,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
                 options,
                 options[0]);
         
-        if (r == JOptionPane.OK_OPTION) {
-            System.out.println(loginForm.passwordTextField.getPassword());
-            System.out.println(loginForm.usernameTextField.getText());
-        } else {
+        if (r != JOptionPane.OK_OPTION) {
             System.out.println("canceld");
             return;
         }
@@ -406,6 +399,8 @@ public class ApplicationWindow extends javax.swing.JFrame {
             return;
         }
         
+//        TODO uncomment this when we can handle bootstrapping in GUI
+//        nd.bootstrap();
         EditPanel panel = new EditPanel(functionality);
         panel.giveDocument(nd);
         nd.giveGUI(panel);
@@ -437,9 +432,6 @@ public class ApplicationWindow extends javax.swing.JFrame {
             System.out.println("Cancel");
             return;
         }
-//        System.out.println(createAccountPanel.passwordTextField.getPassword());
-//        System.out.println(createAccountPanel.retypePasswordTextField.getPassword());
-//        System.out.println(createAccountPanel.pinTextField.getPassword());
             
         char[] newPassword = createAccountPanel.passwordTextField.getPassword();
         char[] retypedPassword = createAccountPanel.retypePasswordTextField.getPassword();

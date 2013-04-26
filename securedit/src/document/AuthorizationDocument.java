@@ -118,7 +118,13 @@ public class AuthorizationDocument implements AuthorizationDocumentInterface, Me
         return updates;
     }
     
+    @Override
     public Document getDocument() {
         return document;
     }
+    
+    @Override
+    public void setDocument(Document d) {
+        this.document = d;
+    }    
 }
