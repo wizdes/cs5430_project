@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import security_layer.Profile;
@@ -232,7 +234,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
             if (!(i + "").equals(profile.username)) {
                 String id = i + "";
                 String host = "localhost";
-                int port = 4000 + i;
+                int port = 6000 + i;
                 ArrayList<String> documents = new ArrayList<>();
                 documents.add("Chat");
                 functionality.manuallyAddPeer(id, host, port, documents);
