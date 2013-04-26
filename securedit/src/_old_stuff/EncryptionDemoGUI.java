@@ -766,7 +766,6 @@ public class EncryptionDemoGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_DiscoverPeersButtonActionPerformed
     
     private void ManuallyAddPeerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ManuallyAddPeerButtonActionPerformed
-        // TODO add your handling code here:
         for (int i = 0; i < 3; i++) {
             if (!(i + "").equals(appNodeId)) {
                 String id = i + "";

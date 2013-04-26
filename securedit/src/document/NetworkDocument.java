@@ -249,8 +249,7 @@ public class NetworkDocument implements NetworkDocumentInterface {
             this.document = resp.document;
             this.authDocument.setDocument(document);
             if (curDoc != null) {
-//                TODO when we have this function
-//                curDoc.DoStuffToDisplayNewDocument();
+                curDoc.repaint(this.authDocument);
             }
         }
     }    
