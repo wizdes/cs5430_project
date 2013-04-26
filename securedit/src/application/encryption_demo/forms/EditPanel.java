@@ -445,9 +445,20 @@ public class EditPanel extends javax.swing.JPanel {
     private void changeUserLevelMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_changeUserLevelMousePressed
         // TODO add your handling code here:
         System.out.println("Pressed Button");
-        ChangeRequestAccess jf = new ChangeRequestAccess();
+        ChangeUserAccess jf = new ChangeUserAccess();
         jf.setLabelsandUsername(labels, displayedUsername, nd);
-        jf.setVisible(true);
+        //jf.setVisible(true);
+
+        Object[] options = {"Close"};
+        int r = JOptionPane.showOptionDialog(
+                this,
+                jf, 
+                "Login",
+                JOptionPane.OK_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                options,
+                options[0]);
     }//GEN-LAST:event_changeUserLevelMousePressed
 
     private void ownerWriteLevelItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_ownerWriteLevelItemStateChanged
