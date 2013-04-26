@@ -4,11 +4,13 @@
  */
 package document;
 
+import java.io.Serializable;
+
 /**
  *
  * @author goggin
  */
-public class DocumentValue {
+public class DocumentValue implements Serializable{
     
     private String identifier;
     private String value;

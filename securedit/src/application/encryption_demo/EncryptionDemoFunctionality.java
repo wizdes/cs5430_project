@@ -80,7 +80,7 @@ public class EncryptionDemoFunctionality {
      * @param filename name of the file to encrypt to
      * @return Encrypted version of the file.
      */
-    String encryptFile(String filename, Message m, char[] password){
+    public String encryptFile(String filename, Message m, char[] password){
         communication.writeEncryptedFile(filename, password, m);
         return "This file was encrypted. Open it to see the encrpted text\n";
     }
@@ -90,7 +90,7 @@ public class EncryptionDemoFunctionality {
      * @param filename name of the file to decrypt
      * @return Plaintext of file after being decrypted.
      */
-    String decryptFile(String filename, char[] password){
+    public String decryptFile(String filename, char[] password){
         String plaintext = (String)communication.readEncryptedFile(filename, password);
         return plaintext;
     }

@@ -7,8 +7,10 @@ package application.encryption_demo.forms;
 import _old_stuff.EncryptionDemoGUI;
 import application.encryption_demo.CustomDocument;
 import application.encryption_demo.EncryptionDemoFunctionality;
+import document.NetworkDocument;
 import document.NetworkDocumentInterface;
 import java.awt.Color;
+import java.awt.GridLayout;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -20,7 +22,11 @@ import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -159,7 +165,7 @@ public class EditPanel extends javax.swing.JPanel {
         
     }
     
-    public void giveDocument(NetworkDocumentInterface nd){
+    public void giveDocument(NetworkDocument nd){
         this.nd = nd;
         cd.giveDocument(nd);
         peerModel.addElement(nd.getOwnerID() + " - Document Owner");
@@ -283,6 +289,11 @@ public class EditPanel extends javax.swing.JPanel {
         });
 
         saveEncryptedFile.setText("Save Encrypted File");
+        saveEncryptedFile.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                saveEncryptedFileMousePressed(evt);
+            }
+        });
 
         DisconnectButton.setText("Disconnect");
 
@@ -470,6 +481,40 @@ public class EditPanel extends javax.swing.JPanel {
         System.out.println("File Selected");
     }//GEN-LAST:event_jFileChooser1ActionPerformed
 
+    private void saveEncryptedFileMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_saveEncryptedFileMousePressed
+        // TODO add your handling code here:
+        //Using a JPanel as the message for the JOptionPane
+        JPanel userPanel = new JPanel();
+        userPanel.setLayout(new GridLayout(2,2));
+
+        //Labels for the textfield components        
+        JLabel usernameLbl = new JLabel("Username:");
+        JLabel passwordLbl = new JLabel("Password:");
+
+        JTextField username = new JTextField();
+        JPasswordField passwordFld = new JPasswordField();
+        char[] password = passwordFld.getPassword();
+
+        userPanel.add(passwordLbl);
+        userPanel.add(passwordFld);
+
+        //As the JOptionPane accepts an object as the message
+        //it allows us to use any component we like - in this case 
+        //a JPanel containing the dialog components we want
+        int input = JOptionPane.showConfirmDialog(null, userPanel, "Enter your password:"
+                      ,JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        jFileChooser1.setVisible(true);
+        int returnVal = jFileChooser1.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = jFileChooser1.getSelectedFile();
+            String fileName = file.getAbsolutePath();
+            functionality.encryptFile(fileName, nd, password);
+        } else {
+            System.out.println("File access cancelled by user.");
+        }
+        
+    }//GEN-LAST:event_saveEncryptedFileMousePressed
+
     public void setColors(int begin, int end, int colorLevel){
         cd.setColors(begin, end, colors.get(colorLevel), true);
     }
@@ -584,5 +629,5 @@ public class EditPanel extends javax.swing.JPanel {
     DefaultListModel peerModel;
     newCellRenderer cr;
     private ArrayList<String> displayedUsername;
-    NetworkDocumentInterface nd;
+    NetworkDocument nd;
 }

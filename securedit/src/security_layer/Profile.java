@@ -4,13 +4,14 @@
  */
 package security_layer;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  *
  * @author Patrick
  */
-public class Profile {
+public class Profile implements Serializable{
     public String username;
     public String host;
     public int port;
