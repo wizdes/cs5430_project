@@ -55,8 +55,9 @@ public class EncryptionDemoFunctionality {
     }
     
     public void manuallyAddPeer(String id, String host, int port, ArrayList<String> docs) {
-//        communication.updatePeers(id, host, port, docs, false);
+        communication.updatePeers(id, host, port, docs, false);
         DiscoveryMessage dm = new DiscoveryMessage(profile.username, profile.host, profile.port);
+        System.out.println(dm);
         communication.sendManualDiscoverMessage(id, host, port, dm);
     }
     

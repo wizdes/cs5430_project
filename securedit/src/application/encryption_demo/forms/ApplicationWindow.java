@@ -7,18 +7,12 @@ package application.encryption_demo.forms;
 import application.encryption_demo.DiscoveredPeers;
 import application.encryption_demo.EncryptionDemoFunctionality;
 import configuration.Constants;
-import security_layer.Profile;
 import document.NetworkDocument;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.swing.JOptionPane;
-import javax.swing.JRootPane;
-import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
 import security_layer.Profile;
 
