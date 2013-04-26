@@ -376,10 +376,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
                 options,
                 options[0]);
         
-        if (r == JOptionPane.OK_OPTION) {
-            System.out.println(loginForm.passwordTextField.getPassword());
-            System.out.println(loginForm.usernameTextField.getText());
-        } else {
+        if (r != JOptionPane.OK_OPTION) {
             System.out.println("canceld");
             return;
         }
@@ -431,9 +428,6 @@ public class ApplicationWindow extends javax.swing.JFrame {
             System.out.println("Cancel");
             return;
         }
-//        System.out.println(createAccountPanel.passwordTextField.getPassword());
-//        System.out.println(createAccountPanel.retypePasswordTextField.getPassword());
-//        System.out.println(createAccountPanel.pinTextField.getPassword());
             
         char[] newPassword = createAccountPanel.passwordTextField.getPassword();
         char[] retypedPassword = createAccountPanel.retypePasswordTextField.getPassword();
