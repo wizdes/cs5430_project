@@ -251,7 +251,7 @@ public class NetworkDocument implements NetworkDocumentInterface {
             this.document = resp.document;
             this.authDocument.setDocument(document);
             if (curDoc != null) {
-                curDoc.repaint(this.authDocument);
+                curDoc.handleBootstrap(this.authDocument);
             }
         }
     }    
@@ -328,20 +328,24 @@ public class NetworkDocument implements NetworkDocumentInterface {
     public void bootstrap() {
         this.sendCommandMessage(ownerId, new BootstrapRequest());
     }
-
+    
+    @Override
     public void addColor(Color c) {
-        this.authDocument.colors.add(c);
+        this.document.colors.add(c);
     }
     
+    @Override
     public void addLabel(String l){
-        this.authDocument.labels.add(l);
+        this.document.labels.add(l);
     }
     
+    @Override
     public ArrayList<String> getLabels(){
-        return this.authDocument.labels;
+        return this.document.labels;
     }
-
+    
+    @Override
     public ArrayList<Color> getColors() {
-        return this.authDocument.colors;
+        return this.document.colors;
     }
 }

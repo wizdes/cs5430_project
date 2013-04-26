@@ -397,12 +397,12 @@ public class ApplicationWindow extends javax.swing.JFrame {
             showMessage("Join chat request failed to send!");
             return;
         }
-        
-//        TODO uncomment this when we can handle bootstrapping in GUI
-//        nd.bootstrap();
+                
         EditPanel panel = new EditPanel(functionality);
         panel.giveDocument(nd);
         nd.giveGUI(panel);
+        nd.bootstrap();
+        
         chatPanels.put(docID, panel);
         this.tabbedPane.add("Owner: " + ownerId + ", Doc: " + docName, panel);
         this.tabbedPane.setSelectedComponent(panel);
