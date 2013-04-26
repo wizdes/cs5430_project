@@ -52,6 +52,16 @@ public class EditPanel extends javax.swing.JPanel {
         
     public void populateColorsList(ArrayList<Color> colors, ArrayList<String> labels){
         this.labels = labels;
+        for (String l : labels) {
+            LevelSelect.addItem(l);
+            ownerWriteLevel.addItem(l);
+        }
+        
+        String[] elements = new String[labels.size()];
+        elements = labels.toArray(elements);
+        jList1.setListData(elements);
+        jList1.setCellRenderer(cr);
+
         cr.giveColorList(colors);
         for(Color c:colors){
             addColor(c);
@@ -59,19 +69,16 @@ public class EditPanel extends javax.swing.JPanel {
     }
     
     public void setDefaultColorsAndLabels() {
-        ArrayList<Color> defaultColors = new ArrayList<>();
-        defaultColors.add(Color.black);
-        defaultColors.add(Color.blue);
-        defaultColors.add(Color.green);
-        defaultColors.add(Color.red);
+        nd.addColor(Color.black);
+        nd.addColor(Color.blue);
+        nd.addColor(Color.green);
+        nd.addColor(Color.red);
         
-        ArrayList<String> defaultLabels = new ArrayList<>();
-        defaultLabels.add("NORMAL");
-        defaultLabels.add("PRIVILEGED");
-        defaultLabels.add("SECRET");
-        defaultLabels.add("TOP SECRET");
-        
-        populateColorsList(defaultColors, defaultLabels);
+        nd.addLabel("NORMAL");
+        nd.addLabel("PRIVILEGED");
+        nd.addLabel("SECRET");
+        nd.addLabel("TOP SECRET");
+        populateColorsList(nd.getColors(), nd.getLabels());
     }
     
     private HashMap<String, Color> getColorChoices() {
@@ -108,7 +115,7 @@ public class EditPanel extends javax.swing.JPanel {
         String labelPrompt = "Enter a security group label (type 'done' when finished)";
         String label = JOptionPane.showInputDialog(labelPrompt);
         while (!label.equals("done")) {
-            defaultLabels.add(label);
+            nd.addLabel(label);
             label = JOptionPane.showInputDialog(labelPrompt);
         }
         
@@ -122,10 +129,9 @@ public class EditPanel extends javax.swing.JPanel {
                 color = colorChoices.get(colorName);                
             }
             colorChoices.remove(colorName);
-            defaultColors.add(color);
+            nd.addColor(color);
         }
-        
-        populateColorsList(defaultColors, defaultLabels);
+        populateColorsList(nd.getColors(), nd.getLabels());
     }
     
     public void promptForLevelsAndColors() {
@@ -145,18 +151,6 @@ public class EditPanel extends javax.swing.JPanel {
         labels = new ArrayList<String>();
         colors = new ArrayList<SimpleAttributeSet>();
         
-        promptForLevelsAndColors();
-        
-        for (String l : labels) {
-            LevelSelect.addItem(l);
-            ownerWriteLevel.addItem(l);
-        }
-        
-        String[] elements = new String[labels.size()];
-        elements = labels.toArray(elements);
-        jList1.setListData(elements);
-        jList1.setCellRenderer(cr);
-        
         PeersList.setModel(peerModel);
 
         cd = new CustomDocument();
@@ -168,11 +162,17 @@ public class EditPanel extends javax.swing.JPanel {
     }
     
     public void giveDocument(NetworkDocument nd){
+        
         this.nd = nd;
         cd.giveDocument(nd);
         peerModel.addElement(nd.getOwnerID() + " - Document Owner");
         displayedUsername.add(nd.getOwnerID());
-        if(nd.isOwner() == false){
+        if(nd.isOwner()){
+            promptForLevelsAndColors();
+        }
+        else if(!nd.isOwner()){
+            this.populateColorsList(nd.getColors(), nd.getLabels());
+            labels = nd.getLabels();
             peerModel.addElement(nd.getUserID() + " - " + labels.get(cd.insertLevel));
             displayedUsername.add(nd.getUserID());
             beginCursor.setEnabled(false);
@@ -553,6 +553,7 @@ public class EditPanel extends javax.swing.JPanel {
 
     public void repaint(AuthorizationDocument ad){
         String text = ad.getDocument().getString();
+        
         int length = text.length();
         DocumentValue dv = ad.getDocument().getValues().getNext();
         for(int i = 0; i < length; i++){
