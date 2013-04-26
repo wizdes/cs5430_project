@@ -8,6 +8,7 @@ import application.encryption_demo.Communication;
 import application.encryption_demo.CommunicationInterface;
 import application.encryption_demo.CommunicationInterfaceTest;
 import application.encryption_demo.Messages.Message;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -331,6 +332,37 @@ public class NetworkDocumentTest {
         assertEquals("111000222111000", client3.getString()); 
     }
 
+    @Test
+    public void testBootstrapLabelsAndColors() {        
+        ArrayList<Color> colors = new ArrayList<>();
+        ArrayList<String> labels = new ArrayList<>();
+        colors.add(Color.red);
+        colors.add(Color.red);
+        colors.add(Color.red);
+
+        labels.add("hello");
+        labels.add("world");
+        labels.add("goodbye");
+        
+        for (String s : labels) {
+            owner.addLabel(s);
+        }
+        for (Color c : colors) {
+            owner.addColor(c);
+        }
+        
+        owner.addUserToLevel(p2Ident, 1); 
+        client2.bootstrap();
+        pause(100);
+        
+        for (String s : labels) {
+            assertTrue(client2.getLabels().contains(s));
+        }
+        for (Color c : colors) {
+            assertTrue(client2.getColors().contains(c));
+        }
+    }    
+    
     public class DocumentCommListener extends Thread {
         private CommunicationInterface comm;
         private NetworkDocumentInterface doc;

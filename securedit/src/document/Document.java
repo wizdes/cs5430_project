@@ -6,6 +6,8 @@
 package document;
 
 import application.encryption_demo.Messages.Message;
+import java.awt.Color;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -27,6 +29,8 @@ public class Document implements DocumentInterface, Message {
     private long uid = 0L;
     private String name;
     private String ownerId;
+    ArrayList<String> labels = new ArrayList<>();
+    ArrayList<Color> colors = new ArrayList<>();
     
     public Document() {
         this("OwnerId", "Document");
@@ -232,6 +236,9 @@ public class Document implements DocumentInterface, Message {
             prev = copy;
             dv = dv.getNext();
         }
+        
+        for (Color c : this.colors) { d.colors.add(c); }
+        for (String l : this.labels) { d.labels.add(l); }
         
         return d;
     }

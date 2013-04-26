@@ -7,7 +7,7 @@ package document;
 
 import application.encryption_demo.Messages.Message;
 import java.awt.Color;
-import java.io.Serializable;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,7 +16,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import javax.swing.text.SimpleAttributeSet;
 import security_layer.authentications.ServerAuthenticationPersistantState;
 
 /**
@@ -27,8 +26,6 @@ public class AuthorizationDocument implements AuthorizationDocumentInterface, Me
     protected Map<String, Integer> peers = new HashMap<>();
     private Document document;
     private ServerAuthenticationPersistantState serverAuthenticationPersistantState;
-    ArrayList<String> labels;
-    ArrayList<Color> colors;
     
     public AuthorizationDocument() {
         this("OwnerId", "Document");        
@@ -37,8 +34,6 @@ public class AuthorizationDocument implements AuthorizationDocumentInterface, Me
     public AuthorizationDocument(String ownerId, String name) {
         this.document = new Document(ownerId, name);
         this.serverAuthenticationPersistantState = new ServerAuthenticationPersistantState();
-        colors = new ArrayList<Color>();
-        labels = new ArrayList<String>();
     }
     
     @Override

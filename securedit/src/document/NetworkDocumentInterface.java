@@ -5,6 +5,8 @@
 package document;
 
 import application.encryption_demo.forms.EditPanel;
+import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Set;
 import security_layer.authentications.ServerAuthenticationPersistantState;
 
@@ -55,5 +57,9 @@ public interface NetworkDocumentInterface {
     public AuthorizationDocumentInterface getAuthDocument();
     public void setAuthDocument(AuthorizationDocument ad);
     public void bootstrap();
-    
+
+    public void addColor(Color c);    
+    public void addLabel(String l);
+    public ArrayList<String> getLabels();
+    public ArrayList<Color> getColors();
 }

@@ -167,13 +167,9 @@ public class EditPanel extends javax.swing.JPanel {
         cd.giveDocument(nd);
         peerModel.addElement(nd.getOwnerID() + " - Document Owner");
         displayedUsername.add(nd.getOwnerID());
-        if(nd.isOwner()){
+        if (nd.isOwner()) {
             promptForLevelsAndColors();
-        }
-        else if(!nd.isOwner()){
-            this.populateColorsList(nd.getColors(), nd.getLabels());
-            labels = nd.getLabels();
-            peerModel.addElement(nd.getUserID() + " - " + labels.get(cd.insertLevel));
+        } else if (!nd.isOwner()) {
             displayedUsername.add(nd.getUserID());
             beginCursor.setEnabled(false);
             endCursor.setEnabled(false);
@@ -184,6 +180,16 @@ public class EditPanel extends javax.swing.JPanel {
         }
     }
 
+    public void handleBootstrap(AuthorizationDocument ad) {
+        nd.setAuthDocument(ad);
+        this.giveDocument(nd);
+        labels = nd.getLabels();
+        System.out.println(nd.getLabels());
+        System.out.println(nd.getColors());
+        this.populateColorsList(nd.getColors(), nd.getLabels());
+        peerModel.addElement(nd.getUserID() + " - " + labels.get(cd.insertLevel));
+        this.repaint(ad);
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
