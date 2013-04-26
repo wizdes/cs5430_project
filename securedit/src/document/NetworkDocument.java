@@ -115,6 +115,7 @@ public class NetworkDocument implements NetworkDocumentInterface {
     
     @Override
     public void requestInsert(int level, String left, String right, String text) {
+        
         if (isOwner()) {
             authDocument.addUserToLevel(document.getOwnerID(), level);
             requestInsertFor(document.getOwnerID(), level, left, right, text);
@@ -128,6 +129,7 @@ public class NetworkDocument implements NetworkDocumentInterface {
         Collection<CommandMessage> updates = authDocument.applyInsert(userId, level, left, right, text);
         if (updates != null) {
             for (CommandMessage m : updates) {
+                System.out.println(m);
                 communication.sendMessage(m.to, document.getName(), m);
             }
         }
@@ -156,6 +158,7 @@ public class NetworkDocument implements NetworkDocumentInterface {
         Collection<CommandMessage> updates = authDocument.applyRemove(userId, toRemove);
         if (updates != null) {
             for (CommandMessage m : updates) {
+                System.out.println(m);
                 communication.sendMessage(m.to, document.getName(), m);
             }
         }        
@@ -204,6 +207,11 @@ public class NetworkDocument implements NetworkDocumentInterface {
             if (approved) {
                 this.addUserToLevel(m.from, rl.getLevel());
             }
+        } else if (m.command instanceof BootstrapRequest) {
+            BootstrapRequest req = (BootstrapRequest)m.command;
+            int level = this.authDocument.getLevelForUser(m.from);
+            BootstrapResponse resp = new BootstrapResponse(this.document.formatFor(level));
+            this.sendCommandMessage(m.from, resp);
         }
     }
     
@@ -236,6 +244,11 @@ public class NetworkDocument implements NetworkDocumentInterface {
             if (curDoc != null) {
                 curDoc.addUser(update.getUserId(), update.getLevel());
             }            
+        }  else if (m.command instanceof BootstrapResponse) {
+            BootstrapResponse resp = (BootstrapResponse)m.command;
+            this.document = resp.document;
+            this.authDocument.setDocument(document);
+            
         }
     }    
 
@@ -302,4 +315,8 @@ public class NetworkDocument implements NetworkDocumentInterface {
         return this.authDocument.getLevelForUser(userId);
     }
     
+    @Override
+    public void bootstrap() {
+        this.sendCommandMessage(ownerId, new BootstrapRequest());
+    }
 }

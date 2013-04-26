@@ -294,7 +294,42 @@ public class NetworkDocumentTest {
         assertEquals(4, client3.getLevelForUser(p3Ident));
     }
     
-    
+    @Test
+    public void testBootstrap() {        
+        owner.requestInsert(0, Document.BOF, Document.EOF, "000");
+        owner.requestInsert(1, Document.BOF, Document.EOF, "111");
+        owner.requestInsert(2, Document.BOF, Document.EOF, "222");
+        
+        owner.addUserToLevel(p2Ident, 1);
+        pause(100);
+        
+        assertEquals("222111000", owner.getString());
+        assertEquals("", client2.getString());
+        assertEquals("", client3.getString());
+        
+        client2.bootstrap();
+        pause(100);
+        
+        assertEquals("222111000", owner.getString());
+        assertEquals("XXX111000", client2.getString());
+        assertEquals("", client3.getString());    
+        
+        client2.requestInsert(0, Document.BOF, Document.EOF, "000");
+        pause(100);
+        
+        assertEquals("000222111000", owner.getString());
+        assertEquals("000XXX111000", client2.getString());
+        assertEquals("", client3.getString());         
+        
+        owner.addUserToLevel(p3Ident, 2);
+        client3.bootstrap();
+        client2.requestInsert(1, Document.BOF, Document.EOF, "111");
+        pause(100);  
+        
+        assertEquals("111000222111000", owner.getString());
+        assertEquals("111000XXX111000", client2.getString());
+        assertEquals("111000222111000", client3.getString()); 
+    }
 
     public class DocumentCommListener extends Thread {
         private CommunicationInterface comm;

@@ -58,4 +58,6 @@ public interface DocumentInterface {
     public void setOwnerID(String name);    
     
     public boolean isEmpty();
+    
+    public Document formatFor(int level);
 }
