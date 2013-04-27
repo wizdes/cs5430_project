@@ -4,8 +4,6 @@ package application.encryption_demo;
 import application.encryption_demo.Messages.Message;
 import application.encryption_demo.Messages.RequestDocUpdateMessage;
 import application.encryption_demo.Messages.RequestJoinDocMessage;
-import application.encryption_demo.Messages.StringMessage;
-import application.encryption_demo.Messages.UpdateDocumentMessage;
 import application.encryption_demo.forms.ApplicationWindow;
 import document.CommandMessage;
 import document.NetworkDocumentInterface;
@@ -80,16 +78,7 @@ public class EncryptionDemoFunctionality {
         communication.writeEncryptedFile(filename, password, m);
         return "This file was encrypted. Open it to see the encrpted text\n";
     }
-    
-    /**
-     * Decrypts a file.
-     * @param filename name of the file to decrypt
-     * @return Plaintext of file after being decrypted.
-     */
-    public String decryptFile(String filename, char[] password){
-        String plaintext = (String)communication.readEncryptedFile(filename, password);
-        return plaintext;
-    }
+
     
     public Message decryptObjFile(String filename, char[] password){
         return communication.readEncryptedObjectFile(filename, password);
@@ -178,25 +167,13 @@ public class EncryptionDemoFunctionality {
                 Collection<Message> messages = communication.waitForMessages();
                 
                 for (Message m : messages) {
-                    if (m instanceof StringMessage) {
-//                        String message = ((StringMessage)m).contents;
-//                        String crypted = "This has been encrypted, trust us...";   
-//                        displayIncomingMessage(message, crypted);
-                    }
-                    else if(m instanceof RequestJoinDocMessage){
+                    if(m instanceof RequestJoinDocMessage){
                         //Owner: Adds sourceID to collaborators for document instance
                         RequestJoinDocMessage joinMsg = (RequestJoinDocMessage)m;
                         
                         NetworkDocumentInterface instance = docInstances.get(joinMsg.docName);
                         instance.addUserToLevel(joinMsg.sourceID, 0);
                         //instance.addUserToLevel(joinMsg.docName, 0);
-                    }
-                    else if(m instanceof UpdateDocumentMessage){
-                        //Collaborator: Add text to GUI
-                        UpdateDocumentMessage updateMsg = (UpdateDocumentMessage)m;
-                        String docID = DocumentInstance.toDocumentIdentifier(updateMsg.ownerID, updateMsg.docName);
-                        
-                        displayIncomingMessage(docID, updateMsg.text);
                     }
                     else if (m instanceof DiscoveryMessage) {
 

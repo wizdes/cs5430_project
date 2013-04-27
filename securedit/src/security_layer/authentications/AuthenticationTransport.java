@@ -240,7 +240,6 @@ public class AuthenticationTransport {
             //Postcondition: Keys match according to the server
             
             //Place session key K inside data structure.
-            //   ASK ELENANOR ABOUT THIS
             produceAndSaveSessionKeys(sourceID, msg3.docID, session.K);
             
             byte[] M2 = H(session.A.toByteArray(), msg3.M1, session.K);
@@ -263,7 +262,6 @@ public class AuthenticationTransport {
             //Postcondition: Keys match according to the client
             
             //Place session key K inside data structure.
-            //   ASK ELENANOR ABOUT THIS
             produceAndSaveSessionKeys(sourceID, msg4.docID, session.K);
             
             //Zero memory for session

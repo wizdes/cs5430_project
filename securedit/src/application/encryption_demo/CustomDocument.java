@@ -5,7 +5,7 @@
 package application.encryption_demo;
 
 import application.encryption_demo.forms.EditPanel;
-import document.NetworkDocument;
+import document.NetworkDocumentHandler;
 import document.NetworkDocumentInterface;
 import java.awt.Color;
 import java.util.ArrayList;

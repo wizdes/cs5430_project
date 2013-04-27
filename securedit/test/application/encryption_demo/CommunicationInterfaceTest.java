@@ -5,8 +5,8 @@
 package application.encryption_demo;
 
 import application.encryption_demo.Messages.Message;
-import application.encryption_demo.Messages.StringMessage;
-import document.NetworkDocument;
+import document.Document;
+import document.NetworkDocumentHandler;
 import document.NetworkDocumentInterface;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -73,16 +73,17 @@ public class CommunicationInterfaceTest {
                                      int iterations) {
         int received = 0;
         for (int i = 0; i < iterations; i++) {
-            StringMessage dm = new StringMessage("hello world " + i);
+            Document dm = new Document(c2Ident, docID);
+            //StringMessage dm = new StringMessage("hello world " + i);
             c1.sendMessage(c2Ident, docID, dm);
         }
 
         while (received < iterations) {
             for (Message m : c2.waitForMessages()) {
-                if (m instanceof StringMessage) {
-                    StringMessage dm2 = (StringMessage)m;
-                    System.out.println(dm2.contents);
-                    assertEquals("hello world " + received++, dm2.contents);
+                if (m instanceof Document) {
+                    Document dm2 = (Document)m;
+//                    System.out.println(dm2.contents);
+                    received++;
                 }
             }
         }
@@ -99,7 +100,7 @@ public class CommunicationInterfaceTest {
         p2Communicator = new Communication(p2, null);
         p3Communicator = new Communication(p3, null);
                 
-        NetworkDocument nd = new NetworkDocument(p1Communicator, p1Ident, p1Ident, "document");
+        NetworkDocumentHandler nd = new NetworkDocumentHandler(p1Communicator, p1Ident, p1Ident, "document");
         documentMap.put("document", nd);
         
         ArrayList<String> documents = new ArrayList(documentMap.keySet());
@@ -121,7 +122,7 @@ public class CommunicationInterfaceTest {
         p2Communicator = new Communication(p2, null);
         p3Communicator = new Communication(p3, null);
                 
-        NetworkDocument nd = new NetworkDocument(p1Communicator, p1Ident, p1Ident, "document");
+        NetworkDocumentHandler nd = new NetworkDocumentHandler(p1Communicator, p1Ident, p1Ident, "document");
         documentMap.put("document", nd);
         
         ArrayList<String> documents = new ArrayList(documentMap.keySet());

@@ -7,7 +7,6 @@ package application.encryption_demo;
 
 import security_layer.Profile;
 import application.encryption_demo.Messages.Message;
-import application.encryption_demo.Messages.StringMessage;
 import configuration.Constants;
 import document.NetworkDocumentInterface;
 import java.security.NoSuchAlgorithmException;
@@ -143,11 +142,6 @@ public class Communication implements CommunicationInterface {
     @Override
     public boolean writeEncryptedFile(String filename, char[] password, Message contents) {
         return secureTransport.writeEncryptedFile(filename, password, contents);
-    }
-
-    @Override
-    public String readEncryptedFile(String filename, char[] password) {
-        return ((StringMessage)secureTransport.readEncryptedFile(filename, password)).contents;
     }
 
     @Override
