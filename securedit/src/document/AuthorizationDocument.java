@@ -129,4 +129,8 @@ public class AuthorizationDocument implements AuthorizationDocumentInterface, Me
     public void setDocument(Document d) {
         this.document = d;
     }    
+
+    void removeUser(String userId) {
+        peers.remove(userId);
+    }
 }

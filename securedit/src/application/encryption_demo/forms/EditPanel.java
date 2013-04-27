@@ -369,6 +369,11 @@ public class EditPanel extends javax.swing.JPanel {
         });
 
         DisconnectButton.setText("Disconnect");
+        DisconnectButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                DisconnectButtonMouseClicked(evt);
+            }
+        });
         DisconnectButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 DisconnectButtonActionPerformed(evt);
@@ -688,6 +693,11 @@ public class EditPanel extends javax.swing.JPanel {
         
     }//GEN-LAST:event_DisconnectButtonActionPerformed
 
+    private void DisconnectButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DisconnectButtonMouseClicked
+        // TODO add your handling code here:
+        nd.deleteUser(nd.getUserID());
+    }//GEN-LAST:event_DisconnectButtonMouseClicked
+
     public void repaint(AuthorizationDocument ad){
         nd.lock();
         try{
@@ -847,4 +857,22 @@ public class EditPanel extends javax.swing.JPanel {
     NewCellRenderer cr;
     private ArrayList<String> displayedUsername;
     NetworkDocumentHandler nd;
+
+    public void removeUser(String username) {
+        nd.lock();
+        try {
+            for (int i = 0; i < peerModel.size(); i++) {
+                String x = peerModel.get(i).toString().split(" - ")[0];
+                if (peerModel.get(i).toString().split(" - ")[1].equals("Document Owner")) {
+                    continue;
+                }
+                if (x.equals(username)) {
+                    peerModel.remove(i);
+                    return;
+                }
+            }
+        } finally {
+            nd.unlock();
+        }
+    }
 }
