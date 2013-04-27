@@ -1,0 +1,56 @@
+Patrick Berens(pcb73)
+Matt Goggin(mg343)
+Yi Li(yl2326)
+
+ASSURANCE.txt, which describes how and what you tested in the software being submitted. Also describe here any other means you used to increase assurance in the correctness of the system and in the absence of vulnerabilities.
+
+Table of Contents
+1) Overview 
+2) Unit Test Cases
+3) Integration Tests
+4) Other Assurance Mechanics
+	a) AES Encrypted Local Files with HMACs
+	b) Secure Length for PIN Generation
+	c) Secure Usage of Encryption
+	d) Code Reviews
+	e) Class Design	
+	f) Network Packet Observation
+
+
+1) Overview 
+
+For this project, we combined several standard Java implementations of security measures with unit tests and careful code maintenance. 
+
+2) Unit Test Cases
+
+We introduced unit tests for the new functionality introduced into the system.
+
+3) Integration Tests
+
+Although created numerous unit test cases to increase our assurance of the system, we also introduced several Integration Tests to analyze our system from an end-to-end perspective.  
+
+3) Other Assurance Mechanics
+
+There are several other assurance measures that were taken to increase the assurance in the correctness of the system.
+
+a) AES Encrypted Local Files with HMACs
+
+In our system, we did not assume that all elements of a user's operating system are safe. Specifically, we assume that an attacker may be able to gain information from the files on the file system. Because of this, we encrypted all data saved onto the file system with an AES encrpytion key generated from a user defined password. Thus, only users who remember their own passwords are able to access their files.
+
+b) Secure Length for PIN Generation
+
+In our system, we use a PIN to authenticate humans connecting to a server as well as exchanging public/private keys. This PIN needs to be of an adequate length to prevent brute force attacks. The paper in by Melber and Ryberg (http://www.bcs.org/upload/pdf/mobile-computing.pdf) recommends a PIN length of 12; this is the length that is used. Based on our threat model as well as the length of the password, the usage (it is a one-time password), the character set used for the PIN (case-sensitive characters and numbers) and the property that this password is generated from SecureRandom, we believe our PIN generation approach is secure. We have considered implementing timeouts; however, we believe it is better to implement this in the 'authorization' phase since we can then adjust our timeout based on our trust model.
+
+c) Secure Usage of Encryption
+All our messages created using Java's Serializable class. Observing the message packets using Wireshark, we observe that the Serialized messages encode type information in the message. Furthermore, our system will fail to de-Serialize a message if the type information does not match; thus, we send our messages such that they are encrypted with an AES message, verified by an HMAC, and encoded with type information to prevent attackers from intercepting and modifying the message.
+
+
+d) Code Reviews
+We used Github's 'Pull Request' feature to code review all commits going into the master branch. This allows us to confirm all changes with the entire team and reduce the number of errors pushed into code.
+
+e) Class Design 
+To reduce programmer error and prevent any leakage of insecure data, we abstracted our system into three layers. The bottom layer is the transport layer which provides basic networking functionality of a multi-client socket architecture, as well as, file operations. It is within this layer that serialization of messages and files occurs. The top layer is the application layer, which runs client applications. It is within this top layer that message and file content construction occurs. 
+Furthermore, we used standard Java semantics to ensure a safe implementation. For an example, we only allowed public interfaces when necessary; we also used the keyword 'final' to prevent modification of in-memory data.
+
+f) Network Packet Observation
+We used several external tools to observe the security of our system. Wireshark is a tool we used to inspect the network data between systems; this allowed us to be assured of the security of the messages sent between machines.

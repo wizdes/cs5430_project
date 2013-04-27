@@ -2,8 +2,6 @@ Patrick Berens(pcb73)
 Matt Goggin(mg343)
 Yi Li(yl2326)
 
-FUNCTIONALITY.txt, which should discuss the interface that your system implements. What operations does it export? What is the effect of each operation?
-
 Table of Contents
 1) Overview
 2) Functionality
