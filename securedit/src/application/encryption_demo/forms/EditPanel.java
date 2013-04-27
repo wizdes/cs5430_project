@@ -565,7 +565,7 @@ public class EditPanel extends javax.swing.JPanel {
         int input = JOptionPane.showConfirmDialog(null, userPanel, "Enter your password:"
                       ,JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         jFileChooser1.setVisible(true);
-        int returnVal = jFileChooser1.showOpenDialog(this);
+        int returnVal = jFileChooser1.showSaveDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = jFileChooser1.getSelectedFile();
             String fileName = file.getAbsolutePath();
