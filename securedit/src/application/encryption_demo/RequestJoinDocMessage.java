@@ -1,7 +1,5 @@
 package application.encryption_demo;
 
-import application.encryption_demo.Messages.Message;
-
 /**
  * Client sends to owner asking to join document.
  * -Currently, owner automatically allows him(no authorization)

@@ -4,7 +4,7 @@ package security_layer;
 import application.encryption_demo.CommunicationInterface;
 import security_layer.authentications.AccountCreationError;
 import transport_layer.discovery.DiscoveryMessage;
-import application.encryption_demo.Messages.Message;
+import application.encryption_demo.Message;
 import configuration.Constants;
 import java.io.File;
 import java.io.IOException;

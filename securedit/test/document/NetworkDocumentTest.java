@@ -7,7 +7,7 @@ package document;
 import application.encryption_demo.Communication;
 import application.encryption_demo.CommunicationInterface;
 import application.encryption_demo.CommunicationInterfaceTest;
-import application.encryption_demo.Messages.Message;
+import application.encryption_demo.Message;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;

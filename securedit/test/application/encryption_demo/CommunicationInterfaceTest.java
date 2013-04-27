@@ -4,7 +4,6 @@
  */
 package application.encryption_demo;
 
-import application.encryption_demo.Messages.Message;
 import document.Document;
 import document.NetworkDocumentHandler;
 import document.NetworkDocumentInterface;

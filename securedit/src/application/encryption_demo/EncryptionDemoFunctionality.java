@@ -1,7 +1,6 @@
 package application.encryption_demo;
 
 
-import application.encryption_demo.Messages.Message;
 import application.encryption_demo.forms.ApplicationWindow;
 import document.CommandMessage;
 import document.NetworkDocumentInterface;

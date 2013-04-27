@@ -5,7 +5,6 @@
 
 package application.encryption_demo;
 
-import application.encryption_demo.Messages.Message;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.List;

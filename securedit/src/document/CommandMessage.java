@@ -5,7 +5,7 @@
 
 package document;
 
-import application.encryption_demo.Messages.Message;
+import application.encryption_demo.Message;
 
 /**
  *

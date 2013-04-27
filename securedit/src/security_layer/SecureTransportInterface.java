@@ -4,7 +4,7 @@
  */
 package security_layer;
 
-import application.encryption_demo.Messages.Message;
+import application.encryption_demo.Message;
 import java.util.ArrayList;
 import javax.crypto.SecretKey;
 import security_layer.authentications.AuthenticationTransport;

@@ -5,7 +5,7 @@
 
 package security_layer.authentications;
 
-import application.encryption_demo.Messages.Message;
+import application.encryption_demo.Message;
 
 /**
  *

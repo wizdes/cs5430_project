@@ -6,7 +6,6 @@
 package application.encryption_demo;
 
 import security_layer.Profile;
-import application.encryption_demo.Messages.Message;
 import configuration.Constants;
 import document.NetworkDocumentInterface;
 import java.security.NoSuchAlgorithmException;
