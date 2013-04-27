@@ -69,6 +69,9 @@ public class ApplicationWindow extends javax.swing.JFrame {
         Close = new javax.swing.JButton();
         loginButton = new javax.swing.JButton();
         createAccountButton = new javax.swing.JButton();
+        peerLabel = new javax.swing.JLabel();
+        clientLabel = new javax.swing.JLabel();
+        ownerLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -94,7 +97,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
             }
         });
 
-        startChatButton.setText("Start Chat");
+        startChatButton.setText("Start Document");
         startChatButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 startChatButtonActionPerformed(evt);
@@ -124,29 +127,42 @@ public class ApplicationWindow extends javax.swing.JFrame {
             }
         });
 
+        peerLabel.setFont(new java.awt.Font("Tahoma", 1, 13)); // NOI18N
+        peerLabel.setText("Peer");
+
+        clientLabel.setFont(new java.awt.Font("Tahoma", 1, 13)); // NOI18N
+        clientLabel.setText("Document Client");
+
+        ownerLabel.setFont(new java.awt.Font("Tahoma", 1, 13)); // NOI18N
+        ownerLabel.setText("Document Owner");
+
         org.jdesktop.layout.GroupLayout peerPanelLayout = new org.jdesktop.layout.GroupLayout(peerPanel);
         peerPanel.setLayout(peerPanelLayout);
         peerPanelLayout.setHorizontalGroup(
             peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(peerPanelLayout.createSequentialGroup()
                 .addContainerGap()
+                .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
+                    .add(peerPanelLayout.createSequentialGroup()
+                        .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                            .add(DiscoverPeersButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 139, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                            .add(peerLabel))
+                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                            .add(clientLabel)
+                            .add(loginButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 119, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
+                    .add(peerPanelLayout.createSequentialGroup()
+                        .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
+                            .add(org.jdesktop.layout.GroupLayout.LEADING, addDefaultPeersButton, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .add(org.jdesktop.layout.GroupLayout.LEADING, addManualPeer, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .add(433, 433, 433)
+                        .add(createAccountButton)))
+                .add(30, 30, 30)
                 .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(addDefaultPeersButton)
+                    .add(ownerLabel)
+                    .add(startChatButton)
                     .add(Close))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 331, Short.MAX_VALUE)
-                .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
-                    .add(loginButton, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .add(createAccountButton, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                    .add(peerPanelLayout.createSequentialGroup()
-                        .add(147, 147, 147)
-                        .add(addManualPeer))
-                    .add(peerPanelLayout.createSequentialGroup()
-                        .add(30, 30, 30)
-                        .add(startChatButton)
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
-                        .add(DiscoverPeersButton)))
-                .addContainerGap())
+                .add(41, 41, 41))
             .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                 .add(peerPanelLayout.createSequentialGroup()
                     .add(11, 11, 11)
@@ -155,18 +171,24 @@ public class ApplicationWindow extends javax.swing.JFrame {
         );
         peerPanelLayout.setVerticalGroup(
             peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(org.jdesktop.layout.GroupLayout.TRAILING, peerPanelLayout.createSequentialGroup()
-                .addContainerGap(400, Short.MAX_VALUE)
+            .add(peerPanelLayout.createSequentialGroup()
+                .addContainerGap(337, Short.MAX_VALUE)
                 .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(DiscoverPeersButton)
-                    .add(Close)
-                    .add(loginButton)
-                    .add(startChatButton))
+                    .add(peerLabel)
+                    .add(clientLabel)
+                    .add(ownerLabel))
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED)
                 .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
-                    .add(addDefaultPeersButton)
+                    .add(DiscoverPeersButton)
+                    .add(loginButton)
+                    .add(startChatButton))
+                .add(12, 12, 12)
+                .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(addManualPeer)
-                    .add(createAccountButton))
+                    .add(createAccountButton)
+                    .add(Close))
+                .add(10, 10, 10)
+                .add(addDefaultPeersButton)
                 .addContainerGap())
             .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                 .add(peerPanelLayout.createSequentialGroup()
@@ -418,9 +440,12 @@ public class ApplicationWindow extends javax.swing.JFrame {
     private javax.swing.JTable DiscoveredPeersTable;
     private javax.swing.JButton addDefaultPeersButton;
     private javax.swing.JButton addManualPeer;
+    private javax.swing.JLabel clientLabel;
     private javax.swing.JButton createAccountButton;
     private javax.swing.JScrollPane jScrollPane8;
     private javax.swing.JButton loginButton;
+    private javax.swing.JLabel ownerLabel;
+    private javax.swing.JLabel peerLabel;
     private javax.swing.JPanel peerPanel;
     private javax.swing.JButton startChatButton;
     javax.swing.JTabbedPane tabbedPane;
