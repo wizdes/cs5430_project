@@ -14,7 +14,7 @@ class EncryptedAESFile extends EncryptedAESMessage{
     byte[] salt;
     byte[] hmacSalt;
     
-    public EncryptedAESFile(SealedObject encryptedObject, byte[] iv, byte[] hmac, byte[] hmacSalt, byte[] salt) {
+    EncryptedAESFile(SealedObject encryptedObject, byte[] iv, byte[] hmac, byte[] hmacSalt, byte[] salt) {
         super(encryptedObject, iv, hmac);
         this.salt = salt;
         this.hmacSalt = hmacSalt;

@@ -14,7 +14,7 @@ import javax.swing.JList;
  *
  * @author yjli_000
  */
-class newCellRenderer extends DefaultListCellRenderer {  
+class NewCellRenderer extends DefaultListCellRenderer {  
     public Component getListCellRendererComponent( JList list, Object value, int index, boolean isSelected, boolean cellHasFocus ) {  
         Component c = super.getListCellRendererComponent( list, value, index, isSelected, cellHasFocus );  
         c.setBackground(colorsList.get(index));  

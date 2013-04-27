@@ -6,7 +6,6 @@ package application.encryption_demo;
 
 import application.encryption_demo.forms.ApplicationWindow;
 import application.encryption_demo.forms.ConfigurationForm;
-import application.encryption_demo.forms.LoginForm;
 import configuration.Constants;
 
 /**

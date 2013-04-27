@@ -2,8 +2,6 @@ package application.encryption_demo;
 
 
 import application.encryption_demo.Messages.Message;
-import application.encryption_demo.Messages.RequestDocUpdateMessage;
-import application.encryption_demo.Messages.RequestJoinDocMessage;
 import application.encryption_demo.forms.ApplicationWindow;
 import document.CommandMessage;
 import document.NetworkDocumentInterface;
@@ -97,11 +95,6 @@ public class EncryptionDemoFunctionality {
     public String createDocumentInstance(NetworkDocumentInterface instance) {
         docInstances.put(instance.getName(), instance);
         return instance.getName();
-    }
-    
-    public boolean sendRequestDocUpdate(String docID, String text){
-        NetworkDocumentInterface instance = docInstances.get(docID);
-        return communication.sendMessage(instance.getOwnerID(), docID, new RequestDocUpdateMessage(profile.username, instance.getName(), text));
     }
     
     public boolean sendJoinRequestMessage(String ownerIdent, String docName){

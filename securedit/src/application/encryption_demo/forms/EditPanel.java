@@ -4,32 +4,26 @@
  */
 package application.encryption_demo.forms;
 
-import _old_stuff.EncryptionDemoGUI;
 import application.encryption_demo.CustomDocument;
 import application.encryption_demo.EncryptionDemoFunctionality;
 import document.AuthorizationDocument;
 import document.DocumentValue;
 import document.NetworkDocumentHandler;
-import document.NetworkDocumentInterface;
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
@@ -147,7 +141,7 @@ public class EditPanel extends javax.swing.JPanel {
         this.functionality = functionality;
         initComponents();
         peerModel = new DefaultListModel();
-        cr = new newCellRenderer();
+        cr = new NewCellRenderer();
         labels = new ArrayList<String>();
         colors = new ArrayList<SimpleAttributeSet>();
         
@@ -737,7 +731,7 @@ public class EditPanel extends javax.swing.JPanel {
     private ArrayList<String> labels;
     public ArrayList<SimpleAttributeSet> colors;
     DefaultListModel peerModel;
-    newCellRenderer cr;
+    NewCellRenderer cr;
     private ArrayList<String> displayedUsername;
     NetworkDocumentHandler nd;
 }
