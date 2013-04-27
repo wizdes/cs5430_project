@@ -9,35 +9,32 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 class Client {
-    private ConcurrentMap<String, Client.Channel> channelMap = new ConcurrentHashMap<>();
-    
-    Client(){}
-    
+    private ConcurrentMap<Node, Client.Channel> channelMap = new ConcurrentHashMap<>();
+        
     void closeSocketWith(Node n) {
-        String key = n.toString();
-        if(channelMap.containsKey(key)){
-            channelMap.get(key).close();
+        if(channelMap.containsKey(n)){
+            channelMap.get(n).close();
         }
     }
     
     void closeConnections() {
-        for (String key : channelMap.keySet()) {
+        for (Node key : channelMap.keySet()) {
             channelMap.get(key).close();
         }
     }
     
     boolean send(Node destNode, NetworkMessage m) {  
-        String key = destNode.toString();
-        
-        if (!channelMap.containsKey(key)) {
+        if (!channelMap.containsKey(destNode)) {
             Channel c = new Channel(destNode);
-            channelMap.putIfAbsent(key, c);
+            if (c.initialize()) {
+                channelMap.put(destNode, c);
+            } else {
+                return false;
+            }
         }
-        
-        return channelMap.get(key).send(m);
+        return channelMap.get(destNode).send(m);
     }
     
-
     private class Channel {
         private Socket socket;
         private ObjectOutputStream out;
@@ -46,14 +43,15 @@ class Client {
         
         private Channel(Node n){
             node = n;
-            initialize();
         }
         
-        private void initialize() {
+        public boolean initialize() {
+            boolean success = false;
             try{
                 socket = new Socket(node.host, node.port);
                 out = new ObjectOutputStream(socket.getOutputStream());
                 in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                success = true;
             } catch(UnknownHostException ex){
                 if(Constants.DEBUG_ON){
                     Logger.getLogger(Client.class.getName()).log(Level.SEVERE, "Unknown host: " + node, ex);
@@ -65,6 +63,8 @@ class Client {
                 }
                 close();
             }
+            
+            return success;
         }
         
         private boolean send(Serializable message) {
@@ -79,6 +79,7 @@ class Client {
                     if(Constants.DEBUG_ON){
                         Logger.getLogger(Client.class.getName()).log(Level.SEVERE, "Client error reading from : " + node + " after send", ex);
                     }
+                    close();                    
                 }
             }
             
@@ -86,6 +87,8 @@ class Client {
         }
         
         private void close() {
+            channelMap.remove(node);
+            
             if(Constants.DEBUG_ON){
                 Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client " + node + " closing socket.");
             }
