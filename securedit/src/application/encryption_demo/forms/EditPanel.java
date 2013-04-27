@@ -275,6 +275,7 @@ public class EditPanel extends javax.swing.JPanel {
         PeersLabel.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         PeersLabel.setText("Peers(not shown currently)");
 
+        documentArea.setFont(new java.awt.Font("Courier New", 0, 13)); // NOI18N
         documentArea.addCaretListener(new javax.swing.event.CaretListener() {
             public void caretUpdate(javax.swing.event.CaretEvent evt) {
                 documentAreaCaretUpdate(evt);
