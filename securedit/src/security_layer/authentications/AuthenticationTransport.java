@@ -9,13 +9,10 @@ import configuration.Constants;
 import document.NetworkDocumentInterface;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.security.Key;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -25,11 +22,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
-import javax.security.auth.DestroyFailedException;
-import javax.security.auth.Destroyable;
 import security_layer.KeyFactory;
 import security_layer.SecureTransportInterface;
 import transport_layer.network.NetworkTransportInterface;
@@ -75,7 +67,6 @@ public class AuthenticationTransport {
         byte[] salt = KeyFactory.generateSalt();
         BigInteger x = new BigInteger(KeyFactory.generateSymmetricKey(password, salt).getEncoded());
         BigInteger v = g.modPow(x, n);
-//        System.out.println("v: " + Arrays.toString(v.toByteArray()));
 
         SecretKey pinKey = null;
         SecretKey HMACKey = null;
@@ -88,77 +79,87 @@ public class AuthenticationTransport {
             }
         }
         InitAuth_Msg initMsg = new InitAuth_Msg(v, salt, docID);
-        return this.secureTransport.sendAESEncryptedMessage(serverID, docID, initMsg, pinKey, HMACKey);
+        
+        AuthenticationSession session = new AuthenticationSession(profile.username, serverID, docID);
+        authSessions.put(getAuthSessionMapKey(serverID, docID), session);
+        
+        if (!this.secureTransport.sendAESEncryptedMessage(serverID, docID, initMsg, pinKey, HMACKey)) {
+            return false;
+        }
+        
+        session.await();
+        return session.success;
     }
     
     public boolean authenticate(String serverID, String docID, char[] password){
-        //Create new session state
+        // Create new session state
         BigInteger a = generateEphemeralPrivateKey();     //a = ephemeral private key
         BigInteger A = g.modPow(a, n);                    //A = g^a = ephemeral public key
         AuthenticationSession session = new AuthenticationSession(profile.username, serverID, docID);
         session.password = password;
         session.a = a;
         session.A = A;
-        authSessions.put(serverID + ":::" + docID, session);
+        System.out.println("putting session for " + getAuthSessionMapKey(serverID, docID));
+        authSessions.put(getAuthSessionMapKey(serverID, docID), session);
         
-        //Send initial message
+        // Send initial message
+        System.out.println("m1" + docID);
         Auth_Msg1 initialMsg = new Auth_Msg1(profile.username, A, docID);
-        transport.send(serverID, initialMsg);
+        transport.send(serverID, docID, initialMsg);
+        System.out.println("m1" + docID);
         
         //Wait for authentication to complete
-        session.authenticateLock.lock();
-        try{
-            while(!session.authenticationCompleted){
-                session.authenticationComplete.await();
-            }
-        } catch (InterruptedException ex) {
-            if(Constants.DEBUG_ON){
-                Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "] authentication with " + serverID + ":" + docID, ex);
-            }
-            return false;
-        } finally{
-            session.authenticateLock.unlock();
-        }
-        return true;
+        session.await();
+        
+        return session.success;
     }
     
     public void processAuthenticationMessage(String sourceID, String docID, AuthenticationMessage receivedMsg){
+        System.out.println("processAuthenticationMessage");
         if(receivedMsg instanceof SRPSetupMessage){
             processSRPSetupMessage(sourceID, (SRPSetupMessage)receivedMsg);
-        }
-        else if(receivedMsg instanceof SRPAuthenticationMessage){
+        } else if(receivedMsg instanceof SRPAuthenticationMessage){
             try {
                 processSRPMessage(sourceID, (SRPAuthenticationMessage)receivedMsg);
             } catch (InvalidSRPMessageException ex) {
-                if(Constants.DEBUG_ON){
-                    Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "] processing authentication from " + sourceID, ex);
-                }
-                //TODO: Handle error here, may need to wake up client
+                AccountLoginError error = new AccountLoginError(docID, "");
+                this.secureTransport.sendPlainTextMessage(sourceID, docID, error);                
             } catch(InconsistentSessionKeyException ex){
-                if(Constants.DEBUG_ON){
-                    Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "] processing authentication from " + sourceID, ex);
-                }
-                //TODO: Handle different error here, may need to wake up client
+                AccountLoginError error = new AccountLoginError(docID, "");
+                this.secureTransport.sendPlainTextMessage(sourceID, docID, error);   
             }
         }
     }
     
-    private void processSRPSetupMessage(String sourceID, SRPSetupMessage receivedSetupMsg){
-        InitAuth_Msg initMsg = (InitAuth_Msg)receivedSetupMsg;
-        docInstances.get(initMsg.docID).getServerAuthenticationPersistantState()
-                                       .addClientPasswordState(sourceID, initMsg.s, initMsg.v);
+    private void processSRPSetupMessage(String sourceID, SRPSetupMessage receivedSetupMsg) {
+        if (receivedSetupMsg instanceof InitAuth_Msg) {
+            InitAuth_Msg initMsg = (InitAuth_Msg)receivedSetupMsg;
+            docInstances.get(initMsg.docID).getServerAuthenticationPersistantState()
+                                           .addClientPasswordState(sourceID, initMsg.s, initMsg.v);
+            
+            InitAuth_MsgSuccess ack = new InitAuth_MsgSuccess(initMsg.docID);
+            this.secureTransport.sendPlainTextMessage(sourceID, initMsg.docID, ack);
+        } else if (receivedSetupMsg instanceof InitAuth_MsgSuccess) {
+            InitAuth_MsgSuccess msg = (InitAuth_MsgSuccess)receivedSetupMsg;
+            AuthenticationSession session = authSessions.get(getAuthSessionMapKey(sourceID, msg.docID));
+            session.wakeup(true);            
+        }
+    }
+    
+    private String getAuthSessionMapKey(String s, String d) {
+        return s + ":::" + d;
     }
     
     private void processSRPMessage(String sourceID, SRPAuthenticationMessage receivedSRPMsg) throws InvalidSRPMessageException, InconsistentSessionKeyException{
         ServerAuthenticationPersistantState persistantServerState;
         
-        if(receivedSRPMsg instanceof Auth_Msg1){    //Server
+        if (receivedSRPMsg instanceof Auth_Msg1) {    //Server
             Auth_Msg1 msg1 = (Auth_Msg1)receivedSRPMsg;
             //Fetch Persistent state
             persistantServerState = docInstances.get(msg1.docID).getServerAuthenticationPersistantState();
             byte[] s = persistantServerState.getClientSalt(sourceID);           //s = salt
             BigInteger v = persistantServerState.getClientVerifier(sourceID);   //v = verifier = g^x
-            if(s == null || v == null){
+            if (s == null || v == null){
                 throw new InvalidSRPMessageException("Client: " + sourceID + " has no account[s,v pair] on record.");
             }
             
@@ -170,7 +171,7 @@ public class AuthenticationTransport {
             session.b = b;
             session.B = B;
             session.A = msg1.A;
-            authSessions.put(sourceID + ":::" + msg1.docID, session);
+            authSessions.put(getAuthSessionMapKey(sourceID, msg1.docID), session);
             
             //Compute S(on the server) which is the common exponential value
             BigInteger u = new BigInteger(KeyFactory.generateNonce() + "");
@@ -193,7 +194,7 @@ public class AuthenticationTransport {
             transport.send(sourceID, replyMsg);
         } else if(receivedSRPMsg instanceof Auth_Msg2){ //Client
             Auth_Msg2 msg2 = (Auth_Msg2)receivedSRPMsg;
-            AuthenticationSession session = authSessions.get(sourceID + ":::" + msg2.docID);
+            AuthenticationSession session = authSessions.get(getAuthSessionMapKey(sourceID, msg2.docID));
             if(session == null){
                 throw new InvalidSRPMessageException("Server: " + sourceID + " has no session data stored on the client.");
             }
@@ -220,10 +221,10 @@ public class AuthenticationTransport {
             byte[] M1 = H(session.A.toByteArray(), session.B.toByteArray(), session.K);
 //            System.out.println("Client's M1: " + Arrays.toString(M1));
             Auth_Msg3 msg3 = new Auth_Msg3(M1, msg2.docID);
-            transport.send(sourceID, msg3);
+            transport.send(sourceID, msg2.docID, msg3);
         } else if(receivedSRPMsg instanceof Auth_Msg3){ //Server
             Auth_Msg3 msg3 = (Auth_Msg3)receivedSRPMsg;
-            AuthenticationSession session = authSessions.get(sourceID + ":::" + msg3.docID);
+            AuthenticationSession session = authSessions.get(getAuthSessionMapKey(sourceID, msg3.docID));
             if(session == null){
                 throw new InvalidSRPMessageException("Client: " + sourceID + " has no session data stored on the server.");
             }
@@ -243,14 +244,14 @@ public class AuthenticationTransport {
             
             byte[] M2 = H(session.A.toByteArray(), msg3.M1, session.K);
             Auth_Msg4 msg4 = new Auth_Msg4(M2, msg3.docID);
-            transport.send(sourceID, msg4);
+            transport.send(sourceID, msg3.docID, msg4);
             
             //Zero memory for session
             cleanupSession(sourceID, msg3.docID);
             
         } else if(receivedSRPMsg instanceof Auth_Msg4){ //Client
             Auth_Msg4 msg4 = (Auth_Msg4)receivedSRPMsg;
-            AuthenticationSession session = authSessions.get(sourceID + ":::" + msg4.docID);
+            AuthenticationSession session = authSessions.get(getAuthSessionMapKey(sourceID, msg4.docID));
             if(session == null){
                 throw new InvalidSRPMessageException("Server: " + sourceID + " has no session data stored on the client.");
             }
@@ -268,13 +269,7 @@ public class AuthenticationTransport {
             cleanupSession(sourceID, msg4.docID);
             
             //Wake up client
-            session.authenticateLock.lock();
-            try {
-                session.authenticationCompleted = true;
-                session.authenticationComplete.signal();
-            } finally {
-                session.authenticateLock.unlock();
-            }
+            session.wakeup(true);
         }
     }
     private void produceAndSaveSessionKeys(String sourceID, String docID, byte[] key) {
@@ -361,6 +356,20 @@ public class AuthenticationTransport {
         }
         return session.authenticationCompleted;
     }
+
+    public void processAuthenticationError(String sourceID, String docID, AuthenticationError authenticationError) {
+        System.out.println("processAuthenticationError");
+        if (authenticationError instanceof AccountLoginError) {
+            AccountLoginError loginError = (AccountLoginError)authenticationError;
+            AuthenticationSession session = authSessions.get(getAuthSessionMapKey(sourceID, docID));
+            session.wakeup(false);
+        } else if (authenticationError instanceof AccountCreationError) {
+            System.out.println("AccountCreationError");
+            AccountCreationError createError = (AccountCreationError)authenticationError;
+            AuthenticationSession session = authSessions.get(getAuthSessionMapKey(sourceID, docID));
+            session.wakeup(false);
+        }
+    }
     
     private class AuthenticationSession {
         private String clientID;
@@ -368,18 +377,46 @@ public class AuthenticationTransport {
         private String docID;
         private BigInteger a, b;
         private BigInteger A, B;
-//        private SecretKey K = null;
         private byte[] K;
         private char[] password;
         private final Condition authenticationComplete;
         private boolean authenticationCompleted = false;
+        private boolean success = false;
         private final Lock authenticateLock;
+        
         private AuthenticationSession(String clientID, String serverID, String docID){
             this.clientID = clientID;
             this.serverID = serverID;
             this.docID = docID;
             this.authenticateLock = new ReentrantLock(true);
             this.authenticationComplete = authenticateLock.newCondition();
+        }
+        
+        private void wakeup(boolean success) {
+            this.authenticateLock.lock();
+            try {
+                authenticationCompleted = true;
+                this.success = success;
+                authSessions.remove(getAuthSessionMapKey(serverID, docID));
+                authenticationComplete.signal();
+            } finally {
+                authenticateLock.unlock();
+            }
+        }
+        
+        private void await() {
+            authenticateLock.lock();
+            try{
+                while(!authenticationCompleted){
+                    authenticationComplete.await();
+                }
+            } catch (InterruptedException ex) {
+                if(Constants.DEBUG_ON){
+                    Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "] authentication with " + serverID + ":" + docID, ex);
+                }
+            } finally{
+                authenticateLock.unlock();
+            }
         }
         
         /**

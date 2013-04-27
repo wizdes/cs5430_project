@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import security_layer.EncryptedMessage;
 import security_layer.PlaintextMessage;
+import security_layer.authentications.AuthenticationError;
 import security_layer.authentications.AuthenticationMessage;
 import transport_layer.discovery.DiscoveryResponseMessage;
 
@@ -37,7 +38,7 @@ public class Server {
 
     void processNetworkMessage(NetworkMessage m){
         this.network.addPeer(m.source.id, m.source.host, m.source.port);
-            
+        
         if (m.content instanceof EncryptedMessage){
             this.network.depositEncryptedMessage(m);
         } else if(m.content instanceof DiscoveryResponseMessage){
@@ -46,6 +47,8 @@ public class Server {
             this.network.depositDiscoveryMessage(m);
         } else if(m.content instanceof AuthenticationMessage){
             this.network.depositAuthenticationMessage(m);
+        } else if(m.content instanceof PlaintextMessage) {
+            this.network.depositAuthenticationError(m);
         }
     }    
     
