@@ -76,7 +76,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
 
         peerPanel.setToolTipText("");
 
-        DiscoveredPeersTable.setModel(new DefaultTableModel(new String[]{"ID", "IP", "Port", "Document", "Authenticated"}, 0));
+        DiscoveredPeersTable.setModel(new DefaultTableModel(new String[]{"ID", "IP", "Port", "Document"}, 0));
         DiscoveredPeersTable.getTableHeader().setReorderingAllowed(false);
         jScrollPane8.setViewportView(DiscoveredPeersTable);
 
@@ -133,7 +133,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
                 .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(addDefaultPeersButton)
                     .add(Close))
-                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 265, Short.MAX_VALUE)
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 331, Short.MAX_VALUE)
                 .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING, false)
                     .add(loginButton, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .add(createAccountButton, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -150,13 +150,13 @@ public class ApplicationWindow extends javax.swing.JFrame {
             .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                 .add(peerPanelLayout.createSequentialGroup()
                     .add(11, 11, 11)
-                    .add(jScrollPane8, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 856, Short.MAX_VALUE)
+                    .add(jScrollPane8, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 872, Short.MAX_VALUE)
                     .add(12, 12, 12)))
         );
         peerPanelLayout.setVerticalGroup(
             peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(org.jdesktop.layout.GroupLayout.TRAILING, peerPanelLayout.createSequentialGroup()
-                .addContainerGap(384, Short.MAX_VALUE)
+                .addContainerGap(400, Short.MAX_VALUE)
                 .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(DiscoverPeersButton)
                     .add(Close)
@@ -172,7 +172,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
                 .add(peerPanelLayout.createSequentialGroup()
                     .add(22, 22, 22)
                     .add(jScrollPane8, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 300, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(132, Short.MAX_VALUE)))
+                    .addContainerGap(148, Short.MAX_VALUE)))
         );
 
         tabbedPane.addTab("Peers", peerPanel);

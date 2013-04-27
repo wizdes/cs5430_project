@@ -51,8 +51,8 @@ public class MultiGUIDemoDriver {
             }
         }, "Shutdown-thread"));
         
-        new ApplicationWindow("0", "localhost", 6000).setVisible(true);
-        new ApplicationWindow("1", "localhost", 6001).setVisible(true);
+        new ApplicationWindow("Matt Goggin", "localhost", 6000).setVisible(true);
+        new ApplicationWindow("Patrick Berens", "localhost", 6001).setVisible(true);
 //        new ConfigurationForm().setVisible(true);
 //        new ConfigurationForm().setVisible(true);
 

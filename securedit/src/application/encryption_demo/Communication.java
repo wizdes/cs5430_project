@@ -164,8 +164,8 @@ public class Communication implements CommunicationInterface {
     }
 
     @Override
-    public void updatePeers(String ident, String ip, int port, List<String> docs, boolean hasHumanAuthenticated) {
-        discoveredPeers.addPeer(ident, ip, port, docs, hasHumanAuthenticated);
+    public void updatePeers(String ident, String ip, int port, List<String> docs) {
+        discoveredPeers.addPeer(ident, ip, port, docs);
         secureTransport.addPeer(ident, ip, port);
         
         if(guiFunctionality != null){

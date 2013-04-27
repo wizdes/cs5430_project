@@ -75,12 +75,12 @@ public class NetworkDocumentTest {
         documentMap3.put("document", nd3);
         
         ArrayList<String> documents = new ArrayList(documentMap1.keySet());
-        p1Communicator.updatePeers(p2Ident, "localhost", p2Port, new ArrayList<String>(), false);
-        p1Communicator.updatePeers(p3Ident, "localhost", p3Port, new ArrayList<String>(), false);
-        p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents, false);
-        p2Communicator.updatePeers(p3Ident, "localhost", p3Port, new ArrayList<String>(), false);
-        p3Communicator.updatePeers(p1Ident, "localhost", p1Port, documents, false);
-        p3Communicator.updatePeers(p2Ident, "localhost", p2Port, new ArrayList<String>(), false);    
+        p1Communicator.updatePeers(p2Ident, "localhost", p2Port, new ArrayList<String>());
+        p1Communicator.updatePeers(p3Ident, "localhost", p3Port, new ArrayList<String>());
+        p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents);
+        p2Communicator.updatePeers(p3Ident, "localhost", p3Port, new ArrayList<String>());
+        p3Communicator.updatePeers(p1Ident, "localhost", p1Port, documents);
+        p3Communicator.updatePeers(p2Ident, "localhost", p2Port, new ArrayList<String>());    
         
         char[] PIN2 = p1Communicator.generatePIN(p2Ident, documents.get(0));
         p2Communicator.initializeSRPAuthentication(p1Ident, documents.get(0), password_2, PIN2);

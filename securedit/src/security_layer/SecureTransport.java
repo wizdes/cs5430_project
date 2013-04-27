@@ -203,7 +203,7 @@ public class SecureTransport implements SecureTransportInterface{
             Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + profile.username + "] Processing " + DiscoveryResponseMessage.class.getName() + " from " + msg.owner + ".");
         }
         
-        communication.updatePeers(msg.owner, msg.ip, msg.port, msg.documents, false);
+        communication.updatePeers(msg.owner, msg.ip, msg.port, msg.documents);
     }
     
     @Override

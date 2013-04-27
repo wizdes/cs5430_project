@@ -32,7 +32,7 @@ public interface CommunicationInterface {
     
     public void shutdown();
     
-    public void updatePeers(String ident, String ip, int port, List<String> docs, boolean needsHumanAuth);
+    public void updatePeers(String ident, String ip, int port, List<String> docs);
 //    public void updateHumanAuthStatus(String ident, boolean hasHumanAuthenticated);
 //    
 //    public boolean updatePin(String ID, String PIN);
