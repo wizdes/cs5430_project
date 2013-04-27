@@ -17,6 +17,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import security_layer.Profile;
+import security_layer.authentications.AuthenticationTransport;
 
 /**
  *
@@ -117,17 +118,32 @@ public class CommunicationInterfaceTest {
     public void testAuthenticationFailures() {
         ConcurrentMap <String, NetworkDocumentInterface> documentMap = new ConcurrentHashMap<>();
         
-        p1Communicator = new Communication(p1, documentMap);
+        
         p2Communicator = new Communication(p2, null);
-        p3Communicator = new Communication(p3, null);
-                
+                                
+        ArrayList<String> documents = new ArrayList();
+        documents.add("document");
+        p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents, false);
+          
+        boolean r;
+        AuthenticationTransport.AUTH_TIMEOUT_DELAY = 500;
+        
+        // Try to create an account when the owner is not online
+        r = p2Communicator.initializeSRPAuthentication(p1Ident, "document", password_2, "SomePIN".toCharArray());
+        assertFalse(r);
+        
+        // Try to login when the owner is not online
+        r = p2Communicator.authenticate(p1Ident, documents.get(0), password_2);
+        assertFalse(r);  
+        
+        AuthenticationTransport.AUTH_TIMEOUT_DELAY = 1000;
+        
+        p1Communicator = new Communication(p1, documentMap);
+        p3Communicator = new Communication(p3, null);        
+        
         NetworkDocumentHandler nd = new NetworkDocumentHandler(p1Communicator, p1Ident, p1Ident, "document");
         documentMap.put("document", nd);
         
-        ArrayList<String> documents = new ArrayList(documentMap.keySet());
-        p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents, false);
-        
-        boolean r;
         // Try to create an account when the owner is not hosting a document
         r = p2Communicator.initializeSRPAuthentication(p1Ident, "Fakedocument", password_2, "SomePIN".toCharArray());
         assertFalse(r);

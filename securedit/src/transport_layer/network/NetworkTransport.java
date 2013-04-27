@@ -78,9 +78,6 @@ public class NetworkTransport implements NetworkTransportInterface{
             return false;
         }
         NetworkMessage netMsg = new NetworkMessage(topology.getMyNode(), docID, destNode, msg);
-        Constants.log("SEND");
-        Constants.log(topology.getMyNode().id);
-        Constants.log(netMsg.source.id);
         client.send(destNode, netMsg);
         return true;
     }
