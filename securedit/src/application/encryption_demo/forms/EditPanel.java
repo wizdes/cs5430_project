@@ -176,7 +176,7 @@ public class EditPanel extends javax.swing.JPanel {
             LevelSelect.setEnabled(false);
             setLevelButton.setEnabled(false);
             generatePINButton.setEnabled(false);
-            changeUserLevel.setText("Request Change Level");
+            changeUserLevelButton.setText("Request Change Level");
         }
     }
 
@@ -214,10 +214,10 @@ public class EditPanel extends javax.swing.JPanel {
         LevelList = new javax.swing.JScrollPane();
         jList1 = new javax.swing.JList();
         LevelLabel = new javax.swing.JLabel();
-        changeUserLevel = new javax.swing.JButton();
-        openFile = new javax.swing.JButton();
-        openNormalFile = new javax.swing.JButton();
-        saveEncryptedFile = new javax.swing.JButton();
+        changeUserLevelButton = new javax.swing.JButton();
+        openEncryptedFileButton = new javax.swing.JButton();
+        openNormalFileButton = new javax.swing.JButton();
+        saveEncryptedFileButton = new javax.swing.JButton();
         DisconnectButton = new javax.swing.JButton();
         ownerWriteLevel = new javax.swing.JComboBox();
         generatePINButton = new javax.swing.JButton();
@@ -265,50 +265,75 @@ public class EditPanel extends javax.swing.JPanel {
                 setLevelButtonMousePressed(evt);
             }
         });
+        setLevelButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                setLevelButtonActionPerformed(evt);
+            }
+        });
 
         LevelList.setViewportView(jList1);
 
         LevelLabel.setText("Levels");
 
-        changeUserLevel.setText("Change User Level");
-        changeUserLevel.addMouseListener(new java.awt.event.MouseAdapter() {
+        changeUserLevelButton.setText("Change User Level");
+        changeUserLevelButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mousePressed(java.awt.event.MouseEvent evt) {
-                changeUserLevelMousePressed(evt);
+                changeUserLevelButtonMousePressed(evt);
             }
         });
-        changeUserLevel.addKeyListener(new java.awt.event.KeyAdapter() {
-            public void keyPressed(java.awt.event.KeyEvent evt) {
-                changeUserLevelKeyPressed(evt);
-            }
-        });
-
-        openFile.setText("Open Encrypted File");
-        openFile.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mousePressed(java.awt.event.MouseEvent evt) {
-                openFileMousePressed(evt);
-            }
-        });
-
-        openNormalFile.setText("Open Normal File");
-        openNormalFile.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mousePressed(java.awt.event.MouseEvent evt) {
-                openNormalFileMousePressed(evt);
-            }
-        });
-        openNormalFile.addActionListener(new java.awt.event.ActionListener() {
+        changeUserLevelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                openNormalFileActionPerformed(evt);
+                changeUserLevelButtonActionPerformed(evt);
+            }
+        });
+        changeUserLevelButton.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                changeUserLevelButtonKeyPressed(evt);
             }
         });
 
-        saveEncryptedFile.setText("Save Encrypted File");
-        saveEncryptedFile.addMouseListener(new java.awt.event.MouseAdapter() {
+        openEncryptedFileButton.setText("Open Encrypted File");
+        openEncryptedFileButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mousePressed(java.awt.event.MouseEvent evt) {
-                saveEncryptedFileMousePressed(evt);
+                openEncryptedFileButtonMousePressed(evt);
+            }
+        });
+        openEncryptedFileButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                openEncryptedFileButtonActionPerformed(evt);
+            }
+        });
+
+        openNormalFileButton.setText("Open Normal File");
+        openNormalFileButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                openNormalFileButtonMousePressed(evt);
+            }
+        });
+        openNormalFileButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                openNormalFileButtonActionPerformed(evt);
+            }
+        });
+
+        saveEncryptedFileButton.setText("Save Encrypted File");
+        saveEncryptedFileButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                saveEncryptedFileButtonMousePressed(evt);
+            }
+        });
+        saveEncryptedFileButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveEncryptedFileButtonActionPerformed(evt);
             }
         });
 
         DisconnectButton.setText("Disconnect");
+        DisconnectButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                DisconnectButtonActionPerformed(evt);
+            }
+        });
 
         ownerWriteLevel.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
@@ -332,11 +357,11 @@ public class EditPanel extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 583, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(openFile)
+                        .addComponent(openEncryptedFileButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(openNormalFile)
+                        .addComponent(openNormalFileButton)
                         .addGap(18, 18, 18)
-                        .addComponent(saveEncryptedFile)
+                        .addComponent(saveEncryptedFileButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(generatePINButton)))
                 .addGap(39, 39, 39)
@@ -361,7 +386,7 @@ public class EditPanel extends javax.swing.JPanel {
                             .addComponent(cursorInfo)
                             .addComponent(LevelLabel)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(changeUserLevel)
+                                .addComponent(changeUserLevelButton)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(setLevelButton)))
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -387,7 +412,7 @@ public class EditPanel extends javax.swing.JPanel {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(setLevelButton)
-                            .addComponent(changeUserLevel))
+                            .addComponent(changeUserLevelButton))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(LevelLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -400,9 +425,9 @@ public class EditPanel extends javax.swing.JPanel {
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 392, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(openFile)
-                            .addComponent(openNormalFile)
-                            .addComponent(saveEncryptedFile)
+                            .addComponent(openEncryptedFileButton)
+                            .addComponent(openNormalFileButton)
+                            .addComponent(saveEncryptedFileButton)
                             .addComponent(generatePINButton))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -423,43 +448,19 @@ public class EditPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_LevelSelectActionPerformed
 
     private void setLevelButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_setLevelButtonMousePressed
-        // TODO add your handling code here:
-        if(beginCursor.getText().equals("") || endCursor.getText().equals("")){
-            return;
-        }
-        int beginCursorInt = Integer.parseInt(beginCursor.getText());
-        int endCursorInt = Integer.parseInt(endCursor.getText());
-        int colorPosition = LevelSelect.getSelectedIndex();
-        AttributeSet s = colors.get(colorPosition);
-        //send it to everyone else
-        //setColors(beginCursorInt, endCursorInt - beginCursorInt, colorPosition);
-        nd.assignLevel(colorPosition, beginCursorInt, endCursorInt);
+        //Replaced with action listener
     }//GEN-LAST:event_setLevelButtonMousePressed
 
-    private void changeUserLevelKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_changeUserLevelKeyPressed
+    private void changeUserLevelButtonKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_changeUserLevelButtonKeyPressed
         // TODO add your handling code here:
 
         
-    }//GEN-LAST:event_changeUserLevelKeyPressed
+    }//GEN-LAST:event_changeUserLevelButtonKeyPressed
 
-    private void changeUserLevelMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_changeUserLevelMousePressed
-        // TODO add your handling code here:
-        System.out.println("Pressed Button");
-        ChangeUserAccess jf = new ChangeUserAccess();
-        jf.setLabelsandUsername(labels, displayedUsername, nd);
-        //jf.setVisible(true);
+    private void changeUserLevelButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_changeUserLevelButtonMousePressed
+        //Replaced with changeUserLevelButtonActionPerformed
 
-        Object[] options = {"Close"};
-        int r = JOptionPane.showOptionDialog(
-                this,
-                jf, 
-                "Login",
-                JOptionPane.OK_OPTION,
-                JOptionPane.INFORMATION_MESSAGE,
-                null,
-                options,
-                options[0]);
-    }//GEN-LAST:event_changeUserLevelMousePressed
+    }//GEN-LAST:event_changeUserLevelButtonMousePressed
 
     private void ownerWriteLevelItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_ownerWriteLevelItemStateChanged
         // TODO add your handling code here:
@@ -470,11 +471,7 @@ public class EditPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_ownerWriteLevelItemStateChanged
 
-    private void openNormalFileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openNormalFileActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_openNormalFileActionPerformed
-
-    private void openNormalFileMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_openNormalFileMousePressed
+    private void openNormalFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openNormalFileButtonActionPerformed
         jFileChooser1.setVisible(true);
         int returnVal = jFileChooser1.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -488,7 +485,11 @@ public class EditPanel extends javax.swing.JPanel {
         } else {
             System.out.println("File access cancelled by user.");
         }
-    }//GEN-LAST:event_openNormalFileMousePressed
+    }//GEN-LAST:event_openNormalFileButtonActionPerformed
+
+    private void openNormalFileButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_openNormalFileButtonMousePressed
+        //Replaced with openNormalFileButtonActionPerformed
+    }//GEN-LAST:event_openNormalFileButtonMousePressed
 
     private void generatePINButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_generatePINButtonActionPerformed
         String username = JOptionPane.showInputDialog("Enter the username:").trim();
@@ -505,39 +506,17 @@ public class EditPanel extends javax.swing.JPanel {
         //System.out.println("File Selected");
     }//GEN-LAST:event_jFileChooser1ActionPerformed
 
-    private void saveEncryptedFileMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_saveEncryptedFileMousePressed
-        // TODO add your handling code here:
-        //Using a JPanel as the message for the JOptionPane
-        JPanel userPanel = new JPanel();
-        userPanel.setLayout(new GridLayout(2,2));
+    private void saveEncryptedFileButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_saveEncryptedFileButtonMousePressed
+       //replaced with saveEncryptedFileActionPeformed
+       
+    }//GEN-LAST:event_saveEncryptedFileButtonMousePressed
 
-        JLabel passwordLbl = new JLabel("Password:");
-        JPasswordField passwordFld = new JPasswordField();
-        char[] password = passwordFld.getPassword();
+    private void openEncryptedFileButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_openEncryptedFileButtonMousePressed
+        //replaced with openEncryptedFileActionPerformed
+    }//GEN-LAST:event_openEncryptedFileButtonMousePressed
 
-        userPanel.add(passwordLbl);
-        userPanel.add(passwordFld);
-
-        //As the JOptionPane accepts an object as the message
-        //it allows us to use any component we like - in this case 
-        //a JPanel containing the dialog components we want
-        int input = JOptionPane.showConfirmDialog(null, userPanel, "Enter your password:"
-                      ,JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        jFileChooser1.setVisible(true);
-        int returnVal = jFileChooser1.showOpenDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = jFileChooser1.getSelectedFile();
-            String fileName = file.getAbsolutePath();
-            functionality.encryptFile(fileName, nd.getAuthDocument(), password);
-        } else {
-            System.out.println("File access cancelled by user.");
-        }        
-    }//GEN-LAST:event_saveEncryptedFileMousePressed
-
-    private void openFileMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_openFileMousePressed
-        // TODO add your handling code here:
-        // TODO add your handling code here:
-        //Using a JPanel as the message for the JOptionPane
+    private void openEncryptedFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openEncryptedFileButtonActionPerformed
+                //Using a JPanel as the message for the JOptionPane
 
         JPanel userPanel = new JPanel();
         userPanel.setLayout(new GridLayout(2,2));
@@ -566,7 +545,70 @@ public class EditPanel extends javax.swing.JPanel {
         } else {
             System.out.println("File access cancelled by user.");
         }
-    }//GEN-LAST:event_openFileMousePressed
+    }//GEN-LAST:event_openEncryptedFileButtonActionPerformed
+
+    private void saveEncryptedFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveEncryptedFileButtonActionPerformed
+        //Using a JPanel as the message for the JOptionPane
+        JPanel userPanel = new JPanel();
+        userPanel.setLayout(new GridLayout(2,2));
+
+        JLabel passwordLbl = new JLabel("Password:");
+        JPasswordField passwordFld = new JPasswordField();
+        char[] password = passwordFld.getPassword();
+
+        userPanel.add(passwordLbl);
+        userPanel.add(passwordFld);
+
+        //As the JOptionPane accepts an object as the message
+        //it allows us to use any component we like - in this case 
+        //a JPanel containing the dialog components we want
+        int input = JOptionPane.showConfirmDialog(null, userPanel, "Enter your password:"
+                      ,JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        jFileChooser1.setVisible(true);
+        int returnVal = jFileChooser1.showOpenDialog(this);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = jFileChooser1.getSelectedFile();
+            String fileName = file.getAbsolutePath();
+            functionality.encryptFile(fileName, nd.getAuthDocument(), password);
+        } else {
+            System.out.println("File access cancelled by user.");
+        } 
+    }//GEN-LAST:event_saveEncryptedFileButtonActionPerformed
+
+    private void changeUserLevelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeUserLevelButtonActionPerformed
+        System.out.println("Pressed Button");
+        ChangeUserAccess jf = new ChangeUserAccess();
+        jf.setLabelsandUsername(labels, displayedUsername, nd);
+        //jf.setVisible(true);
+
+        Object[] options = {"Close"};
+        int r = JOptionPane.showOptionDialog(
+                this,
+                jf, 
+                "Login",
+                JOptionPane.OK_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                options,
+                options[0]);
+    }//GEN-LAST:event_changeUserLevelButtonActionPerformed
+
+    private void setLevelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setLevelButtonActionPerformed
+        if(beginCursor.getText().equals("") || endCursor.getText().equals("")){
+            return;
+        }
+        int beginCursorInt = Integer.parseInt(beginCursor.getText());
+        int endCursorInt = Integer.parseInt(endCursor.getText());
+        int colorPosition = LevelSelect.getSelectedIndex();
+        AttributeSet s = colors.get(colorPosition);
+        //send it to everyone else
+        //setColors(beginCursorInt, endCursorInt - beginCursorInt, colorPosition);
+        nd.assignLevel(colorPosition, beginCursorInt, endCursorInt);
+    }//GEN-LAST:event_setLevelButtonActionPerformed
+
+    private void DisconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DisconnectButtonActionPerformed
+        
+    }//GEN-LAST:event_DisconnectButtonActionPerformed
 
     public void repaint(AuthorizationDocument ad){
         String text = ad.getDocument().getString();
@@ -675,7 +717,7 @@ public class EditPanel extends javax.swing.JPanel {
     private javax.swing.JLabel PeersLabel;
     private javax.swing.JList PeersList;
     private javax.swing.JTextField beginCursor;
-    private javax.swing.JButton changeUserLevel;
+    private javax.swing.JButton changeUserLevelButton;
     private javax.swing.JLabel cursorInfo;
     private javax.swing.JTextPane documentArea;
     private javax.swing.JTextField endCursor;
@@ -685,10 +727,10 @@ public class EditPanel extends javax.swing.JPanel {
     private javax.swing.JList jList1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JButton openFile;
-    private javax.swing.JButton openNormalFile;
+    private javax.swing.JButton openEncryptedFileButton;
+    private javax.swing.JButton openNormalFileButton;
     private javax.swing.JComboBox ownerWriteLevel;
-    private javax.swing.JButton saveEncryptedFile;
+    private javax.swing.JButton saveEncryptedFileButton;
     private javax.swing.JToggleButton setLevelButton;
     // End of variables declaration//GEN-END:variables
     private ArrayList<String> labels;
