@@ -68,6 +68,18 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
         }
     }
     
+    public void deleteUser(String userId){
+        if(curDoc != null){
+            curDoc.removeUser(userId);
+        }
+        authDocument.removeUser(userId);
+        
+        if(userId.equals(this.collaboratorId)){
+            DeleteUser dl = new DeleteUser(userId);
+            this.sendCommandMessage(this.getOwnerID(), dl);
+        }
+    }
+    
     @Override
     public void requestChangeLevel(int level) {
         if (this.isOwner()) {
@@ -231,6 +243,8 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
             int level = this.authDocument.getLevelForUser(m.from);
             BootstrapResponse resp = new BootstrapResponse(this.document.formatFor(level));
             this.sendCommandMessage(m.from, resp);
+        } else if(m.command instanceof DeleteUser){
+            this.deleteUser(((DeleteUser)m.command).getUserID());
         }
     }
     
@@ -270,7 +284,10 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
             if (curDoc != null) {
                 curDoc.handleBootstrap(this.authDocument);
             }
+        } else if(m.command instanceof DeleteUser){
+            this.deleteUser(((DeleteUser)m.command).getUserID());
         }
+
     }    
 
     @Override
