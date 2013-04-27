@@ -312,6 +312,7 @@ public class NetworkDocument implements NetworkDocumentInterface {
     @Override
     public void setAuthDocument(AuthorizationDocument ad) {
         this.authDocument = ad;
+        this.document = this.authDocument.getDocument();
     }
 
     @Override
