@@ -13,8 +13,10 @@ import security_layer.EncryptedMessage;
 import security_layer.InvalidHMACException;
 import security_layer.PlaintextMessage;
 import security_layer.SecureTransportInterface;
+import security_layer.authentications.AuthenticationError;
 import security_layer.authentications.AuthenticationTransport;
 import security_layer.authentications.AuthenticationMessage;
+import security_layer.authentications.InitAuth_MsgSuccess;
 import transport_layer.discovery.DiscoveryMessage;
 import transport_layer.discovery.DiscoveryResponseMessage;
 
@@ -111,7 +113,19 @@ public class NetworkTransport implements NetworkTransportInterface{
             secureTransport.processDiscoveryResponse((DiscoveryResponseMessage)msg.content);
         }
     }
+    
     void depositAuthenticationMessage(NetworkMessage msg){
         authenticationTransport.processAuthenticationMessage(msg.source.id, msg.docID, (AuthenticationMessage)msg.content);
     }
+    
+    void depositAuthenticationError(NetworkMessage msg){
+        PlaintextMessage pm = (PlaintextMessage)msg.content;
+        if (pm.message instanceof AuthenticationError) {
+            AuthenticationError error = (AuthenticationError)pm.message;
+            authenticationTransport.processAuthenticationError(msg.source.id, msg.docID, error);
+        } else if (pm.message instanceof InitAuth_MsgSuccess) {
+            InitAuth_MsgSuccess ack = (InitAuth_MsgSuccess)pm.message;
+            authenticationTransport.processAuthenticationMessage(msg.source.id, msg.docID, ack);
+        }
+    }    
 }

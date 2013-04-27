@@ -60,10 +60,6 @@ public class EncryptionDemoFunctionality {
         communication.sendManualDiscoverMessage(id, host, port, dm);
     }
     
-    public boolean login(String machineId, String docID, char[] password){
-        return communication.authenticate(machineId, docID, password);
-    }
-    
     /**
      * Open a file to be displayed in the GUI
      * @param filename

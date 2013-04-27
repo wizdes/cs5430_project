@@ -5,7 +5,6 @@
 package security_layer;
 
 import application.encryption_demo.Messages.Message;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import javax.crypto.SecretKey;
 import security_layer.authentications.AuthenticationTransport;
@@ -21,6 +20,7 @@ public interface SecureTransportInterface {
     public boolean sendAESEncryptedMessage(String destination, String docID, Message m, SecretKey secretKey, SecretKey HMACKey);
 //    public boolean sendRSAEncryptedMessage(String destination, Message m);
     public boolean sendPlainTextMessage(String destination, Message m);
+    public boolean sendPlainTextMessage(String destination, String docID, Message m);
 //    public boolean processPlaintextMessage(String sourceOfMessage, PlaintextMessage msg);
     public boolean processEncryptedMessage(String sourceOfMessage, String docID, EncryptedMessage encryptedMsg) throws InvalidHMACException;
     public boolean writeEncryptedFile(String filename, char[] password, Message contents);
