@@ -128,15 +128,16 @@ public class CommunicationInterfaceTest {
         p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents, false);
         
         boolean r;
+        // Try to create an account when the owner is not hosting a document
+        r = p2Communicator.initializeSRPAuthentication(p1Ident, "Fakedocument", password_2, "SomePIN".toCharArray());
+        assertFalse(r);
         
         // Try to create an account when no pin has been generated
-        System.out.println("Test ~> 1");
         r = p2Communicator.initializeSRPAuthentication(p1Ident, documents.get(0), password_2, "SomePIN".toCharArray());
         assertFalse(r);
         
         // Try to create an account with the wrong PIN (but one has been generated)
         char[] PIN = p1Communicator.generatePIN(p2Ident, documents.get(0));
-        System.out.println("Test ~> 2");
         r = p2Communicator.initializeSRPAuthentication(p1Ident, documents.get(0), password_2, "SomePIN".toCharArray());
         assertFalse(r);
         
