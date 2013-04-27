@@ -20,10 +20,12 @@ public class ServerAuthenticationPersistantState implements Serializable {
         state.put(clientID, new SaltAndVerifier(salt, passwordVerifier));
     }
     byte[] getClientSalt(String clientID){
-        return state.get(clientID).salt;
+        SaltAndVerifier s = state.get(clientID);
+        return s == null ? null : s.salt;
     }
     BigInteger getClientVerifier(String clientID){
-        return state.get(clientID).passwordVerifier;
+        SaltAndVerifier s = state.get(clientID);
+        return s == null ? null : s.passwordVerifier;
     }
     private class SaltAndVerifier implements Serializable { 
         private byte[] salt;

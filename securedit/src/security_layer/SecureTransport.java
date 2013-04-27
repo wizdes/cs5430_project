@@ -2,6 +2,7 @@ package security_layer;
 
 
 import application.encryption_demo.CommunicationInterface;
+import security_layer.authentications.AccountCreationError;
 import transport_layer.discovery.DiscoveryMessage;
 import application.encryption_demo.Messages.Message;
 import configuration.Constants;
@@ -169,7 +170,13 @@ public class SecureTransport implements SecureTransportInterface{
 //            return false;
 //        }
 //    }
-
+    
+    private void replyAuthFailure(String sourceOfMessage, String docID) {
+        Constants.log("failed to authenticate " + sourceOfMessage + " for " + docID);
+        AccountCreationError error = new AccountCreationError(docID, "");
+        this.sendPlainTextMessage(sourceOfMessage, docID, error);
+    }
+    
     @Override
     public boolean processEncryptedMessage(String sourceOfMessage, String docID, EncryptedMessage encryptedMessage) throws InvalidHMACException {
         boolean success = false;
@@ -182,24 +189,22 @@ public class SecureTransport implements SecureTransportInterface{
 
         Cipher cipher = null;
         try {
-            Constants.log("Received AES message");
-            
             EncryptedAESMessage aesMessage = (EncryptedAESMessage) encryptedMessage;
             encryptedObject = aesMessage.encryptedObject;
             
             if (encryptedMessage instanceof EncryptedAuthenticationMessage) {
-                Constants.log("Received EncryptedAuthenticationMessage");
                 char[] PIN = this.authentication.getPIN(sourceOfMessage, docID);
+                if (PIN == null) {
+                    replyAuthFailure(sourceOfMessage, docID);
+                    return false;
+                }
                 try {
                     secretKey = KeyFactory.generateSymmetricKey(PIN, "PIN".getBytes("UTF-16"));
                     HMACKey = KeyFactory.generateSymmetricKey(PIN, "HMAC".getBytes("UTF-16"));
                 } catch (UnsupportedEncodingException ex) {
-                    if(Constants.DEBUG_ON){
-                        Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    return false;
                 }
             } else {
-                Constants.log("Received other");
                 HMACKey = keys.getHmacKey(sourceOfMessage, docID);
                 secretKey = keys.getSessionKey(sourceOfMessage, docID);
             }
@@ -215,7 +220,8 @@ public class SecureTransport implements SecureTransportInterface{
             }
             
             if (!Arrays.equals(hmac, aesMessage.HMAC)) {
-                throw new InvalidHMACException("[User: " + profile.username + "] Invalid HMAC from " + sourceOfMessage + ".");
+                replyAuthFailure(sourceOfMessage, docID);
+                return false;
             }
 
             
@@ -432,12 +438,7 @@ public class SecureTransport implements SecureTransportInterface{
     
     @Override
     public boolean sendPlainTextMessage(String destination, Message m) {
-        if(Constants.DEBUG_ON){
-            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + profile.username + "] Sending " + PlaintextMessage.class.getName() + " to " + destination + ".");
-        }
-        PlaintextMessage sendMsg = new PlaintextMessage();
-        sendMsg.m = m;
-        return networkTransport.send(destination, sendMsg);
+        return this.sendPlainTextMessage(destination, null, m);
     }
 
 //    @Override
@@ -453,5 +454,15 @@ public class SecureTransport implements SecureTransportInterface{
         if(password != null){
             Arrays.fill(password, '0');
         }
+    }
+
+    @Override
+    public boolean sendPlainTextMessage(String destination, String docID, Message m) {
+        if(Constants.DEBUG_ON){
+            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + profile.username + "] Sending " + PlaintextMessage.class.getName() + " to " + destination + ".");
+        }
+        PlaintextMessage sendMsg = new PlaintextMessage();
+        sendMsg.message = m;
+        return networkTransport.send(destination, docID, sendMsg);
     }
 }

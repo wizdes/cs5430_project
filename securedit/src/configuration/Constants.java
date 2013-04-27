@@ -8,13 +8,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import security_layer.EncryptedMessage;
 import security_layer.SecureTransport;
+import security_layer.authentications.AuthenticationTransport;
 
 /**
  *
  * @author Patrick
  */
 public class Constants {
-    public static final boolean DEBUG_ON = false;
+    public static final boolean DEBUG_ON = true;
     public static final String passwordCharacterRegex = ".*[^a-zA-Z\\s0-9].*";
     public static final int MIN_PASSWORD_LENGTH = 12;
     
@@ -40,4 +41,14 @@ public class Constants {
         }
     }
     
+    public static void logger(Class klass, Exception ex) {
+        logger(klass, "", ex);      
+    }
+
+    public static void logger(Class klass, String msg, Exception ex) {
+        if (Constants.DEBUG_ON){
+            Logger.getLogger(klass.getName()).log(Level.SEVERE, msg, ex);
+        }        
+    }
+
 }
