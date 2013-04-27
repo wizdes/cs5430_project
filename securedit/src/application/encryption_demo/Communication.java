@@ -7,7 +7,7 @@ package application.encryption_demo;
 
 import security_layer.Profile;
 import configuration.Constants;
-import document.NetworkDocumentInterface;
+import document.NetworkDocumentHandlerInterface;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -46,7 +46,7 @@ public class Communication implements CommunicationInterface {
 //        }
 //    }
         
-    public Communication(Profile profile, ConcurrentMap<String, NetworkDocumentInterface> docInstances) {
+    public Communication(Profile profile, ConcurrentMap<String, NetworkDocumentHandlerInterface> docInstances) {
         this.profile = profile;
         //Only used for test packages
         NetworkTransportInterface networkTransport = new NetworkTransport(profile.username, profile.host, profile.port);
@@ -57,7 +57,7 @@ public class Communication implements CommunicationInterface {
     }
     public Communication(EncryptionDemoFunctionality guiFunctionality, 
                          Profile profile, 
-                         ConcurrentMap<String, NetworkDocumentInterface> docInstances) {
+                         ConcurrentMap<String, NetworkDocumentHandlerInterface> docInstances) {
         this(profile, docInstances);
         this.guiFunctionality = guiFunctionality;
     }

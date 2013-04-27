@@ -3,7 +3,7 @@ package application.encryption_demo;
 
 import application.encryption_demo.forms.ApplicationWindow;
 import document.CommandMessage;
-import document.NetworkDocumentInterface;
+import document.NetworkDocumentHandlerInterface;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,7 +21,7 @@ public class EncryptionDemoFunctionality {
     private String openedFilename;
     private CommunicationInterface communication;
 //    public PINFunctionality properPINInfo;
-    private ConcurrentMap<String, NetworkDocumentInterface> docInstances = new ConcurrentHashMap<>();
+    private ConcurrentMap<String, NetworkDocumentHandlerInterface> docInstances = new ConcurrentHashMap<>();
     private Profile profile;
     
     public CommunicationInterface getCommunicationInterface(){
@@ -91,7 +91,7 @@ public class EncryptionDemoFunctionality {
 //        return communication.sendMessage(ident, new StringMessage(plaintextMsg));
 //    }
     
-    public String createDocumentInstance(NetworkDocumentInterface instance) {
+    public String createDocumentInstance(NetworkDocumentHandlerInterface instance) {
         docInstances.put(instance.getName(), instance);
         return instance.getName();
     }
@@ -99,31 +99,6 @@ public class EncryptionDemoFunctionality {
     public boolean sendJoinRequestMessage(String ownerIdent, String docName){
         return communication.sendMessage(ownerIdent, docName, new RequestJoinDocMessage(profile.username, docName));
     }
-    
-    
-//    public boolean broadcastEncryptedMessage(String plaintextMsg){        
-//        return communication.broadcastMessage(new StringMessage(plaintextMsg));
-//    }
-    
-//    public boolean authenticateHuman(String ident) {
-//        return this.communication.authenticateHuman(ident);
-//    }
-//    
-//    public boolean authenticateMachine(String ident){
-//        return communication.authenticateMachine(ident);
-//    }
-    
-//    public boolean addPIN(String ident, String pin) {
-//        return this.communication.updatePin(ident, pin);
-//    }
-    
-//    public void updateHumanAuthStatus(String id, boolean hasHumanAuthenticated){
-//        this.communication.updateHumanAuthStatus(id, hasHumanAuthenticated);
-//    }
-    
-//    public void addPeerToGUI(Peer peer){
-//        gui.addDiscoveredPeer(peer);
-//    }
     public void updatePeersInGUI(DiscoveredPeers peers){
         gui.updateDiscoveredPeers(peers);
     }
@@ -160,19 +135,27 @@ public class EncryptionDemoFunctionality {
                 
                 for (Message m : messages) {
                     if(m instanceof RequestJoinDocMessage){
-                        //Owner: Adds sourceID to collaborators for document instance
                         RequestJoinDocMessage joinMsg = (RequestJoinDocMessage)m;
-                        
-                        NetworkDocumentInterface instance = docInstances.get(joinMsg.docName);
-                        instance.addUserToLevel(joinMsg.sourceID, 0);
-                        //instance.addUserToLevel(joinMsg.docName, 0);
+                        NetworkDocumentHandlerInterface instance = docInstances.get(joinMsg.docName);
+                        instance.lock();
+                        try{
+                            //Owner: Adds sourceID to collaborators for document instance
+                            instance.addUserToLevel(joinMsg.sourceID, 0);
+                        } finally{
+                            instance.unlock();
+                        }
                     }
                     else if (m instanceof DiscoveryMessage) {
 
                     } else if (m instanceof CommandMessage) {
                         CommandMessage cm = (CommandMessage)m;
-                        NetworkDocumentInterface instance = docInstances.get(cm.documentName);
-                        instance.processMessage(cm);
+                        NetworkDocumentHandlerInterface instance = docInstances.get(cm.documentName);
+                        instance.lock();
+                        try{
+                            instance.processMessage(cm);
+                        } finally{
+                            instance.unlock();
+                        }
                     }
                 }
             }

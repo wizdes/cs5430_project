@@ -39,12 +39,19 @@ public class EditPanel extends javax.swing.JPanel {
      */
     private EncryptionDemoFunctionality functionality = null;
     public void addColor(Color c){
+        nd.lock();
+        try{
         SimpleAttributeSet aset = new SimpleAttributeSet();
         StyleConstants.setForeground(aset, c);
         colors.add(aset);
+        } finally{
+            nd.unlock();
+        }
     }
         
     public void populateColorsList(ArrayList<Color> colors, ArrayList<String> labels){
+        nd.lock();
+        try{
         this.labels = labels;
         for (String l : labels) {
             LevelSelect.addItem(l);
@@ -60,9 +67,14 @@ public class EditPanel extends javax.swing.JPanel {
         for(Color c:colors){
             addColor(c);
         }
+        } finally{
+            nd.unlock();
+        }
     }
     
     public void setDefaultColorsAndLabels() {
+        nd.lock();
+        try{
         nd.addColor(Color.black);
         nd.addColor(Color.blue);
         nd.addColor(Color.green);
@@ -73,10 +85,14 @@ public class EditPanel extends javax.swing.JPanel {
         nd.addLabel("SECRET");
         nd.addLabel("TOP SECRET");
         populateColorsList(nd.getColors(), nd.getLabels());
+        } finally{
+            nd.unlock();
+        }
     }
     
     private HashMap<String, Color> getColorChoices() {
-                
+        nd.lock();
+        try{
         HashMap<String, Color> colorChoices = new HashMap<>();
         colorChoices.put("black", Color.black);
         colorChoices.put("blue", Color.blue);
@@ -87,9 +103,14 @@ public class EditPanel extends javax.swing.JPanel {
         colorChoices.put("cyan", Color.CYAN);
         
         return colorChoices;
+        } finally{
+            nd.unlock();
+        }
     }
     
     private String getColorChoicePrompt(HashMap<String, Color> colorChoices) {
+        nd.lock();
+        try{
         String colorChoiceList = "(";
         for (String c : colorChoices.keySet()) {
             colorChoiceList += c + ", ";
@@ -98,9 +119,14 @@ public class EditPanel extends javax.swing.JPanel {
         String colorPrompt = "choose a color for this group '\n" + colorChoiceList + " : ";
         
         return colorPrompt;
+        } finally{
+            nd.unlock();
+        }
     }
     
     private void setupColorsAndLabels() {
+        nd.lock();
+        try{
         ArrayList<Color> defaultColors = new ArrayList<>();
         ArrayList<String> defaultLabels = new ArrayList<>();
 
@@ -126,14 +152,22 @@ public class EditPanel extends javax.swing.JPanel {
             nd.addColor(color);
         }
         populateColorsList(nd.getColors(), nd.getLabels());
+        } finally{
+            nd.unlock();
+        }
     }
     
     public void promptForLevelsAndColors() {
+        nd.lock();
+        try{    
         int r = JOptionPane.showConfirmDialog(this, "Would you like to use the default levels?");
         if (r == JOptionPane.OK_OPTION) {
             setDefaultColorsAndLabels();
         } else {
             setupColorsAndLabels();
+        }
+        } finally{
+            nd.unlock();
         }
     }    
     
@@ -156,8 +190,10 @@ public class EditPanel extends javax.swing.JPanel {
     }
     
     public void giveDocument(NetworkDocumentHandler nd){
-        
         this.nd = nd;
+        this.nd.lock();
+        try{
+        
         cd.giveDocument(nd);
         displayedUsername.add(nd.getUserID());
         if (nd.isOwner()) {
@@ -171,9 +207,14 @@ public class EditPanel extends javax.swing.JPanel {
             generatePINButton.setEnabled(false);
             changeUserLevelButton.setText("Request Change Level");
         }
+        } finally{
+            this.nd.unlock();
+        }
     }
 
     public void handleBootstrap(AuthorizationDocument ad) {
+        nd.lock();
+        try{
         peerModel.addElement(nd.getOwnerID() + " - Document Owner");
         nd.setAuthDocument(ad);
         this.giveDocument(nd);
@@ -183,6 +224,9 @@ public class EditPanel extends javax.swing.JPanel {
         this.populateColorsList(nd.getColors(), nd.getLabels());
         peerModel.addElement(nd.getUserID() + " - " + labels.get(cd.insertLevel));
         this.repaint(ad);
+        } finally{
+            nd.unlock();
+        }
     }
     
     /**
@@ -430,8 +474,12 @@ public class EditPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void documentAreaCaretUpdate(javax.swing.event.CaretEvent evt) {//GEN-FIRST:event_documentAreaCaretUpdate
-        // TODO add your handling code here:
+        nd.lock();
+        try{
         cursorInfo.setText("Cursor at: " + evt.getDot());
+        } finally{
+            nd.unlock();
+        }
     }//GEN-LAST:event_documentAreaCaretUpdate
 
     private void beginCursorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_beginCursorActionPerformed
@@ -458,15 +506,22 @@ public class EditPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_changeUserLevelButtonMousePressed
 
     private void ownerWriteLevelItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_ownerWriteLevelItemStateChanged
+        nd.lock();
+        try{
         // TODO add your handling code here:
         if (nd != null && nd.isOwner()){
             cd.insertLevel = ownerWriteLevel.getSelectedIndex();
             System.out.println("Selected: " + ownerWriteLevel.getSelectedIndex());
             System.out.println("Level: " + cd.insertLevel);
         }
+        } finally{
+            nd.unlock();
+        }
     }//GEN-LAST:event_ownerWriteLevelItemStateChanged
 
     private void openNormalFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openNormalFileButtonActionPerformed
+        nd.lock();
+        try{
         jFileChooser1.setVisible(true);
         int returnVal = jFileChooser1.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -480,6 +535,9 @@ public class EditPanel extends javax.swing.JPanel {
         } else {
             System.out.println("File access cancelled by user.");
         }
+        } finally{
+            nd.unlock();
+        }
     }//GEN-LAST:event_openNormalFileButtonActionPerformed
 
     private void openNormalFileButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_openNormalFileButtonMousePressed
@@ -487,6 +545,8 @@ public class EditPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_openNormalFileButtonMousePressed
 
     private void generatePINButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_generatePINButtonActionPerformed
+        nd.lock();
+        try{
         String username = JOptionPane.showInputDialog("Enter the username:").trim();
         if (username.isEmpty()) {
             return;
@@ -494,6 +554,9 @@ public class EditPanel extends javax.swing.JPanel {
         char[] pin = this.functionality.generatePIN(username, nd.getName());
         System.out.println("PIN: " + new String(pin));
         new PINDisplayDialog(username, pin).setVisible(true);
+        } finally{
+            nd.unlock();
+        }
     }//GEN-LAST:event_generatePINButtonActionPerformed
 
     private void jFileChooser1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFileChooser1ActionPerformed
@@ -512,7 +575,8 @@ public class EditPanel extends javax.swing.JPanel {
 
     private void openEncryptedFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openEncryptedFileButtonActionPerformed
                 //Using a JPanel as the message for the JOptionPane
-
+        nd.lock();
+        try{
         JPanel userPanel = new JPanel();
         userPanel.setLayout(new GridLayout(2,2));
 
@@ -540,9 +604,14 @@ public class EditPanel extends javax.swing.JPanel {
         } else {
             System.out.println("File access cancelled by user.");
         }
+        } finally{
+            nd.unlock();
+        }
     }//GEN-LAST:event_openEncryptedFileButtonActionPerformed
 
     private void saveEncryptedFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveEncryptedFileButtonActionPerformed
+        nd.lock();
+        try{
         //Using a JPanel as the message for the JOptionPane
         JPanel userPanel = new JPanel();
         userPanel.setLayout(new GridLayout(2,2));
@@ -568,9 +637,14 @@ public class EditPanel extends javax.swing.JPanel {
         } else {
             System.out.println("File access cancelled by user.");
         } 
+        } finally{
+            nd.unlock();
+        }
     }//GEN-LAST:event_saveEncryptedFileButtonActionPerformed
 
     private void changeUserLevelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeUserLevelButtonActionPerformed
+        nd.lock();
+        try{
         System.out.println("Pressed Button");
         ChangeUserAccess jf = new ChangeUserAccess();
         jf.setLabelsandUsername(labels, displayedUsername, nd);
@@ -586,19 +660,27 @@ public class EditPanel extends javax.swing.JPanel {
                 null,
                 options,
                 options[0]);
+        } finally{
+            nd.unlock();
+        }
     }//GEN-LAST:event_changeUserLevelButtonActionPerformed
 
     private void setLevelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setLevelButtonActionPerformed
-        if(beginCursor.getText().equals("") || endCursor.getText().equals("")){
-            return;
+        nd.lock();
+        try {
+            if (beginCursor.getText().equals("") || endCursor.getText().equals("")) {
+                return;
+            }
+            int beginCursorInt = Integer.parseInt(beginCursor.getText());
+            int endCursorInt = Integer.parseInt(endCursor.getText());
+            int colorPosition = LevelSelect.getSelectedIndex();
+            AttributeSet s = colors.get(colorPosition);
+            //send it to everyone else
+            //setColors(beginCursorInt, endCursorInt - beginCursorInt, colorPosition);
+            nd.assignLevel(colorPosition, beginCursorInt, endCursorInt);
+        } finally {
+            nd.unlock();
         }
-        int beginCursorInt = Integer.parseInt(beginCursor.getText());
-        int endCursorInt = Integer.parseInt(endCursor.getText());
-        int colorPosition = LevelSelect.getSelectedIndex();
-        AttributeSet s = colors.get(colorPosition);
-        //send it to everyone else
-        //setColors(beginCursorInt, endCursorInt - beginCursorInt, colorPosition);
-        nd.assignLevel(colorPosition, beginCursorInt, endCursorInt);
     }//GEN-LAST:event_setLevelButtonActionPerformed
 
     private void DisconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DisconnectButtonActionPerformed
@@ -606,6 +688,8 @@ public class EditPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_DisconnectButtonActionPerformed
 
     public void repaint(AuthorizationDocument ad){
+        nd.lock();
+        try{
         String text = ad.getDocument().getString();
         
         int length = text.length();
@@ -615,33 +699,47 @@ public class EditPanel extends javax.swing.JPanel {
             this.manualInsert(i, String.valueOf(text.charAt(i)) , colors.get(dv.getLevel()));
             dv = dv.getNext();
         }
-        
+        } finally{
+            nd.unlock();
+        }
     }
     
     public void setColors(int begin, int end, int colorLevel){
+        nd.lock();
+        try{
         cd.setColors(begin, end, colors.get(colorLevel), true);
+        } finally{
+            nd.unlock();
+        }
     }
     
     public boolean approveUserForLevel(String userId, int level) { 
+        nd.lock();
+        try{
         String msg = "Add " + userId + " to level " + level + "?";
         return JOptionPane.showConfirmDialog(this, msg) == JOptionPane.OK_OPTION;
+        } finally{
+            nd.unlock();
+        }
     }
     
     public void manualInsert(int offset, String string, AttributeSet attributeSet){
+        nd.lock();
         try {
-            // Do something here
-            System.out.println("Inserting: " + string);
             cd.manualInsert(offset, string, attributeSet);
             if(offset <= documentArea.getCaretPosition() 
-                    && documentArea.getCaretPosition() + string.length() < documentArea.getText().length()){
+                    && documentArea.getCaretPosition() + string.length() <= documentArea.getText().length()){
                 documentArea.setCaretPosition(documentArea.getCaretPosition() + string.length());
             }
         } catch (BadLocationException ex) {
             Logger.getLogger(EditPanel.class.getName()).log(Level.SEVERE, null, ex);
+        } finally{
+            nd.unlock();
         }
     }
     
     public void manualRemove(int offset, int length){
+        nd.lock();
         try {
             cd.manualRemove(offset, length);
             if(offset < documentArea.getCaretPosition() && documentArea.getCaretPosition() - length >= 0){
@@ -649,57 +747,71 @@ public class EditPanel extends javax.swing.JPanel {
             }
         } catch (BadLocationException ex) {
             Logger.getLogger(EditPanel.class.getName()).log(Level.SEVERE, null, ex);
+        } finally{
+            nd.unlock();
         }
     }
     
-    public void deltaCaretPosition(int delta){
-        documentArea.setCaretPosition(documentArea.getCaretPosition() + delta);
-    }
-    
-    public void update(String s){
-        //documentArea.setText(s);
-    }
-    
     public void setColors(int offset, int length, AttributeSet as, boolean replace){
+        nd.lock();
+        try{
         cd.setColors(offset, length, as, true);
+        } finally{
+            nd.unlock();
+        }
     }
     
     public void displayMessages(String plaintext){
+        nd.lock();
+        try{
         documentArea.setText(documentArea.getText() + plaintext + "\n");
+        } finally{
+            nd.unlock();
+        }
     }
     
-    public void addUser(String username, int levelIdentifier){
-        if(displayedUsername.contains(username)){
-                for(int i = 0; i < peerModel.size(); i++){
+    public void addUser(String username, int levelIdentifier) {
+        nd.lock();
+        try {
+            if (displayedUsername.contains(username)) {
+                for (int i = 0; i < peerModel.size(); i++) {
+                    String x = peerModel.get(i).toString().split(" - ")[0];
+                    if (peerModel.get(i).toString().split(" - ")[1].equals("Document Owner")) {
+                        continue;
+                    }
+                    if (x.equals(username)) {
+                        peerModel.remove(i);
+                        peerModel.addElement(username + " - " + labels.get(levelIdentifier));
+                        cd.insertLevel = levelIdentifier;
+                        return;
+                    }
+                }
+                return;
+            }
+            peerModel.addElement(username + " - " + labels.get(levelIdentifier));
+            displayedUsername.add(username);
+        } finally {
+            nd.unlock();
+        }
+    }
+    
+    public void reviseUser(String username, int levelIdentifier){
+        nd.lock();
+        try {
+            for (int i = 0; i < peerModel.size(); i++) {
                 String x = peerModel.get(i).toString().split(" - ")[0];
-                if(peerModel.get(i).toString().split(" - ")[1].equals("Document Owner")){
+                if (peerModel.get(i).toString().split(" - ")[1].equals("Document Owner")) {
                     continue;
                 }
-                if(x.equals(username)){
+                if (x.equals(username)) {
                     peerModel.remove(i);
-                    peerModel.addElement(username +" - " + labels.get(levelIdentifier));
+                    peerModel.addElement(username + " - " + labels.get(levelIdentifier));
                     cd.insertLevel = levelIdentifier;
                     return;
                 }
             }
-            return;
-        }
-        peerModel.addElement(username +" - " + labels.get(levelIdentifier)); 
-        displayedUsername.add(username);
-    }
-    
-    public void reviseUser(String username, int levelIdentifier){
-        for(int i = 0; i < peerModel.size(); i++){
-            String x = peerModel.get(i).toString().split(" - ")[0];
-            if(peerModel.get(i).toString().split(" - ")[1].equals("Document Owner")){
-                continue;
-            }
-            if(x.equals(username)){
-                peerModel.remove(i);
-                peerModel.addElement(username +" - " + labels.get(levelIdentifier));
-                cd.insertLevel = levelIdentifier;
-                return;
-            }
+        } finally {
+            nd.unlock();
         }
     }
     

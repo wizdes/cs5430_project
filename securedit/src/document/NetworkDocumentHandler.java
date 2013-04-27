@@ -12,12 +12,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import security_layer.authentications.ServerAuthenticationPersistantState;
 
 /**
  *
  */
-public class NetworkDocumentHandler implements NetworkDocumentInterface {
+public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
     
     private CommunicationInterface communication;
     private String collaboratorId;
@@ -25,6 +27,7 @@ public class NetworkDocumentHandler implements NetworkDocumentInterface {
     private AuthorizationDocument authDocument;
     private Document document;
     private String ownerId;
+    private final Lock lock = new ReentrantLock(true);
     
     public static boolean autoApprove = false;
     public static boolean autoDeny = false;
@@ -38,6 +41,15 @@ public class NetworkDocumentHandler implements NetworkDocumentInterface {
         communication = ci;
         this.ownerId = documentOwnerId;
         this.collaboratorId = collaboratorId;
+    }
+    
+    @Override
+    public void lock(){
+        lock.lock();
+    }
+    @Override
+    public void unlock(){
+        lock.unlock();
     }
     
     @Override
@@ -168,10 +180,15 @@ public class NetworkDocumentHandler implements NetworkDocumentInterface {
     
     @Override
     public void processMessage(CommandMessage m) {
+        lock();
+        try{
         if (isOwner()) {
             processMessageOwner(m);
         } else {
             processMessageClient(m);
+        }
+        }finally{
+            unlock();
         }
     }
     

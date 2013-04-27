@@ -6,7 +6,7 @@ package application.encryption_demo;
 
 import document.Document;
 import document.NetworkDocumentHandler;
-import document.NetworkDocumentInterface;
+import document.NetworkDocumentHandlerInterface;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -94,7 +94,7 @@ public class CommunicationInterfaceTest {
     public void testHumanAuthentication() {
         // Connect once from scratch
         int iterations = 100;
-        ConcurrentMap <String, NetworkDocumentInterface> documentMap = new ConcurrentHashMap<>();
+        ConcurrentMap <String, NetworkDocumentHandlerInterface> documentMap = new ConcurrentHashMap<>();
         
         p1Communicator = new Communication(p1, documentMap);
         p2Communicator = new Communication(p2, null);
@@ -116,7 +116,7 @@ public class CommunicationInterfaceTest {
     
     @Test
     public void testAuthenticationFailures() {
-        ConcurrentMap <String, NetworkDocumentInterface> documentMap = new ConcurrentHashMap<>();
+        ConcurrentMap <String, NetworkDocumentHandlerInterface> documentMap = new ConcurrentHashMap<>();
         
         
         p2Communicator = new Communication(p2, null);

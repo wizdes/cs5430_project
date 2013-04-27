@@ -6,7 +6,7 @@ package application.encryption_demo;
 
 import application.encryption_demo.forms.EditPanel;
 import document.NetworkDocumentHandler;
-import document.NetworkDocumentInterface;
+import document.NetworkDocumentHandlerInterface;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -29,7 +29,7 @@ public class CustomDocument extends DefaultStyledDocument {
 
     boolean isServer;
     private EditPanel curDoc;
-    NetworkDocumentInterface nd;
+    NetworkDocumentHandlerInterface nd;
     public int insertLevel;
     
     public CustomDocument(){
@@ -37,7 +37,7 @@ public class CustomDocument extends DefaultStyledDocument {
         insertLevel = 0;
     }
 
-    public void giveDocument(NetworkDocumentInterface nd){
+    public void giveDocument(NetworkDocumentHandlerInterface nd){
         this.nd = nd;
         isServer = nd.isOwner();
     }
