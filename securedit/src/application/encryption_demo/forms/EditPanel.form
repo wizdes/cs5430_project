@@ -33,11 +33,11 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="jScrollPane1" min="-2" pref="583" max="-2" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
-                      <Component id="openFile" min="-2" max="-2" attributes="0"/>
+                      <Component id="openEncryptedFileButton" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="openNormalFile" min="-2" max="-2" attributes="0"/>
+                      <Component id="openNormalFileButton" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Component id="saveEncryptedFile" min="-2" max="-2" attributes="0"/>
+                      <Component id="saveEncryptedFileButton" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="generatePINButton" min="-2" max="-2" attributes="0"/>
                   </Group>
@@ -66,7 +66,7 @@
                           <Component id="cursorInfo" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Component id="LevelLabel" alignment="0" min="-2" max="-2" attributes="0"/>
                           <Group type="102" alignment="0" attributes="0">
-                              <Component id="changeUserLevel" min="-2" max="-2" attributes="0"/>
+                              <Component id="changeUserLevelButton" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="setLevelButton" min="-2" max="-2" attributes="0"/>
                           </Group>
@@ -99,7 +99,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="setLevelButton" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="changeUserLevel" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="changeUserLevelButton" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="LevelLabel" min="-2" max="-2" attributes="0"/>
@@ -115,9 +115,9 @@
                       <Component id="jScrollPane1" min="-2" pref="392" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="openFile" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="openNormalFile" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="saveEncryptedFile" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="openEncryptedFileButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="openNormalFileButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="saveEncryptedFileButton" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="generatePINButton" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
@@ -198,6 +198,7 @@
       </Properties>
       <Events>
         <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="setLevelButtonMousePressed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="setLevelButtonActionPerformed"/>
       </Events>
     </Component>
     <Container class="javax.swing.JScrollPane" name="LevelList">
@@ -221,44 +222,50 @@
         <Property name="text" type="java.lang.String" value="Levels"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JButton" name="changeUserLevel">
+    <Component class="javax.swing.JButton" name="changeUserLevelButton">
       <Properties>
         <Property name="text" type="java.lang.String" value="Change User Level"/>
       </Properties>
       <Events>
-        <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="changeUserLevelMousePressed"/>
-        <EventHandler event="keyPressed" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="changeUserLevelKeyPressed"/>
+        <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="changeUserLevelButtonMousePressed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="changeUserLevelButtonActionPerformed"/>
+        <EventHandler event="keyPressed" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="changeUserLevelButtonKeyPressed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="openFile">
+    <Component class="javax.swing.JButton" name="openEncryptedFileButton">
       <Properties>
         <Property name="text" type="java.lang.String" value="Open Encrypted File"/>
       </Properties>
       <Events>
-        <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="openFileMousePressed"/>
+        <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="openEncryptedFileButtonMousePressed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="openEncryptedFileButtonActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="openNormalFile">
+    <Component class="javax.swing.JButton" name="openNormalFileButton">
       <Properties>
         <Property name="text" type="java.lang.String" value="Open Normal File"/>
       </Properties>
       <Events>
-        <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="openNormalFileMousePressed"/>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="openNormalFileActionPerformed"/>
+        <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="openNormalFileButtonMousePressed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="openNormalFileButtonActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JButton" name="saveEncryptedFile">
+    <Component class="javax.swing.JButton" name="saveEncryptedFileButton">
       <Properties>
         <Property name="text" type="java.lang.String" value="Save Encrypted File"/>
       </Properties>
       <Events>
-        <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="saveEncryptedFileMousePressed"/>
+        <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="saveEncryptedFileButtonMousePressed"/>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="saveEncryptedFileButtonActionPerformed"/>
       </Events>
     </Component>
     <Component class="javax.swing.JButton" name="DisconnectButton">
       <Properties>
         <Property name="text" type="java.lang.String" value="Disconnect"/>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="DisconnectButtonActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JComboBox" name="ownerWriteLevel">
       <Properties>
