@@ -124,7 +124,7 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
         String leftIdent = document.getIdentifierAtIndex(leftOffset);
         String rightIdent = document.getIdentifierAtIndex(rightOffset);
         if (curDoc != null) {
-            curDoc.setColors(leftOffset, rightOffset, levelIdentifier);
+            curDoc.setColors(leftOffset, rightOffset - leftOffset + 1, levelIdentifier);
         }
         return assignLevel(levelIdentifier, leftIdent, rightIdent);
     }

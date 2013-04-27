@@ -33,7 +33,7 @@ import transport_layer.network.NetworkTransportInterface;
  * @author Patrick
  */
 public class AuthenticationTransport {
-    public static int AUTH_TIMEOUT_DELAY = 4000;
+    public static int AUTH_TIMEOUT_DELAY = 16000;
     private NetworkTransportInterface transport;
     private SecureTransportInterface secureTransport;
     private ConcurrentMap<String, AuthenticationSession> authSessions = new ConcurrentHashMap<>();
