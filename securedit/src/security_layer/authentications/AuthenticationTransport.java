@@ -4,7 +4,6 @@
  */
 package security_layer.authentications;
 
-import security_layer.Profile;
 import configuration.Constants;
 import document.NetworkDocumentInterface;
 import java.io.UnsupportedEncodingException;
@@ -14,6 +13,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Condition;
@@ -23,6 +24,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.SecretKey;
 import security_layer.KeyFactory;
+import security_layer.Profile;
 import security_layer.SecureTransportInterface;
 import transport_layer.network.NetworkTransportInterface;
 
@@ -31,6 +33,7 @@ import transport_layer.network.NetworkTransportInterface;
  * @author Patrick
  */
 public class AuthenticationTransport {
+    public static int AUTH_TIMEOUT_DELAY = 4000;
     private NetworkTransportInterface transport;
     private SecureTransportInterface secureTransport;
     private ConcurrentMap<String, AuthenticationSession> authSessions = new ConcurrentHashMap<>();
@@ -38,6 +41,7 @@ public class AuthenticationTransport {
     private ConcurrentMap<String, NetworkDocumentInterface> docInstances;
     private Profile profile;
     
+    private static long sessionIdCounter = 0L;
     private static final BigInteger n = new BigInteger(MODPGroups.MODP_GROUP_3072, 16);
     private static final BigInteger g = new BigInteger(MODPGroups.GENERATOR + "");
     private final BigInteger k = new BigInteger(H(n.toByteArray(), g.toByteArray()));
@@ -100,14 +104,11 @@ public class AuthenticationTransport {
         session.password = password;
         session.a = a;
         session.A = A;
-        System.out.println("putting session for " + getAuthSessionMapKey(serverID, docID));
         authSessions.put(getAuthSessionMapKey(serverID, docID), session);
         
         // Send initial message
-        System.out.println("m1" + docID);
         Auth_Msg1 initialMsg = new Auth_Msg1(profile.username, A, docID);
         transport.send(serverID, docID, initialMsg);
-        System.out.println("m1" + docID);
         
         //Wait for authentication to complete
         session.await();
@@ -116,7 +117,6 @@ public class AuthenticationTransport {
     }
     
     public void processAuthenticationMessage(String sourceID, String docID, AuthenticationMessage receivedMsg){
-        System.out.println("processAuthenticationMessage");
         if(receivedMsg instanceof SRPSetupMessage){
             processSRPSetupMessage(sourceID, (SRPSetupMessage)receivedMsg);
         } else if(receivedMsg instanceof SRPAuthenticationMessage){
@@ -157,7 +157,13 @@ public class AuthenticationTransport {
         if (receivedSRPMsg instanceof Auth_Msg1) {    //Server
             Auth_Msg1 msg1 = (Auth_Msg1)receivedSRPMsg;
             //Fetch Persistent state
-            persistantServerState = docInstances.get(msg1.docID).getServerAuthenticationPersistantState();
+            NetworkDocumentInterface doc = docInstances.get(msg1.docID);
+            if (doc == null) {
+                throw new InvalidSRPMessageException("Client: " + sourceID + " has no account[s,v pair] on record.");
+            }
+            
+            persistantServerState = doc.getServerAuthenticationPersistantState();
+            
             byte[] s = persistantServerState.getClientSalt(sourceID);           //s = salt
             BigInteger v = persistantServerState.getClientVerifier(sourceID);   //v = verifier = g^x
             if (s == null || v == null){
@@ -295,23 +301,7 @@ public class AuthenticationTransport {
             return null;
         }
     }
-//    private byte[] H(char[] pass, byte[] salt){
-//        try {
-//            SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-//            KeySpec ks = new PBEKeySpec(pass, salt, 36359, 128);
-//            SecretKey s = f.generateSecret(ks);
-//            Key k = new SecretKeySpec(s.getEncoded(),"AES");
-//            return k.getEncoded();
-//        } catch (InvalidKeySpecException | NoSuchAlgorithmException ex) {
-//            if(Constants.DEBUG_ON){
-//                Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//            return null;
-//        }
-//    }
-//    private byte[] MAC(byte[] A, byte[] B, byte[] K){
-//        return H(A, B, K);
-//    }
+
     private BigInteger generateEphemeralPrivateKey(){
         BigInteger key = null;
         do{
@@ -345,28 +335,45 @@ public class AuthenticationTransport {
      * @return Whether or not the session had completed authentication at the time of removal
      */
     private boolean cleanupSession(String id, String docID){
-        AuthenticationSession session = authSessions.get(id + ":::" + docID);
+        String key = this.getAuthSessionMapKey(id, docID);
+        AuthenticationSession session = authSessions.get(key);
         session.authenticateLock.lock();
         try{
             session.cleanup();
-            authSessions.remove(id + ":::" + docID);
+            authSessions.remove(key);
         } finally{
             session.authenticateLock.unlock();
         }
         return session.authenticationCompleted;
     }
-
+    
+    private void setAuthTimeout(final String sourceID, final String docID, final long sessionId) {
+       final String key = this.getAuthSessionMapKey(sourceID, docID);
+       new Timer().schedule(new TimerTask() {
+         @Override
+         public void run() {
+            AuthenticationSession session = authSessions.get(key);
+            if (session != null && session.id == sessionId) {
+                session.wakeup(false);
+                authSessions.remove(key);
+            }
+         }
+       }, AUTH_TIMEOUT_DELAY);
+    }
+    
     public void processAuthenticationError(String sourceID, String docID, AuthenticationError authenticationError) {
-        System.out.println("processAuthenticationError");
         if (authenticationError instanceof AccountLoginError) {
             AccountLoginError loginError = (AccountLoginError)authenticationError;
             AuthenticationSession session = authSessions.get(getAuthSessionMapKey(sourceID, docID));
-            session.wakeup(false);
+            if (session != null) { 
+                session.wakeup(false);
+            }
         } else if (authenticationError instanceof AccountCreationError) {
-            System.out.println("AccountCreationError");
             AccountCreationError createError = (AccountCreationError)authenticationError;
             AuthenticationSession session = authSessions.get(getAuthSessionMapKey(sourceID, docID));
-            session.wakeup(false);
+            if (session != null) { 
+                session.wakeup(false);
+            }
         }
     }
     
@@ -382,6 +389,7 @@ public class AuthenticationTransport {
         private boolean authenticationCompleted = false;
         private boolean success = false;
         private final Lock authenticateLock;
+        private long id;
         
         private AuthenticationSession(String clientID, String serverID, String docID){
             this.clientID = clientID;
@@ -389,6 +397,7 @@ public class AuthenticationTransport {
             this.docID = docID;
             this.authenticateLock = new ReentrantLock(true);
             this.authenticationComplete = authenticateLock.newCondition();
+            this.id = sessionIdCounter++;
         }
         
         private void wakeup(boolean success) {
@@ -404,6 +413,7 @@ public class AuthenticationTransport {
         }
         
         private void await() {
+            setAuthTimeout(this.serverID, this.docID, this.id);
             authenticateLock.lock();
             try{
                 while(!authenticationCompleted){
