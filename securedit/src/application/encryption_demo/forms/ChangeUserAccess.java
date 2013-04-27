@@ -116,7 +116,7 @@ public class ChangeUserAccess extends javax.swing.JPanel {
         if(this.nd.isOwner() == false){
             this.nd.requestChangeLevel(accessLists.getSelectedIndex());
         }
-        this.nd.addUserToLevel(userLists.getSelectedValue(), accessLists.getSelectedIndex());        
+        this.nd.addUserToLevel((String) userLists.getSelectedValue(), accessLists.getSelectedIndex());        
     }//GEN-LAST:event_jButton1ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
