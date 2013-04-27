@@ -67,11 +67,11 @@ public class NetworkDocumentTest {
         p2Communicator = new Communication(p2, documentMap2);
         p3Communicator = new Communication(p3, documentMap3);
                 
-        NetworkDocument nd1 = new NetworkDocument(p1Communicator, p1Ident, p1Ident, "document");
+        NetworkDocumentHandler nd1 = new NetworkDocumentHandler(p1Communicator, p1Ident, p1Ident, "document");
         documentMap1.put("document", nd1);
-        NetworkDocument nd2 = new NetworkDocument(p1Communicator, p2Ident, p1Ident, "document");
+        NetworkDocumentHandler nd2 = new NetworkDocumentHandler(p1Communicator, p2Ident, p1Ident, "document");
         documentMap2.put("document", nd2);
-        NetworkDocument nd3 = new NetworkDocument(p1Communicator, p3Ident, p1Ident, "document");
+        NetworkDocumentHandler nd3 = new NetworkDocumentHandler(p1Communicator, p3Ident, p1Ident, "document");
         documentMap3.put("document", nd3);
         
         ArrayList<String> documents = new ArrayList(documentMap1.keySet());
@@ -90,9 +90,9 @@ public class NetworkDocumentTest {
         p3Communicator.initializeSRPAuthentication(p1Ident, documents.get(0), password_3, PIN3);
         assertTrue(p3Communicator.authenticate(p1Ident, documents.get(0), password_3));
         
-        owner = new NetworkDocument(p1Communicator, p1Ident, p1Ident, "document");
-        client2 = new NetworkDocument(p2Communicator, p2Ident, p1Ident, "document");
-        client3 = new NetworkDocument(p3Communicator, p3Ident, p1Ident, "document");   
+        owner = new NetworkDocumentHandler(p1Communicator, p1Ident, p1Ident, "document");
+        client2 = new NetworkDocumentHandler(p2Communicator, p2Ident, p1Ident, "document");
+        client3 = new NetworkDocumentHandler(p3Communicator, p3Ident, p1Ident, "document");   
         
         thread1 = new DocumentCommListener(p1Communicator, owner);
         thread2 = new DocumentCommListener(p2Communicator, client2);
@@ -277,7 +277,7 @@ public class NetworkDocumentTest {
         assertEquals(1, client2.getLevelForUser(p2Ident));
         assertEquals(2, client3.getLevelForUser(p3Ident));
         
-        NetworkDocument.autoApprove = true;
+        NetworkDocumentHandler.autoApprove = true;
         client2.requestChangeLevel(3);
         client3.requestChangeLevel(4);
         pause(100);
@@ -285,8 +285,8 @@ public class NetworkDocumentTest {
         assertEquals(3, client2.getLevelForUser(p2Ident));
         assertEquals(4, client3.getLevelForUser(p3Ident));
         
-        NetworkDocument.autoApprove = false;
-        NetworkDocument.autoDeny = true;
+        NetworkDocumentHandler.autoApprove = false;
+        NetworkDocumentHandler.autoDeny = true;
         client2.requestChangeLevel(5);
         client3.requestChangeLevel(6);
         pause(100);

@@ -17,7 +17,7 @@ import security_layer.authentications.ServerAuthenticationPersistantState;
 /**
  *
  */
-public class NetworkDocument implements NetworkDocumentInterface {
+public class NetworkDocumentHandler implements NetworkDocumentInterface {
     
     private CommunicationInterface communication;
     private String collaboratorId;
@@ -29,7 +29,7 @@ public class NetworkDocument implements NetworkDocumentInterface {
     public static boolean autoApprove = false;
     public static boolean autoDeny = false;
     
-    public NetworkDocument(CommunicationInterface ci, 
+    public NetworkDocumentHandler(CommunicationInterface ci, 
                            String collaboratorId, 
                            String documentOwnerId, 
                            String documentName) {

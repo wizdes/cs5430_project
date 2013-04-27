@@ -9,7 +9,7 @@ import application.encryption_demo.CustomDocument;
 import application.encryption_demo.EncryptionDemoFunctionality;
 import document.AuthorizationDocument;
 import document.DocumentValue;
-import document.NetworkDocument;
+import document.NetworkDocumentHandler;
 import document.NetworkDocumentInterface;
 import java.awt.Color;
 import java.awt.GridLayout;
@@ -161,16 +161,15 @@ public class EditPanel extends javax.swing.JPanel {
         
     }
     
-    public void giveDocument(NetworkDocument nd){
+    public void giveDocument(NetworkDocumentHandler nd){
         
         this.nd = nd;
         cd.giveDocument(nd);
-        peerModel.addElement(nd.getOwnerID() + " - Document Owner");
-        displayedUsername.add(nd.getOwnerID());
+        displayedUsername.add(nd.getUserID());
         if (nd.isOwner()) {
+            peerModel.addElement(nd.getOwnerID() + " - Document Owner");
             promptForLevelsAndColors();
         } else if (!nd.isOwner()) {
-            displayedUsername.add(nd.getUserID());
             beginCursor.setEnabled(false);
             endCursor.setEnabled(false);
             LevelSelect.setEnabled(false);
@@ -181,6 +180,7 @@ public class EditPanel extends javax.swing.JPanel {
     }
 
     public void handleBootstrap(AuthorizationDocument ad) {
+        peerModel.addElement(nd.getOwnerID() + " - Document Owner");
         nd.setAuthDocument(ad);
         this.giveDocument(nd);
         labels = nd.getLabels();
@@ -190,6 +190,7 @@ public class EditPanel extends javax.swing.JPanel {
         peerModel.addElement(nd.getUserID() + " - " + labels.get(cd.insertLevel));
         this.repaint(ad);
     }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -565,7 +566,7 @@ public class EditPanel extends javax.swing.JPanel {
         int input = JOptionPane.showConfirmDialog(null, userPanel, "Enter your password:"
                       ,JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
         jFileChooser1.setVisible(true);
-        int returnVal = jFileChooser1.showOpenDialog(this);
+        int returnVal = jFileChooser1.showSaveDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = jFileChooser1.getSelectedFile();
             String fileName = file.getAbsolutePath();
@@ -738,5 +739,5 @@ public class EditPanel extends javax.swing.JPanel {
     DefaultListModel peerModel;
     newCellRenderer cr;
     private ArrayList<String> displayedUsername;
-    NetworkDocument nd;
+    NetworkDocumentHandler nd;
 }

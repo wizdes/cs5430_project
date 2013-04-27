@@ -33,6 +33,7 @@ import transport_layer.network.NetworkTransportInterface;
  * @author Patrick
  */
 public class AuthenticationTransport {
+    public static int AUTH_TIMEOUT_DELAY = 4000;
     private NetworkTransportInterface transport;
     private SecureTransportInterface secureTransport;
     private ConcurrentMap<String, AuthenticationSession> authSessions = new ConcurrentHashMap<>();
@@ -43,7 +44,7 @@ public class AuthenticationTransport {
     private static long sessionIdCounter = 0L;
     private static final BigInteger n = new BigInteger(MODPGroups.MODP_GROUP_3072, 16);
     private static final BigInteger g = new BigInteger(MODPGroups.GENERATOR + "");
-    public static int AUTH_TIMEOUT_DELAY = 4000;
+    private final BigInteger k = new BigInteger(H(n.toByteArray(), g.toByteArray()));
     
     public AuthenticationTransport(NetworkTransportInterface transport, 
                                    SecureTransportInterface secureTransport, 
@@ -166,7 +167,7 @@ public class AuthenticationTransport {
             //Create new session
             BigInteger b = generateEphemeralPrivateKey();           //b
             BigInteger B = g.modPow(b, n);                          //g^b
-            B = B.add(v);                                               //B = v + g^b
+            B = B.add(k.multiply(v));                               //B = kv + g^b
             AuthenticationSession session = new AuthenticationSession(sourceID, profile.username, msg1.docID);
             session.b = b;
             session.B = B;
@@ -208,7 +209,7 @@ public class AuthenticationTransport {
 //            System.out.println("g: " + Arrays.toString(g.toByteArray()));
             //Compute S(on the client) which is the common exponential value
             BigInteger x = new BigInteger(KeyFactory.generateSymmetricKey(session.password, msg2.salt).getEncoded());
-            BigInteger S = session.B.subtract(g.modPow(x, n));  //(B - g^x)
+            BigInteger S = session.B.subtract(k.multiply(g.modPow(x, n)));  //(B - g^x)
             BigInteger exp = session.a.add(msg2.u.multiply(x));                     //(a + u*x)
             S = S.modPow(exp, n);                                                       //S = (B - g^x)^(a + u*x)
 //            System.out.println("S: " + Arrays.toString(S.toByteArray()));
@@ -239,7 +240,6 @@ public class AuthenticationTransport {
             //Postcondition: Keys match according to the server
             
             //Place session key K inside data structure.
-            //   ASK ELENANOR ABOUT THIS
             produceAndSaveSessionKeys(sourceID, msg3.docID, session.K);
             
             byte[] M2 = H(session.A.toByteArray(), msg3.M1, session.K);
@@ -262,7 +262,6 @@ public class AuthenticationTransport {
             //Postcondition: Keys match according to the client
             
             //Place session key K inside data structure.
-            //   ASK ELENANOR ABOUT THIS
             produceAndSaveSessionKeys(sourceID, msg4.docID, session.K);
             
             //Zero memory for session

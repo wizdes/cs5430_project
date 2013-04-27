@@ -71,39 +71,6 @@ public class SecureTransport implements SecureTransportInterface{
         networkTransport.addPeer(peerIdent, host, port);
     }
     
-//    @Override
-//    public boolean authenticate(String machineIdent) {
-//        
-//        Constants.log(profile.username + " : authenticating");
-//        
-//        //If machine has been authenticated or trying to authenticate with itself, return
-//        if (authInstance.hasAuthenticated(machineIdent) || machineIdent.equals(profile.username)) {
-//            Constants.log(profile.username + " : has already authenticated with " + machineIdent);
-//            return true;
-//        }
-//        final Lock authenticateLock = new ReentrantLock(true);
-//
-//        MachineAuthenticationMessage msg = authInstance.constructInitialAuthMessage();
-//        Condition authenticationComplete = authenticateLock.newCondition();
-//        
-//        try {
-//            authenticateLock.lock();
-//            authInstance.addAuthentication(machineIdent, msg, authenticationComplete, authenticateLock);
-//            sendRSAEncryptedMessage(machineIdent, msg);
-//            authenticationComplete.await();
-//            authInstance.removeAuthentication(machineIdent);
-//        } catch (InterruptedException ex) {
-//            if(Constants.DEBUG_ON){
-//                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "]", ex);
-//            }
-//            return false;
-//        }
-//        finally{
-//            authenticateLock.unlock();
-//            return true;
-//        }
-//    }
-        
     @Override
     public boolean sendAESEncryptedMessage(String destination, String docID, Message m) {
         return sendAESEncryptedMessage(destination, docID, m, keys.getSessionKey(destination, docID), keys.getHmacKey(destination, docID));
@@ -139,37 +106,6 @@ public class SecureTransport implements SecureTransportInterface{
             return false;
         }
     }
-
-//    @Override
-//    public boolean sendRSAEncryptedMessage(String destination, Message m) {
-//        if(Constants.DEBUG_ON){
-//            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + profile.username + "] Sending " + EncryptedRSAMessage.class.getName() + " to " + destination + ".");
-//        }
-//        byte[] iv = new byte[16];
-//        PublicKey publicKey = Profile.keys.getPublicKey(destination);
-//        if (publicKey == null) {
-//            if(Constants.DEBUG_ON){
-//                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "] No public key found for " + destination + ".");
-//            }
-//            return false;
-//        }
-//        Cipher cipher = CipherFactory.constructRSAEncryptionCipher(publicKey);
-//        try {
-//            SealedObject encryptedObject = new SealedObject(m, cipher);
-//            Signature signature = Signature.getInstance(CipherFactory.SIGNING_ALGORITHM);
-//            SignedObject signedObject = new SignedObject(encryptedObject, (PrivateKey)Profile.keys.signingKey, signature);
-//
-//            EncryptedMessage encryptedMessage = new EncryptedRSAMessage(signedObject);
-//
-//            boolean wasSuccessful = networkTransport.send(destination, encryptedMessage);
-//            return wasSuccessful;
-//        } catch (IOException | IllegalBlockSizeException | NoSuchAlgorithmException | InvalidKeyException | SignatureException ex) {
-//            if(Constants.DEBUG_ON){
-//                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "]", ex);
-//            }
-//            return false;
-//        }
-//    }
     
     private void replyAuthFailure(String sourceOfMessage, String docID) {
         Constants.log("failed to authenticate " + sourceOfMessage + " for " + docID);

@@ -60,7 +60,7 @@ class ClientListenerThread extends Thread {
             serverSocket.close();
         } catch (SocketException ex) {
             if(Constants.DEBUG_ON){
-                Logger.getLogger(ClientListenerThread.class.getName()).log(Level.SEVERE, "ServerSocket closed, port: " + port, ex);
+                //Logger.getLogger(ClientListenerThread.class.getName()).log(Level.SEVERE, "ServerSocket closed, port: " + port, ex);
             }
         } catch (IOException ex) {
             if(Constants.DEBUG_ON){

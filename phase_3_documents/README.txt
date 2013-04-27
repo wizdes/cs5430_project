@@ -2,11 +2,7 @@ Patrick Berens(pcb73)
 Matt Goggin(mg343)
 Yi Li(yl2326)
 
-README.txt which contains the names and a description of the contents for the other files in the directory.
-
-Source files that contain the source needed to compile and run your software. This should include any scaffolding used in the Demo you will give. We will look over excerpts of your code to see whether your project is based on clean design and was implemented using good software engineering practices (including secure coding practices). Projects containing code vulnerabilities will be severely penalized.
 Table of Contents
-
 1) Running our code
 2) Packages
   application

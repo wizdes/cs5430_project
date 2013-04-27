@@ -7,7 +7,7 @@ package application.encryption_demo.forms;
 import application.encryption_demo.DiscoveredPeers;
 import application.encryption_demo.EncryptionDemoFunctionality;
 import configuration.Constants;
-import document.NetworkDocument;
+import document.NetworkDocumentHandler;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
@@ -237,7 +237,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
         //Prompt for document name - make sure it is unique
         String docName = "Chat";
         String docID = null;
-        NetworkDocument nd = null;
+        NetworkDocumentHandler nd = null;
         while(docID == null){
             String enteredDocName = JOptionPane.showInputDialog("Enter document name", docName);
             if(enteredDocName == null){
@@ -249,7 +249,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
             }
             
             //docID = this.functionality.createDocumentInstance(profile.username, docName);
-            nd = new NetworkDocument(
+            nd = new NetworkDocumentHandler(
                 functionality.getCommunicationInterface(), profile.username, profile.username, docName );
             docID = this.functionality.createDocumentInstance(nd);
             if(docID == null){
@@ -322,8 +322,8 @@ public class ApplicationWindow extends javax.swing.JFrame {
             return;
         }
         
-         //Create document instance and send join request for doc
-        NetworkDocument nd = new NetworkDocument(
+        //Create document instance and send join request for doc
+        NetworkDocumentHandler nd = new NetworkDocumentHandler(
             functionality.getCommunicationInterface(), profile.username, ownerId, docName );
         String docID = this.functionality.createDocumentInstance(nd);
         docIDs.put(this.tabbedPane.getTabCount(), docID);
