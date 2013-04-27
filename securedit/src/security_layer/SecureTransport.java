@@ -116,14 +116,14 @@ public class SecureTransport implements SecureTransportInterface{
     @Override
     public boolean processEncryptedMessage(String sourceOfMessage, String docID, EncryptedMessage encryptedMessage) {
         boolean success = false;
-        SecretKey secretKey = null;
-        SecretKey HMACKey = null;
+        SecretKey secretKey;
+        SecretKey HMACKey;
         if (Constants.DEBUG_ON) {
             Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + profile.username + "] Processing " + EncryptedMessage.class.getName() + " from " + sourceOfMessage + ".");
         }
         SealedObject encryptedObject;
 
-        Cipher cipher = null;
+        Cipher cipher;
         try {
             EncryptedAESMessage aesMessage = (EncryptedAESMessage) encryptedMessage;
             encryptedObject = aesMessage.encryptedObject;
@@ -140,7 +140,7 @@ public class SecureTransport implements SecureTransportInterface{
                 } catch (UnsupportedEncodingException ex) {
                     return false;
                 }
-            } else {
+            } else {    //Application message
                 HMACKey = keys.getHmacKey(sourceOfMessage, docID);
                 secretKey = keys.getSessionKey(sourceOfMessage, docID);
             }
