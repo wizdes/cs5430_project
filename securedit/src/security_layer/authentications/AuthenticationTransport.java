@@ -157,7 +157,13 @@ public class AuthenticationTransport {
         if (receivedSRPMsg instanceof Auth_Msg1) {    //Server
             Auth_Msg1 msg1 = (Auth_Msg1)receivedSRPMsg;
             //Fetch Persistent state
-            persistantServerState = docInstances.get(msg1.docID).getServerAuthenticationPersistantState();
+            NetworkDocumentInterface doc = docInstances.get(msg1.docID);
+            if (doc == null) {
+                throw new InvalidSRPMessageException("Client: " + sourceID + " has no account[s,v pair] on record.");
+            }
+            
+            persistantServerState = doc.getServerAuthenticationPersistantState();
+            
             byte[] s = persistantServerState.getClientSalt(sourceID);           //s = salt
             BigInteger v = persistantServerState.getClientVerifier(sourceID);   //v = verifier = g^x
             if (s == null || v == null){
