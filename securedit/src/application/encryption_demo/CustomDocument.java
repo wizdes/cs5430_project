@@ -32,31 +32,39 @@ public class CustomDocument extends DefaultStyledDocument {
     NetworkDocumentHandlerInterface nd;
     public int insertLevel;
     
+    //the default construction of this class
     public CustomDocument(){
         isServer = false;
         insertLevel = 0;
     }
 
+    //this custom document contains a document to apply operations
     public void giveDocument(NetworkDocumentHandlerInterface nd){
         this.nd = nd;
         isServer = nd.isOwner();
     }
     
+    //sets the editor panel directly
+    public void setEditorReference(EditPanel d) {
+        this.curDoc = d;
+    }
+    
+    //allows a straight to documentArea insert of text
     public void manualInsert(int offset, String string, AttributeSet attributeSet)
             throws BadLocationException {
-        // Do something here
-        System.out.println("Inserting: " + string);  
-        if(attributeSet == null) attributeSet = curDoc.colors.get(insertLevel);
+        //System.out.println("Inserting: " + string);  
+        if(attributeSet == null) attributeSet = curDoc.getColors().get(insertLevel);
         super.insertString(offset, string, attributeSet);
     }    
     
+    //allows a straight to documentArea remove of text
     public void manualRemove(int offset, int length)
             throws BadLocationException {
-        // Do something here
-        System.out.println("Removing: " + offset + " of length: " + length);      
+        //System.out.println("Removing: " + offset + " of length: " + length);      
         super.remove(offset, length);
     } 
     
+    // applies the insert operation and potentially sends it to the peers
     @Override
     public void insertString(int offset, String string, AttributeSet attributeSet)
             throws BadLocationException {
@@ -79,11 +87,12 @@ public class CustomDocument extends DefaultStyledDocument {
         
         //take thsi out when you're done
         if(isServer) {
-            attributeSet = curDoc.colors.get(insertLevel);
+            attributeSet = curDoc.getColors().get(insertLevel);
             manualInsert(offset, string, attributeSet);
         }
     }
     
+    //applies the remove operation and potentially sends it to its peers
     @Override
     public void remove(int offset, int length) {
         //curDoc.observedDelta(offset, length, "");
@@ -106,11 +115,8 @@ public class CustomDocument extends DefaultStyledDocument {
         }
     }
     
+    //sets the colors directly
     public void setColors(int offset, int length, AttributeSet as, boolean replace){
         super.setCharacterAttributes(offset, length, as, true);
-    }
-
-    public void setEditorReference(EditPanel d) {
-        this.curDoc = d;
     }
 }

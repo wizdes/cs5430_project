@@ -28,17 +28,19 @@ public class ApplicationWindow extends javax.swing.JFrame {
     ConcurrentMap<Integer, String> docIDs = new ConcurrentHashMap<>();   //<tab index, docID>
     ConcurrentMap<String, EditPanel> chatPanels = new ConcurrentHashMap<>();    //<docID, chatPanel>
     
+    // this is the default settings. 
     public static void main(String[] args) {
         String username = "0";
         String ip = "localhost";
         int port = 6000;
-          ApplicationWindow form = new ApplicationWindow(username, ip, port);
+        ApplicationWindow form = new ApplicationWindow(username, ip, port);
         form.setVisible(true);
     }
     
     /**
      * Creates new form ChatWindow
      */
+    // creates this class with the proper elements
     public ApplicationWindow(String username, String ip, int port) {
         profile = new Profile(username, ip, port);
         this.functionality =  new EncryptionDemoFunctionality(this, profile);
@@ -215,6 +217,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    // this will update the peers that are available
     public synchronized void updateDiscoveredPeers(DiscoveredPeers discoveredPeers){
         //Clear table and repopulate it
         ((DefaultTableModel) DiscoveredPeersTable.getModel()).setRowCount(0);
@@ -226,6 +229,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
         }
     }
     
+    // displays message in the specified panel's document Area
     public void displayMessages(String docID, String plaintext){
         EditPanel panel = chatPanels.get(docID);
         if(panel != null){
@@ -238,6 +242,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_DiscoverPeersButtonActionPerformed
 
     private void addDefaultPeersButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addDefaultPeersButtonActionPerformed
+        // this is the default peers adding functionality
         for (int i = 0; i < 2; i++) {
             if (!(i + "").equals(profile.username)) {
                 String id = i + "";
@@ -251,9 +256,8 @@ public class ApplicationWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_addDefaultPeersButtonActionPerformed
 
     private void startChatButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startChatButtonActionPerformed
-        
         //Prompt for document name - make sure it is unique
-        String docName = "Doc1";
+        String docName = "Doc1"; //the default document name
         String docID = null;
         NetworkDocumentHandler nd = null;
         while(docID == null){
@@ -267,6 +271,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
             }
             
             //docID = this.functionality.createDocumentInstance(profile.username, docName);
+            // this allows for a document to be created/propagated/sent
             nd = new NetworkDocumentHandler(
                 functionality.getCommunicationInterface(), profile.username, profile.username, docName );
             docID = this.functionality.createDocumentInstance(nd);
@@ -288,6 +293,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_startChatButtonActionPerformed
 
     private void addManualPeerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addManualPeerActionPerformed
+        // allows a user to manually input an action
         String id = JOptionPane.showInputDialog("Username:");
         if (id == null || id.trim().equals("")) {
             return;
@@ -312,6 +318,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_addManualPeerActionPerformed
 
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginButtonActionPerformed
+        // allows a user to log into a server hosting a document
         int selectedRow = this.DiscoveredPeersTable.getSelectedRow();
         if(selectedRow < 0) return;
         String ownerId = (String)this.DiscoveredPeersTable.getModel().getValueAt(selectedRow, 0);
@@ -362,6 +369,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_loginButtonActionPerformed
 
     private void createAccountButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_createAccountButtonActionPerformed
+        //creates a user account on a server for a specific document
         int selectedRow = this.DiscoveredPeersTable.getSelectedRow();
         if(selectedRow < 0) return;
         String ownerId = (String)this.DiscoveredPeersTable.getModel().getValueAt(selectedRow, 0);
@@ -405,6 +413,9 @@ public class ApplicationWindow extends javax.swing.JFrame {
             showMessage("Account wasn't created. An error occured during setup with server.");
         }
     }//GEN-LAST:event_createAccountButtonActionPerformed
+
+    // checks to see if the password is valid with our criteria
+    // (upper, lower, and digits)
     private boolean isValidPassword(char[] pass) {
         
         boolean containsLowerCase = false;
