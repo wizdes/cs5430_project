@@ -331,7 +331,8 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
             dv.setValue(dr.newValue);
             if (curDoc != null) {
                 int offset = document.getOffsetForIdentifier(dr.identifier);
-                curDoc.manualReplace(offset, 1, dr.newValue);
+                int level = document.getLevelAtIdentifier(dr.identifier);
+                curDoc.manualReplace(offset, 1, dr.newValue, level);
             }
         }
     }    
