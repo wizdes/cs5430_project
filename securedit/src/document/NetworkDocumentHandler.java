@@ -214,7 +214,7 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
                              di.rightIdentifier, 
                              di.text);            
             if (curDoc != null) {
-                curDoc.manualInsert(authDocument.getDocument().getOffsetForIdentifier(di.leftIdentifier) + 1, di.text, null);
+                curDoc.manualInsert(authDocument.getDocument().getOffsetForIdentifier(di.leftIdentifier) + 1, di.text, null); 
             }
         } else if (m.command instanceof DoRemove) {
             DoRemove dr = (DoRemove)m.command;
