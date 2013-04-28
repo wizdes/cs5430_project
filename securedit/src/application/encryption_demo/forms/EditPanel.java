@@ -6,15 +6,18 @@ package application.encryption_demo.forms;
 
 import application.encryption_demo.CustomDocument;
 import application.encryption_demo.EncryptionDemoFunctionality;
+import configuration.Constants;
 import document.AuthorizationDocument;
 import document.DocumentValue;
 import document.NetworkDocumentHandler;
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -525,17 +528,55 @@ public class EditPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_ownerWriteLevelItemStateChanged
 
+    static public String getContents(File aFile) {
+       //...checks on aFile are elided
+       StringBuilder contents = new StringBuilder();
+
+       try {
+         //use buffering, reading one line at a time
+         //FileReader always assumes default encoding is OK!
+         BufferedReader input =  new BufferedReader(new FileReader(aFile));
+         try {
+           String line = null; //not declared within while loop
+           /*
+           * readLine is a bit quirky :
+           * it returns the content of a line MINUS the newline.
+           * it returns null only for the END of the stream.
+           * it returns an empty String if two newlines appear in a row.
+           */
+           while (( line = input.readLine()) != null){
+             contents.append(line);
+             contents.append(System.getProperty("line.separator"));
+           }
+         }
+         finally {
+           input.close();
+         }
+       }
+       catch (IOException ex){
+         ex.printStackTrace();
+       }
+
+       return contents.toString();
+     }    
+    
     private void openNormalFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openNormalFileButtonActionPerformed
         nd.lock();
         try{
         jFileChooser1.setVisible(true);
         int returnVal = jFileChooser1.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = jFileChooser1.getSelectedFile();
+            //documentArea.removeAll();
+            this.manualRemove(0, documentArea.getText().length());
+            String contents = getContents(file);
             try {
-                File file = jFileChooser1.getSelectedFile();
-                documentArea.removeAll();
-                documentArea.read(new FileReader( file.getAbsolutePath() ), null);
-            } catch (IOException ex) {
+                contents = contents.trim();
+                cd.insertString(0, contents, colors.get(0));
+                System.out.println(contents.length());
+                System.out.println(documentArea.getText().length());
+                //documentArea.read(new FileReader( file.getAbsolutePath() ), null);
+            } catch (BadLocationException ex) {
                 Logger.getLogger(EditPanel.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
@@ -580,74 +621,104 @@ public class EditPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_openEncryptedFileButtonMousePressed
 
     private void openEncryptedFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openEncryptedFileButtonActionPerformed
-                //Using a JPanel as the message for the JOptionPane
+        //Using a JPanel as the message for the JOptionPane
         nd.lock();
-        try{
-        JPanel userPanel = new JPanel();
-        userPanel.setLayout(new GridLayout(2,2));
+        try {
+            JPanel userPanel = new JPanel();
+            userPanel.setLayout(new GridLayout(2, 2));
 
-        JLabel passwordLbl = new JLabel("Password:");
-        JPasswordField passwordFld = new JPasswordField();
-        char[] password = passwordFld.getPassword();
+            JLabel passwordLbl = new JLabel("Password:");
+            JPasswordField passwordFld = new JPasswordField();
+            userPanel.add(passwordLbl);
+            userPanel.add(passwordFld);
 
-        userPanel.add(passwordLbl);
-        userPanel.add(passwordFld);
+            //As the JOptionPane accepts an object as the message
+            //it allows us to use any component we like - in this case 
+            //a JPanel containing the dialog components we want
+            int input = JOptionPane.showConfirmDialog(null, userPanel, "Enter your password:", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            jFileChooser1.setVisible(true);
+            char[] password = passwordFld.getPassword();
 
-        //As the JOptionPane accepts an object as the message
-        //it allows us to use any component we like - in this case 
-        //a JPanel containing the dialog components we want
-        int input = JOptionPane.showConfirmDialog(null, userPanel, "Enter your password:"
-                      ,JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        jFileChooser1.setVisible(true);
-        int returnVal = jFileChooser1.showOpenDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = jFileChooser1.getSelectedFile();
-            String fileName = file.getAbsolutePath();
-            AuthorizationDocument ad = (AuthorizationDocument) functionality.decryptObjFile(fileName, password);
-            nd.setAuthDocument(ad);
-            this.manualRemove(0, documentArea.getText().length());
-            repaint(ad);
-        } else {
-            System.out.println("File access cancelled by user.");
-        }
-        } finally{
+            int returnVal = jFileChooser1.showOpenDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = jFileChooser1.getSelectedFile();
+                String fileName = file.getAbsolutePath();
+                //System.out.println(documentArea.getText().length());
+                //System.out.println("Password used to: " + new String(password));
+                AuthorizationDocument ad = (AuthorizationDocument) functionality.decryptObjFile(fileName, password);
+                if(ad != null){
+                    this.manualRemove(0, documentArea.getText().length());
+                    nd.setAuthDocument(ad);
+                    repaint(ad);
+                }
+                else{
+                    JOptionPane.showMessageDialog(null, "Couldn't open file.");
+                }
+            } else {
+                System.out.println("File access cancelled by user.");
+            }
+        } finally {
             nd.unlock();
         }
     }//GEN-LAST:event_openEncryptedFileButtonActionPerformed
 
     private void saveEncryptedFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveEncryptedFileButtonActionPerformed
         nd.lock();
-        try{
-        //Using a JPanel as the message for the JOptionPane
-        JPanel userPanel = new JPanel();
-        userPanel.setLayout(new GridLayout(2,2));
+        try {
+            //Select file to save to
+            jFileChooser1.setVisible(true);
+            int returnVal = jFileChooser1.showSaveDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = jFileChooser1.getSelectedFile();
+                String fileName = file.getAbsolutePath();
 
-        JLabel passwordLbl = new JLabel("Password:");
-        JPasswordField passwordFld = new JPasswordField();
-        char[] password = passwordFld.getPassword();
+                //Prompt for password, continue prompting until receive valid password.
+                char[] password;
+                int input;
+                String passwordStr = "Password:";
+                do {
+                    //Using a JPanel as the message for the JOptionPane
+                    JPanel userPanel = new JPanel();
+                    userPanel.setLayout(new GridLayout(2, 2));
 
-        userPanel.add(passwordLbl);
-        userPanel.add(passwordFld);
+                    JLabel passwordLbl = new JLabel(passwordStr);
+                    JPasswordField passwordFld = new JPasswordField();
 
-        //As the JOptionPane accepts an object as the message
-        //it allows us to use any component we like - in this case 
-        //a JPanel containing the dialog components we want
-        int input = JOptionPane.showConfirmDialog(null, userPanel, "Enter your password:"
-                      ,JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        jFileChooser1.setVisible(true);
-        int returnVal = jFileChooser1.showSaveDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = jFileChooser1.getSelectedFile();
-            String fileName = file.getAbsolutePath();
-            functionality.encryptFile(fileName, nd.getAuthDocument(), password);
-        } else {
-            System.out.println("File access cancelled by user.");
-        } 
-        } finally{
+                    userPanel.add(passwordLbl);
+                    userPanel.add(passwordFld);
+
+                    //As the JOptionPane accepts an object as the message
+                    //it allows us to use any component we like - in this case 
+                    //a JPanel containing the dialog components we want
+                    input = JOptionPane.showConfirmDialog(null, userPanel, "Enter your password:", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                    password = passwordFld.getPassword();
+                    if(!isValidPassword(password)) passwordStr = "Valid Password (12 Characters, Alphanumeric, Upper/Lower:";
+                } while(!isValidPassword(password) && input == JOptionPane.YES_OPTION);
+                functionality.encryptFile(fileName, nd.getAuthDocument(), password);
+            } else {
+                System.out.println("File access cancelled by user.");
+            }
+        } finally {
             nd.unlock();
         }
     }//GEN-LAST:event_saveEncryptedFileButtonActionPerformed
-
+    private boolean isValidPassword(char[] pass) {
+        
+        boolean containsLowerCase = false;
+        boolean containsUpperCase = false;
+        boolean containsDigit = false;
+    
+        for(char c: pass){
+            containsLowerCase   = containsLowerCase || Character.isLowerCase(c);
+            containsUpperCase   = containsUpperCase || Character.isUpperCase(c);
+            containsDigit       = containsDigit || Character.isDigit(c); 
+        }
+        System.out.println("Pass: "  + Arrays.toString(pass));
+        System.out.println("lower: " + containsLowerCase);
+        System.out.println("upper: " + containsUpperCase);
+        System.out.println("digit: " + containsDigit);
+        return pass.length >= Constants.MIN_PASSWORD_LENGTH && containsLowerCase && containsUpperCase && containsDigit;
+    }
     private void changeUserLevelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeUserLevelButtonActionPerformed
         nd.lock();
         try{
@@ -757,6 +828,7 @@ public class EditPanel extends javax.swing.JPanel {
                 documentArea.setCaretPosition(documentArea.getCaretPosition() - length);
             }
         } catch (BadLocationException ex) {
+            System.out.println(ex);
             Logger.getLogger(EditPanel.class.getName()).log(Level.SEVERE, null, ex);
         } finally{
             nd.unlock();

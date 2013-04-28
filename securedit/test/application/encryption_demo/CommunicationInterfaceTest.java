@@ -104,7 +104,7 @@ public class CommunicationInterfaceTest {
         documentMap.put("document", nd);
         
         ArrayList<String> documents = new ArrayList(documentMap.keySet());
-        p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents, false);
+        p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents);
         
         char[] PIN = p1Communicator.generatePIN(p2Ident, documents.get(0));
         assertTrue(p2Communicator.initializeSRPAuthentication(p1Ident, documents.get(0), password_2, PIN));
@@ -123,7 +123,7 @@ public class CommunicationInterfaceTest {
                                 
         ArrayList<String> documents = new ArrayList();
         documents.add("document");
-        p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents, false);
+        p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents);
           
         boolean r;
         AuthenticationTransport.AUTH_TIMEOUT_DELAY = 500;

@@ -53,7 +53,7 @@ public class CustomDocument extends DefaultStyledDocument {
     public void manualRemove(int offset, int length)
             throws BadLocationException {
         // Do something here
-        System.out.println("Removing: " + offset);      
+        System.out.println("Removing: " + offset + " of length: " + length);      
         super.remove(offset, length);
     } 
     
