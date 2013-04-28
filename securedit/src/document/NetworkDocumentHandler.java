@@ -103,17 +103,19 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
         
         while (v != null && !completed) {
             toRemove.add(v.getIdentifier());
-            removedText += v.getValue();
+            
+            removedText = v.getValue();
+            DocumentValue rightBoundary = v != null ? v.getNext() : null;
+            String rightIdent = rightBoundary == null ? Document.EOF : rightBoundary.getIdentifier();
+            String leftIdent = leftBoundary == null ? Document.BOF : leftBoundary.getIdentifier();
+
+            requestRemove(toRemove);
+            requestInsert(levelIdentifier, leftIdent, rightIdent, removedText);            
+            
             completed = v.getIdentifier().equals(rightIdentifier);
             v = v.getNext();
         }
         
-        DocumentValue rightBoundary = v != null ? v.getNext() : null;
-        String rightIdent = rightBoundary == null ? Document.EOF : rightBoundary.getIdentifier();
-        String leftIdent = leftBoundary == null ? Document.BOF : leftBoundary.getIdentifier();
-
-        requestRemove(toRemove);
-        requestInsert(levelIdentifier, leftIdent, rightIdent, removedText);
         return true;
     }
     

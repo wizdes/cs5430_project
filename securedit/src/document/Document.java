@@ -81,10 +81,10 @@ public class Document implements DocumentInterface, Message {
         }
         
         DocumentValue position;
-        if (valuesMap.containsKey(leftIdentifier)) {
-            position = valuesMap.get(leftIdentifier);                    
-        } else if (valuesMap.containsKey(rightIdentifier)) {
+        if (valuesMap.containsKey(rightIdentifier)) {
             position = valuesMap.get(rightIdentifier).getPrev();
+        } else if (valuesMap.containsKey(leftIdentifier)) {
+            position = valuesMap.get(leftIdentifier);                    
         } else {
             return -1;
         }
