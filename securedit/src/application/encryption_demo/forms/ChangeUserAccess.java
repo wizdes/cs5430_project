@@ -20,7 +20,9 @@ public class ChangeUserAccess extends javax.swing.JPanel {
     public ChangeUserAccess() {
         initComponents();
     }
-        public void setLabelsandUsername(ArrayList<String> labels, ArrayList<String> displayedUsername,NetworkDocumentHandlerInterface nd){
+    
+    //sets the labels for the suer access stuff
+    public void setLabelsandUsername(ArrayList<String> labels, ArrayList<String> displayedUsername,NetworkDocumentHandlerInterface nd){
         this.nd = nd;
 
         //this.labels = labels;
@@ -39,7 +41,8 @@ public class ChangeUserAccess extends javax.swing.JPanel {
         
         if(nd.isOwner() == false){
             userLists.setEnabled(false);
-            userLists.setSelectedIndex(Integer.parseInt(this.nd.getUserID()));
+            userLists.setSelectedValue(this.nd.getUserID(), true);
+            //userLists.setSelectedIndex(Integer.parseInt(this.nd.getUserID()));
         }
     }
 
