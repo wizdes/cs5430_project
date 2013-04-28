@@ -140,18 +140,22 @@ public class EditPanel extends javax.swing.JPanel {
     //this sets up all the colors and labels
     //this creates a GUI that pops up and populates the colors/labels list
     private void setupColorsAndLabels() {
-        int count = 0;
         nd.lock();
         try{
 
             HashMap<String, Color> colorChoices = getColorChoices();
-
-            String labelPrompt = "Enter a security group label (type 'done' when finished)";
-            String label = JOptionPane.showInputDialog(labelPrompt);
-            while (count < Constants.ALLOWABLE_LABEL_COUNT && !label.equals("done")) {
-                nd.addLabel(label);
+            String labelPrompt = "Enter a security group label (up to 10, or type 'done' when finished)";
+            String label = "not done";
+            
+            int count = 0;
+            while (count++ < Constants.ALLOWABLE_LABEL_COUNT && !label.equals("done")) {
                 label = JOptionPane.showInputDialog(labelPrompt);
-                count++;
+                if (labels.contains(label)) {
+                    count--;
+                    JOptionPane.showMessageDialog(this, "The label " + label + " already exists");
+                } else if (!label.equals("done")) {
+                    nd.addLabel(label);
+                }
             }
 
             for (String l : nd.getLabels()) {
@@ -160,7 +164,8 @@ public class EditPanel extends javax.swing.JPanel {
                 Color color = colorChoices.get(colorName);
                 while (color == null) {
                     JOptionPane.showMessageDialog(this, "Invalid color selection");
-                    colorName = JOptionPane.showInputDialog(l + " ~> " + colorPrompt);
+                    String defaultSelection = colorChoices.keySet().toArray()[0].toString();
+                    colorName = JOptionPane.showInputDialog(l + " ~> " + colorPrompt, defaultSelection);
                     color = colorChoices.get(colorName);                
                 }
                 colorChoices.remove(colorName);
