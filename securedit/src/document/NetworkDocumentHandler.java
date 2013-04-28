@@ -25,7 +25,6 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
     private String collaboratorId;
     private EditPanel curDoc;
     private AuthorizationDocument authDocument;
-    private Document document;
     private String ownerId;
     private final Lock lock = new ReentrantLock(true);
     private boolean connected = true;
@@ -39,7 +38,6 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
                            String documentOwnerId, 
                            String documentName) {
         this.authDocument = new AuthorizationDocument(documentOwnerId, documentName);
-        this.document = this.authDocument.getDocument();
         communication = ci;
         this.ownerId = documentOwnerId;
         this.collaboratorId = collaboratorId;
@@ -91,7 +89,7 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
     @Override
     public boolean assignLevel(int levelIdentifier, String leftIdentifier, String rightIdentifier) {
         // remove the nodes and save up the values
-        DocumentValue v = document.valuesMap.get(leftIdentifier);
+        DocumentValue v = authDocument.getDocument().valuesMap.get(leftIdentifier);
         if (v == null) {
             return false;
         }
@@ -103,24 +101,26 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
         
         while (v != null && !completed) {
             toRemove.add(v.getIdentifier());
-            removedText += v.getValue();
+            
+            removedText = v.getValue();
+            DocumentValue rightBoundary = v != null ? v.getNext() : null;
+            String rightIdent = rightBoundary == null ? Document.EOF : rightBoundary.getIdentifier();
+            String leftIdent = leftBoundary == null ? Document.BOF : leftBoundary.getIdentifier();
+
+            requestRemove(toRemove);
+            requestInsert(levelIdentifier, leftIdent, rightIdent, removedText);            
+            
             completed = v.getIdentifier().equals(rightIdentifier);
             v = v.getNext();
         }
         
-        DocumentValue rightBoundary = v != null ? v.getNext() : null;
-        String rightIdent = rightBoundary == null ? Document.EOF : rightBoundary.getIdentifier();
-        String leftIdent = leftBoundary == null ? Document.BOF : leftBoundary.getIdentifier();
-
-        requestRemove(toRemove);
-        requestInsert(levelIdentifier, leftIdent, rightIdent, removedText);
         return true;
     }
     
     @Override
     public boolean assignLevel(int levelIdentifier, int leftOffset, int rightOffset) {
-        String leftIdent = document.getIdentifierAtIndex(leftOffset);
-        String rightIdent = document.getIdentifierAtIndex(rightOffset);
+        String leftIdent = authDocument.getDocument().getIdentifierAtIndex(leftOffset);
+        String rightIdent = authDocument.getDocument().getIdentifierAtIndex(rightOffset);
         if (curDoc != null) {
             curDoc.setColors(leftOffset, rightOffset - leftOffset + 1, levelIdentifier);
         }
@@ -129,7 +129,7 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
     
     @Override
     public boolean isOwner() {
-        return document.getOwnerID().equals(collaboratorId);
+        return authDocument.getDocument().getOwnerID().equals(collaboratorId);
     }
     
     @Override
@@ -141,11 +141,11 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
     public void requestInsert(int level, String left, String right, String text) {
         
         if (isOwner()) {
-            authDocument.addUserToLevel(document.getOwnerID(), level);
-            requestInsertFor(document.getOwnerID(), level, left, right, text);
+            authDocument.addUserToLevel(authDocument.getDocument().getOwnerID(), level);
+            requestInsertFor(authDocument.getDocument().getOwnerID(), level, left, right, text);
         } else {
             DoInsert di = new DoInsert(left, right, level, text);
-            this.sendCommandMessage(document.getOwnerID(), di);
+            this.sendCommandMessage(authDocument.getDocument().getOwnerID(), di);
         }
     }
 
@@ -154,7 +154,7 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
         if (updates != null) {
             for (CommandMessage m : updates) {
                 System.out.println(m);
-                communication.sendMessage(m.to, document.getName(), m);
+                communication.sendMessage(m.to, authDocument.getDocument().getName(), m);
             }
         }
     }
@@ -162,10 +162,10 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
     @Override
     public void requestRemove(Set<String> identsToRemove) {
         if (isOwner()) {
-            requestRemoveFor(document.getOwnerID(), identsToRemove);
+            requestRemoveFor(authDocument.getDocument().getOwnerID(), identsToRemove);
         } else {
             DoRemove dr = new DoRemove(identsToRemove);
-            this.sendCommandMessage(document.getOwnerID(), dr);
+            this.sendCommandMessage(authDocument.getDocument().getOwnerID(), dr);
         }        
     }
     
@@ -173,7 +173,7 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
     public void requestRemove(int left, int right) {
         Set<String> toRemove = new HashSet<>();
         for (int i = left; i <= right; i++) {
-            toRemove.add(document.getIdentifierAtIndex(i));
+            toRemove.add(authDocument.getDocument().getIdentifierAtIndex(i));
         }
         requestRemove(toRemove);
     }    
@@ -183,7 +183,7 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
         if (updates != null) {
             for (CommandMessage m : updates) {
                 System.out.println(m);
-                communication.sendMessage(m.to, document.getName(), m);
+                communication.sendMessage(m.to, authDocument.getDocument().getName(), m);
             }
         }        
     }
@@ -212,15 +212,15 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
                              di.levelIdentifier, 
                              di.leftIdentifier, 
                              di.rightIdentifier, 
-                             di.text);
+                             di.text);            
             if (curDoc != null) {
-                curDoc.manualInsert(document.getOffsetForIdentifier(di.rightIdentifier) - 1, di.text, null);
+                curDoc.manualInsert(authDocument.getDocument().getOffsetForIdentifier(di.leftIdentifier) + 1, di.text, null); 
             }
         } else if (m.command instanceof DoRemove) {
             DoRemove dr = (DoRemove)m.command;
             int smallestOffset = -1;
             for(String s:dr.identifiers){
-                int candidate = document.getOffsetForIdentifier(s);
+                int candidate = authDocument.getDocument().getOffsetForIdentifier(s);
                 if(smallestOffset == -1 || smallestOffset > candidate){
                     smallestOffset = candidate;
                 }
@@ -242,7 +242,7 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
         } else if (m.command instanceof BootstrapRequest) {
             BootstrapRequest req = (BootstrapRequest)m.command;
             int level = this.authDocument.getLevelForUser(m.from);
-            BootstrapResponse resp = new BootstrapResponse(this.document.formatFor(level));
+            BootstrapResponse resp = new BootstrapResponse(this.authDocument.getDocument().formatFor(level));
             this.sendCommandMessage(m.from, resp);
         } else if(m.command instanceof DeleteUser){
             String userId = ((DeleteUser)m.command).getUserID();
@@ -253,23 +253,29 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
     private void processMessageClient(CommandMessage m) {
         if (m.command instanceof DoInsert) {
             DoInsert di = (DoInsert)m.command;
-            document.doInsert(di.levelIdentifier, 
-                              di.leftIdentifier, 
-                              di.rightIdentifier, 
-                              di.text);
+            int r = authDocument.getDocument().doInsert(di.levelIdentifier, 
+                                                        di.leftIdentifier, 
+                                                        di.rightIdentifier, 
+                                                        di.text);
+            if (r == -1) {
+                System.out.println("ERROR INSERTING INTO DOCUMENT");
+            } else {
+                System.out.println("Inserted item " + di.text);
+                System.out.println(authDocument.getDocument().getString());
+            }
             if (curDoc != null) {
-                curDoc.manualInsert(document.getOffsetForIdentifier(di.rightIdentifier) - 1, di.text, null);
+                curDoc.manualInsert(authDocument.getDocument().getOffsetForIdentifier(di.leftIdentifier) + 1, di.text, null);
             }
         }  else if (m.command instanceof DoRemove) {
             DoRemove dr = (DoRemove)m.command;
             int smallestOffset = -1;
             for(String s:dr.identifiers){
-                int candidate = document.getOffsetForIdentifier(s);
+                int candidate = authDocument.getDocument().getOffsetForIdentifier(s);
                 if(smallestOffset == -1 || smallestOffset > candidate){
                     smallestOffset = candidate;
                 }
             }
-            document.doRemove(dr.identifiers);
+            authDocument.getDocument().doRemove(dr.identifiers);
             if (curDoc != null) {
                 curDoc.manualRemove(smallestOffset, dr.identifiers.size());
             }
@@ -281,8 +287,7 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
             }            
         }  else if (m.command instanceof BootstrapResponse) {
             BootstrapResponse resp = (BootstrapResponse)m.command;
-            this.document = resp.document;
-            this.authDocument.setDocument(document);
+            this.authDocument.setDocument(resp.document);
             if (curDoc != null) {
                 curDoc.handleBootstrap(this.authDocument);
             }
@@ -298,15 +303,15 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
 
     @Override
     public void requestInsert(int level, int left, int right, String text) {
-        String leftIdent = document.getIdentifierAtIndex(left);
-        String rightIdent = document.getIdentifierAtIndex(right);
+        String leftIdent = authDocument.getDocument().getIdentifierAtIndex(left);
+        String rightIdent = authDocument.getDocument().getIdentifierAtIndex(right);
         requestInsert(level, leftIdent, rightIdent, text);
     }
     
     private void sendCommandMessage(String userId, DocumentCommand dc) {
-        CommandMessage cm = new CommandMessage(userId, this.collaboratorId, document.getName(), dc);
+        CommandMessage cm = new CommandMessage(userId, this.collaboratorId, authDocument.getDocument().getName(), dc);
         System.out.println(cm);
-        this.communication.sendMessage(userId, document.getName(), cm);
+        this.communication.sendMessage(userId, authDocument.getDocument().getName(), cm);
     }
 
     @Override
@@ -316,32 +321,32 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
 
     @Override
     public String getIdentifierAtIndex(int index) {
-        return this.document.getIdentifierAtIndex(index);
+        return this.authDocument.getDocument().getIdentifierAtIndex(index);
     }
 
     @Override
     public boolean isEmpty() {
-        return this.document.isEmpty();
+        return this.authDocument.getDocument().isEmpty();
     }
 
     @Override
     public int getLevelAtIndex(int index) {
-        return this.document.getLevelAtIndex(index);
+        return this.authDocument.getDocument().getLevelAtIndex(index);
     }
 
     @Override
     public String getName() {
-        return this.document.getName();
+        return this.authDocument.getDocument().getName();
     }
 
     @Override
     public String getOwnerID() {
-        return this.document.getOwnerID();
+        return this.authDocument.getDocument().getOwnerID();
     }
 
     @Override
     public String getString() {
-        return this.document.getString();
+        return this.authDocument.getDocument().getString();
     }
     
     @Override
@@ -352,7 +357,6 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
     @Override
     public void setAuthDocument(AuthorizationDocument ad) {
         this.authDocument = ad;
-        this.document = this.authDocument.getDocument();
     }
 
     @Override
@@ -372,22 +376,22 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
     
     @Override
     public void addColor(Color c) {
-        this.document.colors.add(c);
+        this.authDocument.getDocument().colors.add(c);
     }
     
     @Override
     public void addLabel(String l){
-        this.document.labels.add(l);
+        this.authDocument.getDocument().labels.add(l);
     }
     
     @Override
     public ArrayList<String> getLabels(){
-        return this.document.labels;
+        return this.authDocument.getDocument().labels;
     }
     
     @Override
     public ArrayList<Color> getColors() {
-        return this.document.colors;
+        return this.authDocument.getDocument().colors;
     }
 
     @Override

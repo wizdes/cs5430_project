@@ -118,7 +118,7 @@ public class NetworkDocumentTest {
         }
     }
 
-    @Test   
+    @Test
     public void testRequestInsert() {
         
         owner.addUserToLevel(p2Ident, 0);
@@ -199,28 +199,28 @@ public class NetworkDocumentTest {
         owner.addUserToLevel(p3Ident, 2);
         
         // when the owner applies an update it should get broadcast to all of the other documents
-        owner.requestInsert(0, Document.BOF, Document.EOF, "000");
+        owner.requestInsert(0, Document.BOF, "forcetofront", "000");
         pause(100);
         
         assertEquals("000", owner.getString());
         assertEquals("000", client2.getString());
         assertEquals("000", client3.getString());
         
-        owner.requestInsert(1, Document.BOF, Document.EOF, "111 ");
+        owner.requestInsert(1, Document.BOF, "forcetofront", "111 ");
         pause(100);
         
         assertEquals("111 000", owner.getString());
         assertEquals("111 000", client2.getString());
         assertEquals("111 000", client3.getString());
 
-        owner.requestInsert(2, Document.BOF, Document.EOF, "222 ");
+        owner.requestInsert(2, Document.BOF, "forcetofront", "222 ");
         pause(100);
         
         assertEquals("222 111 000", owner.getString());
         assertEquals("XXXX111 000", client2.getString());
         assertEquals("222 111 000", client3.getString());
 
-        owner.requestInsert(3, Document.BOF, Document.EOF, "333 ");
+        owner.requestInsert(3, Document.BOF, "forcetofront", "333 ");
         pause(100);
         
         assertEquals("333 222 111 000", owner.getString());
@@ -252,7 +252,7 @@ public class NetworkDocumentTest {
         assertEquals("XXXX222 111 XXX", client3.getString());        
     }
     
-    @Test
+//    @Test
     public void testUserLevelPropogation() {        
         owner.addUserToLevel(p2Ident, 1);
         owner.addUserToLevel(p3Ident, 2);
@@ -297,9 +297,9 @@ public class NetworkDocumentTest {
     
     @Test
     public void testBootstrap() {   
-        owner.requestInsert(0, Document.BOF, Document.EOF, "000");
-        owner.requestInsert(1, Document.BOF, Document.EOF, "111");
-        owner.requestInsert(2, Document.BOF, Document.EOF, "222");
+        owner.requestInsert(0, Document.BOF, "forcetofront", "000");
+        owner.requestInsert(1, Document.BOF, "forcetofront", "111");
+        owner.requestInsert(2, Document.BOF, "forcetofront", "222");
         
         owner.addUserToLevel(p2Ident, 1);
         pause(100);
@@ -315,7 +315,7 @@ public class NetworkDocumentTest {
         assertEquals("XXX111000", client2.getString());
         assertEquals("", client3.getString());    
         
-        client2.requestInsert(0, Document.BOF, Document.EOF, "000");
+        client2.requestInsert(0, Document.BOF, "forcetofront", "000");
         pause(100);
         
         assertEquals("000222111000", owner.getString());
@@ -324,7 +324,7 @@ public class NetworkDocumentTest {
         
         owner.addUserToLevel(p3Ident, 2);
         client3.bootstrap();
-        client2.requestInsert(1, Document.BOF, Document.EOF, "111");
+        client2.requestInsert(1, Document.BOF, "forcetofront", "111");
         pause(100);  
         
         assertEquals("111000222111000", owner.getString());

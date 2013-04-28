@@ -60,4 +60,10 @@ public interface DocumentInterface {
     public boolean isEmpty();
     
     public Document formatFor(int level);
+    
+    public int length();
+    
+    public void print();
+    
 }
+
