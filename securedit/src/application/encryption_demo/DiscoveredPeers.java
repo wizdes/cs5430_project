@@ -19,14 +19,13 @@ import java.util.concurrent.ConcurrentMap;
 public class DiscoveredPeers {
     public final ConcurrentMap<String, Peer> peers = new ConcurrentHashMap<>();
     
-    public void addPeer(String id, String ip, int port, List<String> documents, boolean hasHumanAuthenticated){
+    public void addPeer(String id, String ip, int port, List<String> documents){
         Peer peer;
         if(!peers.containsKey(id)){  //Hasn't been discovered before this session
-            peer = new Peer(id, ip, port, hasHumanAuthenticated);
+            peer = new Peer(id, ip, port);
             peers.put(id, peer);
         } else{ //Just update documents and if has authenticated
             peer = peers.get(id);
-            peer.hasHumanAuthenticated = hasHumanAuthenticated;
         }
         peer.addDocuments(documents);
     }
@@ -36,24 +35,19 @@ public class DiscoveredPeers {
     public Peer getPeer(String id){
         return peers.get(id);
     }
-    public void updateHumanAuthStatus(String id, boolean hasHumanAuthenticated){
-        peers.get(id).hasHumanAuthenticated = hasHumanAuthenticated;
-    }
     
     public class Peer {
         public String id;
         public String ip;
         public int port;
         public Set<String> documents;
-        public boolean hasHumanAuthenticated;
 
-        private Peer(String id, String ip, int port, boolean hasHumanAuthenticated) {
+        private Peer(String id, String ip, int port) {
             this.id = id;
             this.ip = ip;
             this.port = port;
             //this.documents = new HashSet<>(docs);
             this.documents = Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>());
-            this.hasHumanAuthenticated = hasHumanAuthenticated;
         }
         private void addDocuments(List<String> docs){
             documents.addAll(docs);
@@ -65,7 +59,7 @@ public class DiscoveredPeers {
             Object[][] rows = new Object[documents.size()][5];
             Object[] docs = documents.toArray();
             for(int i = 0; i < documents.size(); i++){
-                rows[i] = new Object[]{id, ip, port, docs[i], hasHumanAuthenticated};
+                rows[i] = new Object[]{id, ip, port, docs[i]};
             }
             return rows;
         }

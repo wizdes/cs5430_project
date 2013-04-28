@@ -19,7 +19,7 @@ Table of Contents
 
 1) Overview 
 
-For this project, we combined several standard Java implementations of security measures with unit tests and careful code maintenance. 
+For this project, we combined several standard Java implementations of security measures with unit tests and careful code maintenance. We also used several authorization policies such as MAC ensure the security of our data.
 
 2) Unit Test Cases
 

@@ -4,7 +4,7 @@
  */
 package security_layer;
 
-import application.encryption_demo.Messages.Message;
+import application.encryption_demo.Message;
 import java.util.ArrayList;
 import javax.crypto.SecretKey;
 import security_layer.authentications.AuthenticationTransport;
@@ -22,7 +22,7 @@ public interface SecureTransportInterface {
     public boolean sendPlainTextMessage(String destination, Message m);
     public boolean sendPlainTextMessage(String destination, String docID, Message m);
 //    public boolean processPlaintextMessage(String sourceOfMessage, PlaintextMessage msg);
-    public boolean processEncryptedMessage(String sourceOfMessage, String docID, EncryptedMessage encryptedMsg) throws InvalidHMACException;
+    public boolean processEncryptedMessage(String sourceOfMessage, String docID, EncryptedMessage encryptedMsg);
     public boolean writeEncryptedFile(String filename, char[] password, Message contents);
     public Message readEncryptedFile(String filename, char[] password);
     public String readUnencryptedFile(String filename);
@@ -32,10 +32,7 @@ public interface SecureTransportInterface {
 
     //FOR TESTING PURPOSES ONLY
     public void addPeer(String peerIdent, String host, int port);
-    
-    public ArrayList<Integer> findPeers(int myID);
-//    public boolean initializeHumanAuthenticate(String ID);
-    
+        
     public void broadcastDiscovery();
     public void processDiscoveryMessage(DiscoveryMessage dm);
     public void processDiscoveryResponse(DiscoveryResponseMessage msg);

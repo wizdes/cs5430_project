@@ -50,14 +50,13 @@ class MulticastServer extends Thread{
     }
     
     void broadcast(String ident, String host, int port){
-        int id = Integer.parseInt(ident);
         try {
-            socket = new DatagramSocket(6000 + id + 666);  //Must not be used by anyone else on server. So maybe port + offset(so for id=0, tcp=4000, udp=4000+500)
+            socket = new DatagramSocket(1000 + port);  //Must not be used by anyone else on server. So maybe port + offset(so for id=0, tcp=4000, udp=4000+500)
             discoveryPacket = new DiscoveryPacket(ident, host, port);
             start();
         } catch (SocketException ex) {
             if(Constants.DEBUG_ON){
-                Logger.getLogger(MulticastServer.class.getName()).log(Level.SEVERE, "[User: " + ident + "] Failed when intializing DatagramSocket @port: " + (6000 + id + 666) + " for broadcast to (" + ident + ", " + host + ", " + port + ")", ex);
+                Logger.getLogger(MulticastServer.class.getName()).log(Level.SEVERE, "[User: " + ident + "] Failed when intializing DatagramSocket @port: " + (1000 + port) + " for broadcast to (" + ident + ", " + host + ", " + port + ")", ex);
             }
         }
     }   

@@ -5,7 +5,7 @@
 package security_layer.authentications;
 
 import configuration.Constants;
-import document.NetworkDocumentInterface;
+import document.NetworkDocumentHandlerInterface;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
@@ -33,12 +33,12 @@ import transport_layer.network.NetworkTransportInterface;
  * @author Patrick
  */
 public class AuthenticationTransport {
-    public static int AUTH_TIMEOUT_DELAY = 4000;
+    public static int AUTH_TIMEOUT_DELAY = 16000;
     private NetworkTransportInterface transport;
     private SecureTransportInterface secureTransport;
     private ConcurrentMap<String, AuthenticationSession> authSessions = new ConcurrentHashMap<>();
     private ConcurrentMap<String, char[]> pendingPINs = new ConcurrentHashMap<>();
-    private ConcurrentMap<String, NetworkDocumentInterface> docInstances;
+    private ConcurrentMap<String, NetworkDocumentHandlerInterface> docInstances;
     private Profile profile;
     
     private static long sessionIdCounter = 0L;
@@ -49,7 +49,7 @@ public class AuthenticationTransport {
     public AuthenticationTransport(NetworkTransportInterface transport, 
                                    SecureTransportInterface secureTransport, 
                                    Profile profile,
-                                   ConcurrentMap<String, NetworkDocumentInterface> docInstances) {
+                                   ConcurrentMap<String, NetworkDocumentHandlerInterface> docInstances) {
         this.profile = profile;
         this.transport = transport;
         this.secureTransport = secureTransport;
@@ -157,7 +157,13 @@ public class AuthenticationTransport {
         if (receivedSRPMsg instanceof Auth_Msg1) {    //Server
             Auth_Msg1 msg1 = (Auth_Msg1)receivedSRPMsg;
             //Fetch Persistent state
-            persistantServerState = docInstances.get(msg1.docID).getServerAuthenticationPersistantState();
+            NetworkDocumentHandlerInterface doc = docInstances.get(msg1.docID);
+            if (doc == null) {
+                throw new InvalidSRPMessageException("Client: " + sourceID + " has no account[s,v pair] on record.");
+            }
+            
+            persistantServerState = doc.getServerAuthenticationPersistantState();
+            
             byte[] s = persistantServerState.getClientSalt(sourceID);           //s = salt
             BigInteger v = persistantServerState.getClientVerifier(sourceID);   //v = verifier = g^x
             if (s == null || v == null){

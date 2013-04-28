@@ -4,15 +4,15 @@
  */
 package application.encryption_demo.forms;
 
-import _old_stuff.EncryptionDemoGUI;
 import application.encryption_demo.CustomDocument;
 import application.encryption_demo.EncryptionDemoFunctionality;
+import configuration.Constants;
 import document.AuthorizationDocument;
 import document.DocumentValue;
 import document.NetworkDocumentHandler;
-import document.NetworkDocumentInterface;
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -23,13 +23,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
@@ -45,12 +42,19 @@ public class EditPanel extends javax.swing.JPanel {
      */
     private EncryptionDemoFunctionality functionality = null;
     public void addColor(Color c){
+        nd.lock();
+        try{
         SimpleAttributeSet aset = new SimpleAttributeSet();
         StyleConstants.setForeground(aset, c);
         colors.add(aset);
+        } finally{
+            nd.unlock();
+        }
     }
         
     public void populateColorsList(ArrayList<Color> colors, ArrayList<String> labels){
+        nd.lock();
+        try{
         this.labels = labels;
         for (String l : labels) {
             LevelSelect.addItem(l);
@@ -66,9 +70,14 @@ public class EditPanel extends javax.swing.JPanel {
         for(Color c:colors){
             addColor(c);
         }
+        } finally{
+            nd.unlock();
+        }
     }
     
     public void setDefaultColorsAndLabels() {
+        nd.lock();
+        try{
         nd.addColor(Color.black);
         nd.addColor(Color.blue);
         nd.addColor(Color.green);
@@ -79,10 +88,14 @@ public class EditPanel extends javax.swing.JPanel {
         nd.addLabel("SECRET");
         nd.addLabel("TOP SECRET");
         populateColorsList(nd.getColors(), nd.getLabels());
+        } finally{
+            nd.unlock();
+        }
     }
     
     private HashMap<String, Color> getColorChoices() {
-                
+        nd.lock();
+        try{
         HashMap<String, Color> colorChoices = new HashMap<>();
         colorChoices.put("black", Color.black);
         colorChoices.put("blue", Color.blue);
@@ -93,9 +106,14 @@ public class EditPanel extends javax.swing.JPanel {
         colorChoices.put("cyan", Color.CYAN);
         
         return colorChoices;
+        } finally{
+            nd.unlock();
+        }
     }
     
     private String getColorChoicePrompt(HashMap<String, Color> colorChoices) {
+        nd.lock();
+        try{
         String colorChoiceList = "(";
         for (String c : colorChoices.keySet()) {
             colorChoiceList += c + ", ";
@@ -104,9 +122,14 @@ public class EditPanel extends javax.swing.JPanel {
         String colorPrompt = "choose a color for this group '\n" + colorChoiceList + " : ";
         
         return colorPrompt;
+        } finally{
+            nd.unlock();
+        }
     }
     
     private void setupColorsAndLabels() {
+        nd.lock();
+        try{
         ArrayList<Color> defaultColors = new ArrayList<>();
         ArrayList<String> defaultLabels = new ArrayList<>();
 
@@ -132,14 +155,22 @@ public class EditPanel extends javax.swing.JPanel {
             nd.addColor(color);
         }
         populateColorsList(nd.getColors(), nd.getLabels());
+        } finally{
+            nd.unlock();
+        }
     }
     
     public void promptForLevelsAndColors() {
+        nd.lock();
+        try{    
         int r = JOptionPane.showConfirmDialog(this, "Would you like to use the default levels?");
         if (r == JOptionPane.OK_OPTION) {
             setDefaultColorsAndLabels();
         } else {
             setupColorsAndLabels();
+        }
+        } finally{
+            nd.unlock();
         }
     }    
     
@@ -147,9 +178,9 @@ public class EditPanel extends javax.swing.JPanel {
         this.functionality = functionality;
         initComponents();
         peerModel = new DefaultListModel();
-        cr = new newCellRenderer();
-        labels = new ArrayList<String>();
-        colors = new ArrayList<SimpleAttributeSet>();
+        cr = new ColorCellRenderer();
+        labels = new ArrayList<>();
+        colors = new ArrayList<>();
         
         PeersList.setModel(peerModel);
 
@@ -162,8 +193,10 @@ public class EditPanel extends javax.swing.JPanel {
     }
     
     public void giveDocument(NetworkDocumentHandler nd){
-        
         this.nd = nd;
+        this.nd.lock();
+        try{
+        
         cd.giveDocument(nd);
         displayedUsername.add(nd.getUserID());
         if (nd.isOwner()) {
@@ -177,9 +210,14 @@ public class EditPanel extends javax.swing.JPanel {
             generatePINButton.setEnabled(false);
             changeUserLevelButton.setText("Request Change Level");
         }
+        } finally{
+            this.nd.unlock();
+        }
     }
 
     public void handleBootstrap(AuthorizationDocument ad) {
+        nd.lock();
+        try{
         peerModel.addElement(nd.getOwnerID() + " - Document Owner");
         nd.setAuthDocument(ad);
         this.giveDocument(nd);
@@ -189,6 +227,9 @@ public class EditPanel extends javax.swing.JPanel {
         this.populateColorsList(nd.getColors(), nd.getLabels());
         peerModel.addElement(nd.getUserID() + " - " + labels.get(cd.insertLevel));
         this.repaint(ad);
+        } finally{
+            nd.unlock();
+        }
     }
     
     /**
@@ -237,6 +278,7 @@ public class EditPanel extends javax.swing.JPanel {
         PeersLabel.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         PeersLabel.setText("Peers(not shown currently)");
 
+        documentArea.setFont(new java.awt.Font("Courier New", 0, 13)); // NOI18N
         documentArea.addCaretListener(new javax.swing.event.CaretListener() {
             public void caretUpdate(javax.swing.event.CaretEvent evt) {
                 documentAreaCaretUpdate(evt);
@@ -330,6 +372,11 @@ public class EditPanel extends javax.swing.JPanel {
         });
 
         DisconnectButton.setText("Disconnect");
+        DisconnectButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                DisconnectButtonMouseClicked(evt);
+            }
+        });
         DisconnectButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 DisconnectButtonActionPerformed(evt);
@@ -436,8 +483,12 @@ public class EditPanel extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     private void documentAreaCaretUpdate(javax.swing.event.CaretEvent evt) {//GEN-FIRST:event_documentAreaCaretUpdate
-        // TODO add your handling code here:
+        nd.lock();
+        try{
         cursorInfo.setText("Cursor at: " + evt.getDot());
+        } finally{
+            nd.unlock();
+        }
     }//GEN-LAST:event_documentAreaCaretUpdate
 
     private void beginCursorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_beginCursorActionPerformed
@@ -464,27 +515,75 @@ public class EditPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_changeUserLevelButtonMousePressed
 
     private void ownerWriteLevelItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_ownerWriteLevelItemStateChanged
+        nd.lock();
+        try{
         // TODO add your handling code here:
         if (nd != null && nd.isOwner()){
             cd.insertLevel = ownerWriteLevel.getSelectedIndex();
             System.out.println("Selected: " + ownerWriteLevel.getSelectedIndex());
             System.out.println("Level: " + cd.insertLevel);
         }
+        } finally{
+            nd.unlock();
+        }
     }//GEN-LAST:event_ownerWriteLevelItemStateChanged
 
+    static public String getContents(File aFile) {
+       //...checks on aFile are elided
+       StringBuilder contents = new StringBuilder();
+
+       try {
+         //use buffering, reading one line at a time
+         //FileReader always assumes default encoding is OK!
+         BufferedReader input =  new BufferedReader(new FileReader(aFile));
+         try {
+           String line = null; //not declared within while loop
+           /*
+           * readLine is a bit quirky :
+           * it returns the content of a line MINUS the newline.
+           * it returns null only for the END of the stream.
+           * it returns an empty String if two newlines appear in a row.
+           */
+           while (( line = input.readLine()) != null){
+             contents.append(line);
+             contents.append(System.getProperty("line.separator"));
+           }
+         }
+         finally {
+           input.close();
+         }
+       }
+       catch (IOException ex){
+         ex.printStackTrace();
+       }
+
+       return contents.toString();
+     }    
+    
     private void openNormalFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openNormalFileButtonActionPerformed
+        nd.lock();
+        try{
         jFileChooser1.setVisible(true);
         int returnVal = jFileChooser1.showOpenDialog(this);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = jFileChooser1.getSelectedFile();
+            //documentArea.removeAll();
+            this.manualRemove(0, documentArea.getText().length());
+            String contents = getContents(file);
             try {
-                File file = jFileChooser1.getSelectedFile();
-                documentArea.removeAll();
-                documentArea.read(new FileReader( file.getAbsolutePath() ), null);
-            } catch (IOException ex) {
+                contents = contents.trim();
+                cd.insertString(0, contents, colors.get(0));
+                System.out.println(contents.length());
+                System.out.println(documentArea.getText().length());
+                //documentArea.read(new FileReader( file.getAbsolutePath() ), null);
+            } catch (BadLocationException ex) {
                 Logger.getLogger(EditPanel.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
             System.out.println("File access cancelled by user.");
+        }
+        } finally{
+            nd.unlock();
         }
     }//GEN-LAST:event_openNormalFileButtonActionPerformed
 
@@ -493,6 +592,8 @@ public class EditPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_openNormalFileButtonMousePressed
 
     private void generatePINButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_generatePINButtonActionPerformed
+        nd.lock();
+        try{
         String username = JOptionPane.showInputDialog("Enter the username:").trim();
         if (username.isEmpty()) {
             return;
@@ -500,6 +601,9 @@ public class EditPanel extends javax.swing.JPanel {
         char[] pin = this.functionality.generatePIN(username, nd.getName());
         System.out.println("PIN: " + new String(pin));
         new PINDisplayDialog(username, pin).setVisible(true);
+        } finally{
+            nd.unlock();
+        }
     }//GEN-LAST:event_generatePINButtonActionPerformed
 
     private void jFileChooser1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jFileChooser1ActionPerformed
@@ -517,66 +621,107 @@ public class EditPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_openEncryptedFileButtonMousePressed
 
     private void openEncryptedFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openEncryptedFileButtonActionPerformed
-                //Using a JPanel as the message for the JOptionPane
+        //Using a JPanel as the message for the JOptionPane
+        nd.lock();
+        try {
+            JPanel userPanel = new JPanel();
+            userPanel.setLayout(new GridLayout(2, 2));
 
-        JPanel userPanel = new JPanel();
-        userPanel.setLayout(new GridLayout(2,2));
+            JLabel passwordLbl = new JLabel("Password:");
+            JPasswordField passwordFld = new JPasswordField();
+            userPanel.add(passwordLbl);
+            userPanel.add(passwordFld);
 
-        JLabel passwordLbl = new JLabel("Password:");
-        JPasswordField passwordFld = new JPasswordField();
-        char[] password = passwordFld.getPassword();
+            //As the JOptionPane accepts an object as the message
+            //it allows us to use any component we like - in this case 
+            //a JPanel containing the dialog components we want
+            int input = JOptionPane.showConfirmDialog(null, userPanel, "Enter your password:", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            jFileChooser1.setVisible(true);
+            char[] password = passwordFld.getPassword();
 
-        userPanel.add(passwordLbl);
-        userPanel.add(passwordFld);
-
-        //As the JOptionPane accepts an object as the message
-        //it allows us to use any component we like - in this case 
-        //a JPanel containing the dialog components we want
-        int input = JOptionPane.showConfirmDialog(null, userPanel, "Enter your password:"
-                      ,JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        jFileChooser1.setVisible(true);
-        int returnVal = jFileChooser1.showOpenDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = jFileChooser1.getSelectedFile();
-            String fileName = file.getAbsolutePath();
-            AuthorizationDocument ad = (AuthorizationDocument) functionality.decryptObjFile(fileName, password);
-            nd.setAuthDocument(ad);
-            this.manualRemove(0, documentArea.getText().length());
-            repaint(ad);
-        } else {
-            System.out.println("File access cancelled by user.");
+            int returnVal = jFileChooser1.showOpenDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = jFileChooser1.getSelectedFile();
+                String fileName = file.getAbsolutePath();
+                //System.out.println(documentArea.getText().length());
+                //System.out.println("Password used to: " + new String(password));
+                AuthorizationDocument ad = (AuthorizationDocument) functionality.decryptObjFile(fileName, password);
+                if(ad != null){
+                    this.manualRemove(0, documentArea.getText().length());
+                    nd.setAuthDocument(ad);
+                    repaint(ad);
+                }
+                else{
+                    JOptionPane.showMessageDialog(null, "Couldn't open file.");
+                }
+            } else {
+                System.out.println("File access cancelled by user.");
+            }
+        } finally {
+            nd.unlock();
         }
     }//GEN-LAST:event_openEncryptedFileButtonActionPerformed
 
     private void saveEncryptedFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveEncryptedFileButtonActionPerformed
-        //Using a JPanel as the message for the JOptionPane
-        JPanel userPanel = new JPanel();
-        userPanel.setLayout(new GridLayout(2,2));
+        nd.lock();
+        try {
+            //Select file to save to
+            jFileChooser1.setVisible(true);
+            int returnVal = jFileChooser1.showSaveDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = jFileChooser1.getSelectedFile();
+                String fileName = file.getAbsolutePath();
 
-        JLabel passwordLbl = new JLabel("Password:");
-        JPasswordField passwordFld = new JPasswordField();
-        char[] password = passwordFld.getPassword();
+                //Prompt for password, continue prompting until receive valid password.
+                char[] password;
+                int input;
+                String passwordStr = "Password:";
+                do {
+                    //Using a JPanel as the message for the JOptionPane
+                    JPanel userPanel = new JPanel();
+                    userPanel.setLayout(new GridLayout(2, 2));
 
-        userPanel.add(passwordLbl);
-        userPanel.add(passwordFld);
+                    JLabel passwordLbl = new JLabel(passwordStr);
+                    JPasswordField passwordFld = new JPasswordField();
 
-        //As the JOptionPane accepts an object as the message
-        //it allows us to use any component we like - in this case 
-        //a JPanel containing the dialog components we want
-        int input = JOptionPane.showConfirmDialog(null, userPanel, "Enter your password:"
-                      ,JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        jFileChooser1.setVisible(true);
-        int returnVal = jFileChooser1.showSaveDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = jFileChooser1.getSelectedFile();
-            String fileName = file.getAbsolutePath();
-            functionality.encryptFile(fileName, nd.getAuthDocument(), password);
-        } else {
-            System.out.println("File access cancelled by user.");
-        } 
+                    userPanel.add(passwordLbl);
+                    userPanel.add(passwordFld);
+
+                    //As the JOptionPane accepts an object as the message
+                    //it allows us to use any component we like - in this case 
+                    //a JPanel containing the dialog components we want
+                    input = JOptionPane.showConfirmDialog(null, userPanel, "Enter your password:", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                    password = passwordFld.getPassword();
+                    if(!isValidPassword(password)) passwordStr = "Valid Password (12 Characters, Alphanumeric, Upper/Lower:";
+                } while(!isValidPassword(password) && input == JOptionPane.YES_OPTION);
+                functionality.encryptFile(fileName, nd.getAuthDocument(), password);
+            } else {
+                System.out.println("File access cancelled by user.");
+            }
+        } finally {
+            nd.unlock();
+        }
     }//GEN-LAST:event_saveEncryptedFileButtonActionPerformed
-
+    private boolean isValidPassword(char[] pass) {
+        
+        boolean containsLowerCase = false;
+        boolean containsUpperCase = false;
+        boolean containsDigit = false;
+    
+        for(char c: pass){
+            containsLowerCase   = containsLowerCase || Character.isLowerCase(c);
+            containsUpperCase   = containsUpperCase || Character.isUpperCase(c);
+            containsDigit       = containsDigit || Character.isDigit(c); 
+        }
+        System.out.println("Pass: "  + Arrays.toString(pass));
+        System.out.println("lower: " + containsLowerCase);
+        System.out.println("upper: " + containsUpperCase);
+        System.out.println("digit: " + containsDigit);
+        return pass.length >= Constants.MIN_PASSWORD_LENGTH && containsLowerCase && containsUpperCase && containsDigit;
+    }
     private void changeUserLevelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeUserLevelButtonActionPerformed
+        nd.lock();
+        try{
         System.out.println("Pressed Button");
         ChangeUserAccess jf = new ChangeUserAccess();
         jf.setLabelsandUsername(labels, displayedUsername, nd);
@@ -592,19 +737,27 @@ public class EditPanel extends javax.swing.JPanel {
                 null,
                 options,
                 options[0]);
+        } finally{
+            nd.unlock();
+        }
     }//GEN-LAST:event_changeUserLevelButtonActionPerformed
 
     private void setLevelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setLevelButtonActionPerformed
-        if(beginCursor.getText().equals("") || endCursor.getText().equals("")){
-            return;
+        nd.lock();
+        try {
+            if (beginCursor.getText().equals("") || endCursor.getText().equals("")) {
+                return;
+            }
+            int beginCursorInt = Integer.parseInt(beginCursor.getText());
+            int endCursorInt = Integer.parseInt(endCursor.getText());
+            int colorPosition = LevelSelect.getSelectedIndex();
+            AttributeSet s = colors.get(colorPosition);
+            //send it to everyone else
+            //setColors(beginCursorInt, endCursorInt - beginCursorInt, colorPosition);
+            nd.assignLevel(colorPosition, beginCursorInt, endCursorInt);
+        } finally {
+            nd.unlock();
         }
-        int beginCursorInt = Integer.parseInt(beginCursor.getText());
-        int endCursorInt = Integer.parseInt(endCursor.getText());
-        int colorPosition = LevelSelect.getSelectedIndex();
-        AttributeSet s = colors.get(colorPosition);
-        //send it to everyone else
-        //setColors(beginCursorInt, endCursorInt - beginCursorInt, colorPosition);
-        nd.assignLevel(colorPosition, beginCursorInt, endCursorInt);
     }//GEN-LAST:event_setLevelButtonActionPerformed
 
     private void DisconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DisconnectButtonActionPerformed
@@ -615,13 +768,14 @@ public class EditPanel extends javax.swing.JPanel {
         this.nd.disconnect();
         this.functionality.closeEditingSession(nd);
     }
-    
+
     private void DisconnectButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DisconnectButtonMouseClicked
         // TODO add your handling code here:
-        
     }//GEN-LAST:event_DisconnectButtonMouseClicked
 
     public void repaint(AuthorizationDocument ad){
+        nd.lock();
+        try{
         String text = ad.getDocument().getString();
         
         int length = text.length();
@@ -631,91 +785,120 @@ public class EditPanel extends javax.swing.JPanel {
             this.manualInsert(i, String.valueOf(text.charAt(i)) , colors.get(dv.getLevel()));
             dv = dv.getNext();
         }
-        
+        } finally{
+            nd.unlock();
+        }
     }
     
     public void setColors(int begin, int end, int colorLevel){
+        nd.lock();
+        try{
         cd.setColors(begin, end, colors.get(colorLevel), true);
+        } finally{
+            nd.unlock();
+        }
     }
     
     public boolean approveUserForLevel(String userId, int level) { 
+        nd.lock();
+        try{
         String msg = "Add " + userId + " to level " + level + "?";
         return JOptionPane.showConfirmDialog(this, msg) == JOptionPane.OK_OPTION;
+        } finally{
+            nd.unlock();
+        }
     }
     
     public void manualInsert(int offset, String string, AttributeSet attributeSet){
+        nd.lock();
         try {
-            // Do something here
-            System.out.println("Inserting: " + string);
             cd.manualInsert(offset, string, attributeSet);
             if(offset <= documentArea.getCaretPosition() 
-                    && documentArea.getCaretPosition() + string.length() < documentArea.getText().length()){
+                    && documentArea.getCaretPosition() + string.length() <= documentArea.getText().length()){
                 documentArea.setCaretPosition(documentArea.getCaretPosition() + string.length());
             }
         } catch (BadLocationException ex) {
             Logger.getLogger(EditPanel.class.getName()).log(Level.SEVERE, null, ex);
+        } finally{
+            nd.unlock();
         }
     }
     
     public void manualRemove(int offset, int length){
+        nd.lock();
         try {
             cd.manualRemove(offset, length);
             if(offset < documentArea.getCaretPosition() && documentArea.getCaretPosition() - length >= 0){
                 documentArea.setCaretPosition(documentArea.getCaretPosition() - length);
             }
         } catch (BadLocationException ex) {
+            System.out.println(ex);
             Logger.getLogger(EditPanel.class.getName()).log(Level.SEVERE, null, ex);
+        } finally{
+            nd.unlock();
         }
     }
     
-    public void deltaCaretPosition(int delta){
-        documentArea.setCaretPosition(documentArea.getCaretPosition() + delta);
-    }
-    
-    public void update(String s){
-        //documentArea.setText(s);
-    }
-    
     public void setColors(int offset, int length, AttributeSet as, boolean replace){
+        nd.lock();
+        try{
         cd.setColors(offset, length, as, true);
+        } finally{
+            nd.unlock();
+        }
     }
     
     public void displayMessages(String plaintext){
+        nd.lock();
+        try{
         documentArea.setText(documentArea.getText() + plaintext + "\n");
+        } finally{
+            nd.unlock();
+        }
     }
     
-    public void addUser(String username, int levelIdentifier){
-        if(displayedUsername.contains(username)){
-                for(int i = 0; i < peerModel.size(); i++){
+    public void addUser(String username, int levelIdentifier) {
+        nd.lock();
+        try {
+            if (displayedUsername.contains(username)) {
+                for (int i = 0; i < peerModel.size(); i++) {
+                    String x = peerModel.get(i).toString().split(" - ")[0];
+                    if (peerModel.get(i).toString().split(" - ")[1].equals("Document Owner")) {
+                        continue;
+                    }
+                    if (x.equals(username)) {
+                        peerModel.remove(i);
+                        peerModel.addElement(username + " - " + labels.get(levelIdentifier));
+                        cd.insertLevel = levelIdentifier;
+                        return;
+                    }
+                }
+                return;
+            }
+            peerModel.addElement(username + " - " + labels.get(levelIdentifier));
+            displayedUsername.add(username);
+        } finally {
+            nd.unlock();
+        }
+    }
+    
+    public void reviseUser(String username, int levelIdentifier){
+        nd.lock();
+        try {
+            for (int i = 0; i < peerModel.size(); i++) {
                 String x = peerModel.get(i).toString().split(" - ")[0];
-                if(peerModel.get(i).toString().split(" - ")[1].equals("Document Owner")){
+                if (peerModel.get(i).toString().split(" - ")[1].equals("Document Owner")) {
                     continue;
                 }
-                if(x.equals(username)){
+                if (x.equals(username)) {
                     peerModel.remove(i);
-                    peerModel.addElement(username +" - " + labels.get(levelIdentifier));
+                    peerModel.addElement(username + " - " + labels.get(levelIdentifier));
                     cd.insertLevel = levelIdentifier;
                     return;
                 }
             }
-            return;
-        }
-        peerModel.addElement(username +" - " + labels.get(levelIdentifier)); 
-        displayedUsername.add(username);
-    }
-    
-    public void reviseUser(String username, int levelIdentifier){
-        for(int i = 0; i < peerModel.size(); i++){
-            String x = peerModel.get(i).toString().split(" - ")[0];
-            if(peerModel.get(i).toString().split(" - ")[1].equals("Document Owner")){
-                continue;
-            }
-            if(x.equals(username)){
-                peerModel.remove(i);
-                peerModel.addElement(username +" - " + labels.get(levelIdentifier));
-                cd.insertLevel = levelIdentifier;
-                return;
-            }
+        } finally {
+            nd.unlock();
         }
     }
     
@@ -747,7 +930,25 @@ public class EditPanel extends javax.swing.JPanel {
     private ArrayList<String> labels;
     public ArrayList<SimpleAttributeSet> colors;
     DefaultListModel peerModel;
-    newCellRenderer cr;
+    ColorCellRenderer cr;
     private ArrayList<String> displayedUsername;
     NetworkDocumentHandler nd;
+
+    public void removeUser(String username) {
+        nd.lock();
+        try {
+            for (int i = 0; i < peerModel.size(); i++) {
+                String x = peerModel.get(i).toString().split(" - ")[0];
+                if (peerModel.get(i).toString().split(" - ")[1].equals("Document Owner")) {
+                    continue;
+                }
+                if (x.equals(username)) {
+                    peerModel.remove(i);
+                    return;
+                }
+            }
+        } finally {
+            nd.unlock();
+        }
+    }
 }

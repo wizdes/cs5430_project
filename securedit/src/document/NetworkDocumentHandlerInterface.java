@@ -8,14 +8,16 @@ import application.encryption_demo.forms.EditPanel;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
 import security_layer.authentications.ServerAuthenticationPersistantState;
 
 /**
  *
  * @author goggin
  */
-public interface NetworkDocumentInterface {
-    
+public interface NetworkDocumentHandlerInterface {
+    public void lock();
+    public void unlock();
     /* Called by the GUI when the user inserts.
      * If this document is owned by the current GUI
      *   it immediately applies the change

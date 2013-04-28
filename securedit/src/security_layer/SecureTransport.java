@@ -4,7 +4,7 @@ package security_layer;
 import application.encryption_demo.CommunicationInterface;
 import security_layer.authentications.AccountCreationError;
 import transport_layer.discovery.DiscoveryMessage;
-import application.encryption_demo.Messages.Message;
+import application.encryption_demo.Message;
 import configuration.Constants;
 import java.io.File;
 import java.io.IOException;
@@ -93,7 +93,7 @@ public class SecureTransport implements SecureTransportInterface{
             EncryptedAESMessage encryptedMessage;
             if (m instanceof AuthenticationMessage) {
                 Constants.log("sending AuthenticationMessage");
-                encryptedMessage = new EncryptedAuthenticationMessage(encryptedObject, iv, hmac);
+                encryptedMessage = new EncryptedAESAuthenticationMessage(encryptedObject, iv, hmac);
             } else {
                 Constants.log("sending EncryptedAESMessage");
                 encryptedMessage = new EncryptedAESMessage(encryptedObject, iv, hmac);
@@ -114,21 +114,21 @@ public class SecureTransport implements SecureTransportInterface{
     }
     
     @Override
-    public boolean processEncryptedMessage(String sourceOfMessage, String docID, EncryptedMessage encryptedMessage) throws InvalidHMACException {
+    public boolean processEncryptedMessage(String sourceOfMessage, String docID, EncryptedMessage encryptedMessage) {
         boolean success = false;
-        SecretKey secretKey = null;
-        SecretKey HMACKey = null;
+        SecretKey secretKey;
+        SecretKey HMACKey;
         if (Constants.DEBUG_ON) {
             Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + profile.username + "] Processing " + EncryptedMessage.class.getName() + " from " + sourceOfMessage + ".");
         }
         SealedObject encryptedObject;
 
-        Cipher cipher = null;
+        Cipher cipher;
         try {
             EncryptedAESMessage aesMessage = (EncryptedAESMessage) encryptedMessage;
             encryptedObject = aesMessage.encryptedObject;
             
-            if (encryptedMessage instanceof EncryptedAuthenticationMessage) {
+            if (encryptedMessage instanceof EncryptedAESAuthenticationMessage) {
                 char[] PIN = this.authentication.getPIN(sourceOfMessage, docID);
                 if (PIN == null) {
                     replyAuthFailure(sourceOfMessage, docID);
@@ -140,7 +140,7 @@ public class SecureTransport implements SecureTransportInterface{
                 } catch (UnsupportedEncodingException ex) {
                     return false;
                 }
-            } else {
+            } else {    //Application message
                 HMACKey = keys.getHmacKey(sourceOfMessage, docID);
                 secretKey = keys.getSessionKey(sourceOfMessage, docID);
             }
@@ -203,7 +203,7 @@ public class SecureTransport implements SecureTransportInterface{
             Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + profile.username + "] Processing " + DiscoveryResponseMessage.class.getName() + " from " + msg.owner + ".");
         }
         
-        communication.updatePeers(msg.owner, msg.ip, msg.port, msg.documents, false);
+        communication.updatePeers(msg.owner, msg.ip, msg.port, msg.documents);
     }
     
     @Override
@@ -219,17 +219,6 @@ public class SecureTransport implements SecureTransportInterface{
             networkTransport.send(dm.sourceID, responseMessage);
         }
     }
-    
-//    @Override
-//    public boolean processPlaintextMessage(String sourceOfMessage, PlaintextMessage msg) {
-//        if(Constants.DEBUG_ON){
-//            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + profile.username + "] Processing " + PlaintextMessage.class.getName() + " from " + sourceOfMessage + ".");
-//        }
-//        if (msg.m instanceof DiscoveryMessage) {
-//            processDiscoveryMessage((DiscoveryMessage)msg.m);
-//        }
-//        return true;
-//    }
     
     @Override
     public boolean writeEncryptedFile(String filename, char[] password, Message contents) {
@@ -301,76 +290,10 @@ public class SecureTransport implements SecureTransportInterface{
         this.networkTransport.shutdown();
     }
 
-
-    @Override
-    public ArrayList<Integer> findPeers(int myID) {
-        ArrayList<Integer> peers = new ArrayList<Integer>();
-        peers.add(0);
-        peers.add(1);
-        peers.add(2);
-        return peers;
-    }
-
-//    @Override
-//    public boolean initializeHumanAuthenticate(String destination) {
-//        if(Constants.DEBUG_ON){
-//            Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + profile.username + "] Starting initial human authentication with " + destination + ".");
-//        }
-//
-//        final Lock authenticateLock = new ReentrantLock(true);
-//        
-//        HumanAuthenticationMessage msg = authInstance.constructInitialHAuthMessage();
-//        Condition authenticationComplete = authenticateLock.newCondition();
-//        
-//        try {
-//            authenticateLock.lock();
-//            // send the message and wait
-//            authInstance.addAuthentication(destination, msg, authenticationComplete, authenticateLock);
-//            sendPlainTextMessage(destination, msg);
-//        }
-//        finally{
-//            authenticateLock.unlock();
-//            return true;
-//        }
-//    }
-
     @Override
     public void broadcastDiscovery() {
         discoveryTransport.broadcastDiscovery();
     }
-    
-//    @Override
-//    public boolean addPIN(String ownerID, String PIN) {
-//        if (!this.pendingHumanAuth.containsKey(ownerID)) {
-//            if(Constants.DEBUG_ON){
-//                Logger.getLogger(SecureTransport.class.getName()).log(Level.INFO, "[User: " + profile.username + "] Haven't yet received PIN message from owner: " + ownerID + ".");
-//            }
-//            return false;
-//        }
-//        
-//        SecretKey pinKey = KeyFactory.generateSymmetricKey(PIN);
-//        SecretKey HMACKey = KeyFactory.generateSymmetricKey(PIN + "HMAC");
-//        Profile.keys.addSymmetricKey(ownerID, pinKey);
-//        Profile.keys.addHMACKey(ownerID, HMACKey);
-//        
-//        EncryptedAESMessage m = this.pendingHumanAuth.get(ownerID);
-//        try {
-//            boolean success = processEncryptedMessage(ownerID, m);
-//            if(success){
-//                Profile.keys.removeSymmetricKey(ownerID);
-//                Profile.keys.removeHMACKey(ownerID);
-//                pendingHumanAuth.remove(ownerID);
-//            }
-//            return success;
-//        } catch (InvalidHMACException ex) {
-//            Profile.keys.removeSymmetricKey(ownerID);
-//            Profile.keys.removeHMACKey(ownerID);
-//            if(Constants.DEBUG_ON){
-//                Logger.getLogger(SecureTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "] Failed to decrypt PIN message from owner: " + ownerID + ".", ex);
-//            }
-//            return false;
-//        }
-//    }
     
     @Override
     public boolean sendPlainTextMessage(String destination, Message m) {

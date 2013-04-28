@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 package security_layer;
-import application.encryption_demo.Messages.Message;
+import application.encryption_demo.Message;
 import java.security.Key;
 import java.util.Arrays;
 import org.junit.Test;

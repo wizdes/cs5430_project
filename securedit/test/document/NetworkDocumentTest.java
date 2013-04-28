@@ -7,7 +7,7 @@ package document;
 import application.encryption_demo.Communication;
 import application.encryption_demo.CommunicationInterface;
 import application.encryption_demo.CommunicationInterfaceTest;
-import application.encryption_demo.Messages.Message;
+import application.encryption_demo.Message;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,9 +45,9 @@ public class NetworkDocumentTest {
     private Profile p2;
     private Profile p3;
     
-    NetworkDocumentInterface owner;
-    NetworkDocumentInterface client2;
-    NetworkDocumentInterface client3;
+    NetworkDocumentHandlerInterface owner;
+    NetworkDocumentHandlerInterface client2;
+    NetworkDocumentHandlerInterface client3;
     
     DocumentCommListener thread1;
     DocumentCommListener thread2;
@@ -59,9 +59,9 @@ public class NetworkDocumentTest {
         p2 = new Profile(p2Ident, "localhost", p2Port);
         p3 = new Profile(p3Ident, "localhost", p3Port);
         
-        ConcurrentMap <String, NetworkDocumentInterface> documentMap1 = new ConcurrentHashMap<>();
-        ConcurrentMap <String, NetworkDocumentInterface> documentMap2 = new ConcurrentHashMap<>();
-        ConcurrentMap <String, NetworkDocumentInterface> documentMap3 = new ConcurrentHashMap<>();
+        ConcurrentMap <String, NetworkDocumentHandlerInterface> documentMap1 = new ConcurrentHashMap<>();
+        ConcurrentMap <String, NetworkDocumentHandlerInterface> documentMap2 = new ConcurrentHashMap<>();
+        ConcurrentMap <String, NetworkDocumentHandlerInterface> documentMap3 = new ConcurrentHashMap<>();
         
         p1Communicator = new Communication(p1, documentMap1);
         p2Communicator = new Communication(p2, documentMap2);
@@ -75,12 +75,12 @@ public class NetworkDocumentTest {
         documentMap3.put("document", nd3);
         
         ArrayList<String> documents = new ArrayList(documentMap1.keySet());
-        p1Communicator.updatePeers(p2Ident, "localhost", p2Port, new ArrayList<String>(), false);
-        p1Communicator.updatePeers(p3Ident, "localhost", p3Port, new ArrayList<String>(), false);
-        p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents, false);
-        p2Communicator.updatePeers(p3Ident, "localhost", p3Port, new ArrayList<String>(), false);
-        p3Communicator.updatePeers(p1Ident, "localhost", p1Port, documents, false);
-        p3Communicator.updatePeers(p2Ident, "localhost", p2Port, new ArrayList<String>(), false);    
+        p1Communicator.updatePeers(p2Ident, "localhost", p2Port, new ArrayList<String>());
+        p1Communicator.updatePeers(p3Ident, "localhost", p3Port, new ArrayList<String>());
+        p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents);
+        p2Communicator.updatePeers(p3Ident, "localhost", p3Port, new ArrayList<String>());
+        p3Communicator.updatePeers(p1Ident, "localhost", p1Port, documents);
+        p3Communicator.updatePeers(p2Ident, "localhost", p2Port, new ArrayList<String>());    
         
         char[] PIN2 = p1Communicator.generatePIN(p2Ident, documents.get(0));
         p2Communicator.initializeSRPAuthentication(p1Ident, documents.get(0), password_2, PIN2);
@@ -405,10 +405,10 @@ public class NetworkDocumentTest {
     
     public class DocumentCommListener extends Thread {
         private CommunicationInterface comm;
-        private NetworkDocumentInterface doc;
+        private NetworkDocumentHandlerInterface doc;
         private boolean listening = true;
         
-        public DocumentCommListener(CommunicationInterface ci, NetworkDocumentInterface ndi) {
+        public DocumentCommListener(CommunicationInterface ci, NetworkDocumentHandlerInterface ndi) {
             this.comm = ci;
             this.doc = ndi;
         }

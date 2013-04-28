@@ -4,7 +4,7 @@
  */
 package application.encryption_demo.forms;
 
-import document.NetworkDocumentInterface;
+import document.NetworkDocumentHandlerInterface;
 import java.util.ArrayList;
 import javax.swing.DefaultListModel;
 
@@ -20,7 +20,7 @@ public class ChangeUserAccess extends javax.swing.JPanel {
     public ChangeUserAccess() {
         initComponents();
     }
-        public void setLabelsandUsername(ArrayList<String> labels, ArrayList<String> displayedUsername,NetworkDocumentInterface nd){
+        public void setLabelsandUsername(ArrayList<String> labels, ArrayList<String> displayedUsername,NetworkDocumentHandlerInterface nd){
         this.nd = nd;
 
         //this.labels = labels;
@@ -130,5 +130,5 @@ public class ChangeUserAccess extends javax.swing.JPanel {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JList userLists;
     // End of variables declaration//GEN-END:variables
-    NetworkDocumentInterface nd;
+    NetworkDocumentHandlerInterface nd;
 }

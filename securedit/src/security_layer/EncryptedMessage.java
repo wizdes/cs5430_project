@@ -9,5 +9,5 @@ package security_layer;
  * @author Patrick C. Berens
  */
 public interface EncryptedMessage extends java.io.Serializable {
-    String getAlgorithm();
+    public String getAlgorithm();
 }

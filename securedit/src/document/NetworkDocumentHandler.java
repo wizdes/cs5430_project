@@ -12,12 +12,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import security_layer.authentications.ServerAuthenticationPersistantState;
 
 /**
  *
  */
-public class NetworkDocumentHandler implements NetworkDocumentInterface {
+public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
     
     private CommunicationInterface communication;
     private String collaboratorId;
@@ -27,6 +29,7 @@ public class NetworkDocumentHandler implements NetworkDocumentInterface {
     private String ownerId;
     private final Lock lock = new ReentrantLock(true);
     private boolean connected = true;
+
     
     public static boolean autoApprove = false;
     public static boolean autoDeny = false;
@@ -119,7 +122,7 @@ public class NetworkDocumentHandler implements NetworkDocumentInterface {
         String leftIdent = document.getIdentifierAtIndex(leftOffset);
         String rightIdent = document.getIdentifierAtIndex(rightOffset);
         if (curDoc != null) {
-            curDoc.setColors(leftOffset, rightOffset, levelIdentifier);
+            curDoc.setColors(leftOffset, rightOffset - leftOffset + 1, levelIdentifier);
         }
         return assignLevel(levelIdentifier, leftIdent, rightIdent);
     }
@@ -187,18 +190,18 @@ public class NetworkDocumentHandler implements NetworkDocumentInterface {
     
     @Override
     public void processMessage(CommandMessage m) {
-<<<<<<< Updated upstream
-=======
         if (!this.isConnected()) {
             return;
         }
         lock();
         try{
->>>>>>> Stashed changes
         if (isOwner()) {
             processMessageOwner(m);
         } else {
             processMessageClient(m);
+        }
+        }finally{
+            unlock();
         }
     }
     
@@ -241,12 +244,9 @@ public class NetworkDocumentHandler implements NetworkDocumentInterface {
             int level = this.authDocument.getLevelForUser(m.from);
             BootstrapResponse resp = new BootstrapResponse(this.document.formatFor(level));
             this.sendCommandMessage(m.from, resp);
-<<<<<<< Updated upstream
-=======
         } else if(m.command instanceof DeleteUser){
             String userId = ((DeleteUser)m.command).getUserID();
             this.deleteUser(userId);
->>>>>>> Stashed changes
         }
     }
     
@@ -293,6 +293,7 @@ public class NetworkDocumentHandler implements NetworkDocumentInterface {
                 this.disconnect();
             }
         }
+
     }    
 
     @Override

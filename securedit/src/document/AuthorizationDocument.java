@@ -5,7 +5,7 @@
 
 package document;
 
-import application.encryption_demo.Messages.Message;
+import application.encryption_demo.Message;
 import java.awt.Color;
 
 import java.util.ArrayList;
@@ -129,4 +129,8 @@ public class AuthorizationDocument implements AuthorizationDocumentInterface, Me
     public void setDocument(Document d) {
         this.document = d;
     }    
+
+    void removeUser(String userId) {
+        peers.remove(userId);
+    }
 }

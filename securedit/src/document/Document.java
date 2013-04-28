@@ -5,7 +5,7 @@
 
 package document;
 
-import application.encryption_demo.Messages.Message;
+import application.encryption_demo.Message;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -239,6 +239,7 @@ public class Document implements DocumentInterface, Message {
         
         for (Color c : this.colors) { d.colors.add(c); }
         for (String l : this.labels) { d.labels.add(l); }
+        d.uid = this.uid;
         
         return d;
     }

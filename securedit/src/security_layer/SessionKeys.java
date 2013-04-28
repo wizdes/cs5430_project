@@ -21,12 +21,15 @@ public class SessionKeys {
     public void addSessionKey(String ident, String docID, SecretKey sessionKey){
         sessionKeys.put(ident + DELIMITER + docID, sessionKey);
     }
-    SecretKey getSessionKey(String ident, String docID){
-        return sessionKeys.get(ident + DELIMITER + docID);
-    }
     public void addHmacKey(String ident, String docID, SecretKey hmacKey){
         hmacKeys.put(ident + DELIMITER + docID, hmacKey);
     }
+    
+    /* ONLY SECURETRANSPORT AS ACCESS TO KEYS */
+    SecretKey getSessionKey(String ident, String docID){
+        return sessionKeys.get(ident + DELIMITER + docID);
+    }
+    
     SecretKey getHmacKey(String ident, String docID){
         return hmacKeys.get(ident + DELIMITER + docID);
     }

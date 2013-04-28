@@ -4,10 +4,9 @@
  */
 package application.encryption_demo;
 
-import application.encryption_demo.Messages.Message;
 import document.Document;
 import document.NetworkDocumentHandler;
-import document.NetworkDocumentInterface;
+import document.NetworkDocumentHandlerInterface;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -95,7 +94,7 @@ public class CommunicationInterfaceTest {
     public void testHumanAuthentication() {
         // Connect once from scratch
         int iterations = 100;
-        ConcurrentMap <String, NetworkDocumentInterface> documentMap = new ConcurrentHashMap<>();
+        ConcurrentMap <String, NetworkDocumentHandlerInterface> documentMap = new ConcurrentHashMap<>();
         
         p1Communicator = new Communication(p1, documentMap);
         p2Communicator = new Communication(p2, null);
@@ -105,7 +104,7 @@ public class CommunicationInterfaceTest {
         documentMap.put("document", nd);
         
         ArrayList<String> documents = new ArrayList(documentMap.keySet());
-        p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents, false);
+        p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents);
         
         char[] PIN = p1Communicator.generatePIN(p2Ident, documents.get(0));
         assertTrue(p2Communicator.initializeSRPAuthentication(p1Ident, documents.get(0), password_2, PIN));
@@ -117,14 +116,14 @@ public class CommunicationInterfaceTest {
     
     @Test
     public void testAuthenticationFailures() {
-        ConcurrentMap <String, NetworkDocumentInterface> documentMap = new ConcurrentHashMap<>();
+        ConcurrentMap <String, NetworkDocumentHandlerInterface> documentMap = new ConcurrentHashMap<>();
         
         
         p2Communicator = new Communication(p2, null);
                                 
         ArrayList<String> documents = new ArrayList();
         documents.add("document");
-        p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents, false);
+        p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents);
           
         boolean r;
         AuthenticationTransport.AUTH_TIMEOUT_DELAY = 500;
