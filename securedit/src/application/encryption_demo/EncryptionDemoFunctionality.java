@@ -3,6 +3,7 @@ package application.encryption_demo;
 
 import application.encryption_demo.forms.ApplicationWindow;
 import document.CommandMessage;
+import document.NetworkDocumentHandler;
 import document.NetworkDocumentHandlerInterface;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -53,6 +54,11 @@ public class EncryptionDemoFunctionality {
         communication.updatePeers(id, host, port, docs);
         DiscoveryMessage dm = new DiscoveryMessage(profile.username, profile.host, profile.port);
         communication.sendManualDiscoverMessage(id, host, port, dm);
+    }
+    
+    public void closeEditingSession(NetworkDocumentHandler document){ 
+        docInstances.remove(document.getName());
+        this.gui.closeEditingSession(document);
     }
     
     /**
@@ -150,6 +156,9 @@ public class EncryptionDemoFunctionality {
                     } else if (m instanceof CommandMessage) {
                         CommandMessage cm = (CommandMessage)m;
                         NetworkDocumentHandlerInterface instance = docInstances.get(cm.documentName);
+                        if (instance == null) {
+                            return;
+                        }
                         instance.lock();
                         try{
                             instance.processMessage(cm);

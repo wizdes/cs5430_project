@@ -178,9 +178,9 @@ public class EditPanel extends javax.swing.JPanel {
         this.functionality = functionality;
         initComponents();
         peerModel = new DefaultListModel();
-        cr = new NewCellRenderer();
-        labels = new ArrayList<String>();
-        colors = new ArrayList<SimpleAttributeSet>();
+        cr = new ColorCellRenderer();
+        labels = new ArrayList<>();
+        colors = new ArrayList<>();
         
         PeersList.setModel(peerModel);
 
@@ -761,12 +761,16 @@ public class EditPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_setLevelButtonActionPerformed
 
     private void DisconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DisconnectButtonActionPerformed
-        
+        endEditingSession();
     }//GEN-LAST:event_DisconnectButtonActionPerformed
+
+    public void endEditingSession() {
+        this.nd.disconnect();
+        this.functionality.closeEditingSession(nd);
+    }
 
     private void DisconnectButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DisconnectButtonMouseClicked
         // TODO add your handling code here:
-        nd.deleteUser(nd.getUserID());
     }//GEN-LAST:event_DisconnectButtonMouseClicked
 
     public void repaint(AuthorizationDocument ad){
@@ -926,7 +930,7 @@ public class EditPanel extends javax.swing.JPanel {
     private ArrayList<String> labels;
     public ArrayList<SimpleAttributeSet> colors;
     DefaultListModel peerModel;
-    NewCellRenderer cr;
+    ColorCellRenderer cr;
     private ArrayList<String> displayedUsername;
     NetworkDocumentHandler nd;
 
