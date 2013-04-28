@@ -1,14 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package security_layer.authentications;
 
 import application.encryption_demo.Message;
 
 /**
- *
+ * Sent back to client if authentication failed.
+ * -Without this, client doesn't know to "wake up"
  */
 public class AuthenticationError implements Message {
     

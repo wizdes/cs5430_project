@@ -1,13 +1,11 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package security_layer;
 
 import javax.crypto.SealedObject;
 
 /**
- *
+ * Represents an AES encrypted message that is either sent over the wire or to a file.
+ * -Uses iv and hmac.
+ * -Java's SealedObject contains the message encrypted.
  * @author Patrick C. Berens
  */
 class EncryptedAESMessage implements EncryptedMessage {

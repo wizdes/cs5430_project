@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package security_layer.authentications;
 
 import java.io.Serializable;
@@ -10,7 +6,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- *
+ * This holds the persistent variables for SRP authentication.
+ * -Every clients s,v for a given document(stored on fs).
  * @author Patrick
  */
 public class ServerAuthenticationPersistantState implements Serializable {

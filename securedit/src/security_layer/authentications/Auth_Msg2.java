@@ -7,7 +7,8 @@ package security_layer.authentications;
 import java.math.BigInteger;
 
 /**
- *
+ *SRP Authentication Message 2
+ * -Server: Sends server's ephemeral public key(B), and preshared salt(s) and nonce(u).
  * @author Patrick
  */
 class Auth_Msg2 extends SRPAuthenticationMessage {

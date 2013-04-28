@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package security_layer;
 
 import configuration.Constants;
@@ -16,17 +12,16 @@ import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
-import security_layer.authentications.AuthenticationTransport;
+import security_layer.authentications.SRPAuthenticationTransport;
 
 /**
- *
+ * This factory produces keys(symmetric, asymmetric), nonces, PINs, and salts.
  * @author Patrick C. Berens
  */
 public class KeyFactory {
@@ -94,7 +89,7 @@ public class KeyFactory {
             return k;
         } catch (InvalidKeySpecException | NoSuchAlgorithmException ex) {
             if(Constants.DEBUG_ON){
-                Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SRPAuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
             }
             return null;
         }

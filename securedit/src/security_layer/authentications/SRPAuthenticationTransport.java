@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package security_layer.authentications;
 
 import configuration.Constants;
@@ -29,10 +25,12 @@ import security_layer.SecureTransportInterface;
 import transport_layer.network.NetworkTransportInterface;
 
 /**
- *
+ * Main SRP authentication processor.
+ * -Sends authentication messages.
+ * -Processes authentication messages.
  * @author Patrick
  */
-public class AuthenticationTransport {
+public class SRPAuthenticationTransport {
     public static int AUTH_TIMEOUT_DELAY = 16000;
     private NetworkTransportInterface transport;
     private SecureTransportInterface secureTransport;
@@ -46,7 +44,7 @@ public class AuthenticationTransport {
     private static final BigInteger g = new BigInteger(MODPGroups.GENERATOR + "");
     private final BigInteger k = new BigInteger(H(n.toByteArray(), g.toByteArray()));
     
-    public AuthenticationTransport(NetworkTransportInterface transport, 
+    public SRPAuthenticationTransport(NetworkTransportInterface transport, 
                                    SecureTransportInterface secureTransport, 
                                    Profile profile,
                                    ConcurrentMap<String, NetworkDocumentHandlerInterface> docInstances) {
@@ -80,7 +78,7 @@ public class AuthenticationTransport {
             HMACKey = KeyFactory.generateSymmetricKey(PIN, "HMAC".getBytes("UTF-16"));
         } catch (UnsupportedEncodingException ex) {
             if(Constants.DEBUG_ON){
-                Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SRPAuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         InitAuth_Msg initMsg = new InitAuth_Msg(v, salt, docID);
@@ -284,7 +282,7 @@ public class AuthenticationTransport {
             profile.keys.addSessionKey(sourceID, docID, sessionKey);
             profile.keys.addHmacKey(sourceID, docID, hmacKey);
         } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SRPAuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     private byte[] H(byte[]... input) {
@@ -296,7 +294,7 @@ public class AuthenticationTransport {
             return sha.digest();
         } catch (NoSuchAlgorithmException ex) {
             if (Constants.DEBUG_ON) {
-                Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SRPAuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
             }
             return null;
         }
@@ -325,7 +323,7 @@ public class AuthenticationTransport {
                 val = new BigInteger(max.bitLength(), rand);
             } while(val.compareTo(max) >= 0 || val.compareTo(min) <= 0);
         } catch (NoSuchAlgorithmException | NoSuchProviderException ex) {
-            Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SRPAuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
         }
         return val;
     }
@@ -421,7 +419,7 @@ public class AuthenticationTransport {
                 }
             } catch (InterruptedException ex) {
                 if(Constants.DEBUG_ON){
-                    Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "] authentication with " + serverID + ":" + docID, ex);
+                    Logger.getLogger(SRPAuthenticationTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "] authentication with " + serverID + ":" + docID, ex);
                 }
             } finally{
                 authenticateLock.unlock();

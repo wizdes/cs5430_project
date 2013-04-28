@@ -17,7 +17,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import security_layer.Profile;
-import security_layer.authentications.AuthenticationTransport;
+import security_layer.authentications.SRPAuthenticationTransport;
 
 /**
  *
@@ -126,7 +126,7 @@ public class CommunicationInterfaceTest {
         p2Communicator.updatePeers(p1Ident, "localhost", p1Port, documents);
           
         boolean r;
-        AuthenticationTransport.AUTH_TIMEOUT_DELAY = 500;
+        SRPAuthenticationTransport.AUTH_TIMEOUT_DELAY = 500;
         
         // Try to create an account when the owner is not online
         r = p2Communicator.initializeSRPAuthentication(p1Ident, "document", password_2, "SomePIN".toCharArray());
@@ -136,7 +136,7 @@ public class CommunicationInterfaceTest {
         r = p2Communicator.authenticate(p1Ident, documents.get(0), password_2);
         assertFalse(r);  
         
-        AuthenticationTransport.AUTH_TIMEOUT_DELAY = 1000;
+        SRPAuthenticationTransport.AUTH_TIMEOUT_DELAY = 1000;
         
         p1Communicator = new Communication(p1, documentMap);
         p3Communicator = new Communication(p3, null);        

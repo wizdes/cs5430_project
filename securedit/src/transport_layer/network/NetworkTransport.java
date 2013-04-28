@@ -13,7 +13,7 @@ import security_layer.EncryptedMessage;
 import security_layer.PlaintextMessage;
 import security_layer.SecureTransportInterface;
 import security_layer.authentications.AuthenticationError;
-import security_layer.authentications.AuthenticationTransport;
+import security_layer.authentications.SRPAuthenticationTransport;
 import security_layer.authentications.AuthenticationMessage;
 import security_layer.authentications.InitAuth_MsgSuccess;
 import transport_layer.discovery.DiscoveryMessage;
@@ -31,7 +31,7 @@ public class NetworkTransport implements NetworkTransportInterface{
     
     private Topology topology;
     private SecureTransportInterface secureTransport;
-    private AuthenticationTransport authenticationTransport;
+    private SRPAuthenticationTransport authenticationTransport;
     
     public NetworkTransport(String ident, String host, int port) {
         this.topology = new Topology(ident, host, port);
@@ -45,7 +45,7 @@ public class NetworkTransport implements NetworkTransportInterface{
         this.secureTransport = secureTransport;
     }
     @Override
-    public void setAuthenticationTransport(AuthenticationTransport authenticationTransport){
+    public void setAuthenticationTransport(SRPAuthenticationTransport authenticationTransport){
         this.authenticationTransport = authenticationTransport;
     }
     

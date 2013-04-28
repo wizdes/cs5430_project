@@ -1,11 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package security_layer.authentications;
 
 /**
- *
+ *SRP Authentication Message 3
+ * -Server: Sends server MAC for K(M2)
  * @author Patrick
  */
 class Auth_Msg4 extends SRPAuthenticationMessage {

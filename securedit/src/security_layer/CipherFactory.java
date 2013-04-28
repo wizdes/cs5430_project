@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package security_layer;
 
 import configuration.Constants;
@@ -23,7 +19,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 
 /**
- *
+ * This factory creates encryption ciphers. It supports RSA, Signing, AES, HMAC.
  * @author Patrick C. Berens
  */
 class CipherFactory {

@@ -1,12 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package security_layer.authentications;
 
 /**
- *
+ * Server responds with this if SRPSetup was successful.
  */
 public class InitAuth_MsgSuccess extends SRPSetupMessage {
     

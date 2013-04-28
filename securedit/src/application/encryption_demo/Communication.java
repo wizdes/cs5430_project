@@ -23,7 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import security_layer.SecureTransport;
 import security_layer.SecureTransportInterface;
-import security_layer.authentications.AuthenticationTransport;
+import security_layer.authentications.SRPAuthenticationTransport;
 import transport_layer.network.NetworkTransport;
 import transport_layer.network.NetworkTransportInterface;
 
@@ -35,7 +35,7 @@ public class Communication implements CommunicationInterface {
     private Condition newMessageArrived = queueLock.newCondition();
     private BlockingQueue<Message> messageQueue = new LinkedBlockingDeque<>();
     private SecureTransportInterface secureTransport = null;
-    private AuthenticationTransport authenticationTransport = null;
+    private SRPAuthenticationTransport authenticationTransport = null;
     private DiscoveredPeers discoveredPeers = new DiscoveredPeers();
     private EncryptionDemoFunctionality guiFunctionality;
     private Profile profile;
@@ -52,7 +52,7 @@ public class Communication implements CommunicationInterface {
         NetworkTransportInterface networkTransport = new NetworkTransport(profile.username, profile.host, profile.port);
         
         this.secureTransport = new SecureTransport(networkTransport, null, this, profile);
-        this.authenticationTransport = new AuthenticationTransport(networkTransport, this.secureTransport, profile, docInstances);
+        this.authenticationTransport = new SRPAuthenticationTransport(networkTransport, this.secureTransport, profile, docInstances);
         this.secureTransport.setAuthenticationTransport(this.authenticationTransport);
     }
     public Communication(EncryptionDemoFunctionality guiFunctionality, 
