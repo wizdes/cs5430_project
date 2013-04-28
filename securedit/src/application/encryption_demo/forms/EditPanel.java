@@ -599,7 +599,8 @@ public class EditPanel extends javax.swing.JPanel {
                 String contents = getStringfromFile(file);
                 
                 // remove the current text in the document
-                this.manualRemove(0, documentArea.getText().length());
+                //this.manualRemove(0, documentArea.getText().length());
+                cd.remove(0, documentArea.getText().length());
 
                 try {
                     //sanitizes the file and puts the contents in the file
