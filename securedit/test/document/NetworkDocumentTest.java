@@ -251,8 +251,36 @@ public class NetworkDocumentTest {
         assertEquals("XXXX222 XXXXXXX", client2.getString());
         assertEquals("XXXX222 111 XXX", client3.getString());        
     }
+
+    @Test
+    public void testUserClassificationChanges() {        
+        owner.addUserToLevel(p2Ident, 0);
+        owner.addUserToLevel(p3Ident, 2);
+        pause(100);
+        
+        owner.requestInsert(1, Document.BOF, "forcetofront", "111");
+        pause(100);
+        
+        assertEquals("111", owner.getString());
+        assertEquals("XXX", client2.getString());
+        assertEquals("111", client3.getString());
+        
+        owner.addUserToLevel(p2Ident, 1);
+        pause(100);
+        
+        assertEquals("111", owner.getString());
+        assertEquals("111", client2.getString());
+        assertEquals("111", client3.getString());
+        
+        owner.addUserToLevel(p2Ident, 0);
+        pause(100);
+        
+        assertEquals("111", owner.getString());
+        assertEquals("XXX", client2.getString());
+        assertEquals("111", client3.getString());     
+    } 
     
-//    @Test
+    @Test
     public void testUserLevelPropogation() {        
         owner.addUserToLevel(p2Ident, 1);
         owner.addUserToLevel(p3Ident, 2);

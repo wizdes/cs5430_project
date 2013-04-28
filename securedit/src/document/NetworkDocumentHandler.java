@@ -326,11 +326,14 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
             }
         } else if(m.command instanceof DoReplace) {
             DoReplace dr = ((DoReplace)m.command);
-            DocumentValue dv = this.authDocument.getDocument().valuesMap.get(dr.identifier);
+            Document document = this.authDocument.getDocument();
+            DocumentValue dv = document.valuesMap.get(dr.identifier);
             dv.setValue(dr.newValue);
-
+            if (curDoc != null) {
+                int offset = document.getOffsetForIdentifier(dr.identifier);
+                curDoc.manualReplace(offset, 1, dr.newValue);
+            }
         }
-
     }    
 
     @Override
