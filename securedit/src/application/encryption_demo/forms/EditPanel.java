@@ -221,6 +221,7 @@ public class EditPanel extends javax.swing.JPanel {
                 LevelSelect.setEnabled(false);
                 setLevelButton.setEnabled(false);
                 generatePINButton.setEnabled(false);
+                ownerWriteLevel.setEnabled(false);
                 changeUserLevelButton.setText("Request Change Level");
             }
         } finally{
