@@ -193,14 +193,9 @@ public class EditPanel extends javax.swing.JPanel {
     public EditPanel(EncryptionDemoFunctionality functionality) {
         this.functionality = functionality;
         initComponents();
-        peerModel = new DefaultListModel();
-        cr = new ColorCellRenderer();
-        labels = new ArrayList<>();
-        colors = new ArrayList<>();
         
         PeersList.setModel(peerModel);
 
-        cd = new CustomDocument();
         documentArea.setDocument(cd);
         cd.setEditorReference(this);
         
@@ -974,12 +969,13 @@ public class EditPanel extends javax.swing.JPanel {
     private javax.swing.JButton saveEncryptedFileButton;
     private javax.swing.JToggleButton setLevelButton;
     // End of variables declaration//GEN-END:variables
-    private ArrayList<String> labels;
-    private ArrayList<SimpleAttributeSet> colors;
-    private DefaultListModel peerModel;
-    private ColorCellRenderer cr;
+    private ArrayList<String> labels = new ArrayList<>();
+    private ArrayList<SimpleAttributeSet> colors = new ArrayList<>();
+    private DefaultListModel peerModel = new DefaultListModel();
+    private ColorCellRenderer cr = new ColorCellRenderer();
     private ArrayList<String> displayedUsername;
     private NetworkDocumentHandler nd;
     private EncryptionDemoFunctionality functionality = null;
-    private CustomDocument cd;
+    private CustomDocument cd = new CustomDocument();
+        
 }
