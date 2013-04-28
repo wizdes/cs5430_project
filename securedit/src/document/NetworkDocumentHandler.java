@@ -60,7 +60,8 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
         }
         
         int previousLevel = authDocument.getLevelForUser(userId);
-        boolean levelChanged = previousLevel != newLevel;
+        boolean levelChanged = previousLevel > -1 && previousLevel != newLevel;
+        boolean levelIncreased = previousLevel > newLevel;
 
         if (levelChanged && curDoc != null) {
             curDoc.reviseUser(userId, newLevel);
@@ -71,6 +72,25 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
         if (!userId.equals(this.collaboratorId)) {
             UpdateLevel ul = new UpdateLevel(userId, newLevel);
             this.sendCommandMessage(userId, ul);            
+        }
+     
+        if (levelChanged && this.isOwner() && !userId.equals(this.collaboratorId)) {
+            Document d = this.authDocument.getDocument();
+
+            DocumentValue iter = d.bofDV.getNext();
+            while (!iter.getIdentifier().equals(Document.EOF)) {
+                int level = iter.getLevel();
+                DoReplace dr = null;
+                if (previousLevel >= level && newLevel < level) {
+                    dr = new DoReplace(iter.getIdentifier(), "X");
+                } else if (previousLevel < level && newLevel >= level) {
+                    dr = new DoReplace(iter.getIdentifier(), iter.getValue());
+                }
+                iter = iter.getNext();
+                if (dr != null) {
+                    this.sendCommandMessage(userId, dr);
+                }
+            }
         }
     }
     
@@ -304,6 +324,11 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
             if (userId.equals(this.getOwnerID())) {
                 this.disconnect();
             }
+        } else if(m.command instanceof DoReplace) {
+            DoReplace dr = ((DoReplace)m.command);
+            DocumentValue dv = this.authDocument.getDocument().valuesMap.get(dr.identifier);
+            dv.setValue(dr.newValue);
+
         }
 
     }    
