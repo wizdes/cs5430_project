@@ -296,7 +296,7 @@ public class NetworkDocumentTest {
     }
     
     @Test
-    public void testBootstrap() {        
+    public void testBootstrap() {   
         owner.requestInsert(0, Document.BOF, Document.EOF, "000");
         owner.requestInsert(1, Document.BOF, Document.EOF, "111");
         owner.requestInsert(2, Document.BOF, Document.EOF, "222");
@@ -331,7 +331,47 @@ public class NetworkDocumentTest {
         assertEquals("111000XXX111000", client2.getString());
         assertEquals("111000222111000", client3.getString()); 
     }
-
+    
+    @Test
+    public void testClientDisconnect() {
+        owner.addUserToLevel(p2Ident, 0);
+        owner.addUserToLevel(p3Ident, 0);
+        
+        assertEquals(owner.getLevelForUser(p2Ident), 0);
+        assertEquals(owner.getLevelForUser(p3Ident), 0);
+        
+        client2.disconnect();
+        pause(100);
+        
+        assertEquals(owner.getLevelForUser(p2Ident), -1);
+        assertFalse(client2.isConnected());
+        assertEquals(owner.getLevelForUser(p3Ident), 0);
+        assertTrue(client3.isConnected());
+        
+        client3.disconnect();
+        pause(100);
+        
+        assertEquals(owner.getLevelForUser(p1Ident), -1);
+        assertFalse(client2.isConnected());
+        assertEquals(owner.getLevelForUser(p3Ident), -1);
+        assertFalse(client3.isConnected());
+        
+        assertTrue(owner.isConnected());
+    }
+    
+    @Test
+    public void testOwnerDisconnect() {
+        owner.addUserToLevel(p2Ident, 0);
+        owner.addUserToLevel(p3Ident, 0);
+        
+        owner.disconnect();
+        pause(100);
+        
+        assertFalse(client2.isConnected());
+        assertFalse(client3.isConnected());
+        assertFalse(owner.isConnected());
+    }
+    
     @Test
     public void testBootstrapLabelsAndColors() {        
         ArrayList<Color> colors = new ArrayList<>();

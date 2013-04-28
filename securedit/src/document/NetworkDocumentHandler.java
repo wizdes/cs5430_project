@@ -28,6 +28,8 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
     private Document document;
     private String ownerId;
     private final Lock lock = new ReentrantLock(true);
+    private boolean connected = true;
+
     
     public static boolean autoApprove = false;
     public static boolean autoDeny = false;
@@ -47,6 +49,7 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
     public void lock(){
         lock.lock();
     }
+    
     @Override
     public void unlock(){
         lock.unlock();
@@ -69,15 +72,10 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
     }
     
     public void deleteUser(String userId){
-        if(curDoc != null){
+        if (curDoc != null){
             curDoc.removeUser(userId);
         }
         authDocument.removeUser(userId);
-        
-        if(userId.equals(this.collaboratorId)){
-            DeleteUser dl = new DeleteUser(userId);
-            this.sendCommandMessage(this.getOwnerID(), dl);
-        }
     }
     
     @Override
@@ -192,6 +190,9 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
     
     @Override
     public void processMessage(CommandMessage m) {
+        if (!this.isConnected()) {
+            return;
+        }
         lock();
         try{
         if (isOwner()) {
@@ -244,7 +245,8 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
             BootstrapResponse resp = new BootstrapResponse(this.document.formatFor(level));
             this.sendCommandMessage(m.from, resp);
         } else if(m.command instanceof DeleteUser){
-            this.deleteUser(((DeleteUser)m.command).getUserID());
+            String userId = ((DeleteUser)m.command).getUserID();
+            this.deleteUser(userId);
         }
     }
     
@@ -285,7 +287,11 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
                 curDoc.handleBootstrap(this.authDocument);
             }
         } else if(m.command instanceof DeleteUser){
-            this.deleteUser(((DeleteUser)m.command).getUserID());
+            String userId = ((DeleteUser)m.command).getUserID();
+            this.deleteUser(userId);
+            if (userId.equals(this.getOwnerID())) {
+                this.disconnect();
+            }
         }
 
     }    
@@ -382,5 +388,35 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
     @Override
     public ArrayList<Color> getColors() {
         return this.document.colors;
+    }
+
+    @Override
+    public void disconnect() {
+        if (!isConnected()) {
+            return;
+        }
+        
+        this.connected = false;
+        
+        this.deleteUser(this.collaboratorId);
+        
+        DeleteUser dl = new DeleteUser(this.collaboratorId);
+        
+        if (this.isOwner()) {
+            for (String userId : this.authDocument.peers.keySet()) {
+                this.sendCommandMessage(userId, dl);
+            }
+        } else {
+            this.sendCommandMessage(this.getOwnerID(), dl);
+        }
+        
+        if (curDoc != null) {
+            curDoc.endEditingSession();
+        }                
+    }
+
+    @Override
+    public boolean isConnected() {
+        return this.connected;
     }
 }
