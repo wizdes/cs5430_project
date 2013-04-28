@@ -355,20 +355,25 @@ public class ApplicationWindow extends javax.swing.JFrame {
         //Create document instance and send join request for doc
         NetworkDocumentHandler nd = new NetworkDocumentHandler(
             functionality.getCommunicationInterface(), profile.username, ownerId, docName );
+        
+        /* The order of these is important!! -- MPG */
+        
         String docID = this.functionality.createDocumentInstance(nd);
         docIDs.put(this.tabbedPane.getTabCount(), docID);
+        
+        EditPanel panel = new EditPanel(functionality);        
+        chatPanels.put(docID, panel);
+        panel.giveDocument(nd);
+        nd.giveGUI(panel);
+        nd.bootstrap();
         
         if(!this.functionality.sendJoinRequestMessage(ownerId, docName)){
             showMessage("Join chat request failed to send!");
             return;
         }
-                
-        EditPanel panel = new EditPanel(functionality);
-        panel.giveDocument(nd);
-        nd.giveGUI(panel);
-        nd.bootstrap();
         
-        chatPanels.put(docID, panel);
+        /* The order of these is important!! -- MPG */
+        
         this.tabbedPane.add("Owner: " + ownerId + ", Doc: " + docName, panel);
         this.tabbedPane.setSelectedComponent(panel);
     }//GEN-LAST:event_loginButtonActionPerformed

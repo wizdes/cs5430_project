@@ -37,10 +37,10 @@ import javax.swing.text.StyleConstants;
  * @author Patrick
  */
 public class EditPanel extends javax.swing.JPanel {
+    
     /**
      * Creates new form ChatPanel
      */
-
     public void addColor(Color c){
         //locks operations
         nd.lock();
@@ -143,8 +143,6 @@ public class EditPanel extends javax.swing.JPanel {
         int count = 0;
         nd.lock();
         try{
-            ArrayList<Color> defaultColors = new ArrayList<>();
-            ArrayList<String> defaultLabels = new ArrayList<>();
 
             HashMap<String, Color> colorChoices = getColorChoices();
 
@@ -156,7 +154,7 @@ public class EditPanel extends javax.swing.JPanel {
                 count++;
             }
 
-            for (String l : defaultLabels) {
+            for (String l : nd.getLabels()) {
                 String colorPrompt = getColorChoicePrompt(colorChoices);
                 String colorName = JOptionPane.showInputDialog(l + " ~> " + colorPrompt);
                 Color color = colorChoices.get(colorName);
@@ -168,6 +166,7 @@ public class EditPanel extends javax.swing.JPanel {
                 colorChoices.remove(colorName);
                 nd.addColor(color);
             }
+            
             populateColorsList(nd.getColors(), nd.getLabels());
         } finally{
             nd.unlock();
@@ -200,7 +199,6 @@ public class EditPanel extends javax.swing.JPanel {
         cd.setEditorReference(this);
         
         displayedUsername = new ArrayList<>();
-        
     }
 
     // this hands the document interface to the GUI
@@ -260,12 +258,9 @@ public class EditPanel extends javax.swing.JPanel {
             //sets all the documents properly
             nd.setAuthDocument(ad);
             this.giveDocument(nd);
-            labels = nd.getLabels();
-            //System.out.println(nd.getLabels());
-            //System.out.println(nd.getColors());
-            //adds the colors 
+            
+            // adds the colors 
             this.populateColorsList(nd.getColors(), nd.getLabels());
-            peerModel.addElement(nd.getUserID() + " - " + labels.get(cd.insertLevel));
             
             //re populates the text
             this.repaint(ad);
@@ -932,7 +927,7 @@ public class EditPanel extends javax.swing.JPanel {
                 if (x.equals(username)) {
                     peerModel.remove(i);
                     peerModel.addElement(username + " - " + labels.get(levelIdentifier));
-                    cd.insertLevel = levelIdentifier;
+                    cd.insertLevel = levelIdentifier;           
                     return;
                 }
             }
