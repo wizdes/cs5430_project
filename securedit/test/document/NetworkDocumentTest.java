@@ -429,7 +429,7 @@ public class NetworkDocumentTest {
         for (Color c : colors) {
             assertTrue(client2.getColors().contains(c));
         }
-    }    
+    }
     
     public class DocumentCommListener extends Thread {
         private CommunicationInterface comm;

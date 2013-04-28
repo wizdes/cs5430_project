@@ -269,6 +269,10 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
         } else if (m.command instanceof BootstrapRequest) {
             BootstrapRequest req = (BootstrapRequest)m.command;
             int level = this.authDocument.getLevelForUser(m.from);
+            if (level == -1) {
+                level = 0;
+                this.authDocument.addUserToLevel(m.from, level);
+            }
             BootstrapResponse resp = new BootstrapResponse(this.authDocument.getDocument().formatFor(level));
             this.sendCommandMessage(m.from, resp);
         } else if(m.command instanceof DeleteUser){
