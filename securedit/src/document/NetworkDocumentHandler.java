@@ -54,17 +54,22 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
     }
     
     @Override
-    public void addUserToLevel(String userId, int levelIdentifier){
+    public void addUserToLevel(String userId, int newLevel){
         if (curDoc != null && !authDocument.peers.containsKey(userId)) {
-            curDoc.addUser(userId, levelIdentifier);
+            curDoc.addUser(userId, newLevel);
         }
-        if (curDoc != null) {
-            curDoc.reviseUser(userId, levelIdentifier);
+        
+        int previousLevel = authDocument.getLevelForUser(userId);
+        boolean levelChanged = previousLevel != newLevel;
+
+        if (levelChanged && curDoc != null) {
+            curDoc.reviseUser(userId, newLevel);
         }
-        authDocument.addUserToLevel(userId, levelIdentifier);
+        
+        authDocument.addUserToLevel(userId, newLevel);
         
         if (!userId.equals(this.collaboratorId)) {
-            UpdateLevel ul = new UpdateLevel(userId, levelIdentifier);
+            UpdateLevel ul = new UpdateLevel(userId, newLevel);
             this.sendCommandMessage(userId, ul);            
         }
     }
@@ -190,7 +195,9 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
     
     @Override
     public void processMessage(CommandMessage m) {
+        System.out.println("processMessage : " + m);
         if (!this.isConnected()) {
+            System.out.println("\tdisconnected");
             return;
         }
         lock();
