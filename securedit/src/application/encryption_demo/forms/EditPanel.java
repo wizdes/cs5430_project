@@ -109,7 +109,11 @@ public class EditPanel extends javax.swing.JPanel {
             colorChoices.put("gray", Color.GRAY);
             colorChoices.put("white", Color.white);
             colorChoices.put("cyan", Color.CYAN);
+            colorChoices.put("magenta", Color.MAGENTA);
+            colorChoices.put("orange", Color.orange);
+            colorChoices.put("pink", Color.PINK);            
 
+            assert colorChoices.size() == Constants.ALLOWABLE_LABEL_COUNT;
             return colorChoices;
         } finally{
             nd.unlock();
@@ -136,6 +140,7 @@ public class EditPanel extends javax.swing.JPanel {
     //this sets up all the colors and labels
     //this creates a GUI that pops up and populates the colors/labels list
     private void setupColorsAndLabels() {
+        int count = 0;
         nd.lock();
         try{
             ArrayList<Color> defaultColors = new ArrayList<>();
@@ -145,9 +150,10 @@ public class EditPanel extends javax.swing.JPanel {
 
             String labelPrompt = "Enter a security group label (type 'done' when finished)";
             String label = JOptionPane.showInputDialog(labelPrompt);
-            while (!label.equals("done")) {
+            while (count < Constants.ALLOWABLE_LABEL_COUNT && !label.equals("done")) {
                 nd.addLabel(label);
                 label = JOptionPane.showInputDialog(labelPrompt);
+                count++;
             }
 
             for (String l : defaultLabels) {
