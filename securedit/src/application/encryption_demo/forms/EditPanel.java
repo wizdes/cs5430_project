@@ -857,10 +857,8 @@ public class EditPanel extends javax.swing.JPanel {
         }
     }
     
-    public void manualReplace(int offset, int length){
+    public void manualReplace(int offset, int length, String replaceStr){
         try {
-            String replaceStr = "";
-            for(int i = 0; i < length; i++) replaceStr += "X";
             cd.replace(offset, length, replaceStr, null);
         } catch (BadLocationException ex) {
             Logger.getLogger(EditPanel.class.getName()).log(Level.SEVERE, null, ex);
