@@ -6,6 +6,7 @@ package application.encryption_demo.forms;
 
 import application.encryption_demo.CustomDocument;
 import application.encryption_demo.EncryptionDemoFunctionality;
+import configuration.Constants;
 import document.AuthorizationDocument;
 import document.DocumentValue;
 import document.NetworkDocumentHandler;
@@ -15,6 +16,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -580,74 +582,95 @@ public class EditPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_openEncryptedFileButtonMousePressed
 
     private void openEncryptedFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openEncryptedFileButtonActionPerformed
-                //Using a JPanel as the message for the JOptionPane
+        //Using a JPanel as the message for the JOptionPane
         nd.lock();
-        try{
-        JPanel userPanel = new JPanel();
-        userPanel.setLayout(new GridLayout(2,2));
+        try {
+            JPanel userPanel = new JPanel();
+            userPanel.setLayout(new GridLayout(2, 2));
 
-        JLabel passwordLbl = new JLabel("Password:");
-        JPasswordField passwordFld = new JPasswordField();
-        char[] password = passwordFld.getPassword();
+            JLabel passwordLbl = new JLabel("Password:");
+            JPasswordField passwordFld = new JPasswordField();
+            char[] password = passwordFld.getPassword();
 
-        userPanel.add(passwordLbl);
-        userPanel.add(passwordFld);
+            userPanel.add(passwordLbl);
+            userPanel.add(passwordFld);
 
-        //As the JOptionPane accepts an object as the message
-        //it allows us to use any component we like - in this case 
-        //a JPanel containing the dialog components we want
-        int input = JOptionPane.showConfirmDialog(null, userPanel, "Enter your password:"
-                      ,JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        jFileChooser1.setVisible(true);
-        int returnVal = jFileChooser1.showOpenDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = jFileChooser1.getSelectedFile();
-            String fileName = file.getAbsolutePath();
-            AuthorizationDocument ad = (AuthorizationDocument) functionality.decryptObjFile(fileName, password);
-            nd.setAuthDocument(ad);
-            this.manualRemove(0, documentArea.getText().length());
-            repaint(ad);
-        } else {
-            System.out.println("File access cancelled by user.");
-        }
-        } finally{
+            //As the JOptionPane accepts an object as the message
+            //it allows us to use any component we like - in this case 
+            //a JPanel containing the dialog components we want
+            int input = JOptionPane.showConfirmDialog(null, userPanel, "Enter your password:", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+            jFileChooser1.setVisible(true);
+            int returnVal = jFileChooser1.showOpenDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = jFileChooser1.getSelectedFile();
+                String fileName = file.getAbsolutePath();
+                AuthorizationDocument ad = (AuthorizationDocument) functionality.decryptObjFile(fileName, password);
+                nd.setAuthDocument(ad);
+                this.manualRemove(0, documentArea.getText().length());
+                repaint(ad);
+            } else {
+                System.out.println("File access cancelled by user.");
+            }
+        } finally {
             nd.unlock();
         }
     }//GEN-LAST:event_openEncryptedFileButtonActionPerformed
 
     private void saveEncryptedFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveEncryptedFileButtonActionPerformed
         nd.lock();
-        try{
-        //Using a JPanel as the message for the JOptionPane
-        JPanel userPanel = new JPanel();
-        userPanel.setLayout(new GridLayout(2,2));
+        try {
+            //Select file to save to
+            jFileChooser1.setVisible(true);
+            int returnVal = jFileChooser1.showSaveDialog(this);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = jFileChooser1.getSelectedFile();
+                String fileName = file.getAbsolutePath();
 
-        JLabel passwordLbl = new JLabel("Password:");
-        JPasswordField passwordFld = new JPasswordField();
-        char[] password = passwordFld.getPassword();
+                //Prompt for password, continue prompting until receive valid password.
+                char[] password;
+                int input;
+                do {
+                    //Using a JPanel as the message for the JOptionPane
+                    JPanel userPanel = new JPanel();
+                    userPanel.setLayout(new GridLayout(2, 2));
 
-        userPanel.add(passwordLbl);
-        userPanel.add(passwordFld);
+                    JLabel passwordLbl = new JLabel("Password:");
+                    JPasswordField passwordFld = new JPasswordField();
 
-        //As the JOptionPane accepts an object as the message
-        //it allows us to use any component we like - in this case 
-        //a JPanel containing the dialog components we want
-        int input = JOptionPane.showConfirmDialog(null, userPanel, "Enter your password:"
-                      ,JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        jFileChooser1.setVisible(true);
-        int returnVal = jFileChooser1.showSaveDialog(this);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = jFileChooser1.getSelectedFile();
-            String fileName = file.getAbsolutePath();
-            functionality.encryptFile(fileName, nd.getAuthDocument(), password);
-        } else {
-            System.out.println("File access cancelled by user.");
-        } 
-        } finally{
+                    userPanel.add(passwordLbl);
+                    userPanel.add(passwordFld);
+
+                    //As the JOptionPane accepts an object as the message
+                    //it allows us to use any component we like - in this case 
+                    //a JPanel containing the dialog components we want
+                    input = JOptionPane.showConfirmDialog(null, userPanel, "Enter your password:", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                    password = passwordFld.getPassword();
+                } while(!isValidPassword(password) && input == JOptionPane.YES_OPTION);
+                functionality.encryptFile(fileName, nd.getAuthDocument(), password);
+            } else {
+                System.out.println("File access cancelled by user.");
+            }
+        } finally {
             nd.unlock();
         }
     }//GEN-LAST:event_saveEncryptedFileButtonActionPerformed
-
+    private boolean isValidPassword(char[] pass) {
+        
+        boolean containsLowerCase = false;
+        boolean containsUpperCase = false;
+        boolean containsDigit = false;
+    
+        for(char c: pass){
+            containsLowerCase   = containsLowerCase || Character.isLowerCase(c);
+            containsUpperCase   = containsUpperCase || Character.isUpperCase(c);
+            containsDigit       = containsDigit || Character.isDigit(c); 
+        }
+        System.out.println("Pass: "  + Arrays.toString(pass));
+        System.out.println("lower: " + containsLowerCase);
+        System.out.println("upper: " + containsUpperCase);
+        System.out.println("digit: " + containsDigit);
+        return pass.length >= Constants.MIN_PASSWORD_LENGTH && containsLowerCase && containsUpperCase && containsDigit;
+    }
     private void changeUserLevelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeUserLevelButtonActionPerformed
         nd.lock();
         try{

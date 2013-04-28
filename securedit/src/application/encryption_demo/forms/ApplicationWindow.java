@@ -142,26 +142,22 @@ public class ApplicationWindow extends javax.swing.JFrame {
             peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(peerPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING)
-                    .add(peerPanelLayout.createSequentialGroup()
-                        .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(DiscoverPeersButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 139, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                            .add(peerLabel))
-                        .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-                            .add(clientLabel)
-                            .add(loginButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 119, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)))
-                    .add(peerPanelLayout.createSequentialGroup()
-                        .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
-                            .add(org.jdesktop.layout.GroupLayout.LEADING, addDefaultPeersButton, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .add(org.jdesktop.layout.GroupLayout.LEADING, addManualPeer, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .add(433, 433, 433)
-                        .add(createAccountButton)))
+                .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
+                    .add(addDefaultPeersButton, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .add(addManualPeer, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .add(DiscoverPeersButton, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 139, Short.MAX_VALUE)
+                    .add(org.jdesktop.layout.GroupLayout.LEADING, peerLabel))
+                .addPreferredGap(org.jdesktop.layout.LayoutStyle.RELATED, 445, Short.MAX_VALUE)
+                .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
+                    .add(clientLabel)
+                    .add(loginButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 119, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
+                    .add(createAccountButton, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 119, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE))
                 .add(30, 30, 30)
                 .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                     .add(ownerLabel)
-                    .add(startChatButton)
-                    .add(Close))
+                    .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.TRAILING, false)
+                        .add(org.jdesktop.layout.GroupLayout.LEADING, Close, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .add(org.jdesktop.layout.GroupLayout.LEADING, startChatButton, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .add(41, 41, 41))
             .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
                 .add(peerPanelLayout.createSequentialGroup()
@@ -172,7 +168,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
         peerPanelLayout.setVerticalGroup(
             peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(peerPanelLayout.createSequentialGroup()
-                .addContainerGap(337, Short.MAX_VALUE)
+                .addContainerGap(348, Short.MAX_VALUE)
                 .add(peerPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(peerLabel)
                     .add(clientLabel)
@@ -194,7 +190,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
                 .add(peerPanelLayout.createSequentialGroup()
                     .add(22, 22, 22)
                     .add(jScrollPane8, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, 300, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(148, Short.MAX_VALUE)))
+                    .addContainerGap(150, Short.MAX_VALUE)))
         );
 
         tabbedPane.addTab("Peers", peerPanel);
@@ -257,7 +253,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
     private void startChatButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startChatButtonActionPerformed
         
         //Prompt for document name - make sure it is unique
-        String docName = "Chat";
+        String docName = "Doc1";
         String docID = null;
         NetworkDocumentHandler nd = null;
         while(docID == null){
@@ -321,7 +317,7 @@ public class ApplicationWindow extends javax.swing.JFrame {
         String ownerId = (String)this.DiscoveredPeersTable.getModel().getValueAt(selectedRow, 0);
         String docName = (String)this.DiscoveredPeersTable.getModel().getValueAt(selectedRow, 3);
         
-        DocumentLoginPanel loginForm = new DocumentLoginPanel();
+        DocumentLoginPanel loginForm = new DocumentLoginPanel(profile.username);
 
         Object[] options = {"Login"};
         int r = JOptionPane.showOptionDialog(
@@ -413,15 +409,12 @@ public class ApplicationWindow extends javax.swing.JFrame {
         
         boolean containsLowerCase = false;
         boolean containsUpperCase = false;
-//        boolean containsInvalid = false;
-//        boolean containsSpecialChar = false;
         boolean containsDigit = false;
     
         for(char c: pass){
             containsLowerCase   = containsLowerCase || Character.isLowerCase(c);
             containsUpperCase   = containsUpperCase || Character.isUpperCase(c);
             containsDigit       = containsDigit || Character.isDigit(c); 
-            //containsSpecialChar ||= someMethodForDetectingIfItIsSpecial(c);
         }
         return pass.length >= Constants.MIN_PASSWORD_LENGTH && containsLowerCase && containsUpperCase && containsDigit;
     }
