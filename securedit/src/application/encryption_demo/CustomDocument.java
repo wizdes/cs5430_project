@@ -57,9 +57,10 @@ public class CustomDocument extends DefaultStyledDocument {
         super.insertString(offset, string, attributeSet);
     }
     
-    public void manualReplace(int offset, int length, String string) throws BadLocationException{
+    public void manualReplace(int offset, int length, String string, AttributeSet attributeSet)
+            throws BadLocationException{
         super.remove(offset, length);
-        super.insertString(offset, string, null);
+        super.insertString(offset, string, attributeSet);
     }
     
     //allows a straight to documentArea remove of text
