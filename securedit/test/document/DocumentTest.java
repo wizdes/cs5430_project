@@ -90,11 +90,9 @@ public class DocumentTest {
     public void testDoInsertFromRight() {
         int r;
         document = new Document();    
-        document.print();
         document.addLevel(0);
             
         Document document2 = document.formatFor(0);
-        document2.print();
         
         r = document2.doInsert(0, Document.BOF, Document.EOF, "h");
         assertEquals(0, r);

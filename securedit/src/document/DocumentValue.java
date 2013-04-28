@@ -37,6 +37,10 @@ public class DocumentValue implements Serializable{
     public String getValue() {
         return value;
     }
+    
+    public void setValue(String v) {
+        this.value = v;
+    }    
 
     public void obscure() {
         String newString = "";
