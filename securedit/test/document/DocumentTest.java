@@ -87,6 +87,25 @@ public class DocumentTest {
     }
 
     @Test
+    public void testDoInsertFromRight() {
+        int r;
+        document = new Document();    
+        document.print();
+        document.addLevel(0);
+            
+        Document document2 = document.formatFor(0);
+        document2.print();
+        
+        r = document2.doInsert(0, Document.BOF, Document.EOF, "h");
+        assertEquals(0, r);
+        assertEquals("h", document2.getString());
+        
+        r = document2.doInsert(0, Document.BOF, Document.EOF, "i");
+        assertEquals(0, r);
+        assertEquals("hi", document2.getString());         
+    }
+    
+    @Test
     public void testDoRemove() {
         document = new Document();
         document.addLevel(0);
@@ -116,6 +135,21 @@ public class DocumentTest {
         }
 
     }    
+    
+    @Test
+    public void testIdentifierForOffsetIdentifier() {
+        document = new Document();
+        
+        assertEquals(Document.BOF, document.getIdentifierAtIndex(-1));
+        assertEquals(Document.EOF, document.getIdentifierAtIndex(0));
+        assertEquals(2, document.length());
+        
+        Document document2 = document.formatFor(0);
+        
+        assertEquals(Document.BOF, document2.getIdentifierAtIndex(-1));
+        assertEquals(Document.EOF, document2.getIdentifierAtIndex(0));
+        assertEquals(2, document2.length());
+    }       
     
     @Test
     public void testIsEmpty() {
