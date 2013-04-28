@@ -55,7 +55,12 @@ public class CustomDocument extends DefaultStyledDocument {
         //System.out.println("Inserting: " + string);  
         if(attributeSet == null) attributeSet = curDoc.getColors().get(insertLevel);
         super.insertString(offset, string, attributeSet);
-    }    
+    }
+    
+    public void manualReplace(int offset, int length, String string) throws BadLocationException{
+        super.remove(offset, length);
+        super.insertString(offset, string, null);
+    }
     
     //allows a straight to documentArea remove of text
     public void manualRemove(int offset, int length)
