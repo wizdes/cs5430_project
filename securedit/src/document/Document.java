@@ -114,7 +114,7 @@ public class Document implements DocumentInterface, Message {
     
     protected DocumentValue getDocumentValueAtIndex(int index) {
         DocumentValue dv = bofDV;
-        for (int i = 0; i <= index; i++) {
+        for (int i = -1; i < index; i++) {
             dv = dv.getNext();
             if (dv == null) {
                 return null;
@@ -133,6 +133,9 @@ public class Document implements DocumentInterface, Message {
     
     @Override
     public void doRemove(String identifier) {
+        if (identifier.equals(Document.EOF) || identifier.equals(Document.BOF)) {
+            return;
+        }
         DocumentValue dv = valuesMap.get(identifier);
         if (dv == null) {
             return;
@@ -216,6 +219,7 @@ public class Document implements DocumentInterface, Message {
         Document d = new Document(this.ownerId, this.name);
         
         d.bofDV = null;
+        d.valuesMap.clear();
         DocumentValue dv = this.bofDV;
         DocumentValue prev = null;
         
@@ -229,18 +233,55 @@ public class Document implements DocumentInterface, Message {
                 d.bofDV = copy;
             } else {
                 prev.setNext(copy);
+                copy.setPrev(prev);
             }
-            
-            copy.setPrev(dv);
+
             d.valuesMap.put(copy.getIdentifier(), copy);
             prev = copy;
             dv = dv.getNext();
+            if (dv == null) {
+                d.eofDV = copy;
+                d.eofDV.setNext(null);
+            }
         }
         
         for (Color c : this.colors) { d.colors.add(c); }
         for (String l : this.labels) { d.labels.add(l); }
         d.uid = this.uid;
-        
+                
         return d;
+    }
+    
+    @Override
+    public void print() {
+        DocumentValue iter = this.bofDV;
+        
+        while (iter != null) {
+            System.out.print(iter.getIdentifier() + " ~> ");
+            iter = iter.getNext();
+        }
+        
+        iter = this.eofDV;
+        
+        System.out.println();
+        
+        while (iter != null) {
+            System.out.print(iter.getIdentifier() + " ~> ");
+            iter = iter.getPrev();
+        }
+                
+        
+        System.out.println();
+    }
+    
+    @Override 
+    public int length() {
+        DocumentValue dv = bofDV;
+        int length = 0;
+        while (dv != null) {
+            length++;
+            dv = dv.getNext();
+        }
+        return length;
     }
 }
