@@ -211,7 +211,7 @@ public class EditPanel extends javax.swing.JPanel {
             cd.giveDocument(nd);
             
             //depending on the role of the contributor, display different things
-            displayedUsername.add(nd.getUserID());
+            displayedUsername.add(nd.getOwnerID());
             if (nd.isOwner()) {
                 peerModel.addElement(nd.getOwnerID() + " - Document Owner");
                 promptForLevelsAndColors();
@@ -753,7 +753,6 @@ public class EditPanel extends javax.swing.JPanel {
             System.out.println("Pressed Button");
             ChangeUserAccess jf = new ChangeUserAccess();
             jf.setLabelsandUsername(labels, displayedUsername, nd);
-            //jf.setVisible(true);
 
             Object[] options = {"Close"};
             int r = JOptionPane.showOptionDialog(
