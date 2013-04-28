@@ -9,9 +9,20 @@ Table of Contents
 2) Functionality
   a) Human Authentication
     i) Protocol
-	b) Hosting a chat
-	c) Joining a chat
-	d) Chatting
+  b) Application layer
+    i) Hosting a document
+    ii) Joining a document
+    iii) Editing a document
+    iv) MAC
+  c) Machine Authentication
+    i) session key exchange protocol
+    ii) message protocol
+  d) Encryption
+    i) RPC 
+    ii) AES
+    iii) HMACs
+  e) Network
+
 
 
 1) Overview
