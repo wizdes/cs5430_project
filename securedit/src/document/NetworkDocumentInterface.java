@@ -45,6 +45,9 @@ public interface NetworkDocumentInterface {
     public boolean assignLevel(int levelIdentifier, String leftIdentifier, String rightIdentifier);
     public boolean assignLevel(int levelIdentifier, int leftOffset, int rightOffset);
     
+    public void disconnect();
+    public boolean isConnected();
+    
     /* Document proxies */
     public String getIdentifierAtIndex(int index);
     public boolean isEmpty();

@@ -25,6 +25,8 @@ public class NetworkDocumentHandler implements NetworkDocumentInterface {
     private AuthorizationDocument authDocument;
     private Document document;
     private String ownerId;
+    private final Lock lock = new ReentrantLock(true);
+    private boolean connected = true;
     
     public static boolean autoApprove = false;
     public static boolean autoDeny = false;
@@ -41,6 +43,16 @@ public class NetworkDocumentHandler implements NetworkDocumentInterface {
     }
     
     @Override
+    public void lock(){
+        lock.lock();
+    }
+    
+    @Override
+    public void unlock(){
+        lock.unlock();
+    }
+    
+    @Override
     public void addUserToLevel(String userId, int levelIdentifier){
         if (curDoc != null && !authDocument.peers.containsKey(userId)) {
             curDoc.addUser(userId, levelIdentifier);
@@ -54,6 +66,13 @@ public class NetworkDocumentHandler implements NetworkDocumentInterface {
             UpdateLevel ul = new UpdateLevel(userId, levelIdentifier);
             this.sendCommandMessage(userId, ul);            
         }
+    }
+    
+    public void deleteUser(String userId){
+        if (curDoc != null){
+            curDoc.removeUser(userId);
+        }
+        authDocument.removeUser(userId);
     }
     
     @Override
@@ -168,6 +187,14 @@ public class NetworkDocumentHandler implements NetworkDocumentInterface {
     
     @Override
     public void processMessage(CommandMessage m) {
+<<<<<<< Updated upstream
+=======
+        if (!this.isConnected()) {
+            return;
+        }
+        lock();
+        try{
+>>>>>>> Stashed changes
         if (isOwner()) {
             processMessageOwner(m);
         } else {
@@ -214,6 +241,12 @@ public class NetworkDocumentHandler implements NetworkDocumentInterface {
             int level = this.authDocument.getLevelForUser(m.from);
             BootstrapResponse resp = new BootstrapResponse(this.document.formatFor(level));
             this.sendCommandMessage(m.from, resp);
+<<<<<<< Updated upstream
+=======
+        } else if(m.command instanceof DeleteUser){
+            String userId = ((DeleteUser)m.command).getUserID();
+            this.deleteUser(userId);
+>>>>>>> Stashed changes
         }
     }
     
@@ -252,6 +285,12 @@ public class NetworkDocumentHandler implements NetworkDocumentInterface {
             this.authDocument.setDocument(document);
             if (curDoc != null) {
                 curDoc.handleBootstrap(this.authDocument);
+            }
+        } else if(m.command instanceof DeleteUser){
+            String userId = ((DeleteUser)m.command).getUserID();
+            this.deleteUser(userId);
+            if (userId.equals(this.getOwnerID())) {
+                this.disconnect();
             }
         }
     }    
@@ -348,5 +387,35 @@ public class NetworkDocumentHandler implements NetworkDocumentInterface {
     @Override
     public ArrayList<Color> getColors() {
         return this.document.colors;
+    }
+
+    @Override
+    public void disconnect() {
+        if (!isConnected()) {
+            return;
+        }
+        
+        this.connected = false;
+        
+        this.deleteUser(this.collaboratorId);
+        
+        DeleteUser dl = new DeleteUser(this.collaboratorId);
+        
+        if (this.isOwner()) {
+            for (String userId : this.authDocument.peers.keySet()) {
+                this.sendCommandMessage(userId, dl);
+            }
+        } else {
+            this.sendCommandMessage(this.getOwnerID(), dl);
+        }
+        
+        if (curDoc != null) {
+            curDoc.endEditingSession();
+        }                
+    }
+
+    @Override
+    public boolean isConnected() {
+        return this.connected;
     }
 }

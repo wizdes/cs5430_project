@@ -220,15 +220,15 @@ public class ApplicationWindow extends javax.swing.JFrame {
     }//GEN-LAST:event_DiscoverPeersButtonActionPerformed
 
     private void addDefaultPeersButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addDefaultPeersButtonActionPerformed
-        for (int i = 0; i < 2; i++) {
-            if (!(i + "").equals(profile.username)) {
-                String id = i + "";
-                String host = "localhost";
-                int port = 6000 + i;
-                ArrayList<String> documents = new ArrayList<>();
-                documents.add("Chat");
-                functionality.manuallyAddPeer(id, host, port, documents);
-            }
+        ArrayList<String> documents = new ArrayList<>();
+        documents.add("Doc1");
+        int port = 6000;
+        String host = "localhost";
+        
+        if (profile.username.equals("Matt Goggin")) {
+            functionality.manuallyAddPeer("Patrick Berens", host, port + 1, documents);
+        } else {
+            functionality.manuallyAddPeer("Matt Goggin", host, port, documents);            
         }
     }//GEN-LAST:event_addDefaultPeersButtonActionPerformed
 
@@ -268,7 +268,13 @@ public class ApplicationWindow extends javax.swing.JFrame {
         this.tabbedPane.add("Owner: " + profile.username + ", Doc: " + docName, panel);
         this.tabbedPane.setSelectedComponent(panel);
     }//GEN-LAST:event_startChatButtonActionPerformed
-
+    
+    public void closeEditingSession(NetworkDocumentHandler document) {
+        EditPanel panel = chatPanels.get(document.getName());
+        chatPanels.remove(document.getName());
+        this.tabbedPane.remove(panel);
+    }
+    
     private void addManualPeerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addManualPeerActionPerformed
         String id = JOptionPane.showInputDialog("Username:");
         if (id == null || id.trim().equals("")) {

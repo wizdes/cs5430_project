@@ -608,8 +608,18 @@ public class EditPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_setLevelButtonActionPerformed
 
     private void DisconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DisconnectButtonActionPerformed
-        
+        endEditingSession();
     }//GEN-LAST:event_DisconnectButtonActionPerformed
+
+    public void endEditingSession() {
+        this.nd.disconnect();
+        this.functionality.closeEditingSession(nd);
+    }
+    
+    private void DisconnectButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DisconnectButtonMouseClicked
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_DisconnectButtonMouseClicked
 
     public void repaint(AuthorizationDocument ad){
         String text = ad.getDocument().getString();
