@@ -9,7 +9,6 @@ java -jar securedit.jar
 
 You may start additional instances by running the same command in a new terminal
 
-
 2) Packages
   
   What follows is a high level description of our source code structure, including
