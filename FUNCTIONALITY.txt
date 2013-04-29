@@ -13,9 +13,8 @@ Table of Contents
   a) Machine Authentication
     i) session key exchange protocol
     ii) message protocol
-    iii) RPC
   b) Human Authentication
-    i) RPC
+    i) SRP
     ii) Password mechanism  
   c) Application layer
     i) Hosting a document
@@ -23,7 +22,7 @@ Table of Contents
     iii) MAC
     iv) Configuration
   d) Encryption
-    i) RPC 
+    i) SRP 
     ii) AES
     iii) HMACs
   e) Network
@@ -33,7 +32,7 @@ This is demonstrate the functionality of our project, SecurEdit. SecurEdit is a 
 
 a) Confidentality
 
-All communication between machines are subject to Dolov-Yao attacks. Because of this, we encrypt our messages either with AES session keys or message information in methods such that important information is not revealed (see RPC protocol). Furthermore, our program all encrypted file securely using AES encryption, encrypting all confidential information with an AES cipher that is generated using a key generator on a user generated password. 
+All communication between machines are subject to Dolov-Yao attacks. Because of this, we encrypt our messages either with AES session keys or message information in methods such that important information is not revealed (see SRP protocol). Furthermore, our program all encrypted file securely using AES encryption, encrypting all confidential information with an AES cipher that is generated using a key generator on a user generated password. 
 
 b) Integrity
 
@@ -49,7 +48,7 @@ a) Machine Authentication
 
 i) Session key exchange protocol
 
-This is done using the SRP protocol to exchange a session key. See section iii for more information.
+This is done using the SRP protocol to exchange a session key. See section b) for more information.
 
 ii) Message protocol
 
@@ -66,23 +65,44 @@ c_i is a counter which keeps track of the number of messages which have been see
    else
 	//Ignore message
 
-iii) SRP
-
-<PATRICK INSERT HERE>
-
 b) Human Authentication
 
-In human authentication, one user wishes to join the chat session being hosted by another user (the owner).  In order to do so, they initiate by sending a clear text message indicating their desire to join.  The owner responds with a message encrypted with a one time PIN, which the owner is responsible for transferring to the user securely outside of our application (e.g. by telling them in person, or writing on a piece of paper.). Once the user has the PIN, they can input it in order to decrypt the message from the owner. This is used to initialize the RPC protocol.
+This is achieved using the SRP protocol and is done on a per document basis. The initial setup is performed securely using a one-time PIN that is distributed outside the band of our system(by hand or verbally).
 
 i) SRP
 
 The SRP protocol is used to authenticate a human into a machine. 
 
-<PATRICK INSERT HERE>
+SRP setup requires the client choose a username and password, computing a salt and a verifier, and finally exhanging s,v securely. The steps are summarized below:
+Precondition: Client gives username to server, and server generates a PIN and gives it to the client.
+ *    Client                                    Server
+ * 1. Client picks password P
+ *    x = H(s, P) 
+ *    v = g^x                   {s,v}K_PIN -->  Store <C, (s,v)>
+ * 2.                           <-- Success               
 
+ The server stores s,v in a map within the document. Then when he encrypts the docuemnt, these values will exist persistantly and safely. Therefore, account creation is done once, but the user can login multiple times as expected.
+ 
+ SRP protocol:
+ Summarized below, but essentially user remembers his password and types it in. Owner remembers s,v and authenication is performed and at the end a key is shared.
+ * SRP Authentication protocol:
+ * Precondition: Server has s,v. Client remembers password P.
+ *      Client                                  Server
+ *      A = g^a	A
+ * 1.                           C, A -->        (lookup s, v)
+ *                                              B = k*v + g^b    
+ * 2.                           <-- B,u,s
+ *      x = H(s, P)   	
+ *      S = (B - k*g^x)^(a + ux)                S = (A · v^u)^b
+ * 	K = H(S)                                K = H(S)
+ * 3.	M[1] = H(A, B, K)	M[1] -->	(verify M[1])
+ * 4.	(verify M[2])           <-- M[2]	M[2] = H(A, M[1], K)
+ * 
+ * Postcondition: Client and Server share session key K.
+ 
 ii) Password mechanism  
 
-One important element of the RPC protocol is the selection of a password. To ensure the security of the password, some restrictions are placed. These restrictions are: 
+One important element of the SRP protocol is the selection of a password. To ensure the security of the password, some restrictions are placed. These restrictions are: 
 - it must be a alphanumeric password
 - it must have both upper and lower case letters
 - it must be at least 12 characters long
@@ -107,7 +127,7 @@ iv) Configuration
 
 d) Encryption
 
-i) RPC 
+i) SRP 
 
 <PATRICK INSERT HERE>
 
