@@ -1,27 +1,22 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package transport_layer.network;
 
 import configuration.Constants;
 import java.io.Serializable;
-import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import security_layer.EncryptedMessage;
 import security_layer.PlaintextMessage;
 import security_layer.SecureTransportInterface;
 import security_layer.authentications.AuthenticationError;
-import security_layer.authentications.AuthenticationTransport;
 import security_layer.authentications.AuthenticationMessage;
+import security_layer.authentications.AuthenticationTransport;
 import security_layer.authentications.InitAuth_MsgSuccess;
 import transport_layer.discovery.DiscoveryMessage;
 import transport_layer.discovery.DiscoveryResponseMessage;
 
 /**
- *
- * @author Patrick C. Berens
+ * Network Transport offers a higher level API around the lower level networking functionality
+ * required by the collaborative editors.  
  */
 public class NetworkTransport implements NetworkTransportInterface{
     static final String MESSAGE_RECIEVED_ACK = "OK";
@@ -44,6 +39,7 @@ public class NetworkTransport implements NetworkTransportInterface{
     public void setSecureTransport(SecureTransportInterface secureTransport){
         this.secureTransport = secureTransport;
     }
+    
     @Override
     public void setAuthenticationTransport(AuthenticationTransport authenticationTransport){
         this.authenticationTransport = authenticationTransport;
@@ -65,6 +61,7 @@ public class NetworkTransport implements NetworkTransportInterface{
         client.send(destNode, netMsg);
         return true;
     }
+    
     @Override
     public boolean send(String destination, String docID, Serializable msg){
         Node destNode = topology.getNode(destination);
@@ -81,18 +78,31 @@ public class NetworkTransport implements NetworkTransportInterface{
         client.send(destNode, netMsg);
         return true;
     }
-        
+    
+    /**
+     * Shutdown this NetworkTransport, including shutting down any servers it maintains and 
+     * any client connections it is maintaining
+     */
     @Override
     public void shutdown() {
         this.server.shutdown();
         this.client.closeConnections();
     }
-
+    
+    /**
+     * Update the topology file with a new node at the given location
+     */
     @Override
     public void addPeer(String peerIdent, String host, int port) {
         topology.addNode(peerIdent, host, port);
     }
-
+    
+    /*
+     * The following functions all deposit messages of different types to
+     * the appropriate receptors. They are called from the lower levels of the network code
+     * when messages are first received and deserialized.  
+     */
+    
     void depositEncryptedMessage(NetworkMessage msg) {
         secureTransport.processEncryptedMessage(msg.source.id, msg.docID, (EncryptedMessage)msg.content);
     }

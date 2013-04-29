@@ -1,16 +1,13 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package transport_layer.discovery;
 
 import java.util.List;
 
 /**
- *
- * @author Patrick
+ * MultiCast Clients use this messgae type to respond to UDP probes from other collaborators
+ * on the network, responding with their username, IP, and port, and documents that they are
+ * hosting.
  */
-public class DiscoveryResponseMessage implements java.io.Serializable{
+public class DiscoveryResponseMessage implements java.io.Serializable {
     public String owner;
     public String ip;
     public int port;

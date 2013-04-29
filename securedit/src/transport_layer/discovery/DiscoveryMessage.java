@@ -1,15 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package transport_layer.discovery;
 
 import application.encryption_demo.Message;
 
 /**
- *
- * @author Patrick C. Berens
+ * Broadcast manually by application instances that wish to discover peers manually (as opposed
+ * to the standard UDP broadcast).  It acts like a DiscoveryPacket.
  */
 public class DiscoveryMessage implements Message {
     public String sourceID;

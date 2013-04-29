@@ -27,7 +27,7 @@ public class Server {
         this.port = port;
         this.network = network;
     }
-    
+
     void listen() {
         if(Constants.DEBUG_ON){
             Logger.getLogger(NetworkTransport.class.getName()).log(Level.INFO, "Server at " + this.port + " now listening...");
@@ -35,7 +35,7 @@ public class Server {
         this.clientListener = new ClientListenerThread(this, port);
         this.clientListener.start();
     }
-
+    
     void processNetworkMessage(NetworkMessage m){
         this.network.addPeer(m.source.id, m.source.host, m.source.port);
         

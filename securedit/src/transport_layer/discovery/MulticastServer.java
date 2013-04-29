@@ -22,7 +22,7 @@ class MulticastServer extends Thread{
     private DiscoveryPacket discoveryPacket;
     
     @Override
-    public void run(){
+    public void run() {
         try {
             /* Convert packet to byte buffer */
             byte[] buf = discoveryPacket.toString().getBytes(Constants.ENCODING);    //Check max size...
@@ -49,6 +49,12 @@ class MulticastServer extends Thread{
         socket.close();
     }
     
+    /**
+     * Start broadcasting discovery packets and waiting for clients to respond
+     * @param ident the username to broadcast for yourself
+     * @param host  the host you are sending from
+     * @param port  the port you are sending from
+     */
     void broadcast(String ident, String host, int port){
         try {
             socket = new DatagramSocket(1000 + port);  //Must not be used by anyone else on server. So maybe port + offset(so for id=0, tcp=4000, udp=4000+500)

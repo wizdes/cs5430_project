@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package transport_layer.files;
 
 import configuration.Constants;
@@ -10,20 +6,23 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.nio.file.*;
+import java.io.Serializable;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.io.Serializable;
 
 /**
- *
- * @author Patrick C. Berens
+ * 
  */
 public class FileHandler implements FileTransportInterface{
-    /***********************************************
-     * Low Level File operations similar to network
-     * -Patrick's
-     ***********************************************/
+    
+    /**
+     * Reads out the data at file path and returns it as a serialized object
+     * @param filename the file to read from
+     * @return the serialized file
+     */
     @Override
     public Serializable readFile(String filename) {
         FileInputStream fis = null;
@@ -55,7 +54,13 @@ public class FileHandler implements FileTransportInterface{
         }
         return objectFile;
     }
-
+    
+    /**
+     * Writes out the give object to the given path
+     * @param filename  path to write to
+     * @param content the object to be serialized and written
+     * @return 
+     */
     @Override
     public boolean writeFile(String filename, Serializable content) {
         FileOutputStream fos = null;
@@ -88,6 +93,11 @@ public class FileHandler implements FileTransportInterface{
         return false;
     }
 
+    /**
+     * Open an file that is normal text, not Java serialized format
+     * @param filename the path to read from
+     * @return String that was read from the file
+     */
     @Override
     public String openUnserializedFile(String filename) {
         try {

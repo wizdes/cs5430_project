@@ -8,21 +8,38 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * A client maintains a set of TCP connection with other document collaborators, and is used
+ * to support sending data via TCP from one collaborator to another
+ */
 class Client {
     private ConcurrentMap<Node, Client.Channel> channelMap = new ConcurrentHashMap<>();
-        
+    
+    /**
+     * Closes a socket maintained by this client
+     * @param n the node of the socket to shut down
+     */
     void closeSocketWith(Node n) {
         if(channelMap.containsKey(n)){
             channelMap.get(n).close();
         }
     }
     
+    /**
+     * shutdown all the connections this client knows about
+     */
     void closeConnections() {
         for (Node key : channelMap.keySet()) {
             channelMap.get(key).close();
         }
     }
     
+    /**
+     * Send the given message to the given destination
+     * @param destNode the node to send this message to
+     * @param m the message to send
+     * @return true on success
+     */
     boolean send(Node destNode, NetworkMessage m) {  
         if (!channelMap.containsKey(destNode)) {
             Channel c = new Channel(destNode);
@@ -35,6 +52,10 @@ class Client {
         return channelMap.get(destNode).send(m);
     }
     
+    /**
+     * Represents a single TCP connection with a client, and offers a simple API for sending, 
+     * and closing that connection
+     */
     private class Channel {
         private Socket socket;
         private ObjectOutputStream out;
