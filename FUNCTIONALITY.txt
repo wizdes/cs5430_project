@@ -123,13 +123,13 @@ The document implements a MAC authorization protocol. Each user has a level, as 
 
 iv) Configuration
 
-<PATRICK INSERT HERE>
+When starting the application, the program prompts the user for configuation.
 
 d) Encryption
 
 i) SRP 
 
-<PATRICK INSERT HERE>
+Please refer to the previous section regarding SRP.
 
 ii) AES
 
