@@ -61,6 +61,9 @@ public class CustomDocument extends DefaultStyledDocument {
     public void manualReplace(int offset, int length, String string, AttributeSet attributeSet)
             throws BadLocationException{
         super.remove(offset, length);
+        if(string.length() == 1 && string.charAt(0) == 164){
+            attributeSet = curDoc.getColors().get(0);
+        }
         super.insertString(offset, string, attributeSet);
     }
     
@@ -77,14 +80,14 @@ public class CustomDocument extends DefaultStyledDocument {
             throws BadLocationException {
         //actually, send it over the network
         //curDoc.observedDelta(offset, string.length(), string);
-        
+                
         //get the IDs
         int leftOffset = offset - 1;
         int rightOffset = offset;
         String lOffset = nd.getIdentifierAtIndex(leftOffset);
         String rOffset = nd.getIdentifierAtIndex(rightOffset);
         int levelStr = 0;
-        if(nd.isEmpty()){
+        if(nd.isEmpty() || (string.length() == 1 && string.charAt(0) == 164)){
             levelStr = 0;
         }
         else{
