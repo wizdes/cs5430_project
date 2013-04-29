@@ -45,7 +45,7 @@ public class DocumentValue implements Serializable{
     public void obscure() {
         String newString = "";
         for (int i = 0; i < value.length(); i++) {
-            newString += "X";
+            newString += Document.OBSCURED_STR;
         }
         this.value = newString;
     }
