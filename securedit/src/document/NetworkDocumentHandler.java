@@ -390,6 +390,11 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
     }
     
     @Override
+    public String getStringForTesting() {
+        return this.authDocument.getDocument().getStringForTesting();
+    }    
+    
+    @Override
     public AuthorizationDocument getAuthDocument() {
         return this.authDocument;
     }

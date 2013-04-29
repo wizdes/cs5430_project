@@ -40,7 +40,7 @@ public class AuthorizationDocumentTest {
         assertEquals(2, messages.size());
         for (CommandMessage cm : messages) {
             DoInsert di = (DoInsert)cm.command;
-            assertEquals("XXXXXXXXXXX", di.text);
+            assertEquals("XXXXXXXXXXX", di.text.replace(Document.OBSCURED_STR, "X"));
         }
     }
 

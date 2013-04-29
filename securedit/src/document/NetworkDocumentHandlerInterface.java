@@ -57,6 +57,7 @@ public interface NetworkDocumentHandlerInterface {
     public String getName();
     public String getOwnerID();
     public String getString();
+    public String getStringForTesting();
     public int getLevelForUser(String userId);
     public ServerAuthenticationPersistantState getServerAuthenticationPersistantState();
     public AuthorizationDocumentInterface getAuthDocument();

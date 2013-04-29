@@ -63,22 +63,22 @@ public class DocumentTest {
         // it should insert after the left identifier if the left identifier is present
         r = document.doInsert(0, Document.BOF, Document.EOF, "Hello World");
         assertEquals(0, r);
-        assertEquals("Hello World", document.getString());
+        assertEquals("Hello World", document.getStringForTesting());
         String iLeft = document.getIdentifierAtIndex(1);
         String iRight = document.getIdentifierAtIndex(2);
         
         r = document.doInsert(0, iLeft, iRight, "7");
         assertEquals(0, r);
-        assertEquals("He7llo World", document.getString());
+        assertEquals("He7llo World", document.getStringForTesting());
         
         r = document.doInsert(0, "doesn't exist", iRight, "7");
         assertEquals(0, r);
-        assertEquals("He77llo World", document.getString());
+        assertEquals("He77llo World", document.getStringForTesting());
         
         document.addLevel(1);
         r = document.doInsert(1, "doesn't exist", Document.EOF, "7");
         assertEquals(1, r);
-        assertEquals("He77llo World7", document.getString());
+        assertEquals("He77llo World7", document.getStringForTesting());
         
         for (int i = 0; i < "He77llo World".length(); i++) {
             assertEquals(0, document.getLevelAtIndex(i));
@@ -96,11 +96,11 @@ public class DocumentTest {
         
         r = document2.doInsert(0, Document.BOF, Document.EOF, "h");
         assertEquals(0, r);
-        assertEquals("h", document2.getString());
+        assertEquals("h", document2.getStringForTesting());
         
         r = document2.doInsert(0, Document.BOF, Document.EOF, "i");
         assertEquals(0, r);
-        assertEquals("hi", document2.getString());         
+        assertEquals("hi", document2.getStringForTesting());         
     }
     
     @Test
@@ -115,7 +115,7 @@ public class DocumentTest {
         toRemove.add(document.getIdentifierAtIndex(4));
         
         document.doRemove(toRemove);
-        assertEquals("el", document.getString());
+        assertEquals("el", document.getStringForTesting());
     }
     
     @Test
