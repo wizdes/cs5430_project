@@ -55,6 +55,9 @@ public class CustomDocument extends DefaultStyledDocument {
             throws BadLocationException {
         //System.out.println("Inserting: " + string);  
         if(attributeSet == null) attributeSet = curDoc.getColors().get(insertLevel);
+        if(string.length() == 1 && string.charAt(0) == Document.OBSCURED_CHAR){
+            attributeSet = curDoc.getColors().get(0);
+        }
         System.out.println("inserting: " + string);
         super.insertString(offset, string, attributeSet);
     }
