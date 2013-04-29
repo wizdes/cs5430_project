@@ -28,6 +28,7 @@ public class Constants {
     public static final int discoveryPort = 5446;      //All "clients" use this port.
     public static final String ENCODING = "UTF-8";
     public static final int numTimesBroadcast = 1;
+    public static int ALLOWABLE_LABEL_COUNT = 10;
     
     public static void log(String className, String m) {
         if(Constants.DEBUG_ON){

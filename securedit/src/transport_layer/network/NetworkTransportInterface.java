@@ -5,19 +5,15 @@
 package transport_layer.network;
 
 import java.io.Serializable;
-import security_layer.EncryptedMessage;
 import security_layer.SecureTransportInterface;
 import security_layer.authentications.SRPAuthenticationTransport;
 
 
 /**
- *
- * @author Patrick C. Berens
+ * A simple wrapper for lower level network utilities;
+ * see NetworkTransport for implementation and specific comments
  */
 public interface NetworkTransportInterface {
-    /***************************************
-     * Matt's package
-     * **************************************/
     public boolean send(String destination, Serializable msg);
     public boolean send(String destination, String docID, Serializable msg);
     public void addPeer(String peerIdent, String host, int port);

@@ -8,13 +8,28 @@ Table of Contents
 1) Overview 
 2) Unit Test Cases
 3) Integration Tests
-4) Other Assurance Mechanics
+4) Machine Authentication Mechanics
+	a) Sealed Object
+	b) SecureRandom
+	c) RSA Encryption/Decryption
+		i) size of Keys
+	d) AES Encryption/Decryption
+		i) size of Keys
+	e) Nonces
+	f) HMACs
+	g) Code Reviews
+	h) Class Design
+5) Human Authentication Mechanics
 	a) AES Encrypted Local Files with HMACs
 	b) Secure Length for PIN Generation
 	c) Secure Usage of Encryption
-	d) Code Reviews
-	e) Class Design	
-	f) Network Packet Observation
+	d) <PATRICK INSERT HERE> SRP Protocol
+6) Human Authorization Mechanics
+	a) MAC Policy
+7) Other Assurance Mechanics
+	a) Code Reviews
+	b) Class Design	
+	c) Network Packet Observation
 
 
 1) Overview 
@@ -29,13 +44,35 @@ We introduced unit tests for the new functionality introduced into the system.
 
 Although created numerous unit test cases to increase our assurance of the system, we also introduced several Integration Tests to analyze our system from an end-to-end perspective.  
 
-3) Other Assurance Mechanics
+4) Other Assurance Mechanics
 
 There are several other assurance measures that were taken to increase the assurance in the correctness of the system.
 
+a) SealedObject
+We used the Java class 'SealedObject' to encapsulate a Java object and encrypt it.
+b) SecureRandom
+We used the Java class 'SecureRandom' to general random numbers securely.
+c) RSA Encryption/Decryption
+	We are using the standard Java class KeyPairGenerator with the 'RSA' algorithm. This is initialized with the highest level of SecureRandom (from the Javadocs). It encrypts/decrypts with the 'RSA/ECB/PKCS1Padding' algorithm.
+	i) size of Keys
+	We are using a 3584 bit RSA keys which support our large authentication messages.
+d) AES Encryption/Decryption
+e) Nonces
+	We are using nonces to ensure the system is not susceptible to replay attacks. The specific protocols in using nonces during machine authentication is detailed in FUNCTIONALITY.txt.
+f) HMACs
+	We are using HMACs to ensure the integrity of the data we are sending. The HMAC is generated using the standard Java implementation of HMACs and encrypted with the message.
+g) Code Reviews
+	We used Github's 'Pull Request' feature to code review all commits going into the master branch. This allows us to confirm all changes with the entire team and reduce the number of errors pushed into code.
+
+h) Class Design 
+	To reduce programmer error and prevent any leakage of insecure data, we abstracted our system into three layers. The bottom layer is the transport layer which provides basic networking functionality of a multi-client socket architecture, as well as, file operations. It is within this layer that serialization of messages and files occurs. The top layer is the application layer, which runs client applications. It is within this top layer that message and file content construction occurs. 
+	The application layer and the transportation layer are separated by the security layer. This layer has functions which accept messages and file contents from the application layer, and packages them into encrypted objects using AES(from password or shared random key) or RSA. This layer also processes messages coming up from the transport layer by unpackaging/decrypting the encrypted messages and sending the plaintext data up to the application. All keys are encapsulated within this layer and aren’t visible outside it. No data can be sent between layers without passing through this secure layer. This provides assurance that all messages and files sent/written are encrypted and no keys leave this layer without first being protected.
+
+5) Human Authentication Mechanics
+
 a) AES Encrypted Local Files with HMACs
 
-In our system, we did not assume that all elements of a user's operating system are safe. Specifically, we assume that an attacker may be able to gain information from the files on the file system. Because of this, we encrypted all data saved onto the file system with an AES encrpytion key generated from a user defined password. Thus, only users who remember their own passwords are able to access their files.
+In our system, we did not assume that all elements of a user's operating system are safe. Specifically, we assume that an attacker may be able to gain information from the files on the file system. Because of this, we encrypted all data saved onto the file system with an AES encryption key generated from a user defined password. Thus, only users who remember their own passwords are able to access their files.
 
 b) Secure Length for PIN Generation
 
@@ -44,13 +81,22 @@ In our system, we use a PIN to authenticate humans connecting to a server as wel
 c) Secure Usage of Encryption
 All our messages created using Java's Serializable class. Observing the message packets using Wireshark, we observe that the Serialized messages encode type information in the message. Furthermore, our system will fail to de-Serialize a message if the type information does not match; thus, we send our messages such that they are encrypted with an AES message, verified by an HMAC, and encoded with type information to prevent attackers from intercepting and modifying the message.
 
+d) <PATRICK INSERT HERE> SRP Protocol
+<PATRICK INSERT HERE>
 
-d) Code Reviews
+6) Human Authorization Mechanics
+
+a) MAC Policy
+We implemented a stricter implementation of the MAC policy in authorizing users to write to specific parts of the files. The user hosting the document has the role as the 'Document Owner' and is the user who change the level of the other users. In terms of read access to the document, we implemented a 'read-down' and 'no read-up' policy; users can only read the contents that are at or below their level. In terms of write access to the document, we implemented a write to only the level you are at. We decided not to use allow 'write-down' because this could be used to leak sensitive information. Furthermore, 'write-up' was not allowed since it would immediately hide to the user what he/she just wrote. Thus, the only sensible write policy was to write at one's level. If the client wanted to change levels, then the client could request the 'document owner' to change levels to write to a different level.
+
+7) Other Assurance Mechanics
+
+a) Code Reviews
 We used Github's 'Pull Request' feature to code review all commits going into the master branch. This allows us to confirm all changes with the entire team and reduce the number of errors pushed into code.
 
-e) Class Design 
+b) Class Design 
 To reduce programmer error and prevent any leakage of insecure data, we abstracted our system into three layers. The bottom layer is the transport layer which provides basic networking functionality of a multi-client socket architecture, as well as, file operations. It is within this layer that serialization of messages and files occurs. The top layer is the application layer, which runs client applications. It is within this top layer that message and file content construction occurs. 
 Furthermore, we used standard Java semantics to ensure a safe implementation. For an example, we only allowed public interfaces when necessary; we also used the keyword 'final' to prevent modification of in-memory data.
 
-f) Network Packet Observation
+c) Network Packet Observation
 We used several external tools to observe the security of our system. Wireshark is a tool we used to inspect the network data between systems; this allowed us to be assured of the security of the messages sent between machines.

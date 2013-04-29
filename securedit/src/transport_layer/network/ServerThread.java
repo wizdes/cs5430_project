@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package transport_layer.network;
 
 import configuration.Constants;
@@ -11,6 +6,9 @@ import java.net.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * A server thread maintains a TCP connection with a connected client.
+ */
 public class ServerThread extends Thread {
     private Socket socket = null;
     private Server server = null;

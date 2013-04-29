@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package transport_layer.network;
 
 import configuration.Constants;
@@ -13,6 +8,11 @@ import java.net.SocketException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * ClientListenerThreads listen on a given port for incoming TCP connections to a host.  When 
+ * connections are initiated, they instantiate a ServerThread which handles the actual TCP
+ * interaction.
+ */
 class ClientListenerThread extends Thread {
         
     private boolean listening = true;
@@ -25,7 +25,10 @@ class ClientListenerThread extends Thread {
         this.server = server;
         this.port = port;
     }
-
+    
+    /**
+     * Interrupt the thread that is listening, and close down this ClientListener
+     */
     void stopListening() {
         this.listening = false;
         try {
@@ -38,7 +41,10 @@ class ClientListenerThread extends Thread {
             }
         }
     } 
-
+    
+    /**
+     * Create a new ServerSocket and listen for incoming connections
+     */
     @Override
     public void run() {
 

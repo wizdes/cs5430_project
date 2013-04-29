@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package transport_layer.discovery;
 
 import configuration.Constants;
@@ -12,8 +8,7 @@ import transport_layer.network.NetworkTransportInterface;
 
 
 /**
- *
- * @author Patrick
+ * A simple wrapper for the work of instantiating Multicast Clients and Servers
  */
 public class DiscoveryTransport {
     

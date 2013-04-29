@@ -6,49 +6,118 @@ FUNCTIONALITY.txt, which should discuss the interface that your system implement
 
 Table of Contents
 1) Overview
+  a) Confidentality
+  b) Integrity
+  c) Availability
 2) Functionality
-  a) Human Authentication
-    i) Protocol
-	b) Hosting a chat
-	c) Joining a chat
-	d) Chatting
-
+  a) Machine Authentication
+    i) session key exchange protocol
+    ii) message protocol
+    iii) RPC
+  b) Human Authentication
+    i) RPC
+    ii) Password mechanism  
+  c) Application layer
+    i) Hosting a document
+    ii) Joining a document
+    iii) MAC
+    iv) Configuration
+  d) Encryption
+    i) RPC 
+    ii) AES
+    iii) HMACs
+  e) Network
 
 1) Overview
+This is demonstrate the functionality of our project, SecurEdit. SecurEdit is a secure, colloborative, peer to peer based text editor. In this document, we will go other the machine authentication, human authentication, and human authorization functionalities.
 
-In this phase, we are demonstrating the human authentication portion of our application.  The result of human authentication is an exchange of public keys which are paired to a human via use of a 1 time PIN.
+a) Confidentality
 
+All communication between machines are subject to Dolov-Yao attacks. Because of this, we encrypt our messages either with AES session keys or message information in methods such that important information is not revealed (see RPC protocol). Furthermore, our program all encrypted file securely using AES encryption, encrypting all confidential information with an AES cipher that is generated using a key generator on a user generated password. 
+
+b) Integrity
+
+We guarantee the integrity of both the data sent between machines as well as data stored on disk by calculating an HMAC of the unencrypted data before encrypting the the concatenation of the HMAC and the unencrypted data. As mentioned in the online lecture notes "[2/10] Applied Cryptography Notes" under the section (Part 3: Confidentiality and Integrity), the process of 'MAC then Encrypt' is considered safe and guarantees integrity.
+
+c) Availability
+
+We use TCP to address issues of availability that involves dropped or out of order packets. 
 
 2) Functionality
 
-2.a) Human Authentication
+a) Machine Authentication
 
-In human authentication, one user wishes to join the chat session being hosted by another user (the owner).  In order to do so, they initiate by sending a clear text message indicating their desire to join.  The owner responds with a message encrypted with a one time PIN, which the owner is responsible for transferring to the user securely outside of our application (e.g. by telling them in person, or writing on a piece of paper.). Once the user has the PIN, they can input it in order to decrypt the message from the owner.
+i) Session key exchange protocol
 
-2.a.i) Protocol
+This is done using the SRP protocol to exchange a session key. See section iii for more information.
 
-A wishes to join a chat session with B
-A -> B : r    ( where r is fresh and unpredictable at A )
-B -> A : {PK_B, VK_B, r + 1}K_PIN
-  B generates a 1 time pin PIN, and uses that to generate an 
-  AES key, K_PIN, which B uses to encrypt the message.  At this
-  point person B also verbally transfers the PIN to person A
-A -> B : {PK_A, VK_A, r + 2}K_PIN
-  After A inputs the PIN into their GUI, they can decrypt the 
-  message from B and sends a reply
+ii) Message protocol
 
-At this point, A and B have one another's public keys and verifying keys, and they can proceed with machine authentication as detailed in the previous phase
+The message follows the following protocol. Once both machines have received a session key, they use this to encrypt and send messages between each other.  We plan on using this to implement the following message sending protocol:
+A and B are machines.
+A is trying to send a message m to B.
+K_AB is the shared key of A and B.
+HMAC is the hmac of the encrypted object.
+c_i is a counter which keeps track of the number of messages which have been seen from user i(this solves our 3 message nonce protocol used previously).
 
-Assurance.txt discusses the details of PIN generation.
+1) A -> B : {A, B}K_AB, HMAC, c_i
+2) If c_i > previous_c_i then
+	//process application messages
+   else
+	//Ignore message
 
-2.b) Hosting a chat
+iii) SRP
 
-When a user logs into our application, they may choose to host as many chats as they like.  New chat windows are each given a name (by the user), and added to a list of open chats the user is hosting.  Other users of our application may 'discover' chats being hosted on their network using a UDP broadcast, or they may manually add chat sessions by inputting another user's id, host, port, and chat name.
+<PATRICK INSERT HERE>
+
+b) Human Authentication
+
+In human authentication, one user wishes to join the chat session being hosted by another user (the owner).  In order to do so, they initiate by sending a clear text message indicating their desire to join.  The owner responds with a message encrypted with a one time PIN, which the owner is responsible for transferring to the user securely outside of our application (e.g. by telling them in person, or writing on a piece of paper.). Once the user has the PIN, they can input it in order to decrypt the message from the owner. This is used to initialize the RPC protocol.
+
+i) SRP
+
+The SRP protocol is used to authenticate a human into a machine. 
+
+<PATRICK INSERT HERE>
+
+ii) Password mechanism  
+
+One important element of the RPC protocol is the selection of a password. To ensure the security of the password, some restrictions are placed. These restrictions are: 
+- it must be a alphanumeric password
+- it must have both upper and lower case letters
+- it must be at least 12 characters long
   
-2.c) Joining a chat
+c) Application layer
 
-Once a user has discovered, or manually added, available chat sessions, they can use the GUI to join in those chat sessions.  If they have not already performed human authentication (or that authentication is not up to date), then this is the point that human authentication must be performed.  If they have an up to date public key for the owner of the chat they wish to join, then they may proceed directly into machine authentication.
+i) Hosting a document
 
-2.d) Chatting
+To host a document, a user simply presses the 'Create Document' button in the main view. This creates a document that allows peers to connect. This is done by having a listening thread that responds to UDP broadcasts for finding LAN documents as well as TCP requests to join the document.
 
-Once a user has joined a chat, and performed machine authentication with the owner, they may exchange messages back and forth with the owner using the symmetric AES key exchanged during machine authentication.
+ii) Joining a document
+
+To join a document, a user starts by finding a document to join on (either via manually adding the information or using the UDP broadcast). Next, if user either logs into the document or creates an account to the document if he/she has not done so before. If the user has not logged in before, then the user needs to create an account. This requires a one time PIN exchange to give the document owner the necessary authenication information. Next, the user logs in with his username and his password to gain access to the document.
+
+iii) MAC
+
+The document implements a MAC authorization protocol. Each user has a level, as well as each character in the document. The system is designed such that the document owner is allowed to determine levels for each other. Furthermore, this system implements a 'read-down', 'no read-up', and allows writes only at the same level. Each user is allowed to request to change to a new level.
+
+iv) Configuration
+
+<PATRICK INSERT HERE>
+
+d) Encryption
+
+i) RPC 
+
+<PATRICK INSERT HERE>
+
+ii) AES
+
+We used the standard Java SecureRandom random number generator to create an initialization vector using the 'SHA1PRNG' algorithm and using the 'AES/CBC/PKCS5Padding' algorithm to generate a symmetric AES key with 128 bytes.
+
+iii) HMACs
+We used the standard Java MAC class to generate an HMAC of our messages using the 'HmacSHA256' algorithm.
+
+e) Network
+The Network layer provides the functionality to send and receive encrypted messages; the actual application interfaces only with a "send" function, to which it passes objects of type application.Message.  These will be subclassed in subsequent phases to send application specific data. The network layer utilizes the SecureTransport package to encrypt messages using either RSA (for initial exchange of the shared session key), or AES (for exchanging messages with the session key).
+  

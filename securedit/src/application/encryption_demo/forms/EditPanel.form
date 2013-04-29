@@ -60,18 +60,13 @@
                       <Component id="LevelSelect" max="32767" attributes="0"/>
                   </Group>
                   <Component id="LevelList" pref="0" max="32767" attributes="0"/>
-                  <Group type="102" attributes="0">
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="PeersLabel" min="-2" max="-2" attributes="0"/>
-                          <Component id="cursorInfo" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Component id="LevelLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                          <Group type="102" alignment="0" attributes="0">
-                              <Component id="changeUserLevelButton" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="setLevelButton" min="-2" max="-2" attributes="0"/>
-                          </Group>
-                      </Group>
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                  <Component id="PeersLabel" min="-2" max="-2" attributes="0"/>
+                  <Component id="cursorInfo" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Component id="LevelLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="changeUserLevelButton" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="setLevelButton" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -98,8 +93,8 @@
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="setLevelButton" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="changeUserLevelButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="setLevelButton" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="LevelLabel" min="-2" max="-2" attributes="0"/>
@@ -148,7 +143,7 @@
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Tahoma" size="11" style="1"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Peers(not shown currently)"/>
+        <Property name="text" type="java.lang.String" value="Visible Peers"/>
       </Properties>
     </Component>
     <Container class="javax.swing.JScrollPane" name="jScrollPane1">
@@ -195,15 +190,6 @@
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="LevelSelectActionPerformed"/>
-      </Events>
-    </Component>
-    <Component class="javax.swing.JToggleButton" name="setLevelButton">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Set Level"/>
-      </Properties>
-      <Events>
-        <EventHandler event="mousePressed" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="setLevelButtonMousePressed"/>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="setLevelButtonActionPerformed"/>
       </Events>
     </Component>
     <Container class="javax.swing.JScrollPane" name="LevelList">
@@ -289,6 +275,14 @@
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="generatePINButtonActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="setLevelButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Set Level"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="setLevelButtonActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

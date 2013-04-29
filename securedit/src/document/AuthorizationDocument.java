@@ -1,7 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+//Contains the authentication information for a document
 
 package document;
 
@@ -77,7 +74,8 @@ public class AuthorizationDocument implements AuthorizationDocumentInterface, Me
             if (l >= level) {
                 di = new DoInsert(leftIdentifier, rightIdentifier, level, text);
             } else {
-                String hidden = new String(new char[text.length()]).replace('\0', 'X');
+                char r = Document.OBSCURED_CHAR;
+                String hidden = new String(new char[text.length()]).replace('\0', r);
                 di = new DoInsert(leftIdentifier, rightIdentifier, level, hidden);
             }
             updates.add(new CommandMessage(uid, this.document.getOwnerID(), this.document.getName(), di));

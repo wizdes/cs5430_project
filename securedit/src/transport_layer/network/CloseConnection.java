@@ -1,13 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package transport_layer.network;
 
 
 /**
- *
+ * This message type indicates to the receiver that the connection is being closed by the other 
+ * side
  */
 class CloseConnection extends NetworkMessage {
     CloseConnection(Node source, Node destination) {

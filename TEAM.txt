@@ -5,12 +5,18 @@ Matt Goggin (mg343)
 
 Yi Li
 
-Time : 30 hours
+Yi developed the application GUI and integration with the document classes used to propagate the document information. Yi also helped design and debug the SRP protocol implementation. Yi also helped develop the ideas for MAC authorization and helped implement these along with the application layer of the project. Lastly, he helped test the system and write the documentation.
+
+Time : 40 hours
 
 Matt Goggin
 
-Time : 30 hours
+Matt helped develop the GUI and the document classes used to propagate the document information and hold state information. Matt also helped design the SRP protocol. Matt also helped develop the ideas for MAC authorization and helped implement these along with the application layer of the project. Lastly, he helped test the system and write the documentation.
+
+Time : 40 hours
 
 Patrick Berens
 
-Time : 30 hours
+Patrick developed the SRP protocol and implemented and integrated it with the project. Patrick also helped develop the ideas for MAC authorization and helped implement these along with the application layer of the project. Lastly, he helped test the system and write the documentation.
+
+Time : 40 hours
