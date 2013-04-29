@@ -2,33 +2,12 @@ Patrick Berens(pcb73)
 Matt Goggin(mg343)
 Yi Li(yl2326)
 
-README.txt which contains the names and a description of the contents for the other files in the directory.
-
-Source files that contain the source needed to compile and run your software. This should include any scaffolding used in the Demo you will give. We will look over excerpts of your code to see whether your project is based on clean design and was implemented using good software engineering practices (including secure coding practices). Projects containing code vulnerabilities will be severely penalized.
-Table of Contents
-
-1) Running our code
-2) Packages
-  application
-    encryption_demo
-      forms
-      messages
-  configuration
-    document
-  security_layer
-    authentications
-  transport_layer
-    discovery
-    files
-    network
-
 1) Running our code
 
 In order to run our submitted code on a Linux OS, change directory into the root of this folder, and start the program with the following command:
 java -jar securedit.jar
 
 You may start additional instances by running the same command in a new terminal
-
 
 2) Packages
   
@@ -53,7 +32,7 @@ You may start additional instances by running the same command in a new terminal
     Document.java
       The lowest level Document API; offers simple inserts, removes, and assigns levels
       to sections of the document
-    AuthorizationTransport
+    AuthorizationDocument
       Maintains an instance of a Document, and also manages a list of users who are authorized
       for which levels of access.  This is what is serialized (encrypted) to the disk when 
       a file is saved.

@@ -128,67 +128,67 @@ public class NetworkDocumentTest {
         owner.requestInsert(0, Document.BOF, Document.EOF, "hello");
         pause(100);
         
-        assertEquals("hello", client2.getString());
-        assertEquals("hello", client3.getString());
+        assertEquals("hello", client2.getStringForTesting());
+        assertEquals("hello", client3.getStringForTesting());
         
         // When a client requests an appropriate update, that should be propogated everywhere
         client2.requestInsert(0, 4, 5, " world");
         pause(100);
         
-        assertEquals("hello world", owner.getString());
-        assertEquals("hello world", client2.getString());
-        assertEquals("hello world", client3.getString());
+        assertEquals("hello world", owner.getStringForTesting());
+        assertEquals("hello world", client2.getStringForTesting());
+        assertEquals("hello world", client3.getStringForTesting());
         
         // when a client requests an inappropriate update, it should be reported nowhere
         client2.requestInsert(99, -1, 0, "shouldn't see this");
         pause(100);
         
-        assertEquals("hello world", owner.getString());
-        assertEquals("hello world", client2.getString());
-        assertEquals("hello world", client3.getString());
+        assertEquals("hello world", owner.getStringForTesting());
+        assertEquals("hello world", client2.getStringForTesting());
+        assertEquals("hello world", client3.getStringForTesting());
         
         // when the owner updates something at a higher level, the clients should see 'xxx'
         owner.requestInsert(4, -1, 0, "owner ");
         
         pause(100);
         
-        assertEquals("owner hello world", owner.getString());
-        assertEquals("XXXXXXhello world", client2.getString());
-        assertEquals("XXXXXXhello world", client3.getString());  
+        assertEquals("owner hello world", owner.getStringForTesting());
+        assertEquals("XXXXXXhello world", client2.getStringForTesting());
+        assertEquals("XXXXXXhello world", client3.getStringForTesting());  
         
         // a clients request should be forward just to those who can see them
         owner.addUserToLevel(p2Ident, 1);
         client2.requestInsert(1, -1, 0, "client ");
         pause(100);
         
-        assertEquals("client owner hello world", owner.getString());
-        assertEquals("client XXXXXXhello world", client2.getString());
-        assertEquals("XXXXXXXXXXXXXhello world", client3.getString());
+        assertEquals("client owner hello world", owner.getStringForTesting());
+        assertEquals("client XXXXXXhello world", client2.getStringForTesting());
+        assertEquals("XXXXXXXXXXXXXhello world", client3.getStringForTesting());
 
         // when a client requests to remove items he can't see, the request is ignored
         client3.requestRemove(0, 6);
         pause(1000);
 
-        assertEquals("client owner hello world", owner.getString());
-        assertEquals("client XXXXXXhello world", client2.getString());
-        assertEquals("XXXXXXXXXXXXXhello world", client3.getString());
+        assertEquals("client owner hello world", owner.getStringForTesting());
+        assertEquals("client XXXXXXhello world", client2.getStringForTesting());
+        assertEquals("XXXXXXXXXXXXXhello world", client3.getStringForTesting());
 
         // an authorized client can remove the text and it is broadcast
         client2.requestRemove(0, 6);
         pause(100);
 
-        assertEquals("owner hello world", owner.getString());
-        assertEquals("XXXXXXhello world", client2.getString());
-        assertEquals("XXXXXXhello world", client3.getString());
+        assertEquals("owner hello world", owner.getStringForTesting());
+        assertEquals("XXXXXXhello world", client2.getStringForTesting());
+        assertEquals("XXXXXXhello world", client3.getStringForTesting());
         
         // when the owner removes items, they are broadcast to clients
         owner.requestRemove(0, 5);
         owner.requestRemove(5, 10);
         pause(100);
 
-        assertEquals("hello", owner.getString());
-        assertEquals("hello", client2.getString());
-        assertEquals("hello", client3.getString());        
+        assertEquals("hello", owner.getStringForTesting());
+        assertEquals("hello", client2.getStringForTesting());
+        assertEquals("hello", client3.getStringForTesting());        
     }
     
     @Test
@@ -201,62 +201,62 @@ public class NetworkDocumentTest {
         owner.requestInsert(0, Document.BOF, "forcetofront", "000");
         pause(100);
         
-        assertEquals("000", owner.getString());
-        assertEquals("000", client2.getString());
-        assertEquals("000", client3.getString());
+        assertEquals("000", owner.getStringForTesting());
+        assertEquals("000", client2.getStringForTesting());
+        assertEquals("000", client3.getStringForTesting());
         
         owner.requestInsert(1, Document.BOF, "forcetofront", "111 ");
         pause(100);
         
-        assertEquals("111 000", owner.getString());
-        assertEquals("111 000", client2.getString());
-        assertEquals("111 000", client3.getString());
+        assertEquals("111 000", owner.getStringForTesting());
+        assertEquals("111 000", client2.getStringForTesting());
+        assertEquals("111 000", client3.getStringForTesting());
 
         owner.requestInsert(2, Document.BOF, "forcetofront", "222 ");
         pause(100);
         
-        assertEquals("222 111 000", owner.getString());
-        assertEquals("XXXX111 000", client2.getString());
-        assertEquals("222 111 000", client3.getString());
+        assertEquals("222 111 000", owner.getStringForTesting());
+        assertEquals("XXXX111 000", client2.getStringForTesting());
+        assertEquals("222 111 000", client3.getStringForTesting());
 
         owner.requestInsert(3, Document.BOF, "forcetofront", "333 ");
         pause(100);
         
-        assertEquals("333 222 111 000", owner.getString());
-        assertEquals("XXXXXXXX111 000", client2.getString());
-        assertEquals("XXXX222 111 000", client3.getString());
+        assertEquals("333 222 111 000", owner.getStringForTesting());
+        assertEquals("XXXXXXXX111 000", client2.getStringForTesting());
+        assertEquals("XXXX222 111 000", client3.getStringForTesting());
         
         // declassify 222
         owner.assignLevel(1, 4, 7);
         pause(200);
 
-        assertEquals("333 222 111 000", owner.getString());
-        assertEquals("XXXX222 111 000", client2.getString());
-        assertEquals("XXXX222 111 000", client3.getString());
+        assertEquals("333 222 111 000", owner.getStringForTesting());
+        assertEquals("XXXX222 111 000", client2.getStringForTesting());
+        assertEquals("XXXX222 111 000", client3.getStringForTesting());
         
         // classify 000
         owner.assignLevel(3, 12, 14);
         pause(200);
 
-        assertEquals("333 222 111 000", owner.getString());
-        assertEquals("XXXX222 111 XXX", client2.getString());
-        assertEquals("XXXX222 111 XXX", client3.getString());
+        assertEquals("333 222 111 000", owner.getStringForTesting());
+        assertEquals("XXXX222 111 XXX", client2.getStringForTesting());
+        assertEquals("XXXX222 111 XXX", client3.getStringForTesting());
         
         // set 111 to 2
         owner.assignLevel(2, 8, 11);
         pause(200);
 
-        assertEquals("333 222 111 000", owner.getString());
-        assertEquals("XXXX222 XXXXXXX", client2.getString());
-        assertEquals("XXXX222 111 XXX", client3.getString());
+        assertEquals("333 222 111 000", owner.getStringForTesting());
+        assertEquals("XXXX222 XXXXXXX", client2.getStringForTesting());
+        assertEquals("XXXX222 111 XXX", client3.getStringForTesting());
         
         // set ending to 0
         owner.assignLevel(0, 8, 15);
         pause(200);
 
-        assertEquals("333 222 111 000", owner.getString());
-        assertEquals("XXXX222 111 000", client2.getString());
-        assertEquals("XXXX222 111 000", client3.getString());        
+        assertEquals("333 222 111 000", owner.getStringForTesting());
+        assertEquals("XXXX222 111 000", client2.getStringForTesting());
+        assertEquals("XXXX222 111 000", client3.getStringForTesting());        
     }
 
     @Test
@@ -268,23 +268,23 @@ public class NetworkDocumentTest {
         owner.requestInsert(1, Document.BOF, "forcetofront", "111");
         pause(100);
         
-        assertEquals("111", owner.getString());
-        assertEquals("XXX", client2.getString());
-        assertEquals("111", client3.getString());
+        assertEquals("111", owner.getStringForTesting());
+        assertEquals("XXX", client2.getStringForTesting());
+        assertEquals("111", client3.getStringForTesting());
         
         owner.addUserToLevel(p2Ident, 1);
         pause(100);
         
-        assertEquals("111", owner.getString());
-        assertEquals("111", client2.getString());
-        assertEquals("111", client3.getString());
+        assertEquals("111", owner.getStringForTesting());
+        assertEquals("111", client2.getStringForTesting());
+        assertEquals("111", client3.getStringForTesting());
         
         owner.addUserToLevel(p2Ident, 0);
         pause(100);
         
-        assertEquals("111", owner.getString());
-        assertEquals("XXX", client2.getString());
-        assertEquals("111", client3.getString());     
+        assertEquals("111", owner.getStringForTesting());
+        assertEquals("XXX", client2.getStringForTesting());
+        assertEquals("111", client3.getStringForTesting());     
     } 
     
     @Test
@@ -339,32 +339,32 @@ public class NetworkDocumentTest {
         owner.addUserToLevel(p2Ident, 1);
         pause(100);
         
-        assertEquals("222111000", owner.getString());
-        assertEquals("", client2.getString());
-        assertEquals("", client3.getString());
+        assertEquals("222111000", owner.getStringForTesting());
+        assertEquals("", client2.getStringForTesting());
+        assertEquals("", client3.getStringForTesting());
         
         client2.bootstrap();
         pause(100);
         
-        assertEquals("222111000", owner.getString());
-        assertEquals("XXX111000", client2.getString());
-        assertEquals("", client3.getString());    
+        assertEquals("222111000", owner.getStringForTesting());
+        assertEquals("XXX111000", client2.getStringForTesting());
+        assertEquals("", client3.getStringForTesting());    
         
         client2.requestInsert(0, Document.BOF, "forcetofront", "000");
         pause(100);
         
-        assertEquals("000222111000", owner.getString());
-        assertEquals("000XXX111000", client2.getString());
-        assertEquals("", client3.getString());         
+        assertEquals("000222111000", owner.getStringForTesting());
+        assertEquals("000XXX111000", client2.getStringForTesting());
+        assertEquals("", client3.getStringForTesting());         
         
         owner.addUserToLevel(p3Ident, 2);
         client3.bootstrap();
         client2.requestInsert(1, Document.BOF, "forcetofront", "111");
         pause(100);  
         
-        assertEquals("111000222111000", owner.getString());
-        assertEquals("111000XXX111000", client2.getString());
-        assertEquals("111000222111000", client3.getString()); 
+        assertEquals("111000222111000", owner.getStringForTesting());
+        assertEquals("111000XXX111000", client2.getStringForTesting());
+        assertEquals("111000222111000", client3.getStringForTesting()); 
     }
     
     @Test

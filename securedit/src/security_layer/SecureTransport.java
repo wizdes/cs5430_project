@@ -71,11 +71,18 @@ public class SecureTransport implements SecureTransportInterface{
         networkTransport.addPeer(peerIdent, host, port);
     }
     
+    /**
+     * Send an AES encrypted message to the given destination; the keys will be retrieved
+     * from 
+     */
     @Override
     public boolean sendAESEncryptedMessage(String destination, String docID, Message m) {
         return sendAESEncryptedMessage(destination, docID, m, keys.getSessionKey(destination, docID), keys.getHmacKey(destination, docID));
     }
     
+    /**
+     * Send an AES encrypted message, but instead of looking up the key to use, pass in the keys
+     */
     @Override
     public boolean sendAESEncryptedMessage(String destination, String docID, Message m, SecretKey secretKey, SecretKey HMACKey) {
         if(Constants.DEBUG_ON){
@@ -113,6 +120,10 @@ public class SecureTransport implements SecureTransportInterface{
         this.sendPlainTextMessage(sourceOfMessage, docID, error);
     }
     
+    /**
+     * called from the network layer to pass off processing of encrypted messages to
+     * the security package
+     */
     @Override
     public boolean processEncryptedMessage(String sourceOfMessage, String docID, EncryptedMessage encryptedMessage) {
         boolean success = false;

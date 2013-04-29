@@ -760,6 +760,7 @@ public class EditPanel extends javax.swing.JPanel {
                     options[0]);
         } finally{
             nd.unlock();
+            cd.insertLevel = ownerWriteLevel.getSelectedIndex();
         }
     }//GEN-LAST:event_changeUserLevelButtonActionPerformed
 
