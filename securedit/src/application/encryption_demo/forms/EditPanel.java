@@ -203,7 +203,7 @@ public class EditPanel extends javax.swing.JPanel {
         documentArea.setDocument(cd);
         cd.setEditorReference(this);
         
-        displayedUsername = new ArrayList<>();
+        displayedUsernames = new ArrayList<>();
     }
 
     // this hands the document interface to the GUI
@@ -215,7 +215,7 @@ public class EditPanel extends javax.swing.JPanel {
             cd.giveDocument(nd);
             
             //depending on the role of the contributor, display different things
-            displayedUsername.add(nd.getOwnerID());
+            displayedUsernames.add(nd.getOwnerID());
             if (nd.isOwner()) {
                 peerModel.addElement(nd.getOwnerID() + " - Document Owner");
                 promptForLevelsAndColors();
@@ -746,7 +746,7 @@ public class EditPanel extends javax.swing.JPanel {
         try{
             System.out.println("Pressed Button");
             ChangeUserAccess jf = new ChangeUserAccess();
-            jf.setLabelsandUsername(labels, displayedUsername, nd);
+            jf.setLabelsandUsername(labels, displayedUsernames, nd);
 
             Object[] options = {"Close"};
             int r = JOptionPane.showOptionDialog(
@@ -898,7 +898,7 @@ public class EditPanel extends javax.swing.JPanel {
     public void addUser(String username, int levelIdentifier) {
         nd.lock();
         try {
-            if (displayedUsername.contains(username)) {
+            if (displayedUsernames.contains(username)) {
                 for (int i = 0; i < peerModel.size(); i++) {
                     String x = peerModel.get(i).toString().split(" - ")[0];
                     if (peerModel.get(i).toString().split(" - ")[1].equals("Document Owner")) {
@@ -914,7 +914,7 @@ public class EditPanel extends javax.swing.JPanel {
                 return;
             }
             peerModel.addElement(username + " - " + labels.get(levelIdentifier));
-            displayedUsername.add(username);
+            displayedUsernames.add(username);
         } finally {
             nd.unlock();
         }
@@ -973,7 +973,7 @@ public class EditPanel extends javax.swing.JPanel {
     private ArrayList<SimpleAttributeSet> colors = new ArrayList<>();
     private DefaultListModel peerModel = new DefaultListModel();
     private ColorCellRenderer cr = new ColorCellRenderer();
-    private ArrayList<String> displayedUsername;
+    private ArrayList<String> displayedUsernames;
     private NetworkDocumentHandler nd;
     private EncryptionDemoFunctionality functionality = null;
     private CustomDocument cd = new CustomDocument();
