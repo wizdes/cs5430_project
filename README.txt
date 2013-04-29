@@ -53,7 +53,7 @@ You may start additional instances by running the same command in a new terminal
     Document.java
       The lowest level Document API; offers simple inserts, removes, and assigns levels
       to sections of the document
-    AuthorizationTransport
+    AuthorizationDocument
       Maintains an instance of a Document, and also manages a list of users who are authorized
       for which levels of access.  This is what is serialized (encrypted) to the disk when 
       a file is saved.
