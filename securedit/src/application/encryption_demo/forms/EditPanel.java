@@ -588,7 +588,7 @@ public class EditPanel extends javax.swing.JPanel {
                 
                 // remove the current text in the document
                 //this.manualRemove(0, documentArea.getText().length());
-                cd.remove(0, documentArea.getText().length());
+                cd.remove(0, nd.getAuthDocument().getDocument().getString().length());
 
                 try {
                     //sanitizes the file and puts the contents in the file
@@ -664,7 +664,9 @@ public class EditPanel extends javax.swing.JPanel {
             
                 AuthorizationDocument ad = (AuthorizationDocument) functionality.decryptObjFile(fileName, password);
                 if(ad != null){
-                    this.manualRemove(0, documentArea.getText().length());
+                    if(nd.getAuthDocument().getDocument().getString().length() != 0){
+                        this.manualRemove(0, nd.getAuthDocument().getDocument().getString().length());
+                    }
                     nd.setAuthDocument(ad);
                     repaint(ad);
                 }
@@ -796,12 +798,12 @@ public class EditPanel extends javax.swing.JPanel {
         nd.lock();
         try{
             String text = ad.getDocument().getString();
-
+            System.out.println("Text is: " + text);
             int length = text.length();
             DocumentValue dv = ad.getDocument().getValues().getNext();
             for(int i = 0; i < length; i++){
-                System.out.println(dv.getLevel());
-                this.manualInsert(i, String.valueOf(text.charAt(i)) , colors.get(dv.getLevel()));
+                System.out.println(dv.getLevel() + " " + text.charAt(i));
+                this.manualInsert(i, String.valueOf(text.charAt(i)) , colors.get(dv.getLevel()), false);
                 dv = dv.getNext();
             }
         } finally{
@@ -831,12 +833,13 @@ public class EditPanel extends javax.swing.JPanel {
     }
     
     // pushes a text change at an offset and level into the document
-    public void manualInsert(int offset, String string, AttributeSet attributeSet){
+    public void manualInsert(int offset, String string, AttributeSet attributeSet, boolean moveCaret){
         nd.lock();
         try {
             cd.manualInsert(offset, string, attributeSet);
-            if(offset <= documentArea.getCaretPosition() 
-                    && documentArea.getCaretPosition() + string.length() <= documentArea.getText().length()){
+            
+            if(offset <= documentArea.getCaretPosition() && moveCaret
+                    && documentArea.getCaretPosition() + string.length() <= nd.getAuthDocument().getDocument().getString().length()){
                 documentArea.setCaretPosition(documentArea.getCaretPosition() + string.length());
             }
         } catch (BadLocationException ex) {
