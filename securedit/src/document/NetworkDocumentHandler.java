@@ -238,7 +238,7 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
                              di.rightIdentifier, 
                              di.text);            
             if (curDoc != null) {
-                curDoc.manualInsert(authDocument.getDocument().getOffsetForIdentifier(di.rightIdentifier) - 1, di.text, null, true); 
+                curDoc.manualInsert(authDocument.getDocument().getOffsetForIdentifier(di.rightIdentifier) - 1, di.text, curDoc.getColors().get(di.levelIdentifier), true); 
             }
         } else if (m.command instanceof DoRemove) {
             DoRemove dr = (DoRemove)m.command;
@@ -295,7 +295,7 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
                 System.out.println(authDocument.getDocument().getString());
             }
             if (curDoc != null) {
-                curDoc.manualInsert(authDocument.getDocument().getOffsetForIdentifier(di.rightIdentifier) - 1, di.text, null, true);
+                curDoc.manualInsert(authDocument.getDocument().getOffsetForIdentifier(di.rightIdentifier) - 1, di.text, curDoc.getColors().get(di.levelIdentifier), true);
             }
         }  else if (m.command instanceof DoRemove) {
             DoRemove dr = (DoRemove)m.command;
