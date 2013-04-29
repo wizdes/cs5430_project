@@ -48,8 +48,8 @@ import transport_layer.network.NetworkTransportInterface;
  *      x = H(s, P)   	
  *      S = (B - k*g^x)^(a + ux)                S = (A · v^u)^b
  * 	K = H(S)                                K = H(S)
- * 7.	M[1] = H(A, B, K)	M[1] -->	(verify M[1])
- * 8.	(verify M[2])           <-- M[2]	M[2] = H(A, M[1], K)
+ * 3.	M[1] = H(A, B, K)	M[1] -->	(verify M[1])
+ * 4.	(verify M[2])           <-- M[2]	M[2] = H(A, M[1], K)
  * 
  * Postcondition: Client and Server share session key K.
  * 
