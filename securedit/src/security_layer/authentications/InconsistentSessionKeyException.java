@@ -1,11 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package security_layer.authentications;
 
 /**
- *
+ * Exception which is thrown when MACs don't match(K's aren't the same).
  * @author Patrick
  */
 public class InconsistentSessionKeyException extends Exception{

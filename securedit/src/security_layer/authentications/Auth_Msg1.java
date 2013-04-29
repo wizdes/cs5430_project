@@ -1,14 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package security_layer.authentications;
 
 import java.math.BigInteger;
-import java.security.PublicKey;
 
 /**
- *
+ * SRP Authentication Message 1
+ * -Client: Sends client identifier(C) and client ephemeral public key(A)
  * @author Patrick
  */
 class Auth_Msg1 extends SRPAuthenticationMessage{

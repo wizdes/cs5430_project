@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package security_layer.authentications;
 
 import configuration.Constants;
@@ -29,10 +25,37 @@ import security_layer.SecureTransportInterface;
 import transport_layer.network.NetworkTransportInterface;
 
 /**
- *
+ * Main SRP authentication processor.
+ * -Sends authentication messages.
+ * -Processes authentication messages.
+ * 
+ * SRP Setup protocol:
+ * Precondition: Client goes to document owner and they exchange a shared key.
+ *               Server has <ClientID, PIN> in memory.
+ *    Client                                    Server
+ * 1. Client picks password P
+ *    x = H(s, P) 
+ *    v = g^x                   s,v -->         Store <C, (s,v)>
+ * 2.                           <-- Success                           
+ * 
+ * SRP Authentication protocol:
+ * Precondition: Server has s,v. Client remembers password P.
+ *      Client                                  Server
+ *      A = g^a	A
+ * 1.                           C, A -->        (lookup s, v)
+ *                                              B = k*v + g^b    
+ * 2.                           <-- B,u,s
+ *      x = H(s, P)   	
+ *      S = (B - k*g^x)^(a + ux)                S = (A · v^u)^b
+ * 	K = H(S)                                K = H(S)
+ * 7.	M[1] = H(A, B, K)	M[1] -->	(verify M[1])
+ * 8.	(verify M[2])           <-- M[2]	M[2] = H(A, M[1], K)
+ * 
+ * Postcondition: Client and Server share session key K.
+ * 
  * @author Patrick
  */
-public class AuthenticationTransport {
+public class SRPAuthenticationTransport {
     public static int AUTH_TIMEOUT_DELAY = 16000;
     private NetworkTransportInterface transport;
     private SecureTransportInterface secureTransport;
@@ -46,7 +69,7 @@ public class AuthenticationTransport {
     private static final BigInteger g = new BigInteger(MODPGroups.GENERATOR + "");
     private final BigInteger k = new BigInteger(H(n.toByteArray(), g.toByteArray()));
     
-    public AuthenticationTransport(NetworkTransportInterface transport, 
+    public SRPAuthenticationTransport(NetworkTransportInterface transport, 
                                    SecureTransportInterface secureTransport, 
                                    Profile profile,
                                    ConcurrentMap<String, NetworkDocumentHandlerInterface> docInstances) {
@@ -56,18 +79,17 @@ public class AuthenticationTransport {
         this.docInstances = docInstances;
         this.transport.setAuthenticationTransport(this);
     }
-    
-    public char[] generatePIN(String userID, String docID) {
-        char[] PIN = KeyFactory.generatePIN();
-        pendingPINs.put(userID + "-" + docID, PIN);
-        Constants.log("generated pin for " + userID + "-" + docID + " -> " + this.getPIN(userID, docID));
-        return PIN;
-    }
-    
-    public char[] getPIN(String userID, String docID) {
-        return pendingPINs.get(userID + "-" + docID);
-    }    
-    
+   
+    /**
+     * Initializes SRP authentication during account creation.
+     * -Exchanges salt and verifier.
+     * -Uses PIN to encrypt them.
+     * @param serverID Server want to authenticate with.
+     * @param docID Document trying to connect to.
+     * @param password Password using for this server/document pair.
+     * @param PIN PIN server gave to them.
+     * @return Was able to send SRP authentication message successfully.
+     */
     public boolean initializeSRPAuthentication(String serverID, String docID, char[] password, char[] PIN){
         byte[] salt = KeyFactory.generateSalt();
         BigInteger x = new BigInteger(KeyFactory.generateSymmetricKey(password, salt).getEncoded());
@@ -80,7 +102,7 @@ public class AuthenticationTransport {
             HMACKey = KeyFactory.generateSymmetricKey(PIN, "HMAC".getBytes("UTF-16"));
         } catch (UnsupportedEncodingException ex) {
             if(Constants.DEBUG_ON){
-                Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SRPAuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         InitAuth_Msg initMsg = new InitAuth_Msg(v, salt, docID);
@@ -96,6 +118,13 @@ public class AuthenticationTransport {
         return session.success;
     }
     
+    /**
+     * Starts SRP authentication with a server(login).
+     * @param serverID Server want to authenticate with.
+     * @param docID Document trying to connect to.
+     * @param password Password using for this server/document pair.
+     * @return Whether authentication response message was sent successfully.
+     */
     public boolean authenticate(String serverID, String docID, char[] password){
         // Create new session state
         BigInteger a = generateEphemeralPrivateKey();     //a = ephemeral private key
@@ -116,6 +145,12 @@ public class AuthenticationTransport {
         return session.success;
     }
     
+    /**
+     * Processes both SRP initialize/setup and authenticate messages.
+     * @param sourceID Server want to authenticate with.
+     * @param docID Document trying to connect to.
+     * @param receivedMsg Authentication message to process.
+     */
     public void processAuthenticationMessage(String sourceID, String docID, AuthenticationMessage receivedMsg){
         if(receivedMsg instanceof SRPSetupMessage){
             processSRPSetupMessage(sourceID, (SRPSetupMessage)receivedMsg);
@@ -132,6 +167,11 @@ public class AuthenticationTransport {
         }
     }
     
+    /**
+     * Processes SRP setup message.
+     * @param sourceID  Server want to authenticate with.
+     * @param receivedSetupMsg SRP setup message to process.
+     */
     private void processSRPSetupMessage(String sourceID, SRPSetupMessage receivedSetupMsg) {
         if (receivedSetupMsg instanceof InitAuth_Msg) {
             InitAuth_Msg initMsg = (InitAuth_Msg)receivedSetupMsg;
@@ -151,6 +191,23 @@ public class AuthenticationTransport {
         return s + ":::" + d;
     }
     
+    /**
+     * Process SRP authentication message.
+     * -Multiplexes the message, processes it, and creates/sends reply message.
+     * 
+     * Messages: 
+     * C ==> S	C, A    //Auth_Msg1
+     * C <== S	s, B    //Auth_Msg2    
+     * C ==> S	M[1]    //Auth_Msg3
+     * C <== S	M[2]    //Auth_Msg4
+     * 
+     * 
+     * @param sourceID Server want to authenticate with.
+     * @param receivedSRPMsg Received SRP authentication message to process.
+     * @throws InvalidSRPMessageException
+     * @throws InconsistentSessionKeyException If key MAC doesn't match
+     * 
+     */
     private void processSRPMessage(String sourceID, SRPAuthenticationMessage receivedSRPMsg) throws InvalidSRPMessageException, InconsistentSessionKeyException{
         ServerAuthenticationPersistantState persistantServerState;
         
@@ -182,16 +239,9 @@ public class AuthenticationTransport {
             
             //Compute S(on the server) which is the common exponential value
             BigInteger u = new BigInteger(KeyFactory.generateNonce() + "");
-//            System.out.println("A: " + Arrays.toString(session.A.toByteArray()));
-//            System.out.println("B: " + Arrays.toString(session.B.toByteArray()));
-//            System.out.println("u: " + Arrays.toString(u.toByteArray()));
-//            System.out.println("v: " + Arrays.toString(v.toByteArray()));
-//            System.out.println("n: " + Arrays.toString(n.toByteArray()));
-//            System.out.println("g: " + Arrays.toString(g.toByteArray()));
             BigInteger S = v.modPow(u, n);                      //v^u
             S = session.A.multiply(S);                                 //A * v^u
             S = S.modPow(b, n);                                     //S = (A * v^u)^b mod n
-//            System.out.println("S: " + Arrays.toString(S.toByteArray()));
             
             //Generate key from S
             session.K = H(S.toByteArray());                     //K = H(S)
@@ -206,27 +256,18 @@ public class AuthenticationTransport {
                 throw new InvalidSRPMessageException("Server: " + sourceID + " has no session data stored on the client.");
             }
             session.B = msg2.B;
-            
-//            System.out.println("A: " + Arrays.toString(session.A.toByteArray()));
-//            System.out.println("B: " + Arrays.toString(session.B.toByteArray()));
-//            System.out.println("u: " + Arrays.toString(msg2.u.toByteArray()));
-            //System.out.println("v: " + Arrays.toString(.toByteArray()));
-//            System.out.println("n: " + Arrays.toString(n.toByteArray()));
-//            System.out.println("g: " + Arrays.toString(g.toByteArray()));
+
             //Compute S(on the client) which is the common exponential value
             BigInteger x = new BigInteger(KeyFactory.generateSymmetricKey(session.password, msg2.salt).getEncoded());
             BigInteger S = session.B.subtract(k.multiply(g.modPow(x, n)));  //(B - g^x)
             BigInteger exp = session.a.add(msg2.u.multiply(x));                     //(a + u*x)
             S = S.modPow(exp, n);                                                       //S = (B - g^x)^(a + u*x)
-//            System.out.println("S: " + Arrays.toString(S.toByteArray()));
             
             //Generate key from S
             session.K = H(S.toByteArray());                                         //K = H(S)
             
             //Send Auth_Msg3
-//            System.out.println("K: " + Arrays.toString(session.K));
             byte[] M1 = H(session.A.toByteArray(), session.B.toByteArray(), session.K);
-//            System.out.println("Client's M1: " + Arrays.toString(M1));
             Auth_Msg3 msg3 = new Auth_Msg3(M1, msg2.docID);
             transport.send(sourceID, msg2.docID, msg3);
         } else if(receivedSRPMsg instanceof Auth_Msg3){ //Server
@@ -235,10 +276,8 @@ public class AuthenticationTransport {
             if(session == null){
                 throw new InvalidSRPMessageException("Client: " + sourceID + " has no session data stored on the server.");
             }
-            //System.out.println("Client's M1: " + Arrays.toString(msg3.M1));
-//            System.out.println("K: " + Arrays.toString(session.K));
+
             byte[] serversM1 = H(session.A.toByteArray(), session.B.toByteArray(), session.K);
-//            System.out.println("Server's M1: " + Arrays.toString(serversM1));
             
             if(!Arrays.equals(msg3.M1, serversM1)){
                 throw new InconsistentSessionKeyException("Client's M1 doesn't match servers");
@@ -277,6 +316,19 @@ public class AuthenticationTransport {
             session.wakeup(true);
         }
     }
+    
+    public char[] generatePIN(String userID, String docID) {
+        char[] PIN = KeyFactory.generatePIN();
+        pendingPINs.put(userID + "-" + docID, PIN);
+        Constants.log("generated pin for " + userID + "-" + docID + " -> " + this.getPIN(userID, docID));
+        return PIN;
+    }
+    
+    public char[] getPIN(String userID, String docID) {
+        return pendingPINs.get(userID + "-" + docID);
+    }    
+ 
+    
     private void produceAndSaveSessionKeys(String sourceID, String docID, byte[] key) {
         try {
             SecretKey sessionKey = KeyFactory.generateSymmetricKey(new String(key).toCharArray(), "SESSION_KEY".getBytes("UTF-16"));
@@ -284,7 +336,7 @@ public class AuthenticationTransport {
             profile.keys.addSessionKey(sourceID, docID, sessionKey);
             profile.keys.addHmacKey(sourceID, docID, hmacKey);
         } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SRPAuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     private byte[] H(byte[]... input) {
@@ -296,7 +348,7 @@ public class AuthenticationTransport {
             return sha.digest();
         } catch (NoSuchAlgorithmException ex) {
             if (Constants.DEBUG_ON) {
-                Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SRPAuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
             }
             return null;
         }
@@ -325,7 +377,7 @@ public class AuthenticationTransport {
                 val = new BigInteger(max.bitLength(), rand);
             } while(val.compareTo(max) >= 0 || val.compareTo(min) <= 0);
         } catch (NoSuchAlgorithmException | NoSuchProviderException ex) {
-            Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SRPAuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
         }
         return val;
     }
@@ -421,7 +473,7 @@ public class AuthenticationTransport {
                 }
             } catch (InterruptedException ex) {
                 if(Constants.DEBUG_ON){
-                    Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "] authentication with " + serverID + ":" + docID, ex);
+                    Logger.getLogger(SRPAuthenticationTransport.class.getName()).log(Level.SEVERE, "[User: " + profile.username + "] authentication with " + serverID + ":" + docID, ex);
                 }
             } finally{
                 authenticateLock.unlock();
@@ -441,12 +493,6 @@ public class AuthenticationTransport {
             
             if(K != null){
                 Arrays.fill(K, (byte)0);
-//                Destroyable destroyableK = (Destroyable)K;
-//                try {
-//                    destroyableK.destroy();
-//                } catch (DestroyFailedException ex) {
-//                    Logger.getLogger(AuthenticationTransport.class.getName()).log(Level.SEVERE, null, ex);
-//                }
             }
             if(password != null)   Arrays.fill(password, '0');
             

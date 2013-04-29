@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.util.ArrayList;
@@ -26,10 +25,8 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.SealedObject;
 import javax.crypto.SecretKey;
-import javax.swing.JComboBox;
-import security_layer.authentications.AuthenticationTransport;
+import security_layer.authentications.SRPAuthenticationTransport;
 import security_layer.authentications.AuthenticationMessage;
-import security_layer.authentications.SRPSetupMessage;
 import transport_layer.discovery.DiscoveryResponseMessage;
 import transport_layer.discovery.DiscoveryTransport;
 import transport_layer.files.FileHandler;
@@ -37,7 +34,10 @@ import transport_layer.files.FileTransportInterface;
 import transport_layer.network.NetworkTransportInterface;
 
 /**
- *
+ * This is the implementation of the security transport layer.
+ * -It is responsible for sending encrypted messages.
+ * -It also processes encrypted messages.
+ *   *Multiplexes them and sends them to either the application layer or authentications.
  * @author Patrick C. Berens
  */
 public class SecureTransport implements SecureTransportInterface{
@@ -50,11 +50,11 @@ public class SecureTransport implements SecureTransportInterface{
     private AtomicLong counter = new AtomicLong();
 //    private ConcurrentMap<String, EncryptedAESMessage> pendingHumanAuth = new ConcurrentHashMap<>();
     private SessionKeys keys = new SessionKeys();
-    private AuthenticationTransport authentication;
+    private SRPAuthenticationTransport authentication;
     private Profile profile;
     
     public SecureTransport(NetworkTransportInterface networkTransport, 
-                           AuthenticationTransport authentication, 
+                           SRPAuthenticationTransport authentication, 
                            CommunicationInterface communication,
                            Profile profile) {               
         this.profile = profile;
@@ -306,7 +306,7 @@ public class SecureTransport implements SecureTransportInterface{
 //    }
 
     @Override
-    public void setAuthenticationTransport(AuthenticationTransport a) {
+    public void setAuthenticationTransport(SRPAuthenticationTransport a) {
         this.authentication = a;
     }
     private void cleanupPassword(char[] password){

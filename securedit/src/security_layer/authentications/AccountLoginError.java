@@ -1,12 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package security_layer.authentications;
 
 /**
- *
+ * AuthenticationError message saying error was during login.
  */
 public class AccountLoginError extends AuthenticationError {
         

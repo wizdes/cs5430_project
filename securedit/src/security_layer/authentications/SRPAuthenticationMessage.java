@@ -14,5 +14,4 @@ class SRPAuthenticationMessage implements AuthenticationMessage {
     SRPAuthenticationMessage(String docID) {
         this.docID = docID;
     }
-    
 }

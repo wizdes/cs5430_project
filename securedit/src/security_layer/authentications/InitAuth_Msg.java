@@ -1,14 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package security_layer.authentications;
 
 import java.math.BigInteger;
 
 /**
- *
+ * Used during SRP setup phase.
+ * -Client: Sends salt(s) and v(verifier) before SRP authentication begins.
  */
 public class InitAuth_Msg extends SRPSetupMessage {
     
@@ -20,5 +16,4 @@ public class InitAuth_Msg extends SRPSetupMessage {
         this.v = v;
         this.s = s;
     }
-    
 }

@@ -8,7 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import security_layer.EncryptedMessage;
 import security_layer.SecureTransport;
-import security_layer.authentications.AuthenticationTransport;
+import security_layer.authentications.SRPAuthenticationTransport;
 
 /**
  *

@@ -1,11 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package security_layer.authentications;
 
 /**
- *
+ * Message class used for SRP setup(exchanging s,v)
  * @author Patrick
  */
 public class SRPSetupMessage implements AuthenticationMessage {

@@ -10,7 +10,7 @@ import javax.crypto.SecretKey;
 
 /**
  * SessionKey states, both AES encryption and HMAC keys.
- * -Can set from anywhere, but can only get from security layer.
+ * -Can set from anywhere, but can only get from security layer which protects their distribution.
  * @author Patrick
  */
 public class SessionKeys {
