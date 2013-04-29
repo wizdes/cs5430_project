@@ -191,7 +191,6 @@ public class NetworkDocumentTest {
         assertEquals("hello", client3.getString());        
     }
     
-    
     @Test
     public void testLevelPropogation() {
         
@@ -249,7 +248,15 @@ public class NetworkDocumentTest {
 
         assertEquals("333 222 111 000", owner.getString());
         assertEquals("XXXX222 XXXXXXX", client2.getString());
-        assertEquals("XXXX222 111 XXX", client3.getString());        
+        assertEquals("XXXX222 111 XXX", client3.getString());
+        
+        // set ending to 0
+        owner.assignLevel(0, 8, 15);
+        pause(200);
+
+        assertEquals("333 222 111 000", owner.getString());
+        assertEquals("XXXX222 111 000", client2.getString());
+        assertEquals("XXXX222 111 000", client3.getString());        
     }
 
     @Test
