@@ -48,6 +48,7 @@ public interface DocumentInterface {
     public DocumentValue getValues();
     
     public String getString();
+    public String getStringForTesting();
     
     public String getName();
 

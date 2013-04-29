@@ -24,16 +24,10 @@ Table of Contents
 
 1) Running our code
 
-In order to run our submitted code on a Linux OS, change directory into the root of this folder, and run the "run.sh" command.  This will start a single instance of the application.  Opening a new terminal to the same directory you may start a second instance of the application in a separate JVM.
+In order to run our submitted code on a Linux OS, change directory into the root of this folder, and start the program with the following command:
+java -jar securedit.jar
 
-Once you have two instances of the application running, you may proceed as follows to start a chat session:
-- In each GUI, create a new account with a different numeric ID, e.g. "0" and "1", and with a different port.
-- On one GUI, click "Start Chat", in the next window that appears, and give your chat session a name.
-- In the other GUI, click "Discover", and you should see the table populated with an entry for the first GUI's chat session.
-  - Click that row, and then "Join".
-  - The first GUI will pop up a dialog box with a PIN
-  - Type that PIN into the dialog box presented on the second GUI
-  - After entering a correct PIN, a window appears where you can send and receive chats.
+You may start additional instances by running the same command in a new terminal
 
 
 2) Packages
@@ -135,7 +129,8 @@ Postcondition:  “Secure Document Viewer” window opens. Should have a tab tha
 		-Input into prompt: PASS1111pass. Click “Login” button.
 	Postcondition: Document editing window appears.
 
-8. Once you have an authenticated editing session, with one Document Owner, and one Client, you can perform the following steps to see our authorization functionality.
+8. Authorization
+  Once you have an authenticated editing session, with one Document Owner, and one Client, you can perform the following steps to see our authorization functionality.
 
   The Client types "hello" into his editing pane
     ~> it should also display in the owner's pane
@@ -170,7 +165,41 @@ Postcondition:  “Secure Document Viewer” window opens. Should have a tab tha
   Enter 0, 19 in the range inputs and set the text to "Normal".
     ~> the client GUI's text should return to "hello, world he said"
   
+9. Encrypted Files
   
-
+  You can pick up this section from the previous.  
+  
+  To make for a more interesting demo, have the Owner update the client's
+  level to "Privileged", (click the "Change User Level" button), and also
+  insert some Top Secret text (use the dropdown at the very bottom right
+  to select "Top Secret", and type a few words).
+  
+  Have the owner save an encrypted version of the document, by clicking
+  "Save Encrypted File".  Save it anywhere on your machine.
+  
+  Shut down both the owner and client applications, and start them
+  back up again.
+  
+  Follow Steps 1-2 to start the client and owner instances of the 
+  application again. 
+  
+  In the owner's GUI, click "Start Document", and then choose "Open
+  Encrypted File".  Choose the file you saved previously.  
+  
+  Enter an incorrect password;
+    ~> You should see a failure dialog
+  
+  Enter the correct password
+    ~> The text we constructed previously should now be present in the
+       editing pane
+  
+  On the Client's GUI, discover the document the owner is hosting by
+  clicking the "Discover Peers" button. Click that row and then the
+  "Login" button.
+    ~> the client should be able to login with out a pin exchange this time
+    ~> the client should retain the level we assigned them previously
+    ~> the text should appear at the same levels as were assigned 
+        previously
+  
 
   

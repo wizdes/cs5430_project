@@ -79,7 +79,7 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
                 int level = iter.getLevel();
                 DoReplace dr = null;
                 if (previousLevel >= level && newLevel < level) {
-                    dr = new DoReplace(iter.getIdentifier(), "X");
+                    dr = new DoReplace(iter.getIdentifier(), Document.OBSCURED_STR);
                 } else if (previousLevel < level && newLevel >= level) {
                     dr = new DoReplace(iter.getIdentifier(), iter.getValue());
                 }

@@ -26,7 +26,7 @@ public class Document implements DocumentInterface, Message {
     private long uid = 0L;
     private String name;
     private String ownerId;
-    public static final char OBSCURED_CHAR = (char)164;
+    public static final char OBSCURED_CHAR = (char)254;
     public static final String OBSCURED_STR = OBSCURED_CHAR + "";
     ArrayList<String> labels = new ArrayList<>();
     ArrayList<Color> colors = new ArrayList<>();
@@ -167,7 +167,7 @@ public class Document implements DocumentInterface, Message {
     }    
     
     @Override
-    public String getString() {
+    public String getStringForTesting() {
         DocumentValue dv = bofDV;
         String r = "";
         while (dv != null) {
@@ -181,6 +181,18 @@ public class Document implements DocumentInterface, Message {
         return r;
     }    
 
+    @Override
+    public String getString() {
+        DocumentValue dv = bofDV;
+        String r = "";
+        while (dv != null) {
+            String v = dv.getValue();
+            r += v;
+            dv = dv.getNext();
+        }
+        return r;
+    }      
+    
     @Override
     public String getName() {
         return name;
