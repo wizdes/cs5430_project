@@ -81,8 +81,8 @@ In our system, we use a PIN to authenticate humans connecting to a server as wel
 c) Secure Usage of Encryption
 All our messages created using Java's Serializable class. Observing the message packets using Wireshark, we observe that the Serialized messages encode type information in the message. Furthermore, our system will fail to de-Serialize a message if the type information does not match; thus, we send our messages such that they are encrypted with an AES message, verified by an HMAC, and encoded with type information to prevent attackers from intercepting and modifying the message.
 
-d) <PATRICK INSERT HERE> SRP Protocol
-<PATRICK INSERT HERE>
+d) SRP Protocol
+SRP was implemented as the original white paper protocol with a few enhancements from RPC version 3. Functionality was reviewed by all three teams members who ensured the functionality was in fact correct. Step by step debugging was performed on server and client side to ensure every value at every line made sense. Finally, intensive testing with multiple users was performed. We checked persistant state to make sure that it looked encrypted and verified PIN encryption using wireshark. Finally, we researched serialization in java to ensure, like our other encryption, that PIN encryption would be sufficient(12 length).
 
 6) Human Authorization Mechanics
 
