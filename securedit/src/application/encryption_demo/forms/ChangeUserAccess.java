@@ -25,6 +25,19 @@ public class ChangeUserAccess extends javax.swing.JPanel {
     public void setLabelsandUsername(ArrayList<String> labels, ArrayList<String> displayedUsername,NetworkDocumentHandlerInterface nd){
         this.nd = nd;
 
+        if(nd.isOwner()){
+            DefaultListModel usersModel = new DefaultListModel();
+            for(int i = 0; i < displayedUsername.size(); i++){
+                usersModel.addElement(displayedUsername.get(i));
+            }
+            userLists.setModel(usersModel);
+        }
+        else{
+            DefaultListModel usersModel = new DefaultListModel();
+            usersModel.addElement(nd.getUserID());
+            userLists.setModel(usersModel);
+        }
+
         //this.labels = labels;
         //this.displayedUsername = displayedUsername;
         DefaultListModel labelsModel = new DefaultListModel();
@@ -32,12 +45,6 @@ public class ChangeUserAccess extends javax.swing.JPanel {
             labelsModel.addElement(labels.get(i));
         }
         accessLists.setModel(labelsModel);
-        DefaultListModel usersModel = new DefaultListModel();
-        for(int i = 0; i < displayedUsername.size(); i++){
-            usersModel.addElement(displayedUsername.get(i));
-        }
-
-        userLists.setModel(usersModel);
         
         if(nd.isOwner() == false){
             userLists.setEnabled(false);
