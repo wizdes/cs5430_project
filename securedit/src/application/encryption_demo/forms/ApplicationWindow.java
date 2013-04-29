@@ -244,13 +244,13 @@ public class ApplicationWindow extends javax.swing.JFrame {
     private void addDefaultPeersButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addDefaultPeersButtonActionPerformed
         ArrayList<String> documents = new ArrayList<>();
         documents.add("Doc1");
-        int port = 6000;
-        String host = "localhost";
         
-        if (profile.username.equals("Matt Goggin")) {
-            functionality.manuallyAddPeer("Patrick Berens", host, port + 1, documents);
-        } else {
-            functionality.manuallyAddPeer("Matt Goggin", host, port, documents);            
+        for (int i = 0; i < 3; i++) {
+            if (!(i + "").equals(this.profile.username)) {
+                int port = 6000 + i;
+                String host = "localhost";
+                functionality.manuallyAddPeer(i + "", host, port, documents);                
+            }
         }
     }//GEN-LAST:event_addDefaultPeersButtonActionPerformed
 

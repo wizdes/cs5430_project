@@ -29,6 +29,8 @@ public class Document implements DocumentInterface, Message {
     private long uid = 0L;
     private String name;
     private String ownerId;
+    public static final char OBSCURED_CHAR = (char)164;
+    public static final String OBSCURED_STR = OBSCURED_CHAR + "";
     ArrayList<String> labels = new ArrayList<>();
     ArrayList<Color> colors = new ArrayList<>();
     
@@ -172,7 +174,11 @@ public class Document implements DocumentInterface, Message {
         DocumentValue dv = bofDV;
         String r = "";
         while (dv != null) {
-            r += dv.getValue();
+            String v = dv.getValue();
+            if (v.equals(OBSCURED_STR)) {
+                v = "X";
+            }
+            r += v;
             dv = dv.getNext();
         }
         return r;
