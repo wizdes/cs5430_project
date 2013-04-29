@@ -294,7 +294,6 @@ public class EditPanel extends javax.swing.JPanel {
         jLabel1 = new javax.swing.JLabel();
         endCursor = new javax.swing.JTextField();
         LevelSelect = new javax.swing.JComboBox();
-        setLevelButton = new javax.swing.JToggleButton();
         LevelList = new javax.swing.JScrollPane();
         jList1 = new javax.swing.JList();
         LevelLabel = new javax.swing.JLabel();
@@ -305,6 +304,7 @@ public class EditPanel extends javax.swing.JPanel {
         DisconnectButton = new javax.swing.JButton();
         ownerWriteLevel = new javax.swing.JComboBox();
         generatePINButton = new javax.swing.JButton();
+        setLevelButton = new javax.swing.JButton();
 
         jFileChooser1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -341,18 +341,6 @@ public class EditPanel extends javax.swing.JPanel {
         LevelSelect.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 LevelSelectActionPerformed(evt);
-            }
-        });
-
-        setLevelButton.setText("Set Level");
-        setLevelButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mousePressed(java.awt.event.MouseEvent evt) {
-                setLevelButtonMousePressed(evt);
-            }
-        });
-        setLevelButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                setLevelButtonActionPerformed(evt);
             }
         });
 
@@ -438,6 +426,13 @@ public class EditPanel extends javax.swing.JPanel {
             }
         });
 
+        setLevelButton.setText("Set Level");
+        setLevelButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                setLevelButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -470,16 +465,13 @@ public class EditPanel extends javax.swing.JPanel {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(LevelSelect, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(LevelList, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(PeersLabel)
+                    .addComponent(cursorInfo)
+                    .addComponent(LevelLabel)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(PeersLabel)
-                            .addComponent(cursorInfo)
-                            .addComponent(LevelLabel)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(changeUserLevelButton)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(setLevelButton)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addComponent(changeUserLevelButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(setLevelButton)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -501,8 +493,8 @@ public class EditPanel extends javax.swing.JPanel {
                             .addComponent(LevelSelect, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(setLevelButton)
-                            .addComponent(changeUserLevelButton))
+                            .addComponent(changeUserLevelButton)
+                            .addComponent(setLevelButton))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(LevelLabel)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -539,10 +531,6 @@ public class EditPanel extends javax.swing.JPanel {
 
     private void LevelSelectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_LevelSelectActionPerformed
     }//GEN-LAST:event_LevelSelectActionPerformed
-
-    private void setLevelButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_setLevelButtonMousePressed
-        //Replaced with action listener
-    }//GEN-LAST:event_setLevelButtonMousePressed
 
     private void changeUserLevelButtonKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_changeUserLevelButtonKeyPressed
     }//GEN-LAST:event_changeUserLevelButtonKeyPressed
@@ -773,7 +761,19 @@ public class EditPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_changeUserLevelButtonActionPerformed
 
-    // allows the user to define the level of a specific user
+    private void DisconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DisconnectButtonActionPerformed
+        endEditingSession();
+    }//GEN-LAST:event_DisconnectButtonActionPerformed
+
+    public void endEditingSession() {
+        this.nd.disconnect();
+        this.functionality.closeEditingSession(nd);
+    }
+
+    // allows for the disconnect of a user
+    private void DisconnectButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DisconnectButtonMouseClicked
+    }//GEN-LAST:event_DisconnectButtonMouseClicked
+    // allows the user to define the level of a specific user                                           
     private void setLevelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_setLevelButtonActionPerformed
         nd.lock();
         try {
@@ -790,19 +790,6 @@ public class EditPanel extends javax.swing.JPanel {
             nd.unlock();
         }
     }//GEN-LAST:event_setLevelButtonActionPerformed
-
-    private void DisconnectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DisconnectButtonActionPerformed
-        endEditingSession();
-    }//GEN-LAST:event_DisconnectButtonActionPerformed
-
-    public void endEditingSession() {
-        this.nd.disconnect();
-        this.functionality.closeEditingSession(nd);
-    }
-
-    // allows for the disconnect of a user
-    private void DisconnectButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DisconnectButtonMouseClicked
-    }//GEN-LAST:event_DisconnectButtonMouseClicked
 
     // repopulates the text with the new authorization document that was passed in
     public void repaint(AuthorizationDocument ad){
@@ -977,7 +964,7 @@ public class EditPanel extends javax.swing.JPanel {
     private javax.swing.JButton openNormalFileButton;
     private javax.swing.JComboBox ownerWriteLevel;
     private javax.swing.JButton saveEncryptedFileButton;
-    private javax.swing.JToggleButton setLevelButton;
+    private javax.swing.JButton setLevelButton;
     // End of variables declaration//GEN-END:variables
     private ArrayList<String> labels = new ArrayList<>();
     private ArrayList<SimpleAttributeSet> colors = new ArrayList<>();
