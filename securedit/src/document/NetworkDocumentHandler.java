@@ -272,6 +272,9 @@ public class NetworkDocumentHandler implements NetworkDocumentHandlerInterface {
             if (level == -1) {
                 level = 0;
                 this.authDocument.addUserToLevel(m.from, level);
+                if (this.curDoc != null) {
+                    curDoc.addUser(m.from, level);
+                }
             }
             BootstrapResponse resp = new BootstrapResponse(this.authDocument.getDocument().formatFor(level));
             this.sendCommandMessage(m.from, resp);
