@@ -656,23 +656,24 @@ public class EditPanel extends javax.swing.JPanel {
         nd.lock();
         try {
             //this allows users to open encrypted files
-            JPanel userPanel = new JPanel();
-            userPanel.setLayout(new GridLayout(2, 2));
-
-            JLabel passwordLbl = new JLabel("Password:");
-            JPasswordField passwordFld = new JPasswordField();
-            userPanel.add(passwordLbl);
-            userPanel.add(passwordFld);
-
-            //As the JOptionPane accepts an object as the message
-            int input = JOptionPane.showConfirmDialog(null, userPanel, "Enter your password:", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-            jFileChooser1.setVisible(true);
-            char[] password = passwordFld.getPassword();
-
             int returnVal = jFileChooser1.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 File file = jFileChooser1.getSelectedFile();
                 String fileName = file.getAbsolutePath();
+                
+                //Prompt for password
+                JPanel userPanel = new JPanel();
+                userPanel.setLayout(new GridLayout(2, 2));
+                JLabel passwordLbl = new JLabel("Password:");
+                JPasswordField passwordFld = new JPasswordField();
+                userPanel.add(passwordLbl);
+                userPanel.add(passwordFld);
+
+                //As the JOptionPane accepts an object as the message
+                int input = JOptionPane.showConfirmDialog(null, userPanel, "Enter your password:", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                jFileChooser1.setVisible(true);
+                char[] password = passwordFld.getPassword();
+            
                 AuthorizationDocument ad = (AuthorizationDocument) functionality.decryptObjFile(fileName, password);
                 if(ad != null){
                     this.manualRemove(0, documentArea.getText().length());

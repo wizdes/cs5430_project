@@ -49,7 +49,7 @@ a) Machine Authentication
 
 i) Session key exchange protocol
 
-This is done using the RPC protocol to exchange a session key. See section iii for more information.
+This is done using the SRP protocol to exchange a session key. See section iii for more information.
 
 ii) Message protocol
 
@@ -57,12 +57,16 @@ The message follows the following protocol. Once both machines have received a s
 A and B are machines.
 A is trying to send a message m to B.
 K_AB is the shared key of A and B.
+HMAC is the hmac of the encrypted object.
+c_i is a counter which keeps track of the number of messages which have been seen from user i(this solves our 3 message nonce protocol used previously).
 
-1) A -> B : {A, B} K_AB
-2) B -> A : {B, A, r} K_AB where r is a nonce
-3) A -> B : {m, A, B, r + 1} K_AB
+1) A -> B : {A, B}K_AB, HMAC, c_i
+2) If c_i > previous_c_i then
+	//process application messages
+   else
+	//Ignore message
 
-iii) RPC
+iii) SRP
 
 <PATRICK INSERT HERE>
 
@@ -70,9 +74,9 @@ b) Human Authentication
 
 In human authentication, one user wishes to join the chat session being hosted by another user (the owner).  In order to do so, they initiate by sending a clear text message indicating their desire to join.  The owner responds with a message encrypted with a one time PIN, which the owner is responsible for transferring to the user securely outside of our application (e.g. by telling them in person, or writing on a piece of paper.). Once the user has the PIN, they can input it in order to decrypt the message from the owner. This is used to initialize the RPC protocol.
 
-i) RPC
+i) SRP
 
-The RPC protocol is used to authenticate a human into a machine. 
+The SRP protocol is used to authenticate a human into a machine. 
 
 <PATRICK INSERT HERE>
 
