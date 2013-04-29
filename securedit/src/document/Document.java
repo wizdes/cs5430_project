@@ -1,7 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+// This is the basic document class that contains the contents of the state of the class
 
 package document;
 
